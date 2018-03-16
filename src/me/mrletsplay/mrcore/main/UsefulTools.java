@@ -1,4 +1,4 @@
-package main;
+package me.mrletsplay.mrcore.main;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

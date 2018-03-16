@@ -1,7 +1,7 @@
-package test;
+package me.mrletsplay.mrcore.test;
 
-import main.UsefulTools;
-import main.UsefulTools.UnitConverter;
+import me.mrletsplay.mrcore.main.UsefulTools;
+import me.mrletsplay.mrcore.main.UsefulTools.UnitConverter;
 
 public class Main {
 

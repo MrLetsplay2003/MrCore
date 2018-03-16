@@ -1,4 +1,4 @@
-package main;
+package me.mrletsplay.mrcore.main;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
