@@ -3,7 +3,7 @@ package me.mrletsplay.mrcore.main;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public class UsefulTools {
+public class OtherTools {
 	
 	/**
 	 * @param ms The amount of milliseconds
