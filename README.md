@@ -9,4 +9,21 @@ The newest version currently includes:
 
 Pull requests are welcome and will help improve the library even more!
 
+Maven dependency
+```xml
+<dependency>
+  <groupId>com.github.mrletsplay2003</groupId>
+  <artifactId>MrCore</artifactId>
+  <version>test</version>
+</dependency>
+```
+
+You also need to add the jitpack.io repository
+```xml
+<repository>
+  <id>jitpack.io</id>
+  <url>https://jitpack.io</url>
+</repository>
+```
+
 For more specific information look at [the wiki](https://github.com/MrLetsplay2003/MrCore/wiki)
