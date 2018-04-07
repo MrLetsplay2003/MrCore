@@ -51,6 +51,7 @@ public class CustomConfig {
 	private HashMap<String, String> comments;
 	private List<ConfigSaveProperty> defaultSaveProps;
 	private HashMap<String, Object> defaults;
+	private long lastEdited;
 
 	/**
 	 * See {@link #CustomConfig(File, boolean, ConfigSaveProperty...)}
@@ -204,6 +205,7 @@ public class CustomConfig {
 	public void saveConfig(OutputStream fOut, List<ConfigSaveProperty> saveProperties) throws IOException{
 		List<ConfigSaveProperty> props = saveProperties!=null?saveProperties:defaultSaveProps;
 		if(!isCompact) {
+			lastEdited = configFile.lastModified();
 			List<String> so = sortProperties(props.contains(ConfigSaveProperty.SORT_ALPHABETICALLY));
 			BufferedWriter w = new BufferedWriter(new OutputStreamWriter(fOut, StandardCharsets.UTF_8));
 			if(comments.containsKey(null)) {
@@ -384,6 +386,7 @@ public class CustomConfig {
 	public CustomConfig loadConfig(InputStream in) throws IOException {
 		properties = defaultSaveProps.contains(ConfigSaveProperty.KEEP_CONFIG_SORTING)?new LinkedHashMap<>(): new HashMap<>();
 		if(isCompact) return loadConfig_Compact(in);
+		if(!isCompact) lastEdited = configFile.lastModified();
 		BufferedReader r = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
 		List<String> stages = new ArrayList<>();
 		int lastStage = 0;
@@ -1490,6 +1493,15 @@ public class CustomConfig {
 	public void deleteConfig(){
 		if(isExternal)return;
 		configFile.delete();
+	}
+	
+	/**
+	 * @return whether the config file has been modified since it was last saved/loaded
+	 * @throws UnsupportedOperationException if the config is external
+	 */
+	public boolean hasBeenModified() throws UnsupportedOperationException {
+		if(isExternal) throw new UnsupportedOperationException("Can't use hasBeenModified() on an external config");
+		return lastEdited != configFile.lastModified();
 	}
 
 	/**
