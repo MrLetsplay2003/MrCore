@@ -1,4 +1,4 @@
-package me.mrletsplay.mrcore.main;
+package me.mrletsplay.mrcore.config;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -21,10 +21,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * - This is a config format based on two HashMaps, one for the properties and one for the comments<br>
+ * - The file formatting is based on YAML, but is easier to read/edit for humans as it supports UTF-8 encoding, so you don't need to escape special characters<br>
+ * - Every value is treated like a String or a List of Strings until further processing is requested using the get[type] methods<br>
+ * - This config should be able to load most yaml-based configs without too much errors<br>
+ * <br>
+ * Feel free to use this in your projects however you want (You don't need to credit me)
+ * @author MrLetsplay2003
+ */
 public class CustomConfig {
 	
 	private static final String SPACE = "  ";
@@ -40,75 +50,157 @@ public class CustomConfig {
 	private HashMap<String, Property> properties;
 	private HashMap<String, String> comments;
 	private List<ConfigSaveProperty> defaultSaveProps;
+	private HashMap<String, Object> defaults;
 
+	/**
+	 * See {@link #CustomConfig(File, boolean, ConfigSaveProperty...)}
+	 */
 	public CustomConfig(File configFile, boolean compact) {
 		this(configFile, compact, new ConfigSaveProperty[0]);
 	}
 	
+	
+	/**
+	 * Creates a CustomConfig instance with the given config file
+	 * @param configFile The config file to be used
+	 * @param compact Whether to use the compact format or not
+	 * @param defaultSaveProperties The default {@link ConfigSaveProperty} options for this config
+	 */
 	public CustomConfig(File configFile, boolean compact, ConfigSaveProperty... defaultSaveProperties) {
 		this.configFile = configFile;
 		isExternal = false;
 		isCompact = compact;
-		properties = new HashMap<>();
-		comments = new HashMap<>();
 		defaultSaveProps = Arrays.asList(defaultSaveProperties);
+		if(defaultSaveProps.contains(ConfigSaveProperty.KEEP_CONFIG_SORTING)) {
+			properties = new LinkedHashMap<>();
+			comments = new LinkedHashMap<>();
+			defaults = new LinkedHashMap<>();
+		}else {
+			properties = new HashMap<>();
+			comments = new HashMap<>();
+			defaults = new HashMap<>();
+		}
 	}
 	
+	/**
+	 * Returns the config file if not external, returns <b>null</b> otherwise<br>
+	 * Check whether the config is external using {@link #isExternal() isExternal()}
+	 * @return The config file, if set, null otherwise
+	 */
 	public File getConfigFile() {
 		return configFile;
 	}
 
+	/**
+	 * See {@link #CustomConfig(URL, boolean, ConfigSaveProperty...)}
+	 */
 	public CustomConfig(URL configURL, boolean compact) {
 		this(configURL, compact, new ConfigSaveProperty[0]);
 	}
-	
+
+	/**
+	 * Creates a CustomConfig instance with the given config url<br>
+	 * Note: External CustomConfig instances can <b>not</br> be saved
+	 * @param configURL The config url to be used
+	 * @param compact Whether to use the compact format or not
+	 * @param defaultSaveProperties The default {@link ConfigSaveProperty} options for this config
+	 */
 	public CustomConfig(URL configURL, boolean compact, ConfigSaveProperty... defaultSaveProperties) {
 		this.configURL = configURL;
 		isExternal = true;
 		isCompact = compact;
-		properties = new HashMap<>();
-		comments = new HashMap<>();
 		defaultSaveProps = Arrays.asList(defaultSaveProperties);
+		if(defaultSaveProps.contains(ConfigSaveProperty.KEEP_CONFIG_SORTING)) {
+			properties = new LinkedHashMap<>();
+			comments = new LinkedHashMap<>();
+			defaults = new LinkedHashMap<>();
+		}else {
+			properties = new HashMap<>();
+			comments = new HashMap<>();
+			defaults = new HashMap<>();
+		}
 	}
 	
+	/**
+	 * Sets the default save options
+	 * @param defaultSaveProps The default {@link ConfigSaveProperty ConfigSaveProperty} options to use
+	 */
 	public void setDefaultSaveProperties(ConfigSaveProperty... defaultSaveProps) {
 		this.defaultSaveProps = Arrays.asList(defaultSaveProps);
 	}
-	
+
+	/**
+	 * Returns the config url if external, returns <b>null</b> otherwise<br>
+	 * Check whether the config is external using {@link CustomConfig#isExternal() isExternal()}
+	 * @return The config url, if set, null otherwise
+	 */
 	public URL getConfigURL() {
 		return configURL;
 	}
 	
+	/**
+	 * Checks whether the config is external (loaded from a url) or not
+	 * @return True if external, false otherwise
+	 */
 	public boolean isExternal() {
 		return isExternal;
 	}
 
+	/**
+	 * Saves the config with the given save properties<br>
+	 * This method ignores the default save properties if a non-null value is given
+	 * @param saveProperties The {@link me.mrletsplay.mrcore.config.CustomConfig.ConfigSaveProperty ConfigSaveProperty} options to be used when saving the config
+	 * @throws IOException If an IO error occurs while saving the config
+	 */
 	public void saveConfig(List<ConfigSaveProperty> saveProperties) throws IOException {
 		if(isExternal) return;
 		configFile.getParentFile().mkdirs();
 		saveConfig(new FileOutputStream(configFile), saveProperties);
 	}
 	
+	/**
+	 * See {@link #saveConfig(List)}
+	 */
 	public void saveConfig() throws IOException {
 		saveConfig((List<ConfigSaveProperty>)null);
 	}
 	
-	public void saveConfig_Safe(List<ConfigSaveProperty> saveProperties) {
+	/**
+	 * Saves the config with the given save properties<br>
+	 * This method ignores the default save properties if a non-null value is given<br>
+	 * <br>
+	 * Note: This method does <b>not</b> hide errors. Any errors that occur will be printed to the console
+	 * @param saveProperties The {@link ConfigSaveProperty} options to be used when saving the config
+	 */
+	public void saveConfigSafely(List<ConfigSaveProperty> saveProperties) {
 		try {
 			saveConfig(saveProperties);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
-	public void saveConfig_Safe() {
-		saveConfig_Safe(null);
+
+	/**
+	 * See {@link #saveConfigSafely(List)}
+	 */
+	public void saveConfigSafely() {
+		saveConfigSafely(null);
 	}
 	
+	/**
+	 * See {@link #saveConfig(OutputStream, List)}
+	 */
 	public void saveConfig(OutputStream fOut) throws IOException {
 		saveConfig(fOut, null);
 	}
 	
+	/**
+	 * Saves the config to the given {@link OutputStream}<br>
+	 * This method ignores the default save properties if a non-null value is given
+	 * @param fOut The OutputStream to be used
+	 * @param saveProperties The save properties to be used
+	 * @throws IOException If an IO error occurs while saving the config
+	 */
 	public void saveConfig(OutputStream fOut, List<ConfigSaveProperty> saveProperties) throws IOException{
 		List<ConfigSaveProperty> props = saveProperties!=null?saveProperties:defaultSaveProps;
 		if(!isCompact) {
@@ -166,7 +258,7 @@ public class CustomConfig {
 							sp = space(getHighestKey(lKey, key));
 						}
 						for (Object s : (List<?>) p.getValue()) {
-							w.write(sp + ENTRY_STRING + s);
+							w.write(sp + SPACE + ENTRY_STRING + s);
 							w.newLine();
 						}
 					}
@@ -251,6 +343,12 @@ public class CustomConfig {
 		return a-1;
 	}
 
+	/**
+	 * Loads the config from the set config file/url
+	 * @return The same CustomConfig instance
+	 * @throws IOException If an IO error occurs while loading the config
+	 * @throws InvalidConfigException If the config to be loaded is in an invalid format
+	 */
 	public CustomConfig loadConfig() throws IOException{
 		if(!isExternal && !configFile.exists()){
 			configFile.getParentFile().mkdirs();
@@ -260,7 +358,14 @@ public class CustomConfig {
 		return this;
 	}
 	
-	public CustomConfig loadConfig_Safe() {
+	/**
+	 * Loads the config from the set config file/url<br>
+	 * <br>
+	 * Note: This method does <b>not</b> hide errors. Any errors that occur will be printed to the console
+	 * @return The same CustomConfig instance
+	 * @throws InvalidConfigException If the config to be loaded is in an invalid format
+	 */
+	public CustomConfig loadConfigSafely() {
 		try {
 			return loadConfig();
 		} catch (IOException e) {
@@ -269,8 +374,15 @@ public class CustomConfig {
 		}
 	}
 
+	/**
+	 * Loads the CustomConfig fromt the given {@link InputStream}
+	 * @param in The InputStream to be used
+	 * @return The same CustomConfig instance
+	 * @throws IOException If an IO error occurs while loading the config
+	 * @throws InvalidConfigException If the config to be loaded is in an invalid format
+	 */
 	public CustomConfig loadConfig(InputStream in) throws IOException {
-		properties = new HashMap<>();
+		properties = defaultSaveProps.contains(ConfigSaveProperty.KEEP_CONFIG_SORTING)?new LinkedHashMap<>(): new HashMap<>();
 		if(isCompact) return loadConfig_Compact(in);
 		BufferedReader r = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
 		List<String> stages = new ArrayList<>();
@@ -297,8 +409,11 @@ public class CustomConfig {
 			}
 			if(stage!=lastStage) {
 				if(p.getType().equals(PropertyType.LIST_ENTRY)) {
-					r.close();
-					throw new InvalidConfigException("Stage changed on LIST_ENTRY", l);
+					if(!((lastP.getType().equals(PropertyType.LIST_START) && stage-lastStage == 1) || (lastP.getType().equals(PropertyType.LIST_ENTRY) && stage == lastStage))) {
+						r.close();
+						throw new InvalidConfigException("Stage changed on LIST_ENTRY", l);
+					}
+//					addOrRemove(stages, lastP.getKey().split("\\."), stage - lastStage, l);
 				}else if(lastP==null) {
 					r.close();
 					throw new InvalidConfigException("Stage > 0 in first line", l);
@@ -306,7 +421,7 @@ public class CustomConfig {
 					r.close();
 					throw new InvalidConfigException("Stage changed on COMMENT: "+stage+", previously "+lastStage, l);
 				}else {
-					addOrRemove(stages, lastP.getKey().split("\\."), stage - lastStage);
+					addOrRemove(stages, lastP.getKey().split("\\."), stage - lastStage + (lastP.getType().equals(PropertyType.LIST_ENTRY)?1:0), l);
 				}
 			}
 			if(!p.getType().equals(PropertyType.COMMENT) && tmpComments!=null) {
@@ -336,7 +451,7 @@ public class CustomConfig {
 				tmpHeader.add((String)p.getValue());
 			}else if(!p.getType().IS_LIST){
 				if(tmpList!=null){
-					if(!tmpList.isEmpty()) setLoadedProperty(lastStage, tmpStages, new Property(tmpKey, PropertyType.LIST, tmpList));
+					if(!tmpList.isEmpty()) setLoadedProperty(lastStage-1, tmpStages, new Property(tmpKey, PropertyType.LIST, tmpList));
 					tmpList = null;
 					tmpKey = null;
 				}
@@ -344,7 +459,7 @@ public class CustomConfig {
 				lastP = p;
 			}else if(p.getType().equals(PropertyType.LIST_START)){
 				if(tmpList!=null){
-					if(!tmpList.isEmpty()) setLoadedProperty(lastStage, tmpStages, new Property(tmpKey, PropertyType.LIST, tmpList));
+					if(!tmpList.isEmpty()) setLoadedProperty(lastStage-1, tmpStages, new Property(tmpKey, PropertyType.LIST, tmpList));
 				}
 				tmpList = new ArrayList<>();
 				tmpKey = p.getKey();
@@ -360,7 +475,7 @@ public class CustomConfig {
 			lastStage = stage;
 		}
 		if(tmpList!=null && !tmpList.isEmpty()){
-			setLoadedProperty(lastStage, stages, new Property(tmpKey, PropertyType.LIST, tmpList));
+			setLoadedProperty(lastStage-1, stages, new Property(tmpKey, PropertyType.LIST, tmpList));
 		}
 		r.close();
 		return this;
@@ -422,6 +537,15 @@ public class CustomConfig {
 		}
 	}
 
+	/**
+	 * Loads the given CustomConfig as default (If given properties don't exist, they will be created)<br>
+	 * This method will load the config if no call to {@link #loadConfig()} has been made
+	 * @param cfg The CustomConfig to load the defaults from
+	 * @param override Whether currently existing properties should be overridden
+	 * @return The same CustomConfig instance
+	 * @throws IOException If an IO error occurs while loading the config
+	 * @throws InvalidConfigException If this config needs to be loaded and is in an invalid format
+	 */
 	public CustomConfig loadDefault(CustomConfig cfg, boolean override) throws IOException{
 		if(properties==null){
 			loadConfig();
@@ -431,6 +555,15 @@ public class CustomConfig {
 		return this;
 	}
 
+	/**
+	 * Loads the config defaults (see {@link #loadDefault(CustomConfig, boolean)}) from a given class path. This will use this classes {@link ClassLoader} to find the given path<br>
+	 * This method will load the config if no call to {@link #loadConfig()} has been made
+	 * @param path The class path
+	 * @param override Whether currently existing properties should be overriden
+	 * @return The same CustomConfig instance
+	 * @throws IOException If an IO error occurs while loading the config
+	 * @throws InvalidConfigException If this config needs to be loaded and is in an invalid format or the config from the class path is in an invalid format
+	 */
 	public CustomConfig loadDefaultFromClassPath(String path, boolean override) throws IOException{
 		if(properties==null){
 			loadConfig();
@@ -440,7 +573,13 @@ public class CustomConfig {
 		return this;
 	}
 
-	public CustomConfig loadDefaultFromClassPath_Safe(String path, boolean override){
+	/**
+	 * See {@link #loadDefaultFromClassPath(String, boolean)}
+	 * @param path The class path
+	 * @param override Whether currently existing properties should be overridden
+	 * @return The same CustomConfig instance
+	 */
+	public CustomConfig loadDefaultFromClassPathSafely(String path, boolean override){
 		try {
 			loadDefaultFromClassPath(path, override);
 		} catch (IOException | InvalidConfigException e) {
@@ -449,10 +588,20 @@ public class CustomConfig {
 		return this;
 	}
 
+	/**
+	 * Returns this config's property HashMap<br>
+	 * Any changes to this HashMap will also affect this config
+	 * @return This config's property HashMap
+	 */
 	public HashMap<String, Property> getProperties(){
 		return properties;
 	}
 
+	/**
+	 * Returns this config's comment HashMap<br>
+	 * Any changes to this HashMap will also affect this config
+	 * @return This config's comment HashMap
+	 */
 	public HashMap<String, String> getComments(){
 		return comments;
 	}
@@ -481,6 +630,12 @@ public class CustomConfig {
 		if(formattedLine.startsWith(HEADER_COMMENT_STRING)) {
 			return new Property(null, PropertyType.HEADER_COMMENT, formattedLine.substring(COMMENT_STRING.length()));
 		}
+		if(formattedLine.startsWith(ENTRY_STRING)) {
+			return new Property(null, PropertyType.LIST_ENTRY, formattedLine.substring(ENTRY_STRING.length()));
+		}
+		if(formattedLine.equals(ENTRY_STRING.trim())) {
+			return new Property(null, PropertyType.LIST_ENTRY, "");
+		}
 		String[] p = formattedLine.split(SPL_STRING, 2);
 		if(p.length==2){
 			if(p[1].isEmpty()){
@@ -489,9 +644,7 @@ public class CustomConfig {
 				return new Property(p[0], PropertyType.VALUE, p[1]);
 			}
 		}else if(p.length==1){
-			if(p[0].startsWith(ENTRY_STRING)) {
-				return new Property(null, PropertyType.LIST_ENTRY, p[0].substring(ENTRY_STRING.length()));
-			}else if(p[0].endsWith(SPL_STRING.trim())){
+			if(p[0].endsWith(SPL_STRING.trim())){
 				String k = p[0].substring(0, p[0].length()-SPL_STRING.trim().length());
 				return new Property(k, PropertyType.LIST_START, true);
 			}
@@ -499,10 +652,12 @@ public class CustomConfig {
 		throw new InvalidConfigException("Invalid property \""+formattedLine+"\"",line);
 	}
 
-	private void addOrRemove(List<String> s, String[] spl, int c) {
+	private void addOrRemove(List<String> s, String[] spl, int c, int l) {
 		if(c>0) {
+			if(c > spl.length) throw new InvalidConfigException("Invalid stage change", l);
 			s.addAll(Arrays.asList(spl).subList(0, c));
 		}else {
+			if(Math.abs(c) > s.size()) throw new InvalidConfigException("Invalid stage change", l);
 			for(int i = 0; i < Math.abs(c); i++) {
 				s.remove(s.size()-1);
 			}
@@ -557,14 +712,32 @@ public class CustomConfig {
 		}
 	}
 	
+	/**
+	 * See {@link #set(String, Object, boolean, List)}
+	 * @param key The key
+	 * @param val The value
+	 */
 	public void set(String key, Object val) {
 		set(key, val, false, null);
 	}
 	
+	/**
+	 * See {@link #set(String, Object, boolean, List)}
+	 * @param key
+	 * @param val
+	 * @param save
+	 */
 	public void set(String key, Object val, boolean save) {
 		set(key, val, save, null);
 	}
 
+	/**
+	 * Sets a key to a value
+	 * @param key The key
+	 * @param val The value
+	 * @param save Whether this config should be saved
+	 * @param props The saveProperties to be used when saving the config (See {@link #saveConfig(List)})
+	 */
 	@SuppressWarnings("unchecked")
 	public void set(String key, Object val, boolean save, List<ConfigSaveProperty> props) {
 		PropertyType type;
@@ -598,18 +771,39 @@ public class CustomConfig {
 		}
 	}
 	
+	/**
+	 * See {@link #unset(String, boolean, boolean, List)}
+	 * @param key
+	 */
 	public void unset(String key) {
 		unset(key, false);
 	}
-	
+
+	/**
+	 * See {@link #unset(String, boolean, boolean, List)}
+	 * @param key
+	 */
 	public void unset(String key, boolean deep) {
 		unset(key, deep, false);
 	}
 	
+	/**
+	 * See {@link #unset(String, boolean, boolean, List)}
+	 * @param key
+	 * @param deep
+	 * @param save
+	 */
 	public void unset(String key, boolean deep, boolean save) {
 		unset(key, deep, save, null);
 	}
-	
+
+	/**
+	 * Unsets a specific key/set of keys
+	 * @param key The key to be unset
+	 * @param deep If true, all subproperties (and their subproperties etc.) will also be unset
+	 * @param save Whether or not this config should be saved
+	 * @param props The save properties to be used when saving the config (See {@link #saveConfig(List)})
+	 */
 	public void unset(String key, boolean deep, boolean save, List<ConfigSaveProperty> props) {
 		properties.remove(key);
 		if(deep) {
@@ -630,44 +824,100 @@ public class CustomConfig {
 		return s.replace("\n", "\\n").replace("\r", "\\r");
 	}
 	
-	public void resetWithSubkeys(String key) {
-		for(String k : getKeys(key, true, true)) {
-			properties.remove(k);
-		}
-	}
-	
+	/**
+	 * Adds a default value to the config<br>
+	 * <br>
+	 * These values need to be applied using {@link #applyDefaults(boolean, boolean, List)}
+	 * @param key The key
+	 * @param defaultVal The default value
+	 */
 	public void addDefault(String key, Object defaultVal) {
-		addDefault(key, defaultVal, false);
+//		addDefault(key, defaultVal, false);
+		defaults.put(key, defaultVal);
 	}
 	
-	public void addDefault(String key, Object defaultVal, boolean save) {
-		addDefault(key, defaultVal, save, null);
+//	public void addDefault(String key, Object defaultVal, boolean save) {
+//		addDefault(key, defaultVal, save, null);
+//	}
+	
+//	public void addDefault(String key, Object defaultVal, boolean save, List<ConfigSaveProperty> props) {
+//		if(!properties.containsKey(key)) {
+//			set(key, defaultVal, save, props);
+//		}
+//	}
+//	
+//	public void addDefault(String forKey, String key, Object defaultVal) {
+//		addDefault(forKey, key, defaultVal, false);
+//	}
+//	
+//	public void addDefault(String forKey, String key, Object defaultVal, boolean save) {
+//		addDefault(forKey, key, defaultVal, save, null);
+//	}
+//	
+//	public void addDefault(String forKey, String key, Object defaultVal, boolean save, List<ConfigSaveProperty> props) {
+//		if(getKeys(forKey, false, true).isEmpty()) {
+//			set(key, defaultVal, save, props);
+//		}
+//	}
+
+	/**
+	 * See {@link #applyDefaults(boolean, boolean, List)}
+	 */
+	public void applyDefaults(boolean save) {
+		applyDefaults(save, false);
 	}
 	
-	public void addDefault(String key, Object defaultVal, boolean save, List<ConfigSaveProperty> props) {
-		if(!properties.containsKey(key)) {
-			set(key, defaultVal, save, props);
+	/**
+	 * See {@link #applyDefaults(boolean, boolean, List)}
+	 */
+	public void applyDefaults(boolean save, boolean alwaysAdd) {
+		applyDefaults(save, alwaysAdd, null);
+	}
+
+	/**
+	 * Applies all default values set using {@link #addDefault(String, Object)}
+	 * @param save Whether this config should be saved or not
+	 * @param alwaysAdd Whether currently existing properties should be overridden
+	 * @param props The save properties to use when saving the config (See {@link #saveConfig(List)})
+	 */
+	public void applyDefaults(boolean save, boolean alwaysAdd, List<ConfigSaveProperty> props) {
+		if(!properties.isEmpty() && !alwaysAdd) return;
+		for(Map.Entry<String, Object> en : defaults.entrySet()) {
+			if(!properties.containsKey(en.getKey())) {
+				set(en.getKey(), en.getValue());
+			}
 		}
-	}
-	
-	public void addDefault(String forKey, String key, Object defaultVal) {
-		addDefault(forKey, key, defaultVal, false);
-	}
-	
-	public void addDefault(String forKey, String key, Object defaultVal, boolean save) {
-		addDefault(forKey, key, defaultVal, save, null);
-	}
-	
-	public void addDefault(String forKey, String key, Object defaultVal, boolean save, List<ConfigSaveProperty> props) {
-		if(getKeys(forKey, false, true).isEmpty()) {
-			set(key, defaultVal, save, props);
+		if(save) {
+			try {
+				saveConfig(props);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
+	/**
+	 * See {@link #setComment(String, String, boolean, List)}
+	 */
+	public void setComment(String key, String comment) {
+		setComment(key, comment, false);
+	}
+
+	/**
+	 * See {@link #setComment(String, String, boolean, List)}
+	 */
 	public void setComment(String key, String comment, boolean save) {
 		setComment(key, comment, save, null);
 	}
-	
+
+	/**
+	 * Sets a comment for a specific key<br>
+	 * If a comment is set for a key that doesn't exist and the config is saved, the comment will be ignored
+	 * @param key The key
+	 * @param comment The comment for that key
+	 * @param save Whether this config should be saved
+	 * @param props The save properties to be used when saving the config (See {@link #saveConfig(List)})
+	 */
 	public void setComment(String key, String comment, boolean save, List<ConfigSaveProperty> props) {
 		comments.put(key, comment);
 		if(save) try {
@@ -677,14 +927,26 @@ public class CustomConfig {
 		}
 	}
 	
-	public void setComment(String key, String comment) {
-		setComment(key, comment, false);
+	/**
+	 * See {@link #setHeader(String, boolean, List)}
+	 */
+	public void setHeader(String header) {
+		setHeader(header, false);
 	}
-	
+
+	/**
+	 * See {@link #setHeader(String, boolean, List)}
+	 */
 	public void setHeader(String header, boolean save) {
 		setHeader(header, save, null);
 	}
 
+	/**
+	 * Sets the header comment (The comment above the config)
+	 * @param header The header comment
+	 * @param save Whether the config should be saved
+	 * @param props The save properties to be used when saving the config (See {@link #saveConfig(List)})
+	 */
 	public void setHeader(String header, boolean save, List<ConfigSaveProperty> props) {
 		comments.put(null, header);
 		if(save) try {
@@ -693,15 +955,17 @@ public class CustomConfig {
 			e.printStackTrace();
 		}
 	}
-	
-	public void setHeader(String header) {
-		setHeader(header, false);
-	}
 
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
 	public String getString(String key) {
 		return getString(key, null, false);
 	}
 
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
 	public String getString(String key, String defaultVal, boolean applyDefault) {
 		Property p = properties.get(key);
 		if(p!=null) {
@@ -712,6 +976,9 @@ public class CustomConfig {
 		}
 	}
 
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
 	public List<String> getStringList(String key) {
 		Property p = properties.get(key);
 		if(p!=null && p.getType().equals(PropertyType.LIST)) {
@@ -720,6 +987,9 @@ public class CustomConfig {
 		return new ArrayList<>();
 	}
 
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
 	public List<String> getStringList(String key, List<String> defaultVal, boolean applyDefault) {
 		Property p = properties.get(key);
 		if(p!=null && p.getType().equals(PropertyType.LIST)) {
@@ -729,6 +999,9 @@ public class CustomConfig {
 		return defaultVal;
 	}
 
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
 	public Integer getInt(String key) {
 		Property p = properties.get(key);
 		if(p!=null){
@@ -738,6 +1011,9 @@ public class CustomConfig {
 		}
 	}
 
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
 	public Integer getInt(String key, Integer defaultVal, boolean applyDefault) {
 		Property p = properties.get(key);
 		if(p!=null) {
@@ -748,6 +1024,9 @@ public class CustomConfig {
 		}
 	}
 
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
 	public List<Integer> getIntegerList(String key) {
 		Property p = properties.get(key);
 		if(p!=null && p.getType().equals(PropertyType.LIST)) {
@@ -758,6 +1037,9 @@ public class CustomConfig {
 		return new ArrayList<>();
 	}
 
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
 	public List<Integer> getIntegerList(String key, List<Integer> defaultVal, boolean applyDefault) {
 		Property p = properties.get(key);
 		if(p!=null && p.getType().equals(PropertyType.LIST)) {
@@ -769,6 +1051,9 @@ public class CustomConfig {
 		return defaultVal;
 	}
 
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
 	public Double getDouble(String key) {
 		Property p = properties.get(key);
 		if(p!=null){
@@ -778,6 +1063,9 @@ public class CustomConfig {
 		}
 	}
 
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
 	public Double getDouble(String key, Double defaultVal, boolean applyDefault) {
 		Property p = properties.get(key);
 		if(p!=null) {
@@ -788,6 +1076,9 @@ public class CustomConfig {
 		}
 	}
 
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
 	public List<Double> getDoubleList(String key) {
 		Property p = properties.get(key);
 		if(p!=null && p.getType().equals(PropertyType.LIST)) {
@@ -798,6 +1089,9 @@ public class CustomConfig {
 		return new ArrayList<>();
 	}
 
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
 	public List<Double> getDoubleList(String key, List<Double> defaultVal, boolean applyDefault) {
 		Property p = properties.get(key);
 		if(p!=null && p.getType().equals(PropertyType.LIST)) {
@@ -809,6 +1103,9 @@ public class CustomConfig {
 		return defaultVal;
 	}
 
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
 	public boolean getBoolean(String key) {
 		Property p = properties.get(key);
 		if(p!=null){
@@ -818,6 +1115,9 @@ public class CustomConfig {
 		}
 	}
 
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
 	public boolean getBoolean(String key, boolean defaultVal, boolean applyDefault) {
 		Property p = properties.get(key);
 		if(p!=null) {
@@ -828,6 +1128,9 @@ public class CustomConfig {
 		}
 	}
 
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
 	public List<Boolean> getBooleanList(String key) {
 		Property p = properties.get(key);
 		if(p!=null && p.getType().equals(PropertyType.LIST)) {
@@ -837,7 +1140,10 @@ public class CustomConfig {
 		}
 		return new ArrayList<>();
 	}
-	
+
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
 	public List<Boolean> getBooleanList(String key, List<Boolean> defaultVal, boolean applyDefault) {
 		Property p = properties.get(key);
 		if(p!=null && p.getType().equals(PropertyType.LIST)) {
@@ -849,12 +1155,26 @@ public class CustomConfig {
 		return defaultVal;
 	}
 
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
 	public Object get(String key) {
 		Property p = properties.get(key);
 		if(p==null) return null;
 		return p.getValue();
 	}
 
+	/**
+	 * Get an object by a specific key<br>
+	 * The <b>get[type]</b> functions return their type respectively<br>
+	 * If the type is invalid, these functions will throw a {@link ClassCastException} or a {@link NumberFormatException}<br>
+	 * <br>
+	 * this specific function will always either return a {@link List}<{@link String}> or a {@link String}
+	 * @param key The key to the property
+	 * @param defaultVal If there is no value stored in the CustomConfig, this value will be returned
+	 * @param applyDefault Whether the default value should be added to the config, if it's not set
+	 * @return The property value
+	 */
 	public Object get(String key, Object defaultVal, boolean applyDefault) {
 		Property p = properties.get(key);
 		if(p!=null){
@@ -867,6 +1187,9 @@ public class CustomConfig {
 		}
 	}
 
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
 	public Long getLong(String key) {
 		Property p = properties.get(key);
 		if(p!=null){
@@ -876,6 +1199,9 @@ public class CustomConfig {
 		}
 	}
 
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
 	public Long getLong(String key, Long defaultVal, boolean applyDefault) {
 		Property p = properties.get(key);
 		if(p!=null) {
@@ -886,6 +1212,9 @@ public class CustomConfig {
 		}
 	}
 
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
 	public List<Long> getLongList(String key) {
 		Property p = properties.get(key);
 		if(p!=null && p.getType().equals(PropertyType.LIST)) {
@@ -896,6 +1225,9 @@ public class CustomConfig {
 		return new ArrayList<>();
 	}
 
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
 	public List<Long> getLongList(String key, List<Long> defaultVal, boolean applyDefault) {
 		Property p = properties.get(key);
 		if(p!=null && p.getType().equals(PropertyType.LIST)) {
@@ -906,7 +1238,10 @@ public class CustomConfig {
 		if(applyDefault) set(key, defaultVal, false);
 		return defaultVal;
 	}
-	
+
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
 	public BigInteger getBigInteger(String key) {
 		Property p = properties.get(key);
 		if(p!=null){
@@ -916,6 +1251,9 @@ public class CustomConfig {
 		}
 	}
 
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
 	public BigInteger getBigInteger(String key, BigInteger defaultVal, boolean applyDefault) {
 		Property p = properties.get(key);
 		if(p!=null) {
@@ -926,6 +1264,9 @@ public class CustomConfig {
 		}
 	}
 
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
 	public List<BigInteger> getBigIntegerList(String key) {
 		Property p = properties.get(key);
 		if(p!=null && p.getType().equals(PropertyType.LIST)) {
@@ -936,6 +1277,9 @@ public class CustomConfig {
 		return new ArrayList<>();
 	}
 
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
 	public List<BigInteger> getBigIntegerList(String key, List<BigInteger> defaultVal, boolean applyDefault) {
 		Property p = properties.get(key);
 		if(p!=null && p.getType().equals(PropertyType.LIST)) {
@@ -946,7 +1290,10 @@ public class CustomConfig {
 		if(applyDefault) set(key, defaultVal, false);
 		return defaultVal;
 	}
-	
+
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
 	public BigDecimal getBigDecimal(String key) {
 		Property p = properties.get(key);
 		if(p!=null){
@@ -956,6 +1303,9 @@ public class CustomConfig {
 		}
 	}
 
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
 	public BigDecimal getBigDecimal(String key, BigDecimal defaultVal, boolean applyDefault) {
 		Property p = properties.get(key);
 		if(p!=null) {
@@ -966,6 +1316,9 @@ public class CustomConfig {
 		}
 	}
 
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
 	public List<BigDecimal> getBigDecimalList(String key) {
 		Property p = properties.get(key);
 		if(p!=null && p.getType().equals(PropertyType.LIST)) {
@@ -976,6 +1329,9 @@ public class CustomConfig {
 		return new ArrayList<>();
 	}
 
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
 	public List<BigDecimal> getBigDecimalList(String key, List<BigDecimal> defaultVal, boolean applyDefault) {
 		Property p = properties.get(key);
 		if(p!=null && p.getType().equals(PropertyType.LIST)) {
@@ -1050,6 +1406,13 @@ public class CustomConfig {
 		return out;
 	}
 
+	/**
+	 * Returns the list of keys for the subproperties for the given key
+	 * @param key The key
+	 * @param deep Whether the subproperties of subproperties (and theirs as well etc.) should also be included
+	 * @param fullKeys Whether the given key should be removed from the front
+	 * @return A list of property keys
+	 */
 	public List<String> getKeys(String key, boolean deep, boolean fullKeys){
 		List<String> keys = new ArrayList<>();
 		for(String kk : properties.keySet()) {
@@ -1069,6 +1432,9 @@ public class CustomConfig {
 		return keys;
 	}
 
+	/**
+	 * See {@link #getKeys(String, boolean, boolean)}
+	 */
 	public List<String> getKeys(boolean deep){
 		List<String> keys = new ArrayList<>();
 		for(String kk : properties.keySet()) {
@@ -1083,19 +1449,34 @@ public class CustomConfig {
 		return keys;
 	}
 	
+	/**
+	 * See {@link #reloadConfig(boolean, List)}
+	 */
 	public void reloadConfig(boolean save) throws IOException {
 		reloadConfig(save, null);
 	}
 
+	/**
+	 * Reloads the config<br>
+	 * See {@link #saveConfig(List)} and {@link #loadConfig()}
+	 * @param save Whether the config should be saved
+	 */
 	public void reloadConfig(boolean save, List<ConfigSaveProperty> props) throws IOException{
 		clearConfig(save, props);
 		loadConfig();
 	}
 	
+	/**
+	 * See {@link #clearConfig(boolean, List)}
+	 */
 	public void clearConfig(boolean save) throws IOException {
 		clearConfig(save, null);
 	}
 
+	/**
+	 * Clears all properties from the config
+	 * @param save Whether the config should be saved first (See {@link #saveConfig(List)}
+	 */
 	public void clearConfig(boolean save, List<ConfigSaveProperty> props) throws IOException {
 		if(save){
 			saveConfig(props);
@@ -1103,11 +1484,18 @@ public class CustomConfig {
 		properties.clear();
 	}
 
+	/**
+	 * Deletes the config file (If the config is not external, as stated by {@link #isExternal()})
+	 */
 	public void deleteConfig(){
 		if(isExternal)return;
 		configFile.delete();
 	}
 
+	/**
+	 * The config property class used for internal handling of config properties
+	 * @author MrLetsplay2003
+	 */
 	public static class Property {
 
 		private String key;
@@ -1131,8 +1519,17 @@ public class CustomConfig {
 		public String getKey() {
 			return key;
 		}
+		
+		@Override
+		public String toString() {
+			return "["+key+" => "+value+"]";
+		}
 	}
 
+	/**
+	 * The config property type enum used for internal handling of config properties
+	 * @author MrLetsplay2003
+	 */
 	public enum PropertyType {
 
 		COMMENT(false),
@@ -1149,13 +1546,42 @@ public class CustomConfig {
 
 	}
 
+	/**
+	 * All config save properties that can be used. These provide additional features or change the behaviour when saving the config
+	 * @author MrLetsplay2003
+	 */
 	public enum ConfigSaveProperty{
+		
+		/**
+		 * When saving the config, all config properties will be sorted alphabetically<br>
+		 * This is only available to non-external configs (as stated by {@link CustomConfig#isExternal()})
+		 */
 		SORT_ALPHABETICALLY,
+		
+		/**
+		 * When saving the config, null values will be kept in the config<br>
+		 * <br>
+		 * <b>Note:<br>
+		 * This is currently not working correctly. This feature will be reimplemented soon</b>
+		 */
 		INCLUDE_NULL,
+		
+		/**
+		 * When saving the config, properties with comments will have one empty line added before and after them
+		 */
 		SPACE_COMMENTED_PROPERTIES,
-		ADVANCED_COMPACT_FORMAT,
+		
+		/**
+		 * When loading/saving the config, the properties will stay in the order as they're set. <br>
+		 * <b>This option can only be used in the constructor</b>
+		 */
+		KEEP_CONFIG_SORTING,
 	}
 
+	/**
+	 * An exception thrown when the given config is not in the correct format
+	 * @author MrLetsplay2003
+	 */
 	public class InvalidConfigException extends RuntimeException{
 		
 		private static final long serialVersionUID = 1L;

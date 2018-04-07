@@ -48,7 +48,7 @@ public class OtherTools {
 	 * - If that's not possible, the string will be cut exactly at *length*
 	 * @param string The string to cut into lines
 	 * @param len The maximum length of a line
-	 * @return An array of lines cut into properly-sized pieces
+	 * @return An array of lines cut into properly-sized pieces by above rules
 	 */
 	public static List<String> advSplit(String string, int length) {
 		List<String> words = new ArrayList<>();
