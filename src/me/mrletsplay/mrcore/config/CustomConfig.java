@@ -205,7 +205,6 @@ public class CustomConfig {
 	public void saveConfig(OutputStream fOut, List<ConfigSaveProperty> saveProperties) throws IOException{
 		List<ConfigSaveProperty> props = saveProperties!=null?saveProperties:defaultSaveProps;
 		if(!isCompact) {
-			lastEdited = configFile.lastModified();
 			List<String> so = sortProperties(props.contains(ConfigSaveProperty.SORT_ALPHABETICALLY));
 			BufferedWriter w = new BufferedWriter(new OutputStreamWriter(fOut, StandardCharsets.UTF_8));
 			if(comments.containsKey(null)) {
@@ -327,6 +326,7 @@ public class CustomConfig {
 			out.writeByte(-1);
 			out.close();
 		}
+		lastEdited = configFile.lastModified();
 	}
 	
 	private String space(int length) {
@@ -385,8 +385,8 @@ public class CustomConfig {
 	 */
 	public CustomConfig loadConfig(InputStream in) throws IOException {
 		properties = defaultSaveProps.contains(ConfigSaveProperty.KEEP_CONFIG_SORTING)?new LinkedHashMap<>(): new HashMap<>();
+		if(!isExternal) lastEdited = configFile.lastModified();
 		if(isCompact) return loadConfig_Compact(in);
-		if(!isCompact) lastEdited = configFile.lastModified();
 		BufferedReader r = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
 		List<String> stages = new ArrayList<>();
 		int lastStage = 0;
