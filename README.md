@@ -14,7 +14,7 @@ Maven dependency
 <dependency>
   <groupId>com.github.mrletsplay2003</groupId>
   <artifactId>MrCore</artifactId>
-  <version>test</version>
+  <version>LATEST</version>
 </dependency>
 ```
 
