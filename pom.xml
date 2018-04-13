@@ -3,12 +3,6 @@
   <groupId>MrCore</groupId>
   <artifactId>MrCore</artifactId>
   <version>v1.4</version>
-  <repositories>
-    <repository>
-        <id>spigot-repo</id>
-        <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
-    </repository>
-  </repositories>
   <build>
     <sourceDirectory>src</sourceDirectory>
     <plugins>
@@ -22,7 +16,14 @@
       </plugin>
     </plugins>
   </build>
+  <repositories>
+    <repository>
+        <id>spigot-repo</id>
+        <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+    </repository>
+</repositories>
   <dependencies>
+    <!--Spigot API-->
     <dependency>
            <groupId>org.spigotmc</groupId>
            <artifactId>spigot-api</artifactId>
