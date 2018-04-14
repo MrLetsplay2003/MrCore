@@ -377,7 +377,7 @@ public class CustomConfig {
 	}
 
 	/**
-	 * Loads the CustomConfig fromt the given {@link InputStream}
+	 * Loads the CustomConfig from the given {@link InputStream}
 	 * @param in The InputStream to be used
 	 * @return The same CustomConfig instance
 	 * @throws IOException If an IO error occurs while loading the config
