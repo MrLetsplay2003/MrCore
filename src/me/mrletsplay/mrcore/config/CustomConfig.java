@@ -571,7 +571,7 @@ public class CustomConfig {
 		if(properties==null){
 			loadConfig();
 		}
-		CustomConfig cfg = new CustomConfig((File)null, false).loadConfig(clazz.getClassLoader().getResourceAsStream(path));
+		CustomConfig cfg = new CustomConfig((File) null, false).loadConfig(clazz.getClassLoader().getResourceAsStream(path));
 		loadDefault(cfg, override);
 		return this;
 	}
