@@ -326,7 +326,7 @@ public class CustomConfig {
 			out.writeByte(-1);
 			out.close();
 		}
-		lastEdited = configFile.lastModified();
+		if(configFile!=null) lastEdited = configFile.lastModified();
 	}
 	
 	private String space(int length) {
@@ -385,7 +385,7 @@ public class CustomConfig {
 	 */
 	public CustomConfig loadConfig(InputStream in) throws IOException {
 		properties = defaultSaveProps.contains(ConfigSaveProperty.KEEP_CONFIG_SORTING)?new LinkedHashMap<>(): new HashMap<>();
-		if(!isExternal) lastEdited = configFile.lastModified();
+		if(!isExternal && configFile != null) lastEdited = configFile.lastModified();
 		if(isCompact) return loadConfig_Compact(in);
 		BufferedReader r = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
 		List<String> stages = new ArrayList<>();
