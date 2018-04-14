@@ -563,6 +563,7 @@ public class CustomConfig {
 	 * This method will load the config if no call to {@link #loadConfig()} has been made
 	 * @param path The class path
 	 * @param override Whether currently existing properties should be overriden
+	 * @param clazz The class to use the classloader from
 	 * @return The same CustomConfig instance
 	 * @throws IOException If an IO error occurs while loading the config
 	 * @throws InvalidConfigException If this config needs to be loaded and is in an invalid format or the config from the class path is in an invalid format
@@ -580,6 +581,7 @@ public class CustomConfig {
 	 * See {@link #loadDefaultFromClassPath(String, boolean)}
 	 * @param path The class path
 	 * @param override Whether currently existing properties should be overridden
+	 * @param clazz The class to use the classloader from
 	 * @return The same CustomConfig instance
 	 */
 	public CustomConfig loadDefaultFromClassPathSafely(String path, boolean override, Class<?> clazz){
