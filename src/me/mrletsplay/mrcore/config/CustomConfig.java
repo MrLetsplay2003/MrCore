@@ -567,11 +567,11 @@ public class CustomConfig {
 	 * @throws IOException If an IO error occurs while loading the config
 	 * @throws InvalidConfigException If this config needs to be loaded and is in an invalid format or the config from the class path is in an invalid format
 	 */
-	public CustomConfig loadDefaultFromClassPath(String path, boolean override) throws IOException{
+	public CustomConfig loadDefaultFromClassPath(String path, boolean override, Class<?> clazz) throws IOException{
 		if(properties==null){
 			loadConfig();
 		}
-		CustomConfig cfg = new CustomConfig((File)null, false).loadConfig(getClass().getClassLoader().getResourceAsStream(path));
+		CustomConfig cfg = new CustomConfig((File)null, false).loadConfig(clazz.getClassLoader().getResourceAsStream(path));
 		loadDefault(cfg, override);
 		return this;
 	}
@@ -582,9 +582,9 @@ public class CustomConfig {
 	 * @param override Whether currently existing properties should be overridden
 	 * @return The same CustomConfig instance
 	 */
-	public CustomConfig loadDefaultFromClassPathSafely(String path, boolean override){
+	public CustomConfig loadDefaultFromClassPathSafely(String path, boolean override, Class<?> clazz){
 		try {
-			loadDefaultFromClassPath(path, override);
+			loadDefaultFromClassPath(path, override, clazz);
 		} catch (IOException | InvalidConfigException e) {
 			e.printStackTrace();
 		}

@@ -148,7 +148,7 @@ public class GUIUtils {
 	
 	public static class StaticGUIElement extends GUIElement{
 		
-		ItemStack it;
+		private ItemStack it;
 		
 		public StaticGUIElement(int slot, ItemStack it) {
 			super(slot);
