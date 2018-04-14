@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>MrCore</groupId>
   <artifactId>MrCore</artifactId>
-  <version>v1.3</version>
+  <version>v1.4</version>
   <build>
     <sourceDirectory>src</sourceDirectory>
     <plugins>
@@ -22,7 +22,7 @@
         <id>spigot-repo</id>
         <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
     </repository>
-</repositories>
+  </repositories>
   <dependencies>
     <!--Spigot API-->
     <dependency>
