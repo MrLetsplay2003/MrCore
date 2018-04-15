@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -135,7 +136,7 @@ public class GUIUtils {
 		
 		public abstract List<T> getItems();
 		
-		public abstract ItemStack toItemStack(T item);
+		public abstract GUIElement toGUIElement(T item);
 		
 	}
 	
@@ -277,15 +278,19 @@ public class GUIUtils {
 			int nSlots = slots.size();
 			ItemSupplier<T> supp = builder.supplier;
 			List<T> items = supp.getItems();
+			List<GUIElement> elements = items.stream().map(supp::toGUIElement).collect(Collectors.toList());
+			HashMap<Integer, GUIElement> elSlots = new HashMap<>();
 			int pages = items.size()/nSlots;
 			if(page <= pages && page >= 0) {
 				int start = page*nSlots;
 				int end = (items.size()<=start+nSlots)?items.size():start+nSlots;
 				for(int i = start; i < end; i++){
-					T item = items.get(i);
+					GUIElement el = elements.get(i);
 					int slot = slots.get(i-start);
-					base.setItem(slot, supp.toItemStack(item));
+					base.setItem(slot, el.getItem(p));
+					elSlots.put(slot, el);
 				}
+				holder.properties.put("page-elements", elSlots);
 				return base;
 			}else {
 				return null;
