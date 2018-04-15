@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -21,18 +22,18 @@ public class GUIUtils {
 		
 		private String title;
 		private int size;
-		private List<GUIElement> elements;
+		private HashMap<Integer, GUIElement> elements;
 		private GUIDragDropListener dragDrop;
 		private GUIAction action;
 		
 		public GUIBuilder(String title, int rows) {
 			this.title = title;
 			this.size = rows * 9;
-			this.elements = new ArrayList<>();
+			this.elements = new HashMap<>();
 		}
 		
-		public GUIBuilder addElement(GUIElement e) {
-			elements.add(e);
+		public GUIBuilder addElement(int slot, GUIElement e) {
+			elements.put(slot, e);
 			return this;
 		}
 		
@@ -67,7 +68,7 @@ public class GUIUtils {
 			return this;
 		}
 		
-		public GUIBuilderMultiPage<T> addPageSlotsinRange(int from, int to) {
+		public GUIBuilderMultiPage<T> addPageSlotsInRange(int from, int to) {
 			List<Integer> slots = new ArrayList<>();
 			while(from <= to) {
 				slots.add(from);
@@ -83,8 +84,8 @@ public class GUIUtils {
 		}
 		
 		@Override
-		public GUIBuilderMultiPage<T> addElement(GUIElement e) {
-			super.addElement(e);
+		public GUIBuilderMultiPage<T> addElement(int slot, GUIElement e) {
+			super.addElement(slot, e);
 			return this;
 		}
 		
@@ -101,15 +102,15 @@ public class GUIUtils {
 		}
 		
 		public GUIBuilderMultiPage<T> addNextPageItem(int slot, ItemStack it){
-			return addElement(changePageItem(slot, it, 1));
+			return addElement(slot, changePageItem(it, 1));
 		}
 		
 		public GUIBuilderMultiPage<T> addPreviousPageItem(int slot, ItemStack it){
-			return addElement(changePageItem(slot, it, -1));
+			return addElement(slot, changePageItem(it, -1));
 		}
 		
-		private static GUIElement changePageItem(int slot, ItemStack it, int diff) {
-			return new StaticGUIElement(slot, it)
+		private static GUIElement changePageItem(ItemStack it, int diff) {
+			return new StaticGUIElement(it)
 			.setAction(new GUIElementAction() {
 				
 				@Override
@@ -140,12 +141,7 @@ public class GUIUtils {
 	
 	public static abstract class GUIElement {
 
-		private int slot;
 		private GUIElementAction action;
-		
-		public GUIElement(int slot) {
-			this.slot = slot;
-		}
 		
 		public abstract ItemStack getItem(Player p);
 		
@@ -160,8 +156,7 @@ public class GUIUtils {
 		
 		private ItemStack it;
 		
-		public StaticGUIElement(int slot, ItemStack it) {
-			super(slot);
+		public StaticGUIElement(ItemStack it) {
 			this.it = it;
 		}
 
@@ -228,8 +223,8 @@ public class GUIUtils {
 		
 		public Inventory getForPlayer(Player p) {
 			Inventory inv = Bukkit.createInventory(holder.clone(), builder.size, builder.title);
-			for(GUIElement el : builder.elements) {
-				inv.setItem(el.slot, el.getItem(p));
+			for(Map.Entry<Integer, GUIElement> el : builder.elements.entrySet()) {
+				inv.setItem(el.getKey(), el.getValue().getItem(p));
 			}
 			return inv;
 		}
@@ -239,10 +234,10 @@ public class GUIUtils {
 		}
 		
 		public GUIElement getElementBySlot(int slot) {
-			return builder.elements.stream().filter(e -> e.slot == slot).findFirst().orElse(null);
+			return builder.elements.get(slot);
 		}
 		
-		public List<GUIElement> getElements(){
+		public HashMap<Integer, GUIElement> getElements(){
 			return builder.elements;
 		}
 		
