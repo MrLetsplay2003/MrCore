@@ -331,20 +331,21 @@ public class GUIUtils {
 					//Gui clicked
 					int slot = e.getSlot();
 					GUIElement elClicked = gui.getElementBySlot(slot);
+					e.setCancelled(true);
 					if(gui.builder.action != null) {
 						boolean cancel = gui.builder.action.action(player, action, e.getCursor(), elClicked, e.getClickedInventory(), gui);
-						if(cancel) e.setCancelled(true);
+						if(!cancel) e.setCancelled(false);
 					}
 					if(elClicked != null && elClicked.action != null) {
 						boolean cancel = elClicked.action.action(player, action, e.getCursor(), e.getClickedInventory(), gui);
-						if(cancel) e.setCancelled(true);
+						if(!cancel) e.setCancelled(false);
 					}
 					if(gui instanceof GUIMultiPage<?>) {
 						HashMap<Integer, GUIElement> pageElements = (HashMap<Integer, GUIElement>) holder.properties.get("page-elements");
 						GUIElement pElClicked = pageElements.get(slot);
 						if(pElClicked != null && pElClicked.action != null) {
 							boolean cancel = pElClicked.action.action(player, action, e.getCursor(), e.getClickedInventory(), gui);
-							if(cancel) e.setCancelled(true);
+							if(!cancel) e.setCancelled(false);
 						}
 					}
 				}else {
