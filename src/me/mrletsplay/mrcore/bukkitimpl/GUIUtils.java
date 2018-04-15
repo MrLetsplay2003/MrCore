@@ -62,8 +62,18 @@ public class GUIUtils {
 			this.customItemSlots = new ArrayList<>();
 		}
 		
-		public GUIBuilderMultiPage<T> addCustomItemSlots(int... slots) {
+		public GUIBuilderMultiPage<T> addPageSlots(int... slots) {
 			Arrays.stream(slots).forEach(customItemSlots::add);
+			return this;
+		}
+		
+		public GUIBuilderMultiPage<T> addPageSlotsinRange(int from, int to) {
+			List<Integer> slots = new ArrayList<>();
+			while(from <= to) {
+				slots.add(from);
+				from++;
+			}
+			slots.forEach(customItemSlots::add);
 			return this;
 		}
 		
