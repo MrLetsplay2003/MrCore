@@ -312,6 +312,7 @@ public class GUIUtils {
 	
 	public static class GUIListener implements Listener{
 		
+		@SuppressWarnings("unchecked")
 		@EventHandler
 		public void onInvClick(InventoryClickEvent e) {
 			if(e.getClickedInventory() == null) return;
@@ -319,7 +320,8 @@ public class GUIUtils {
 			Inventory inv = e.getInventory();
 			Player player = (Player) e.getWhoClicked();
 			if(inv.getHolder() instanceof GUIHolder) {
-				GUI gui = ((GUIHolder)inv.getHolder()).gui;
+				GUIHolder holder = (GUIHolder)inv.getHolder();
+				GUI gui = holder.gui;
 				ClickAction action = ClickAction.getFromEvent(e);
 				if(action==null) {
 					e.setCancelled(true);
@@ -336,6 +338,14 @@ public class GUIUtils {
 					if(elClicked != null && elClicked.action != null) {
 						boolean cancel = elClicked.action.action(player, action, e.getCursor(), e.getClickedInventory(), gui);
 						if(cancel) e.setCancelled(true);
+					}
+					if(gui instanceof GUIMultiPage<?>) {
+						HashMap<Integer, GUIElement> pageElements = (HashMap<Integer, GUIElement>) holder.properties.get("page-elements");
+						GUIElement pElClicked = pageElements.get(slot);
+						if(pElClicked != null && pElClicked.action != null) {
+							boolean cancel = pElClicked.action.action(player, action, e.getCursor(), e.getClickedInventory(), gui);
+							if(cancel) e.setCancelled(true);
+						}
 					}
 				}else {
 					//Player inv clicked
