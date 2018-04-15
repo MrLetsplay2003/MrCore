@@ -182,6 +182,12 @@ public class GUIUtils {
 	
 	public static abstract class GUIAction {
 		
+		private boolean alwaysCall;
+		
+		public GUIAction(boolean alwaysCall) {
+			this.alwaysCall = alwaysCall;
+		}
+		
 		public abstract boolean action(Player p, ClickAction action, ItemStack clickedWith, GUIElement clickedElement, Inventory inv, GUI gui);
 		
 	}
@@ -332,12 +338,12 @@ public class GUIUtils {
 					int slot = e.getSlot();
 					GUIElement elClicked = gui.getElementBySlot(slot);
 					e.setCancelled(true);
-					if(gui.builder.action != null) {
-						boolean cancel = gui.builder.action.action(player, action, e.getCursor(), elClicked, e.getClickedInventory(), gui);
-						if(!cancel) e.setCancelled(false);
-					}
 					if(elClicked != null && elClicked.action != null) {
 						boolean cancel = elClicked.action.action(player, action, e.getCursor(), e.getClickedInventory(), gui);
+						if(!cancel) e.setCancelled(false);
+					}
+					if(gui.builder.action != null && (elClicked == null || gui.builder.action.alwaysCall)) {
+						boolean cancel = gui.builder.action.action(player, action, e.getCursor(), elClicked, e.getClickedInventory(), gui);
 						if(!cancel) e.setCancelled(false);
 					}
 					if(gui instanceof GUIMultiPage<?>) {
