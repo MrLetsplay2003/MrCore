@@ -136,7 +136,7 @@ public class GUIUtils {
 		
 		public abstract List<T> getItems();
 		
-		public abstract GUIElement toGUIElement(T item);
+		public abstract GUIElement toGUIElement(Player p, T item);
 		
 	}
 	
@@ -278,7 +278,7 @@ public class GUIUtils {
 			int nSlots = slots.size();
 			ItemSupplier<T> supp = builder.supplier;
 			List<T> items = supp.getItems();
-			List<GUIElement> elements = items.stream().map(supp::toGUIElement).collect(Collectors.toList());
+			List<GUIElement> elements = items.stream().map(i -> supp.toGUIElement(p, i)).collect(Collectors.toList());
 			HashMap<Integer, GUIElement> elSlots = new HashMap<>();
 			int pages = items.size()/nSlots;
 			if(page <= pages && page >= 0) {
