@@ -115,7 +115,7 @@ public class GUIUtils {
 			.setAction(new GUIElementAction() {
 				
 				@Override
-				public boolean action(Player p, ClickAction button, ItemStack clickedWith, Inventory inv, GUI gui) {
+				public boolean action(Player p, ClickAction button, ItemStack clickedWith, Inventory inv, GUI gui, InventoryClickEvent event) {
 					int pg = GUIMultiPage.getPage(inv);
 					GUIMultiPage<?> guiMP = (GUIMultiPage<?>)gui;
 					Inventory nPage = guiMP.getForPlayer(p, pg+diff);
@@ -170,19 +170,19 @@ public class GUIUtils {
 	
 	public static abstract class GUIElementAction {
 		
-		public abstract boolean action(Player p, ClickAction button, ItemStack clickedWith, Inventory inv, GUI gui);
+		public abstract boolean action(Player p, ClickAction button, ItemStack clickedWith, Inventory inv, GUI gui, InventoryClickEvent event);
 		
 	}
 	
 	public static abstract class GUIDragDropListener {
 		
-		public abstract boolean allowDragDrop(Player p, ItemStack item, Inventory inv, GUI gui);
+		public abstract boolean allowDragDrop(Player p, ItemStack item, Inventory inv, GUI gui, InventoryClickEvent event);
 		
 	}
 	
 	public static abstract class GUIAction {
 
-		public abstract boolean action(Player p, ClickAction action, ItemStack clickedWith, GUIElement clickedElement, Inventory inv, GUI gui);
+		public abstract boolean action(Player p, ClickAction action, ItemStack clickedWith, GUIElement clickedElement, Inventory inv, GUI gui, InventoryClickEvent event);
 		
 	}
 	
@@ -333,18 +333,18 @@ public class GUIUtils {
 					GUIElement elClicked = gui.getElementBySlot(slot);
 					e.setCancelled(true);
 					if(elClicked != null && elClicked.action != null) {
-						boolean cancel = elClicked.action.action(player, action, e.getCursor(), e.getClickedInventory(), gui);
+						boolean cancel = elClicked.action.action(player, action, e.getCursor(), e.getClickedInventory(), gui, e);
 						if(!cancel) e.setCancelled(false);
 					}
 					if(gui.builder.action != null) {
-						boolean cancel = gui.builder.action.action(player, action, e.getCursor(), elClicked, e.getClickedInventory(), gui);
+						boolean cancel = gui.builder.action.action(player, action, e.getCursor(), elClicked, e.getClickedInventory(), gui, e);
 						if(!cancel) e.setCancelled(false);
 					}
 					if(gui instanceof GUIMultiPage<?>) {
 						HashMap<Integer, GUIElement> pageElements = (HashMap<Integer, GUIElement>) holder.properties.get("page-elements");
 						GUIElement pElClicked = pageElements.get(slot);
 						if(pElClicked != null && pElClicked.action != null) {
-							boolean cancel = pElClicked.action.action(player, action, e.getCursor(), e.getClickedInventory(), gui);
+							boolean cancel = pElClicked.action.action(player, action, e.getCursor(), e.getClickedInventory(), gui, e);
 							if(!cancel) e.setCancelled(false);
 						}
 					}
@@ -353,7 +353,7 @@ public class GUIUtils {
 					if(gui.builder.dragDrop != null) {
 						ItemStack pickedUp = e.getCurrentItem();
 						if(pickedUp!=null) {
-							if(!gui.builder.dragDrop.allowDragDrop(player, pickedUp, e.getClickedInventory(), gui)) {
+							if(!gui.builder.dragDrop.allowDragDrop(player, pickedUp, e.getClickedInventory(), gui, e)) {
 								e.setCancelled(true);
 							}
 						}
