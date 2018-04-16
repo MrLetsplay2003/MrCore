@@ -112,17 +112,17 @@ public class GUIUtils {
 		
 		private static GUIElement changePageItem(ItemStack it, int diff) {
 			return new StaticGUIElement(it)
-			.setAction(new GUIElementAction() {
-				
-				@Override
-				public boolean action(Player p, ClickAction button, ItemStack clickedWith, Inventory inv, GUI gui, InventoryClickEvent event) {
-					int pg = GUIMultiPage.getPage(inv);
-					GUIMultiPage<?> guiMP = (GUIMultiPage<?>)gui;
-					Inventory nPage = guiMP.getForPlayer(p, pg+diff);
-					if(nPage!=null) p.openInventory(nPage);
-					return true;
-				}
-			});
+				.setAction(new GUIElementAction() {
+					
+					@Override
+					public boolean action(Player p, ClickAction button, ItemStack clickedWith, Inventory inv, GUI gui, InventoryClickEvent event) {
+						int pg = GUIMultiPage.getPage(inv);
+						GUIMultiPage<?> guiMP = (GUIMultiPage<?>)gui;
+						Inventory nPage = guiMP.getForPlayer(p, pg+diff);
+						if(nPage!=null) p.openInventory(nPage);
+						return true;
+					}
+				});
 		}
 		
 		@Override
@@ -320,7 +320,7 @@ public class GUIUtils {
 			Inventory inv = e.getInventory();
 			Player player = (Player) e.getWhoClicked();
 			if(inv.getHolder() instanceof GUIHolder) {
-				GUIHolder holder = (GUIHolder)inv.getHolder();
+				GUIHolder holder = (GUIHolder) inv.getHolder();
 				GUI gui = holder.gui;
 				ClickAction action = ClickAction.getFromEvent(e);
 				if(action==null) {

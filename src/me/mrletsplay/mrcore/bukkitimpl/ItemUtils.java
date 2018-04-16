@@ -1,6 +1,8 @@
 package me.mrletsplay.mrcore.bukkitimpl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +16,8 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 
 public class ItemUtils {
 
@@ -126,11 +130,129 @@ public class ItemUtils {
 		return banner;
 	}
 	
-	public static void addItem(Player p, ItemStack item){
+	public static void addItemOrDrop(Player p, ItemStack item){
 		HashMap<Integer,ItemStack> excess = p.getInventory().addItem(item);
 		for(Map.Entry<Integer, ItemStack> me : excess.entrySet()){
 			p.getWorld().dropItem(p.getLocation(), me.getValue());
 		}
+	}
+	
+	public static ComparisonResult compareItems(ItemStack item1, ItemStack item2) {
+		if(item1 == null || item2 == null) {
+			if(item1 == item2) {
+				return new ComparisonResult(Arrays.asList(ComparisonParameter.NULL));
+			}else {
+				return new ComparisonResult(Arrays.asList(ComparisonParameter.NONE_APPLICABLE));
+			}
+		}else {
+			List<ComparisonParameter> params = new ArrayList<>();
+			if(item1.getType().equals(item2.getType())) {
+				params.add(ComparisonParameter.TYPE);
+			}
+			if(item1.getDurability() == item2.getDurability()) {
+				params.add(ComparisonParameter.DURABILITY);
+			}
+			if(item1.hasItemMeta() && item2.hasItemMeta()) {
+				ItemMeta m1 = item1.getItemMeta();
+				ItemMeta m2 = item2.getItemMeta();
+				if(m1.hasDisplayName() && m2.hasDisplayName()) {
+					if(m1.getDisplayName().equals(m2.getDisplayName())) {
+						params.add(ComparisonParameter.NAME);
+					}
+				}
+				if(m1.hasLore() && m2.hasLore()) {
+					if(m1.getLore().equals(m2.getLore())) {
+						params.add(ComparisonParameter.LORE);
+					}
+				}
+				if(m1.hasEnchants() && m2.hasEnchants()) {
+					if(m1.getEnchants().equals(m2.getEnchants())) {
+						params.add(ComparisonParameter.ENCHANTS);
+					}
+				}
+
+				if(params.containsAll(Arrays.asList(
+							ComparisonParameter.TYPE,
+							ComparisonParameter.NAME,
+							ComparisonParameter.DURABILITY,
+							ComparisonParameter.LORE,
+							ComparisonParameter.ENCHANTS
+						)))
+				{
+					params.add(ComparisonParameter.ALL_BASIC);
+				}
+				
+				if(m1 instanceof SkullMeta && m2 instanceof SkullMeta) {
+					SkullMeta s1 = (SkullMeta) m1;
+					SkullMeta s2 = (SkullMeta) m2;
+					if(s1.hasOwner() && s2.hasOwner()) {
+						if(s1.getOwningPlayer().equals(s2.getOwningPlayer())) {
+							params.add(ComparisonParameter.SKULL_OWNER);
+						}
+					}
+
+					if(params.containsAll(Arrays.asList(
+								ComparisonParameter.ALL_BASIC,
+								ComparisonParameter.SKULL_OWNER
+							)))
+					{
+						params.add(ComparisonParameter.ALL_APPLICABLE);
+					}
+				}else if(m1 instanceof LeatherArmorMeta && m2 instanceof LeatherArmorMeta) {
+					LeatherArmorMeta l1 = (LeatherArmorMeta) m1;
+					LeatherArmorMeta l2 = (LeatherArmorMeta) m2;
+					if(l1.getColor().equals(l2.getColor())) {
+						params.add(ComparisonParameter.LEATHER_ARMOR_COLOR);
+					}
+
+					if(params.containsAll(Arrays.asList(
+								ComparisonParameter.ALL_BASIC,
+								ComparisonParameter.LEATHER_ARMOR_COLOR
+							)))
+					{
+						params.add(ComparisonParameter.ALL_APPLICABLE);
+					}
+				}else {
+					if(params.contains(ComparisonParameter.ALL_BASIC)) {
+						params.add(ComparisonParameter.ALL_APPLICABLE);
+					}
+				}
+			}
+			return new ComparisonResult(params);
+		}
+	}
+	
+	public static class ComparisonResult {
+		
+		private List<ComparisonParameter> params;
+		
+		public ComparisonResult(List<ComparisonParameter> params) {
+			this.params = params;
+		}
+		
+		public boolean matches(ComparisonParameter... params) {
+			return false;
+		}
+		
+	}
+	
+	public static enum ComparisonParameter {
+		
+		ALL_APPLICABLE,
+		ALL_BASIC,
+		NONE_APPLICABLE,
+		
+		NULL,
+		
+		TYPE,
+		DURABILITY,
+		NAME,
+		LORE,
+		ENCHANTS,
+		SKULL_OWNER,
+//		SKULL_TEXTURE,
+		LEATHER_ARMOR_COLOR
+		
 	}
 	
 }
