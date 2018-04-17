@@ -1,4 +1,4 @@
-package me.mrletsplay.mrcore.main;
+package me.mrletsplay.mrcore.misc;
 
 import java.util.HashMap;
 import java.util.List;

@@ -27,48 +27,100 @@ public class GUIUtils {
 		private GUIDragDropListener dragDrop;
 		private GUIAction action;
 		
+		/**
+		 * Creates a GUI builder for a single page GUI
+		 * @see <a href="https://github.com/MrLetsplay2003/MrCore/wiki/GUIUtils">GUIUtils wiki</a>
+		 * @param title The title for the GUI (inventory)
+		 * @param rows The amount of rows of the GUI (inventory). Should not be more than 6
+		 */
 		public GUIBuilder(String title, int rows) {
 			this.title = title;
 			this.size = rows * 9;
 			this.elements = new HashMap<>();
 		}
 		
+		/**
+		 * Adds an element to the GUI<br>
+		 * If there's already an element in this slot, it will be overridden
+		 * @param slot The slot to add the element to
+		 * @param e The element to add
+		 * @return This GUIBuilder instance
+		 */
 		public GUIBuilder addElement(int slot, GUIElement e) {
 			elements.put(slot, e);
 			return this;
 		}
 		
+		/**
+		 * Sets the {@link GUIAction} listener for this GUI<br>
+		 * If there's already a listener registered, it will be overridden
+		 * @param a The action listener to use
+		 * @return This GUIBuilder instance
+		 */
 		public GUIBuilder setActionListener(GUIAction a) {
 			this.action = a;
 			return this;
 		}
 		
+		/**
+		 * Sets the {@link GUIDragDropListener} for this GUI<br>
+		 * If there's already a listener registered, it will be overridden
+		 * @param dragDrop The listener to use
+		 * @return This GUIBuilder instance
+		 */
 		public GUIBuilder setDragDropListener(GUIDragDropListener dragDrop) {
 			this.dragDrop = dragDrop;
 			return this;
 		}
 		
+		/**
+		 * Builds this GUIBuilder into a functioning GUI
+		 * @return The GUI that was built
+		 */
 		public GUI build() {
 			return new GUI(this);
 		}
 		
 	}
 	
+	/**
+	 * @see <a href="https://github.com/MrLetsplay2003/MrCore/wiki/GUIUtils">GUIUtils wiki</a>
+	 * @author MrLetsplay2003
+	 */
 	public static class GUIBuilderMultiPage<T> extends GUIBuilder {
 
 		private List<Integer> customItemSlots;
 		private ItemSupplier<T> supplier;
 		
+		/**
+		 * Creates a GUI builder for a multi page GUI
+		 * @see <a href="https://github.com/MrLetsplay2003/MrCore/wiki/GUIUtils">GUIUtils wiki</a>
+		 * @param title
+		 * @param rows
+		 */
 		public GUIBuilderMultiPage(String title, int rows) {
 			super(title, rows);
 			this.customItemSlots = new ArrayList<>();
 		}
 		
+		/**
+		 * Adds the specified page slots to the GUI builder
+		 * @param slots The specific slots to add
+		 * @return This GUIBuilderMultiPage instance
+		 */
 		public GUIBuilderMultiPage<T> addPageSlots(int... slots) {
 			Arrays.stream(slots).forEach(customItemSlots::add);
 			return this;
 		}
 		
+		/**
+		 * Adds the specified page slots to the GUI builder (by range)<br>
+		 * Both from and to are inclusive<br>
+		 * E.g.: {@code addPageSlotsInRange(5, 8);} is basically equivalent to {@code addPageSlots(5, 6, 7, 8);}
+		 * @param from The start of the range (inclusive)
+		 * @param to The end of the range (inclusive)
+		 * @return This GUIBuilderMultiPage instance
+		 */
 		public GUIBuilderMultiPage<T> addPageSlotsInRange(int from, int to) {
 			List<Integer> slots = new ArrayList<>();
 			while(from <= to) {
@@ -79,6 +131,11 @@ public class GUIUtils {
 			return this;
 		}
 		
+		/**
+		 * Sets the {@link ItemSupplier} for this multi page GUI
+		 * @param supplier The supplier to use
+		 * @return This GUIBuilderMultiPage instance
+		 */
 		public GUIBuilderMultiPage<T> setSupplier(ItemSupplier<T> supplier){
 			this.supplier = supplier;
 			return this;
@@ -102,10 +159,26 @@ public class GUIUtils {
 			return this;
 		}
 		
+		/**
+		 * Adds a "previous page" item to the GUI<br>
+		 * This will have the default action of switching to the page before the current one<br>
+		 * If there is no page before the current one, the click will be ignored
+		 * @param slot The slot to add the item to
+		 * @param it The {@link ItemStack} to represent this element
+		 * @return This GUIBuilderMultiPage instance
+		 */
 		public GUIBuilderMultiPage<T> addNextPageItem(int slot, ItemStack it){
 			return addElement(slot, changePageItem(it, 1));
 		}
-		
+
+		/**
+		 * Adds a "next page" item to the GUI<br>
+		 * This will have the default action of switching to the page before the current one<br>
+		 * If there is no page before the current one, the click will be ignored
+		 * @param slot The slot to add the item to
+		 * @param it The {@link ItemStack} to represent this element
+		 * @return This GUIBuilderMultiPage instance
+		 */
 		public GUIBuilderMultiPage<T> addPreviousPageItem(int slot, ItemStack it){
 			return addElement(slot, changePageItem(it, -1));
 		}
@@ -146,6 +219,11 @@ public class GUIUtils {
 		
 		public abstract ItemStack getItem(Player p);
 		
+		/**
+		 * Sets the {@link GUIElementAction} for this element
+		 * @param a The action to be called
+		 * @return This GUIElement instance
+		 */
 		public GUIElement setAction(GUIElementAction a) {
 			this.action = a;
 			return this;
@@ -217,11 +295,21 @@ public class GUIUtils {
 		private GUIHolder holder;
 		private GUIBuilder builder;
 		
+		/**
+		 * Creates a GUI<br>
+		 * It is not recommended to use this method. Use {@link GUIBuilder#build()} instead
+		 * @param builder The builder this GUI was built from
+		 */
 		public GUI(GUIBuilder builder) {
 			this.builder = builder;
 			this.holder = new GUIHolder(this);
 		}
 		
+		/**
+		 * Returns this GUI represented as an inventory for the specified player
+		 * @param p The player this inventory is for (Used in all method calls to GUIElements and similar)
+		 * @return An inventory representation of this GUI
+		 */
 		public Inventory getForPlayer(Player p) {
 			Inventory inv = Bukkit.createInventory(holder.clone(), builder.size, builder.title);
 			for(Map.Entry<Integer, GUIElement> el : builder.elements.entrySet()) {
@@ -230,26 +318,49 @@ public class GUIUtils {
 			return inv;
 		}
 		
+		/**
+		 * Returns the default GUIHolder for this GUI<br>
+		 * Can be used to set GUI-specific properties (See {@link GUIHolder#setProperty(String, Object)})
+		 * @return The GUIHolder instance for this GUI (unique to this GUI)
+		 */
 		public GUIHolder getHolder() {
 			return holder;
 		}
 		
+		/**
+		 * @param slot The slot the element is on
+		 * @return The element on that slot, null if none
+		 */
 		public GUIElement getElementBySlot(int slot) {
 			return builder.elements.get(slot);
 		}
 		
+		/**
+		 * @return All the elements in this GUI. This does not include page-specific items for {@link GUIMultiPage} GUIs
+		 */
 		public HashMap<Integer, GUIElement> getElements(){
 			return builder.elements;
 		}
 		
+		/**
+		 * @return The GUIAction listener for this GUI, null if none
+		 */
 		public GUIAction getAction() {
 			return builder.action;
 		}
 		
+		/**
+		 * @return GUIDragDropListener for this GUI, null if none
+		 */
 		public GUIDragDropListener getDragDropListener() {
 			return builder.dragDrop;
 		}
 		
+		/**
+		 * The builder this GUI was built from<br>
+		 * All changes made to the builder will be applied to the GUI as well
+		 * @return The GUI builder for this GUI
+		 */
 		public GUIBuilder getBuilder() {
 			return builder;
 		}
@@ -260,16 +371,31 @@ public class GUIUtils {
 
 		private GUIBuilderMultiPage<T> builder;
 		
+
+		/**
+		 * Creates a GUI<br>
+		 * It is not recommended to use this method. Use {@link GUIBuilderMultiPage#build()} instead
+		 * @param builder The builder this GUI was built from
+		 */
 		public GUIMultiPage(GUIBuilderMultiPage<T> builder) {
 			super(builder);
 			this.builder = builder;
 		}
 		
+		/**
+		 * This will return page 0 of the GUI
+		 */
 		@Override
 		public Inventory getForPlayer(Player p) {
 			return getForPlayer(p, 0);
 		}
 		
+		/**
+		 * Returns an inventory representation of the specified page of this GUI for a specified player
+		 * @param p The player this inventory is for (Used in all method calls to GUIElements and similar)
+		 * @param page The page to be used
+		 * @return An inventory representation for this GUI, null if the page doesn't exist
+		 */
 		public Inventory getForPlayer(Player p, int page) {
 			Inventory base = super.getForPlayer(p);
 			GUIHolder holder = (GUIHolder)base.getHolder();
@@ -297,6 +423,12 @@ public class GUIUtils {
 			}
 		}
 		
+		/**
+		 * Returns the page number for this inventory
+		 * @param inv The inventory to be checked
+		 * @return The page for this gui
+		 * @throws IllegalArgumentException if the given Inventory is not a valid GUI
+		 */
 		public static int getPage(Inventory inv) {
 			if(!(inv.getHolder() instanceof GUIHolder)) {
 				throw new IllegalArgumentException("Provided inventory is not a GUIMultiPage");
@@ -310,6 +442,10 @@ public class GUIUtils {
 		
 	}
 	
+	/**
+	 * Do NOT register this listener yourself. It will be handled by MrCore and registering it will cause double calls to GUIs
+	 * @author MrLetsplay2003
+	 */
 	public static class GUIListener implements Listener{
 		
 		@SuppressWarnings("unchecked")
@@ -371,27 +507,61 @@ public class GUIUtils {
 		private GUI gui;
 		private HashMap<String, Object> properties;
 		
+		/**
+		 * Creates a gui holder for the specified GUI<br>
+		 * It will not automatically be registered to the GUI
+		 * @param gui The GUI this holder is for
+		 */
 		public GUIHolder(GUI gui) {
 			this(gui, new HashMap<>());
 		}
-		
+
+		/**
+		 * Creates a gui holder for the specified GUI<br>
+		 * It will not automatically be registered to the GUI
+		 * @param gui The GUI this holder is for
+		 * @param props The property HashMap to be used
+		 */
 		public GUIHolder(GUI gui, HashMap<String, Object> props) {
 			this.gui = gui;
 			this.properties = props;
 		}
 		
+		/**
+		 * @return The GUI instance this holder belongs to
+		 */
 		public GUI getGui() {
 			return gui;
 		}
 		
+		/**
+		 * Sets a property in the property HashMap to a specific value<br>
+		 * If this is the default holder specified by {@link GUI#getHolder()}, the properties set by this method will be passed down to all children GUIs (inventories)
+		 * @param key The key of the property
+		 * @param value The value of the property
+		 */
+		public void setProperty(String key, Object value) {
+			properties.put(key, value);
+		}
+		
+		/**
+		 * @return The property HashMap for this holder
+		 */
 		public HashMap<String, Object> getProperties() {
 			return properties;
 		}
 		
+		/**
+		 * Clones this GUIHolder. This will be called in order to supply independent holders to inventories
+		 * @return A copy of this GUIHolder
+		 */
 		public GUIHolder clone() {
 			return new GUIHolder(gui, new HashMap<>(properties));
 		}
 		
+		/**
+		 * It is not recommended for this method to be used as it could cause errors in some cases
+		 */
 		@Override
 		public Inventory getInventory() {
 			return gui.getForPlayer(null);

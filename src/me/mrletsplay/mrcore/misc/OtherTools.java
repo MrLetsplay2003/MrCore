@@ -1,4 +1,4 @@
-package me.mrletsplay.mrcore.main;
+package me.mrletsplay.mrcore.misc;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -47,7 +47,7 @@ public class OtherTools {
 	 * - The string will be cut on the end of a word
 	 * - If that's not possible, the string will be cut exactly at *length*
 	 * @param string The string to cut into lines
-	 * @param len The maximum length of a line
+	 * @param length The maximum length of a line
 	 * @return An array of lines cut into properly-sized pieces by above rules
 	 */
 	public static List<String> advSplit(String string, int length) {

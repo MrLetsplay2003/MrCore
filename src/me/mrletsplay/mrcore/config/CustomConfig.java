@@ -101,7 +101,7 @@ public class CustomConfig {
 
 	/**
 	 * Creates a CustomConfig instance with the given config url<br>
-	 * Note: External CustomConfig instances can <b>not</br> be saved
+	 * Note: External CustomConfig instances can <b>not</b> be saved
 	 * @param configURL The config url to be used
 	 * @param compact Whether to use the compact format or not
 	 * @param defaultSaveProperties The default {@link ConfigSaveProperty} options for this config
