@@ -253,6 +253,12 @@ public class GUIUtils {
 			return it;
 		}
 		
+		@Override
+		public StaticGUIElement setAction(GUIElementAction a) {
+			super.setAction(a);
+			return this;
+		}
+		
 	}
 	
 	public static abstract class GUIElementAction {
