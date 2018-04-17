@@ -26,6 +26,7 @@ public class GUIUtils {
 		private HashMap<Integer, GUIElement> elements;
 		private GUIDragDropListener dragDrop;
 		private GUIAction action;
+		private HashMap<String, Object> properties;
 		
 		/**
 		 * Creates a GUI builder for a single page GUI
@@ -71,6 +72,14 @@ public class GUIUtils {
 		public GUIBuilder setDragDropListener(GUIDragDropListener dragDrop) {
 			this.dragDrop = dragDrop;
 			return this;
+		}
+		
+		/**
+		 * Sets the default properties for this GUIBuilder
+		 * @param properties The properties to use
+		 */
+		public void setProperties(HashMap<String, Object> properties) {
+			this.properties = properties;
 		}
 		
 		/**
@@ -399,7 +408,7 @@ public class GUIUtils {
 		public Inventory getForPlayer(Player p, int page) {
 			Inventory base = super.getForPlayer(p);
 			GUIHolder holder = (GUIHolder)base.getHolder();
-			holder.properties.put("page", page);
+			holder.getProperties().put("page", page);
 			List<Integer> slots = builder.customItemSlots;
 			int nSlots = slots.size();
 			ItemSupplier<T> supp = builder.supplier;
@@ -416,7 +425,7 @@ public class GUIUtils {
 					base.setItem(slot, el.getItem(p));
 					elSlots.put(slot, el);
 				}
-				holder.properties.put("page-elements", elSlots);
+				holder.getProperties().put("page-elements", elSlots);
 				return base;
 			}else {
 				return null;
@@ -437,7 +446,7 @@ public class GUIUtils {
 			if(!(holder.gui instanceof GUIMultiPage<?>)) {
 				throw new IllegalArgumentException("Provided inventory is not a GUIMultiPage");
 			}
-			return (int) holder.properties.get("page");
+			return (int) holder.getProperties().get("page");
 		}
 		
 	}
@@ -477,7 +486,7 @@ public class GUIUtils {
 						if(!cancel) e.setCancelled(false);
 					}
 					if(gui instanceof GUIMultiPage<?>) {
-						HashMap<Integer, GUIElement> pageElements = (HashMap<Integer, GUIElement>) holder.properties.get("page-elements");
+						HashMap<Integer, GUIElement> pageElements = (HashMap<Integer, GUIElement>) holder.getProperties().get("page-elements");
 						GUIElement pElClicked = pageElements.get(slot);
 						if(pElClicked != null && pElClicked.action != null) {
 							boolean cancel = pElClicked.action.action(player, action, e.getCursor(), e.getClickedInventory(), gui, e);
@@ -505,7 +514,6 @@ public class GUIUtils {
 	public static class GUIHolder implements InventoryHolder {
 
 		private GUI gui;
-		private HashMap<String, Object> properties;
 		
 		/**
 		 * Creates a gui holder for the specified GUI<br>
@@ -524,7 +532,7 @@ public class GUIUtils {
 		 */
 		public GUIHolder(GUI gui, HashMap<String, Object> props) {
 			this.gui = gui;
-			this.properties = props;
+			this.gui.builder.properties = props;
 		}
 		
 		/**
@@ -541,14 +549,14 @@ public class GUIUtils {
 		 * @param value The value of the property
 		 */
 		public void setProperty(String key, Object value) {
-			properties.put(key, value);
+			this.gui.builder.properties.put(key, value);
 		}
 		
 		/**
 		 * @return The property HashMap for this holder
 		 */
 		public HashMap<String, Object> getProperties() {
-			return properties;
+			return this.gui.builder.properties;
 		}
 		
 		/**
@@ -556,7 +564,7 @@ public class GUIUtils {
 		 * @return A copy of this GUIHolder
 		 */
 		public GUIHolder clone() {
-			return new GUIHolder(gui, new HashMap<>(properties));
+			return new GUIHolder(gui, new HashMap<>(this.gui.builder.properties));
 		}
 		
 		/**
