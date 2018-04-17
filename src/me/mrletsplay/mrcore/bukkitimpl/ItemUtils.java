@@ -2,7 +2,6 @@ package me.mrletsplay.mrcore.bukkitimpl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -224,14 +223,18 @@ public class ItemUtils {
 	
 	public static class ComparisonResult {
 		
-		private List<ComparisonParameter> params;
+		private List<ComparisonParameter> parameters;
 		
 		public ComparisonResult(List<ComparisonParameter> params) {
-			this.params = params;
+			this.parameters = params;
+		}
+		
+		public List<ComparisonParameter> getParameters() {
+			return parameters;
 		}
 		
 		public boolean matches(ComparisonParameter... params) {
-			return false;
+			return parameters.containsAll(Arrays.asList(params));
 		}
 		
 	}
