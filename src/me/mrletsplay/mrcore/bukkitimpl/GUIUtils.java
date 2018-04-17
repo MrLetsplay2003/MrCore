@@ -577,6 +577,17 @@ public class GUIUtils {
 		
 	}
 	
-	
+	/**
+	 * Gets a GUI from an inventory
+	 * @param inv The inventory to be converted
+	 * @return The respective GUI, null if none (not a GUI)
+	 */
+	public static GUI getGUI(Inventory inv){
+		if(inv.getHolder() instanceof GUIHolder) {
+			return ((GUIHolder) inv.getHolder()).gui;
+		}else {
+			return null;
+		}
+	}
 
 }
