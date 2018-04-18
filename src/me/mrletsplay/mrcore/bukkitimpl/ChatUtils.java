@@ -4,30 +4,31 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 
 public class ChatUtils {
-	
-	public static List<TextComponent> insertTextComponent(String txt, List<KeyedTextComponent> toReplace){
+
+	public static List<BaseComponent> insertBaseComponent(String txt, List<KeyedBaseComponent> toReplace){
 		if(toReplace.isEmpty()) return Arrays.asList(new TextComponent(txt));
-		KeyedTextComponent tR = toReplace.remove(0);
-		if(!txt.contains(tR.getKey())) return Arrays.asList(new TextComponent(txt));
-		List<TextComponent> cs = new ArrayList<>();
+		KeyedBaseComponent tR = toReplace.remove(0);
+		if(!txt.contains(tR.getKey())) return insertBaseComponent(txt, toReplace);
+		List<BaseComponent> cs = new ArrayList<>();
 		int ind = txt.indexOf(tR.getKey());
 		String before = txt.substring(0, ind);
 		String after = txt.substring(ind + tR.getKey().length(), txt.length());
-		cs.addAll(insertTextComponent(before, new ArrayList<>(toReplace)));
+		cs.addAll(insertBaseComponent(before, new ArrayList<>(toReplace)));
 		cs.add(tR.getValue());
-		cs.addAll(insertTextComponent(after, new ArrayList<>(toReplace)));
+		cs.addAll(insertBaseComponent(after, new ArrayList<>(toReplace)));
 		return cs;
 	}
 	
-	public static class KeyedTextComponent{
+	public static class KeyedBaseComponent{
 		
 		private String key;
-		private TextComponent value;
+		private BaseComponent value;
 		
-		public KeyedTextComponent(String k, TextComponent v) {
+		public KeyedBaseComponent(String k, BaseComponent v) {
 			this.key = k;
 			this.value = v;
 		}
@@ -36,7 +37,7 @@ public class ChatUtils {
 			return key;
 		}
 		
-		public TextComponent getValue() {
+		public BaseComponent getValue() {
 			return value;
 		}
 	}
