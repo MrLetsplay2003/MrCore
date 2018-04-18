@@ -78,7 +78,8 @@ public class OtherTools {
 				}
 			}
 		}
-		if(!buf.isEmpty())lineBuf.add(toString(buf));
+		System.out.println(buf);
+		if(!buf.isEmpty()) lineBuf.add(toString(buf));
 		return lineBuf;
 	}
 	
