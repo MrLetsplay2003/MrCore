@@ -56,8 +56,8 @@ public class OtherTools {
 		List<String> lineBuf = new ArrayList<>();
 		List<String> buf = new ArrayList<>();
 		boolean a = true;
-		while(!words.isEmpty()) {
-			if(a) buf.add(words.remove(0));
+		while(!words.isEmpty() && !buf.isEmpty()) {
+			if(a && !buf.isEmpty()) buf.add(words.remove(0));
 			a = true;
 			if(toString(buf).length()>length) {
 				String o = buf.remove(buf.size()-1);
@@ -78,7 +78,6 @@ public class OtherTools {
 				}
 			}
 		}
-		System.out.println(buf);
 		if(!buf.isEmpty()) lineBuf.add(toString(buf));
 		return lineBuf;
 	}
