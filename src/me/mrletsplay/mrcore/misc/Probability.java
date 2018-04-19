@@ -8,11 +8,11 @@ public class Probability {
 	
 	private static final Random DEFAULT_RANDOM = new Random();
 	
-	public static <T> T choose(List<ProbabilityElement<T>> elements) {
+	public static <T> ProbabilityElement<T> choose(List<ProbabilityElement<T>> elements) {
 		return choose(elements, DEFAULT_RANDOM);
 	}
 
-	public static <T> T choose(List<ProbabilityElement<T>> elements, Random r){
+	public static <T> ProbabilityElement<T> choose(List<ProbabilityElement<T>> elements, Random r){
 		double sum = 0;
 		HashMap<DoubleRange, ProbabilityElement<T>> els = new HashMap<>();
 		for(ProbabilityElement<T> el : elements) {
@@ -20,7 +20,17 @@ public class Probability {
 		}
 		double val = r.nextDouble() * sum;
 		ProbabilityElement<T> el = els.entrySet().stream().filter(e -> e.getKey().contains(val)).map(e -> e.getValue()).findFirst().orElse(null);
-		return el!=null?el.element:null;
+		return el;
+	}
+	
+	public static <T> T chooseValue(List<ProbabilityElement<T>> elements) {
+		ProbabilityElement<T> elC = choose(elements);
+		return elC != null ? elC.element : null;
+	}
+	
+	public static <T> T chooseValue(List<ProbabilityElement<T>> elements, Random r) {
+		ProbabilityElement<T> elC = choose(elements, r);
+		return elC != null ? elC.element : null;
 	}
 	
 	private static class DoubleRange {
