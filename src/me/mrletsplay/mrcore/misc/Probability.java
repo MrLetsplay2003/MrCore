@@ -24,8 +24,7 @@ public class Probability {
 	}
 	
 	public static <T> T chooseValue(List<ProbabilityElement<T>> elements) {
-		ProbabilityElement<T> elC = choose(elements);
-		return elC != null ? elC.element : null;
+		return chooseValue(elements, DEFAULT_RANDOM);
 	}
 	
 	public static <T> T chooseValue(List<ProbabilityElement<T>> elements, Random r) {
