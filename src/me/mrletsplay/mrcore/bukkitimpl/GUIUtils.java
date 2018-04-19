@@ -262,7 +262,6 @@ public class GUIUtils {
 		
 	}
 
-	@Deprecated
 	public static abstract class GUIElementAction {
 		
 		public boolean action(Player p, ClickAction button, ItemStack clickedWith, Inventory inv, GUI gui, InventoryClickEvent event) { return true; }
