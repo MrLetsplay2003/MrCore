@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -260,10 +261,73 @@ public class GUIUtils {
 		}
 		
 	}
-	
+
+	@Deprecated
 	public static abstract class GUIElementAction {
 		
-		public abstract boolean action(Player p, ClickAction button, ItemStack clickedWith, Inventory inv, GUI gui, InventoryClickEvent event);
+		public boolean action(Player p, ClickAction button, ItemStack clickedWith, Inventory inv, GUI gui, InventoryClickEvent event) { return true; }
+		
+	}
+	
+	public static abstract class GUIElementActionListener {
+		
+		public abstract boolean action(GUIElementActionEvent event);
+		
+	}
+	
+	public static abstract class GUIElementActionHandler {
+		
+		public abstract boolean action(GUIElementAction action);
+		
+	}
+	
+	public static class GUIElementActionEvent {
+		
+		private Player p;
+		private ClickAction button;
+		private Inventory inv;
+		private GUI gui;
+		private InventoryClickEvent event;
+		
+		public GUIElementActionEvent(Player p, ClickAction button, Inventory inv, GUI gui, InventoryClickEvent event) {
+			this.p = p;
+			this.button = button;
+			this.inv = inv;
+			this.gui = gui;
+			this.event = event;
+		}
+		
+		public Player getPlayer() {
+			return p;
+		}
+		
+		public ClickAction getButton() {
+			return button;
+		}
+		
+		public ClickType getClickType() {
+			return event.getClick();
+		}
+		
+		public ItemStack getClickedWith() {
+			return event.getCursor();
+		}
+		
+		public ItemStack getClicked() {
+			return event.getCurrentItem();
+		}
+		
+		public Inventory getInventory() {
+			return inv;
+		}
+		
+		public GUI getGui() {
+			return gui;
+		}
+		
+		public InventoryClickEvent getEvent() {
+			return event;
+		}
 		
 	}
 	
@@ -588,7 +652,7 @@ public class GUIUtils {
 	 * @param inv The inventory to be converted
 	 * @return The respective GUI, null if none (not a GUI)
 	 */
-	public static GUI getGUI(Inventory inv){
+	public static GUI getGUI(Inventory inv) {
 		if(inv.getHolder() instanceof GUIHolder) {
 			return ((GUIHolder) inv.getHolder()).gui;
 		}else {
