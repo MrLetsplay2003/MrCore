@@ -14,6 +14,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -24,6 +25,8 @@ public class GUIUtils {
 		
 		private String title;
 		private int size;
+		private InventoryType invType;
+		private boolean isCustomType;
 		private HashMap<Integer, GUIElement> elements;
 		private GUIDragDropListener dragDrop;
 		private GUIAction action;
@@ -38,6 +41,20 @@ public class GUIUtils {
 		public GUIBuilder(String title, int rows) {
 			this.title = title;
 			this.size = rows * 9;
+			this.isCustomType = false;
+			this.elements = new HashMap<>();
+		}
+
+		/**
+		 * Creates a GUI builder for a single page GUI
+		 * @see <a href="https://github.com/MrLetsplay2003/MrCore/wiki/GUIUtils">GUIUtils wiki</a>
+		 * @param title The title for the GUI (inventory)
+		 * @param type The inventory type for this GUI
+		 */
+		public GUIBuilder(String title, InventoryType type) {
+			this.title = title;
+			this.invType = type;
+			this.isCustomType = true;
 			this.elements = new HashMap<>();
 		}
 		
@@ -105,11 +122,21 @@ public class GUIUtils {
 		/**
 		 * Creates a GUI builder for a multi page GUI
 		 * @see <a href="https://github.com/MrLetsplay2003/MrCore/wiki/GUIUtils">GUIUtils wiki</a>
-		 * @param title
-		 * @param rows
+		 * @param title The title for this inventory
+		 * @param rows The amount of rows (Should not be more than 6)
 		 */
 		public GUIBuilderMultiPage(String title, int rows) {
 			super(title, rows);
+			this.customItemSlots = new ArrayList<>();
+		}
+		/**
+		 * Creates a GUI builder for a multi page GUI
+		 * @see <a href="https://github.com/MrLetsplay2003/MrCore/wiki/GUIUtils">GUIUtils wiki</a>
+		 * @param title The title for this inventory
+		 * @param type The type for this inventory
+		 */
+		public GUIBuilderMultiPage(String title, InventoryType type) {
+			super(title, type);
 			this.customItemSlots = new ArrayList<>();
 		}
 		
@@ -389,7 +416,12 @@ public class GUIUtils {
 		 * @return An inventory representation of this GUI
 		 */
 		public Inventory getForPlayer(Player p) {
-			Inventory inv = Bukkit.createInventory(holder.clone(), builder.size, builder.title);
+			Inventory inv;
+			if(builder.isCustomType) {
+				inv = Bukkit.createInventory(holder.clone(), builder.invType, builder.title);
+			}else {
+				inv = Bukkit.createInventory(holder.clone(), builder.size, builder.title);
+			}
 			for(Map.Entry<Integer, GUIElement> el : builder.elements.entrySet()) {
 				inv.setItem(el.getKey(), el.getValue().getItem(p));
 			}
