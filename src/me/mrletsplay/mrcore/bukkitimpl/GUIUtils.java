@@ -309,11 +309,11 @@ public class GUIUtils {
 			return event.getClick();
 		}
 		
-		public ItemStack getClickedWith() {
+		public ItemStack getItemClickedWith() {
 			return event.getCursor();
 		}
 		
-		public ItemStack getClicked() {
+		public ItemStack getItemClicked() {
 			return event.getCurrentItem();
 		}
 		
