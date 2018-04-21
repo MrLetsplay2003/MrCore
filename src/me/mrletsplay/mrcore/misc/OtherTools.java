@@ -85,6 +85,33 @@ public class OtherTools {
 		return lineBuf;
 	}
 	
+	public static double similarity(String f, String f2){
+		char[] ch = f.toCharArray();
+		char[] ch2 = f2.toCharArray();
+		int a = (ch.length>ch2.length?0:1);
+		char[] b = a==0?ch:ch2;
+		char[] s = a==1?ch:ch2;
+		double mostAccPerc = -Double.MAX_VALUE;
+		for(int i = 0; i <= b.length - s.length; i++){
+			int p = 0;
+			int p2 = 0;
+			for(int c = i; c < i+s.length; c++){
+				if(s[c-i] == b[c]){
+					p2++;
+				}
+
+				if(p2>p){
+					p = p2;
+				}
+			}
+			double perc = ((double)p/(double)s.length)*(1-(Math.abs(f2.length()-f.length())/(double)(f2.length()>f.length()?f2.length():f.length())));
+			if(perc > mostAccPerc){
+				mostAccPerc = perc;
+			}
+		}
+		return mostAccPerc;
+	}
+	
 	private static String toString(List<String> list) {
 		return list.stream().collect(Collectors.joining(" "));
 	}
