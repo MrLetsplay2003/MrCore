@@ -85,6 +85,11 @@ public class OtherTools {
 		return lineBuf;
 	}
 	
+	/**
+	 * @param f One string
+	 * @param f2 Another string
+	 * @return A value representing the similarity of two strings. (Higher = more similar) 
+	 */
 	public static double similarity(String f, String f2){
 		char[] ch = f.toCharArray();
 		char[] ch2 = f2.toCharArray();
