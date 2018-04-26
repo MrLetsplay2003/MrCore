@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import me.mrletsplay.mrcore.config.ConfigExpansions.ConfigCustomizer;
+
 /**
  * - This is a config format based on two HashMaps, one for the properties and one for the comments<br>
  * - The file formatting is based on YAML, but is easier to read/edit for humans as it supports UTF-8 encoding, so you don't need to escape special characters<br>
@@ -39,10 +41,15 @@ public class CustomConfig {
 	
 	private static final String SPACE = "  ";
 	private static final String SPL_STRING = ": ";
-	private static final String
-			ENTRY_STRING = "- ",
-			COMMENT_STRING = "# ",
-			HEADER_COMMENT_STRING = "## ";
+	public static final String
+			DEFAULT_ENTRY_STRING = "- ",
+			DEFAULT_COMMENT_STRING = "# ",
+			DEFAULT_HEADER_COMMENT_STRING = "## ";
+	
+	private String 
+			entryString = DEFAULT_ENTRY_STRING,
+			commentString = DEFAULT_COMMENT_STRING,
+			headerCommentString = DEFAULT_HEADER_COMMENT_STRING;
 
 	private File configFile;
 	private URL configURL;
@@ -146,6 +153,19 @@ public class CustomConfig {
 	public boolean isExternal() {
 		return isExternal;
 	}
+	
+	/**
+	 * Adds a {@link ConfigCustomizer} to this config instance.<br>
+	 * This will determine the layout of a (non-compact) saved config and can also load configs with the given layout
+	 * @param custom The customizer to use
+	 * @return This config instance
+	 */
+	public CustomConfig useCustomizer(ConfigCustomizer customizer) {
+		entryString = customizer.getEntryPrefix();
+		commentString = customizer.getCommentPrefix();
+		headerCommentString = customizer.getHeaderCommentPrefix();
+		return this;
+	}
 
 	/**
 	 * Saves the config with the given save properties<br>
@@ -212,7 +232,7 @@ public class CustomConfig {
 				if(splc.length>0) {
 					if(props.contains(ConfigSaveProperty.SPACE_COMMENTED_PROPERTIES)) w.newLine();
 					for (String s : splc) {
-						w.write(HEADER_COMMENT_STRING + s);
+						w.write(headerCommentString + s);
 						w.newLine();
 					}
 				}
@@ -243,7 +263,7 @@ public class CustomConfig {
 						if(splc.length>0) {
 							if(props.contains(ConfigSaveProperty.SPACE_COMMENTED_PROPERTIES)) w.newLine();
 							for(String s : splc){
-								w.write(ls + COMMENT_STRING + s);
+								w.write(ls + commentString + s);
 								w.newLine();
 							}
 						}
@@ -259,7 +279,7 @@ public class CustomConfig {
 							sp = space(getHighestKey(lKey, key));
 						}
 						for (Object s : (List<?>) p.getValue()) {
-							w.write(sp + SPACE + ENTRY_STRING + s);
+							w.write(sp + SPACE + entryString + s);
 							w.newLine();
 						}
 					}
@@ -629,16 +649,16 @@ public class CustomConfig {
 
 	private Property loadProperty(int line, String s) throws InvalidConfigException{
 		String formattedLine = s.replaceAll("^\\s+","").replaceAll("^\\t+","");
-		if(formattedLine.startsWith(COMMENT_STRING)){
-			return new Property(null, PropertyType.COMMENT, formattedLine.substring(COMMENT_STRING.length()));
+		if(formattedLine.startsWith(commentString)){
+			return new Property(null, PropertyType.COMMENT, formattedLine.substring(commentString.length()));
 		}
-		if(formattedLine.startsWith(HEADER_COMMENT_STRING)) {
-			return new Property(null, PropertyType.HEADER_COMMENT, formattedLine.substring(COMMENT_STRING.length()));
+		if(formattedLine.startsWith(headerCommentString)) {
+			return new Property(null, PropertyType.HEADER_COMMENT, formattedLine.substring(headerCommentString.length()));
 		}
-		if(formattedLine.startsWith(ENTRY_STRING)) {
-			return new Property(null, PropertyType.LIST_ENTRY, formattedLine.substring(ENTRY_STRING.length()));
+		if(formattedLine.startsWith(entryString)) {
+			return new Property(null, PropertyType.LIST_ENTRY, formattedLine.substring(entryString.length()));
 		}
-		if(formattedLine.equals(ENTRY_STRING.trim())) {
+		if(formattedLine.equals(entryString.trim())) {
 			return new Property(null, PropertyType.LIST_ENTRY, "");
 		}
 		String[] p = formattedLine.split(SPL_STRING, 2);

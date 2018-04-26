@@ -23,6 +23,23 @@ public class ChatUtils {
 		return cs;
 	}
 	
+//	public static List<BaseComponent> fixColor(List<BaseComponent> components){
+//		ChatColor lastColor = null;
+//		for(BaseComponent bc : components) {
+//			if(bc instanceof TextComponent) {
+//				TextComponent tc = (TextComponent) bc;
+//				String text = tc.getText();
+//				int lastIndex = text.lastIndexOf('§');
+//				if(lastIndex != -1) {
+//					return null;
+//				}
+//			}else {
+//				lastColor = bc.getColor();
+//			}
+//		}
+//		return null;
+//	}
+	
 	public static class KeyedBaseComponent{
 		
 		private String key;
