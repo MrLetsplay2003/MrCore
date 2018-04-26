@@ -39,14 +39,16 @@ import me.mrletsplay.mrcore.config.ConfigExpansions.ConfigCustomizer;
  */
 public class CustomConfig {
 	
-	private static final String SPACE = "  ";
-	private static final String SPL_STRING = ": ";
 	public static final String
+			DEFAULT_SPACE = "  ",
+			DEFAULT_SPL_STRING = ": ",
 			DEFAULT_ENTRY_STRING = "- ",
 			DEFAULT_COMMENT_STRING = "# ",
 			DEFAULT_HEADER_COMMENT_STRING = "## ";
 	
 	private String 
+			space = DEFAULT_SPACE,
+			splString = DEFAULT_SPL_STRING,
 			entryString = DEFAULT_ENTRY_STRING,
 			commentString = DEFAULT_COMMENT_STRING,
 			headerCommentString = DEFAULT_HEADER_COMMENT_STRING;
@@ -164,6 +166,8 @@ public class CustomConfig {
 		entryString = customizer.getEntryPrefix();
 		commentString = customizer.getCommentPrefix();
 		headerCommentString = customizer.getHeaderCommentPrefix();
+		space = customizer.getIndentation();
+		splString = customizer.getPropertySplitter();
 		return this;
 	}
 
@@ -244,13 +248,13 @@ public class CustomConfig {
 				if (lKey != null) {
 					int hk = getHighestKey(lKey, key);
 					for (int i = 0; i < hk; i++) {
-						lsb.append(SPACE);
+						lsb.append(space);
 					}
 					String tK = getKeyFrom(key.split("\\."), hk);
 					String[] splK = tK.split("\\.");
 					for(int i = hk; i < splK.length-1; i++) {
-						w.write(lsb.toString()+splK[i]+SPL_STRING);
-						lsb.append(SPACE);
+						w.write(lsb.toString()+splK[i]+splString);
+						lsb.append(space);
 						w.newLine();
 					}
 					ktw = splK[splK.length-1];
@@ -268,7 +272,7 @@ public class CustomConfig {
 							}
 						}
 					}
-					w.write(ls+ktw + SPL_STRING + (p!=null&&p.getValue()!=null?(p.getType().equals(PropertyType.VALUE) ? p.getValue() : ""):""));
+					w.write(ls+ktw + splString + (p!=null&&p.getValue()!=null?(p.getType().equals(PropertyType.VALUE) ? p.getValue() : ""):""));
 					if(comments.containsKey(key)) {
 						if(props.contains(ConfigSaveProperty.SPACE_COMMENTED_PROPERTIES)) w.newLine();
 					}
@@ -279,7 +283,7 @@ public class CustomConfig {
 							sp = space(getHighestKey(lKey, key));
 						}
 						for (Object s : (List<?>) p.getValue()) {
-							w.write(sp + SPACE + entryString + s);
+							w.write(sp + space + entryString + s);
 							w.newLine();
 						}
 					}
@@ -351,7 +355,7 @@ public class CustomConfig {
 	
 	private String space(int length) {
 		StringBuilder sb = new StringBuilder();
-		for(int i = 0; i < length; i++) sb.append(SPACE);
+		for(int i = 0; i < length; i++) sb.append(space);
 		return sb.toString();
 	}
 	
@@ -661,7 +665,7 @@ public class CustomConfig {
 		if(formattedLine.equals(entryString.trim())) {
 			return new Property(null, PropertyType.LIST_ENTRY, "");
 		}
-		String[] p = formattedLine.split(SPL_STRING, 2);
+		String[] p = formattedLine.split(splString, 2);
 		if(p.length==2){
 			if(p[1].isEmpty()){
 				return new Property(p[0], PropertyType.LIST_START,true);
@@ -669,8 +673,8 @@ public class CustomConfig {
 				return new Property(p[0], PropertyType.VALUE, p[1]);
 			}
 		}else if(p.length==1){
-			if(p[0].endsWith(SPL_STRING.trim())){
-				String k = p[0].substring(0, p[0].length()-SPL_STRING.trim().length());
+			if(p[0].endsWith(splString.trim())){
+				String k = p[0].substring(0, p[0].length()-splString.trim().length());
 				return new Property(k, PropertyType.LIST_START, true);
 			}
 		}
@@ -728,13 +732,20 @@ public class CustomConfig {
 	}
 
 	private int getFileStage(String s) {
-		int sSpaces = s.length()-s.replaceAll("^\\s+","").length();
-		int sTabs = s.length()-s.replaceAll("^\\t+","").length();
-		if(sSpaces % SPACE.length()!=0) {
-			return -1;
-		}else {
-			return (sSpaces/SPACE.length())+(sTabs*(4/SPACE.length()));
+//		int sSpaces = s.length()-s.replaceAll("^\\s+","").length();
+//		int sTabs = s.length()-s.replaceAll("^\\t+","").length();
+//		if(sSpaces % space.length()!=0) {
+//			return -1;
+//		}else {
+//			return (sSpaces/space.length())+(sTabs*(4/space.length()));
+//		}
+		
+		int indents = 0;
+		while(s.startsWith(space)) {
+			s = s.substring(space.length());
+			indents++;
 		}
+		return indents;
 	}
 	
 	/**
