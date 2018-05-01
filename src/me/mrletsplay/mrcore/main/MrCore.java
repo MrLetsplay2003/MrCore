@@ -9,6 +9,7 @@ public class MrCore {
 	 * - NMS
 	 * - CC custom parser
 	 * - Command system
+	 * - Chat GUIs (via commands)
 	 */
 	
 	public static final String VERSION = "v1.4";
