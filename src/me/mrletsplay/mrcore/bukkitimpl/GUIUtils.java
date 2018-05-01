@@ -419,7 +419,7 @@ public class GUIUtils {
 			Inventory inv;
 			if(builder.isCustomType) {
 				inv = Bukkit.createInventory(holder.clone(), builder.invType, builder.title);
-			}else {
+			} else {
 				inv = Bukkit.createInventory(holder.clone(), builder.size, builder.title);
 			}
 			for(Map.Entry<Integer, GUIElement> el : builder.elements.entrySet()) {
