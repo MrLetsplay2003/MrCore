@@ -31,53 +31,6 @@ public class MrCorePlugin extends JavaPlugin{
 	
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		if(command.getName().equals("mrcore")) {
-			UIMultiPage<String> ui = new UIBuilderMultiPage<String>().setLayout(new UILayoutMultiPage())
-				.addElement("player_name", new UIElement() {
-					
-					@Override
-					public String getLayout(Player p) {
-						return p.getName();
-					}
-				}.setAction(new UIElementAction() {
-					
-					@Override
-					public void action(UIElementActionEvent event) {
-						System.out.println(event.getPlayer().getName());
-					}
-				}).setHoverText("Click me!"))
-				.addPreviousPageElement("previous_page", "§7Previous page")
-				.addNextPageElement("next_page", "§7Next page")
-				.setLayout(new UILayoutMultiPage()
-						.addText("Some ui!")
-						.newLine()
-						.addElement("player_name")
-						.addPageElements(10, true)
-						.newLine()
-						.addElement("previous_page")
-						.addText(" ")
-						.addElement("next_page"))
-				.setSupplier(new ItemSupplier<String>() {
-					
-					@Override
-					public UIElement toUIElement(Player p, String item) {
-						return new StaticUIElement(item.toString()).setHoverText("Hover "+item).setAction(new UIElementAction() {
-							
-							@Override
-							public void action(UIElementActionEvent event) {
-								event.getPlayer().sendMessage("You clicked: "+item);
-							}
-						});
-					}
-					
-					@Override
-					public List<String> getItems() {
-						return Arrays.asList("Some string 1", "Some string 2");
-					}
-				})
-				.build();
-			ui.sendToPlayer((Player)sender);
-		}
 		return true;
 	}
 	
