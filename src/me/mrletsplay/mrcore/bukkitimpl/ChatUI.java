@@ -22,7 +22,7 @@ public class ChatUI {
 	public static class UIBuilder {
 		
 		public HashMap<String, UIElement> elements;
-		private UILayout layout;
+		public UILayout layout;
 		private HashMap<String, Object> properties;
 		
 		public UIBuilder() {
@@ -55,7 +55,6 @@ public class ChatUI {
 	public static class UIBuilderMultiPage<T> extends UIBuilder{
 		
 		private ItemSupplier<T> supplier;
-		private UILayoutMultiPage layout;
 		
 		public UIBuilderMultiPage() {
 			super();
@@ -65,6 +64,28 @@ public class ChatUI {
 		public UIBuilderMultiPage<T> addElement(String key, UIElement element) {
 			super.addElement(key, element);
 			return this;
+		}
+		
+		public UIBuilderMultiPage<T> addNextPageElement(String key, String layout){
+			return addElement(key, new StaticUIElement(layout).setAction(new UIElementAction() {
+				
+				@Override
+				public void action(UIElementActionEvent event) {
+					int page = (int) event.getUIInstance().getProperties().get("page");
+					((UIMultiPage<?>) event.getUIInstance().getUI()).getForPlayer(event.getPlayer(), page-1);
+				}
+			}));
+		}
+		
+		public UIBuilderMultiPage<T> addPreviousPageElement(String key, String layout){
+			return addElement(key, new StaticUIElement(layout).setAction(new UIElementAction() {
+				
+				@Override
+				public void action(UIElementActionEvent event) {
+					int page = (int) event.getUIInstance().getProperties().get("page");
+					((UIMultiPage<?>) event.getUIInstance().getUI()).getForPlayer(event.getPlayer(), page-1);
+				}
+			}));
 		}
 		
 		@Deprecated
@@ -328,6 +349,7 @@ public class ChatUI {
 						break;
 				}
 			}
+			UIListener.instances.put(instanceID, instance);
 			return uiMessage;
 		}
 		
@@ -357,8 +379,13 @@ public class ChatUI {
 			UIMessage uiMessage = super.getForPlayer(p);
 			String instanceID = uiMessage.instance.id;
 			List<T> items = builder.supplier.getItems();
-			HashMap<String, UIElement> elements = (HashMap<String, UIElement>) uiMessage.instance.properties.get("elements");
-			int index = page * builder.layout.nItems;
+			UILayoutMultiPage lmp = (UILayoutMultiPage) builder.layout;
+			int nPg = items.size()/lmp.nItems;
+			if(page > nPg || page < 0) return null;
+			HashMap<String, Object> props = uiMessage.instance.properties;
+			props.put("page", page);
+			HashMap<String, UIElement> elements = (HashMap<String, UIElement>) props.get("elements");
+			int index = page * lmp.nItems;
 			for(int i = 0; i < uiMessage.messageElements.size();  i++) {
 				Object msgEl = uiMessage.messageElements.get(i);
 				if(msgEl instanceof UILayoutElement) {
@@ -373,6 +400,8 @@ public class ChatUI {
 							String elID = "multi_"+(lElID++);
 							elements.put(elID, el);
 							uiMessage.messageElements.set(i, UILayoutParser.parseElement(el, p, instanceID, elID));
+							boolean nL = (boolean) lEl.getProperty("newline");
+							if(nL) uiMessage.messageElements.add(i, new UILayoutElement(UILayoutElementType.NEWLINE));
 						default:
 							break;
 					}
@@ -383,7 +412,9 @@ public class ChatUI {
 		}
 		
 		public void sendToPlayer(Player p) {
-			getForPlayer(p).sendToPlayer(p);
+			UIMessage uim = getForPlayer(p);
+			if(uim==null) return;
+			uim.sendToPlayer(p);
 		}
 		
 	}
@@ -395,7 +426,7 @@ public class ChatUI {
 			if(element.hoverText != null)
 				tc.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(element.hoverText).create()));
 			if(element.action != null)
-				tc.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/mrcoreui action "+instanceID+" "+elementID));
+				tc.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/mrcoreui "+instanceID+" "+elementID));
 			return tc;
 		}
 		
@@ -414,7 +445,6 @@ public class ChatUI {
 		public List<BaseComponent[]> buildMessage() {
 			List<BaseComponent[]> lines = new ArrayList<>();
 			ComponentBuilder cb = new ComponentBuilder("");
-			System.out.println(messageElements.size());
 			for(Object o : messageElements) {
 				if(o instanceof BaseComponent) {
 					cb.append((BaseComponent) o);
@@ -454,11 +484,21 @@ public class ChatUI {
 			String insID = args[0];
 			String elID = args[1];
 			UIInstance instance = UIListener.instances.get(insID);
-			//==null?
+			if(instance == null) {
+				p.sendMessage("Invalid instance");
+				return true;
+			}
 			HashMap<String, UIElement> elements = (HashMap<String, UIElement>) instance.properties.get("elements");
 			UIElement el = elements.get(elID);
-			if(el.action != null) el.action.action(new UIElementActionEvent(instance, p));
-			p.sendMessage("Invalid action");
+			if(el == null) {
+				p.sendMessage("Invalid element");
+				return true;
+			}
+			if(el.action == null) {
+				p.sendMessage("Invalid action");
+				return true;
+			}
+			el.action.action(new UIElementActionEvent(instance, p));
 			return true;
 		}
 		

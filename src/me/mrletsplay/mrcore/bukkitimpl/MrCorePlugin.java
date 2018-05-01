@@ -46,11 +46,17 @@ public class MrCorePlugin extends JavaPlugin{
 						System.out.println(event.getPlayer().getName());
 					}
 				}).setHoverText("Click me!"))
+				.addPreviousPageElement("previous_page", "§7Previous page")
+				.addNextPageElement("next_page", "§7Next page")
 				.setLayout(new UILayoutMultiPage()
 						.addText("Some ui!")
 						.newLine()
 						.addElement("player_name")
-						.addPageElements(10, true))
+						.addPageElements(10, true)
+						.newLine()
+						.addElement("previous_page")
+						.addText(" ")
+						.addElement("next_page"))
 				.setSupplier(new ItemSupplier<String>() {
 					
 					@Override
