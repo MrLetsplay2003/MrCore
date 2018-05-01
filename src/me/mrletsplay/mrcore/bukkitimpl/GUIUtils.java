@@ -225,12 +225,12 @@ public class GUIUtils {
 				.setAction(new GUIElementAction() {
 					
 					@Override
-					public boolean action(Player p, ClickAction button, ItemStack clickedWith, Inventory inv, GUI gui, InventoryClickEvent event) {
-						int pg = GUIMultiPage.getPage(inv);
-						GUIMultiPage<?> guiMP = (GUIMultiPage<?>)gui;
-						Inventory nPage = guiMP.getForPlayer(p, pg+diff);
-						if(nPage!=null) p.openInventory(nPage);
-						return true;
+					public void onAction(GUIElementActionEvent event) {
+						int pg = GUIMultiPage.getPage(event.getInventory());
+						GUIMultiPage<?> guiMP = (GUIMultiPage<?>) event.getGUI();
+						Inventory nPage = guiMP.getForPlayer(event.getPlayer(), pg+diff);
+						if(nPage!=null) event.getPlayer().openInventory(nPage);
+						event.setCancelled(true);
 					}
 				});
 		}
@@ -291,19 +291,7 @@ public class GUIUtils {
 
 	public static abstract class GUIElementAction {
 		
-		public boolean action(Player p, ClickAction button, ItemStack clickedWith, Inventory inv, GUI gui, InventoryClickEvent event) { return true; }
-		
-	}
-	
-	public static abstract class GUIElementActionListener {
-		
-		public abstract boolean action(GUIElementActionEvent event);
-		
-	}
-	
-	public static abstract class GUIElementActionHandler {
-		
-		public abstract boolean action(GUIElementAction action);
+		public abstract void onAction(GUIElementActionEvent event);
 		
 	}
 	
@@ -313,14 +301,18 @@ public class GUIUtils {
 		private ClickAction button;
 		private Inventory inv;
 		private GUI gui;
+		private GUIHolder guiHolder;
 		private InventoryClickEvent event;
+		private boolean cancelled;
 		
-		public GUIElementActionEvent(Player p, ClickAction button, Inventory inv, GUI gui, InventoryClickEvent event) {
+		public GUIElementActionEvent(Player p, ClickAction button, Inventory inv, GUI gui, GUIHolder holder, InventoryClickEvent event) {
 			this.p = p;
 			this.button = button;
 			this.inv = inv;
 			this.gui = gui;
+			this.guiHolder = holder;
 			this.event = event;
+			this.cancelled = true;
 		}
 		
 		public Player getPlayer() {
@@ -347,7 +339,67 @@ public class GUIUtils {
 			return inv;
 		}
 		
-		public GUI getGui() {
+		public GUI getGUI() {
+			return gui;
+		}
+		
+		public GUIHolder getGUIHolder() {
+			return guiHolder;
+		}
+		
+		public InventoryClickEvent getEvent() {
+			return event;
+		}
+		
+		public void setCancelled(boolean cancelled) {
+			this.cancelled = cancelled;
+		}
+		
+		public boolean isCancelled() {
+			return cancelled;
+		}
+		
+	}
+	
+	public static abstract class GUIDragDropListener {
+		
+		public abstract void onDragDrop(GUIDragDropEvent event);
+		
+	}
+	
+	public static class GUIDragDropEvent {
+		
+		private Player player;
+		private ItemStack clicked;
+		private Inventory inv;
+		private GUI gui;
+		private GUIHolder guiHolder;
+		private InventoryClickEvent event;
+		private boolean cancelled;
+		
+		public GUIDragDropEvent(Player p, ItemStack clicked, Inventory inv, GUI gui, GUIHolder holder, InventoryClickEvent event) {
+			this.player = p;
+			this.clicked = clicked;
+			this.inv = inv;
+			this.gui = gui;
+			this.event = event;
+			this.guiHolder = holder;
+			this.cancelled = false;
+		}
+		
+		public Player getPlayer() {
+			return player;
+		}
+		
+		public ItemStack getItemClicked() {
+			return clicked;
+		}
+		
+		public Inventory getInventory() {
+			return inv;
+		}
+		
+		public GUI getGUI() {
 			return gui;
 		}
 		
@@ -355,17 +407,91 @@ public class GUIUtils {
 			return event;
 		}
 		
-	}
-	
-	public static abstract class GUIDragDropListener {
+		public GUIHolder getGUIHolder() {
+			return guiHolder;
+		}
 		
-		public abstract boolean allowDragDrop(Player p, ItemStack item, Inventory inv, GUI gui, InventoryClickEvent event);
+		public void setCancelled(boolean cancelled) {
+			this.cancelled = cancelled;
+		}
+		
+		public boolean isCancelled() {
+			return cancelled;
+		}
 		
 	}
 	
 	public static abstract class GUIAction {
 
-		public abstract boolean action(Player p, ClickAction action, ItemStack clickedWith, GUIElement clickedElement, Inventory inv, GUI gui, InventoryClickEvent event);
+		public abstract void onAction(GUIActionEvent event);
+		
+	}
+	
+	public static class GUIActionEvent {
+		
+		private Player p;
+		private ClickAction action;
+		private GUIElement elClicked;
+		private Inventory inv;
+		private GUI gui;
+		private GUIHolder guiHolder;
+		private InventoryClickEvent event;
+		private boolean cancelled;
+		
+		public GUIActionEvent(Player p, ClickAction action, GUIElement elClicked, Inventory inv, GUI gui, GUIHolder holder, InventoryClickEvent event) {
+			this.p = p;
+			this.action = action;
+			this.elClicked = elClicked;
+			this.inv = inv;
+			this.gui = gui;
+			this.event = event;
+			this.guiHolder = holder;
+			this.cancelled = true;
+		}
+		
+		public Player getPlayer() {
+			return p;
+		}
+		
+		public ClickAction getAction() {
+			return action;
+		}
+		
+		public ItemStack getItemClicked() {
+			return event.getCurrentItem();
+		}
+		
+		public ItemStack getItemClickedWith() {
+			return event.getCursor();
+		}
+		
+		public GUIElement getElementClicked() {
+			return elClicked;
+		}
+		
+		public Inventory getInventory() {
+			return inv;
+		}
+		
+		public GUI getGUI() {
+			return gui;
+		}
+		
+		public GUIHolder getGUIHolder() {
+			return guiHolder;
+		}
+		
+		public InventoryClickEvent getEvent() {
+			return event;
+		}
+		
+		public void setCancelled(boolean cancelled) {
+			this.cancelled = cancelled;
+		}
+		
+		public boolean isCancelled() {
+			return cancelled;
+		}
 		
 	}
 	
@@ -579,29 +705,32 @@ public class GUIUtils {
 					GUIElement elClicked = gui.getElementBySlot(slot);
 					e.setCancelled(true);
 					if(elClicked != null && elClicked.action != null) {
-						boolean cancel = elClicked.action.action(player, action, e.getCursor(), e.getClickedInventory(), gui, e);
-						if(!cancel) e.setCancelled(false);
+						GUIElementActionEvent event = new GUIElementActionEvent(player, action, inv, gui, holder, e);
+						elClicked.action.onAction(event);
+						if(!event.isCancelled()) e.setCancelled(false);
 					}
 					if(gui.builder.action != null) {
-						boolean cancel = gui.builder.action.action(player, action, e.getCursor(), elClicked, e.getClickedInventory(), gui, e);
-						if(!cancel) e.setCancelled(false);
+						GUIActionEvent event = new GUIActionEvent(player, action, elClicked, e.getClickedInventory(), gui, holder, e);
+						gui.builder.action.onAction(event);
+						if(!event.isCancelled()) e.setCancelled(false);
 					}
 					if(gui instanceof GUIMultiPage<?>) {
 						HashMap<Integer, GUIElement> pageElements = (HashMap<Integer, GUIElement>) holder.getProperties().get("page-elements");
 						GUIElement pElClicked = pageElements.get(slot);
 						if(pElClicked != null && pElClicked.action != null) {
-							boolean cancel = pElClicked.action.action(player, action, e.getCursor(), e.getClickedInventory(), gui, e);
-							if(!cancel) e.setCancelled(false);
+							GUIElementActionEvent event = new GUIElementActionEvent(player, action, inv, gui, holder, e);
+							pElClicked.action.onAction(event);
+							if(!event.isCancelled()) e.setCancelled(false);
 						}
 					}
-				}else {
+				} else {
 					//Player inv clicked
 					if(gui.builder.dragDrop != null) {
 						ItemStack pickedUp = e.getCurrentItem();
 						if(pickedUp!=null) {
-							if(!gui.builder.dragDrop.allowDragDrop(player, pickedUp, e.getClickedInventory(), gui, e)) {
-								e.setCancelled(true);
-							}
+							GUIDragDropEvent event = new GUIDragDropEvent(player, pickedUp, e.getClickedInventory(), gui, holder, e);
+							gui.builder.dragDrop.onDragDrop(event);
+							if(event.isCancelled()) e.setCancelled(true);
 						}
 					}else {
 						e.setCancelled(true);
@@ -661,7 +790,7 @@ public class GUIUtils {
 		}
 		
 		/**
-		 * Clones this GUIHolder. This will be called in order to supply independent holders to inventories
+		 * Clones this GUIHolder. This will be called in order to supply individual holders to inventories
 		 * @return A copy of this GUIHolder
 		 */
 		public GUIHolder clone() {
