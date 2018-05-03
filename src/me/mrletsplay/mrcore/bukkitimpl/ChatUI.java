@@ -95,6 +95,15 @@ public class ChatUI {
 			return this;
 		}
 		
+		/**
+		 * Adds a "next page" element to the UI<br>
+		 * This will have the default action of switching to the page after the current one<br>
+		 * If there is no page before the current one, the click will be ignored
+		 * @param key The element key
+		 * @param layout The layout string to use
+		 * @return This UIBuilderMultiPage instance
+		 * @see {@link UIBuilder#addElement(String, UIElement)}
+		 */
 		public UIBuilderMultiPage<T> addNextPageElement(String key, String layout){
 			return addElement(key, new StaticUIElement(layout).setAction(new UIElementAction() {
 				
@@ -105,7 +114,16 @@ public class ChatUI {
 				}
 			}));
 		}
-		
+
+		/**
+		 * Adds a "next page" element to the UI<br>
+		 * This will have the default action of switching to the page before the current one<br>
+		 * If there is no page before the current one, the click will be ignored
+		 * @param key The element key
+		 * @param layout The layout string to use
+		 * @return This UIBuilderMultiPage instance
+		 * @see {@link UIBuilder#addElement(String, UIElement)}
+		 */
 		public UIBuilderMultiPage<T> addPreviousPageElement(String key, String layout){
 			return addElement(key, new StaticUIElement(layout).setAction(new UIElementAction() {
 				
@@ -117,22 +135,36 @@ public class ChatUI {
 			}));
 		}
 		
+		/**
+		 * This method will not work with UIBuilderMultiPage instances and will throw an exception<br>
+		 * Use {@link UIBuilderMultiPage#setLayout(UILayoutMultiPage)} instead
+		 */
 		@Deprecated
 		@Override
 		public UIBuilder setLayout(UILayout layout) {
 			throw new UnsupportedOperationException("Use setLayout(UILayoutMultiPage) instead");
 		}
-		
+
+		/**
+		 * Sets the UILayoutMultiPage for the UI
+		 * @param layout The {@link UILayoutMultiPage} to use
+		 * @return This UIBuilderMultiPage instance
+		 */
 		public UIBuilderMultiPage<T> setLayout(UILayoutMultiPage layout) {
 			this.layout = layout;
 			return this;
 		}
 		
+		/**
+		 * Sets the supplier to use for gathering multipage items
+		 * @param supplier The supplier to use
+		 * @return This UIBuilderMultiPage instance
+		 */
 		public UIBuilderMultiPage<T> setSupplier(ItemSupplier<T> supplier) {
 			this.supplier = supplier;
 			return this;
 		}
-		
+
 		@Override
 		public UIBuilderMultiPage<T> setProperties(HashMap<String, Object> properties) {
 			super.setProperties(properties);
