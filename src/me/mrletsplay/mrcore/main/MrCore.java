@@ -10,6 +10,7 @@ public class MrCore {
 	 * - CC custom parser
 	 * - Command system
 	 * - Chat GUIs (via commands)
+	 * - JSON (?)
 	 */
 	
 	public static final String VERSION = "v1.4";

@@ -186,6 +186,11 @@ public class ChatUI {
 		
 	}
 	
+	/**
+	 * This class is used by UIs to define a basic, flexible layout which will then be parsed into the final chat message<br>
+	 * This class is only available to the UIBuilder/UI (single page)
+	 * @author MrLetsplay2003
+	 */
 	public static class UILayout {
 		
 		public List<UILayoutElement> elements;
@@ -194,23 +199,45 @@ public class ChatUI {
 			this.elements = new ArrayList<>();
 		}
 		
+		/**
+		 * Adds plain text to the layout<br>
+		 * This will not be altered in the final message
+		 * @param text The text to add
+		 * @return This UILayout instance
+		 */
 		public UILayout addText(String text) {
 			elements.add(new UILayoutElement(UILayoutElementType.TEXT).setProperty("text", text));
 			return this;
 		}
 		
+		/**
+		 * Adds an element to the layout<br>
+		 * This will be replaced with the layout of the element defined by the key<br>
+		 * If no element with that key is defined, it will not be replaced
+		 * @param element The element's key
+		 * @return This UILayout instance
+		 */
 		public UILayout addElement(String element) {
 			elements.add(new UILayoutElement(UILayoutElementType.ELEMENT).setProperty("element", element));
 			return this;
 		}
 		
+		/**
+		 * Adds a new line to the message
+		 * @return This UILayout instance
+		 */
 		public UILayout newLine() {
 			elements.add(new UILayoutElement(UILayoutElementType.NEWLINE));
 			return this;
 		}
 		
 	}
-	
+
+	/**
+	 * This class is used by UIMultiPages to define a basic, flexible layout which will then be parsed into the final chat message<br>
+	 * This class is only available to the UIBuilderMultiPage/UIMultiPage
+	 * @author MrLetsplay2003
+	 */
 	public static class UILayoutMultiPage extends UILayout {
 		
 		private int nItems = 0;
@@ -233,6 +260,13 @@ public class ChatUI {
 			return this;
 		}
 		
+		/**
+		 * Adds multi page elements<br>
+		 * These will later be replaced by the multi page element's layouts
+		 * @param count The amount of elements to add
+		 * @param includeNewLines Whether a {@link UILayoutMultiPage#newLine()} should be added before each element
+		 * @return This UILayoutMultiPage instance
+		 */
 		public UILayoutMultiPage addPageElements(int count, boolean includeNewLines) {
 			nItems += count;
 			for(int i = 0; i < count; i++) {
@@ -243,7 +277,7 @@ public class ChatUI {
 		
 	}
 	
-	public static class UILayoutElement {
+	private static class UILayoutElement {
 		
 		private UILayoutElementType type;
 		private HashMap<String, Object> properties;
@@ -264,7 +298,7 @@ public class ChatUI {
 		
 	}
 	
-	public static enum UILayoutElementType {
+	private static enum UILayoutElementType {
 		
 		TEXT,
 		NEWLINE,
@@ -273,6 +307,10 @@ public class ChatUI {
 		
 	}
 	
+	/**
+	 * This class represents a flexible, interactive UI element whose layout is dependent on the player (or any other own factors)
+	 * @author MrLetsplay2003
+	 */
 	public static abstract class UIElement {
 		
 		private UIElementAction action;
@@ -280,11 +318,22 @@ public class ChatUI {
 		
 		public abstract String getLayout(Player p);
 		
+		/**
+		 * Sets the action for this UIElement<br>
+		 * The action will be called when this element is clicked in chat
+		 * @param action The action to use
+		 * @return This UIElement instance
+		 */
 		public UIElement setAction(UIElementAction action) {
 			this.action = action;
 			return this;
 		}
 		
+		/**
+		 * Sets the hover text to be displayed when the player hovers over it in chat
+		 * @param hoverText The hover text to use
+		 * @return This UIElement instance
+		 */
 		public UIElement setHoverText(String hoverText) {
 			this.hoverText = hoverText;
 			return this;
@@ -292,10 +341,19 @@ public class ChatUI {
 		
 	}
 	
+	/**
+	 * This class represents an interactive UI element whose layout is fixed and will not change
+	 * @author MrLetsplay2003
+	 */
 	public static class StaticUIElement extends UIElement {
 		
 		private String layout;
 		
+		/**
+		 * Constructs a UI element
+		 * @param layout The static layout to use
+		 * @see {@link StaticUIElement}
+		 */
 		public StaticUIElement(String layout) {
 			this.layout = layout;
 		}
