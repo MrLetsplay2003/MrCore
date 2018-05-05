@@ -16,6 +16,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import me.mrletsplay.mrcore.main.MrCore;
+
 public class MrCoreBukkitImpl {
 	
 	public static final String MRCORE_PLUGIN_NAME = "MrCore_BukkitImpl";
@@ -25,13 +27,25 @@ public class MrCoreBukkitImpl {
 	 * Version "latest" is to be used with caution, because i'm horrible at sustaining backwards-compatability
 	 * @param plugin The plugin to load it for
 	 * @param version The version to load ("latest" for the latest version). This should equal the version specified in the maven dependency
-	 * @param autoUpdate Whether the MrCore should be updated automatically (only if version is "latest")
+	 * @param autoUpdate Whether the MrCore should be updated automatically to the required version
 	 */
 	public static void loadMrCore(JavaPlugin plugin, String version, boolean autoUpdate) {
+		boolean isLoaded = false;
+		String absoluteVersion = version.equals("latest") ? getLatestVersion() : version;
 		if(Bukkit.getPluginManager().isPluginEnabled(MRCORE_PLUGIN_NAME)) {
-			return;
+			if(!MrCore.VERSION.equals(absoluteVersion)) {
+				if(!autoUpdate) {
+					plugin.getLogger().warning("MrCore version "+MrCore.VERSION+" is loaded, although version "+absoluteVersion+" ("+version+") is required");
+					plugin.getLogger().warning("Continuing anyway. If any problems occur, please update to the required version");
+					return;
+				}else {
+					isLoaded = true;
+				}
+			}else {
+				return;
+			}
 		}
-		plugin.getLogger().info("Couldn't find "+MRCORE_PLUGIN_NAME+", seems like we need to download it from GitHub...");
+		plugin.getLogger().info("Updating/Downloading MrCore from GitHub...");
 		try {
 			String oldProtocol = System.getProperty("http.protocols");
 			System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
@@ -44,8 +58,13 @@ public class MrCoreBukkitImpl {
 			String downloadL = getDownloadLink(version);
 			plugin.getLogger().info("Downloading from "+downloadL+"...");
 			download(new URL(downloadL), mrCoreFile);
+			plugin.getLogger().info("Downloaded MrCore successfully");
+			if(isLoaded) {
+				Bukkit.getPluginManager().disablePlugin(Bukkit.getPluginManager().getPlugin(MRCORE_PLUGIN_NAME));
+			}
 			Bukkit.getPluginManager().loadPlugin(mrCoreFile);
-			plugin.getLogger().info("Down-/loaded MrCore successfully");
+			plugin.getLogger().info("Loaded MrCore successfully");
+			
 			if(oldProtocol != null) System.setProperty("https.protocols", oldProtocol);
 			return;
 		} catch (Exception e) {
@@ -87,6 +106,15 @@ public class MrCoreBukkitImpl {
 		JSONObject asset = (JSONObject) assets.get(0); // The attached MrCore.jar file
 		String downloadL = (String) asset.get("browser_download_url");
 		return downloadL;
+	}
+	
+	private static String getLatestVersion() {
+		try {
+			JSONObject release = (JSONObject) new JSONParser().parse(new InputStreamReader(new URL("https://api.github.com/repos/MrLetsplay2003/MrCore/releases/latest").openStream()));
+			return (String) release.get("tag_name");
+		}catch(Exception e) {
+			return null;
+		}
 	}
 	
 }
