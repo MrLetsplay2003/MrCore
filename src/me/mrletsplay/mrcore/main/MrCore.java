@@ -11,6 +11,7 @@ public class MrCore {
 	 * - Command system
 	 * - Chat GUIs (via commands)
 	 * - JSON (?)
+	 * - MySQL
 	 */
 	
 	public static final String VERSION = "v1.4";
