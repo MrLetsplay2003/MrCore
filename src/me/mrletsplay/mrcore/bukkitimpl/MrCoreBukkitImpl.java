@@ -33,12 +33,13 @@ public class MrCoreBukkitImpl {
 		boolean isLoaded = false;
 		String absoluteVersion = version.equals("latest") ? getLatestVersion() : version;
 		if(Bukkit.getPluginManager().isPluginEnabled(MRCORE_PLUGIN_NAME)) {
-			if(!MrCore.VERSION.equals(absoluteVersion)) {
+			if(!MrCore.getVersion().equals(absoluteVersion)) {
 				if(!autoUpdate) {
-					plugin.getLogger().warning("MrCore version "+MrCore.VERSION+" is loaded, although version "+absoluteVersion+" ("+version+") is required");
+					plugin.getLogger().warning("MrCore version "+MrCore.getVersion()+" is loaded, although version "+absoluteVersion+" ("+version+") is required");
 					plugin.getLogger().warning("Continuing anyway. If any problems occur, please update to the required version");
 					return;
 				}else {
+					System.out.println(absoluteVersion+"/"+MrCore.getVersion());
 					isLoaded = true;
 				}
 			}else {
@@ -51,16 +52,17 @@ public class MrCoreBukkitImpl {
 			System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
 			
 			File mrCoreFile = new File("plugins/"+MRCORE_PLUGIN_NAME+".jar");
-			if(mrCoreFile.exists()) {
+			if(mrCoreFile.exists() && !isLoaded) {
 				plugin.getLogger().info("A file named \""+mrCoreFile.getName()+"\" already exists, assuming that MrCore was already loaded");
 				return;
 			}
 			String downloadL = getDownloadLink(version);
 			plugin.getLogger().info("Downloading from "+downloadL+"...");
 			download(new URL(downloadL), mrCoreFile);
-			plugin.getLogger().info("Downloaded MrCore successfully");
+			plugin.getLogger().info("Downloaded MrCore jar");
 			if(isLoaded) {
-				Bukkit.getPluginManager().disablePlugin(Bukkit.getPluginManager().getPlugin(MRCORE_PLUGIN_NAME));
+				plugin.getLogger().info("An older version of MrCore is already installed. In order to load the newer version, you need to restart the server");
+				return;
 			}
 			Bukkit.getPluginManager().loadPlugin(mrCoreFile);
 			plugin.getLogger().info("Loaded MrCore successfully");
