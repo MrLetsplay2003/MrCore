@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>MrCore</groupId>
   <artifactId>MrCore</artifactId>
-  <version>1.6_pre</version>
+  <version>1.6_pre2</version>
   <build>
     <sourceDirectory>src</sourceDirectory>
     <plugins>
