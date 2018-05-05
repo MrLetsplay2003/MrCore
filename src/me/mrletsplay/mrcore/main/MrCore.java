@@ -14,7 +14,7 @@ public class MrCore {
 	 * - MySQL
 	 */
 	
-	private static final String VERSION = "1.6_pre2";
+	private static final String VERSION = "1.6_pre";
 	
 	public static String getVersion() {
 		return VERSION;

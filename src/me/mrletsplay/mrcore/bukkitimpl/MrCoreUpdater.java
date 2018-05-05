@@ -16,18 +16,20 @@ import me.mrletsplay.mrcore.main.MrCore;
 
 public class MrCoreUpdater {
 
+	//TODO: This is just a concept idea, nothing solid
+	
 	public static void update(String version) {
 		String absoluteVersion = version.equalsIgnoreCase("latest") ? getLatestVersion() : version;
 		if(MrCore.getVersion().equals(absoluteVersion)) {
 			MrCorePlugin.pl.getLogger().info("MrCore is up to date!");
 			return;
 		}
-		MrCorePlugin.pl.getLogger().info("Updating MrCore (current version: "+MrCore.getVersion()+", required version: "+version+")...");
+		MrCorePlugin.pl.getLogger().info("Updating MrCore (current version: "+MrCore.getVersion()+", required version: "+absoluteVersion+"/"+version+")...");
 		try {
 			String oldProtocol = System.getProperty("http.protocols");
 			System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
 
-			File mrCoreFile = new File("plugins/MrCore_"+version+".jar");
+			File mrCoreFile = new File("plugins/MrCore_"+absoluteVersion+".jar");
 			if(mrCoreFile.exists()) {
 				MrCorePlugin.pl.getLogger().info("A file named \""+mrCoreFile.getName()+"\" already exists, assuming that MrCore was already loaded");
 				return;

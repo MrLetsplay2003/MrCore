@@ -22,7 +22,7 @@ public class MrCoreBukkitImpl {
 	 * Version "latest" is to be used with caution, because i'm horrible at sustaining backwards-compatability
 	 * @param plugin The plugin to load it for
 	 */
-	public static void loadMrCore(JavaPlugin plugin, String version) {
+	public static void loadMrCore(JavaPlugin plugin) {
 		if(Bukkit.getPluginManager().isPluginEnabled(MRCORE_PLUGIN_NAME)) {
 			return;
 		}
