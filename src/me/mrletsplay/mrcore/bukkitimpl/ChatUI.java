@@ -377,12 +377,20 @@ public class ChatUI {
 		
 	}
 	
+	/**
+	 * This class is used to add actions to ui elements when you click on them
+	 * @author MrLetsplay2003
+	 */
 	public static abstract class UIElementAction {
 		
 		public abstract void action(UIElementActionEvent event);
 		
 	}
 	
+	/**
+	 * This is the event fired to the {@link UIElementAction#action(UIElementActionEvent)} when the corresponding element is clicked
+	 * @author MrLetsplay2003
+	 */
 	public static class UIElementActionEvent {
 		
 		private UIInstance ui;
@@ -403,51 +411,83 @@ public class ChatUI {
 		
 	}
 	
+	/**
+	 * This class represents one instance (one chat message) of an UI for a specific player<br>
+	 * It also contains an instance-specific property HashMap containing the UI elements, which can also be used to store extra data
+	 * @author MrLetsplay2003
+	 */
 	public static class UIInstance {
 		
 		private String id;
+		private Player player;
 		private HashMap<String, Object> properties;
 		private UI ui;
 		
-		public UIInstance(String id, UI ui, HashMap<String, Object> properties) {
+		public UIInstance(String id, UI ui, HashMap<String, Object> properties, Player player) {
 			this.id = id;
 			this.ui = ui;
 			this.properties = properties;
+			this.player = player;
 		}
 		
+		/**
+		 * @return This instance's (unique) instance id
+		 */
 		public String getID() {
 			return id;
 		}
 		
+		/**
+		 * @return This instance's property HashMap
+		 */
 		public HashMap<String, Object> getProperties() {
 			return properties;
 		}
 		
+		/**
+		 * @return The UI this is an instance of
+		 */
 		public UI getUI() {
 			return ui;
 		}
 		
+		/**
+		 * @return The player this instance was created for/who was passed in the {@link UI#getForPlayer(Player)} function
+		 */
+		public Player getPlayer() {
+			return player;
+		}
+		
 	}
 	
+	/**
+	 * This class represents a UI which can be built into a chat message for specific players
+	 * @author MrLetsplay2003
+	 */
 	public static class UI {
 
 		private UIBuilder builder;
 		public String id;
 		private long lInsID = 0;
 		
-		public UI(UIBuilder builder) {
+		private UI(UIBuilder builder) {
 			this.builder = builder;
 			this.id = ""+(lastID++);
 			UIListener.uis.add(this);
 		}
 		
+		/**
+		 * Creates the UI for a specific player and parses it into a chat message
+		 * @param p The player to get this UI for/to be passed to all underlying functions
+		 * @return An {@link UIMessage} instance which can be sent to a player
+		 */
 		public UIMessage getForPlayer(Player p) {
 			HashMap<String, UIElement> elements = new HashMap<>();
 			builder.elements.forEach(elements::put);
 			String instanceID = id+"_"+(lInsID++);
 			HashMap<String, Object> props = new HashMap<>(builder.properties);
 			props.put("elements", elements);
-			UIInstance instance = new UIInstance(instanceID, this, props);
+			UIInstance instance = new UIInstance(instanceID, this, props, p);
 			UIMessage uiMessage = new UIMessage(instance);
 			for(UILayoutElement el : builder.layout.elements) {
 				switch(el.type) {
@@ -472,8 +512,31 @@ public class ChatUI {
 			return uiMessage;
 		}
 		
+		/**
+		 * @return This UI's (unique) id
+		 */
 		public String getID() {
 			return id;
+		}
+		
+		/**
+		 * @return This UI's builder
+		 */
+		public UIBuilder getBuilder() {
+			return builder;
+		}
+		
+		/**
+		 * Builds the UI into a chat message using {@link #getForPlayer(Player)} and sends it if the return result isn't null
+		 * @param p The player to build the UI with
+		 * @return The UIMessage instance returned by {@link #getForPlayer(Player)}
+		 * @see {@link UI#getForPlayer(Player)}
+		 */
+		public UIMessage sendToPlayer(Player p) {
+			UIMessage uim = getForPlayer(p);
+			if(uim==null) return null;
+			uim.sendToPlayer(p);
+			return uim;
 		}
 		
 	}
@@ -482,11 +545,14 @@ public class ChatUI {
 
 		private UIBuilderMultiPage<T> builder;
 		
-		public UIMultiPage(UIBuilderMultiPage<T> builder) {
+		private UIMultiPage(UIBuilderMultiPage<T> builder) {
 			super(builder);
 			this.builder = builder;
 		}
 		
+		/**
+		 * Returns the first page (page 0) of this UI using {@link #getForPlayer(Player, int)}
+		 */
 		@Override
 		public UIMessage getForPlayer(Player p) {
 			return getForPlayer(p, 0);
@@ -530,15 +596,14 @@ public class ChatUI {
 			return uiMessage;
 		}
 		
-		public void sendToPlayer(Player p) {
-			UIMessage uim = getForPlayer(p);
-			if(uim==null) return;
-			uim.sendToPlayer(p);
+		@Override
+		public UIBuilderMultiPage<T> getBuilder() {
+			return builder;
 		}
 		
 	}
 	
-	public static class UILayoutParser {
+	private static class UILayoutParser {
 		
 		public static TextComponent parseElement(UIElement element, Player p, String instanceID, String elementID) {
 			TextComponent tc = new TextComponent(element.getLayout(p));
@@ -556,11 +621,15 @@ public class ChatUI {
 		private List<Object> messageElements;
 		private UIInstance instance;
 		
-		public UIMessage(UIInstance instance) {
+		private UIMessage(UIInstance instance) {
 			this.messageElements = new ArrayList<>();
 			this.instance = instance;
 		}
 		
+		/**
+		 * Builds this message into a list of {@link BaseComponent} arrays
+		 * @return The built message
+		 */
 		public List<BaseComponent[]> buildMessage() {
 			List<BaseComponent[]> lines = new ArrayList<>();
 			ComponentBuilder cb = new ComponentBuilder("");
@@ -579,13 +648,24 @@ public class ChatUI {
 			return lines;
 		}
 		
+		/**
+		 * Builds this message usigng {@link #buildMessage()} and sends it to the specified player
+		 * @param p The player to send the message to
+		 */
 		public void sendToPlayer(Player p) {
 			buildMessage().forEach(p.spigot()::sendMessage);
 		}
 		
+		/**
+		 * @return The {@link UIInstance} object this message corresponds to
+		 */
+		public UIInstance getInstance() {
+			return instance;
+		}
+		
 	}
 	
-	public static class UIListener implements CommandExecutor {
+	protected static class UIListener implements CommandExecutor {
 		
 		private static List<UI> uis = new ArrayList<>();
 		private static HashMap<String, UIInstance> instances = new HashMap<>();
