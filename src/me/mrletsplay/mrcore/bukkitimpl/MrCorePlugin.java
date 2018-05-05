@@ -24,9 +24,9 @@ public class MrCorePlugin extends JavaPlugin{
 		Bukkit.getPluginManager().registerEvents(new GUIListener(), this);
 		getCommand("mrcoreui").setExecutor(new UIListener());
 		config = new CustomConfig(new File(getDataFolder(), "config.yml"), false).loadConfigSafely();
-		if(config.getBoolean("versioning.auto-update", true, true)) {
+		if(config.getBoolean("versioning.check-update", true, true)) {
 			String version = config.getString("versioning.version-to-use", "latest", true);
-			MrCoreUpdater.update(version);
+			MrCoreUpdateChecker.checkForUpdate(version);
 		}
 		config.saveConfigSafely();
 	}
