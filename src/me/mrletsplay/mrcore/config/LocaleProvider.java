@@ -1,9 +1,7 @@
-package me.mrletsplay.mrcore.bukkitimpl;
+package me.mrletsplay.mrcore.config;
 
 import java.io.File;
 import java.io.IOException;
-
-import me.mrletsplay.mrcore.config.CustomConfig;
 
 /**
  * Provides language files for your application
