@@ -14,7 +14,7 @@ public class OtherTools {
 	 * @param formatting Example format: "s,min,h,d"
 	 * @return A formatted string
 	 */
-	public static String formatTime(int ms, String formatting) {
+	public static String formatTime(long ms, String formatting) {
 		String[] formats = formatting.split(",");
 		if(ms<60000) {
 			return ms/1000+formats[0];
