@@ -56,8 +56,6 @@ public class CustomConfig {
 	private File configFile;
 	private URL configURL;
 	private boolean isExternal, isCompact;
-//	private HashMap<String, Property> properties;
-//	private HashMap<String, String> comments;
 	private HashMap<String, Object> defaults;
 	private ConfigSection parentSection;
 	private List<ConfigSaveProperty> defaultSaveProps;
@@ -212,10 +210,10 @@ public class CustomConfig {
 	 * @throws IOException If an IO error occurs while saving the config
 	 */
 	public void saveConfig(OutputStream fOut, List<ConfigSaveProperty> saveProperties) throws IOException{
-//		List<ConfigSaveProperty> props = saveProperties!=null?saveProperties:defaultSaveProps;
+		List<ConfigSaveProperty> props = saveProperties!=null?saveProperties:defaultSaveProps;
 		if(!isCompact) {
 			BufferedWriter w = new BufferedWriter(new OutputStreamWriter(fOut, StandardCharsets.UTF_8));
-			w.write(parentSection.saveToString());
+			w.write(parentSection.saveToString(props, 0));
 			w.close();
 		}else {
 			//Compact format
@@ -488,8 +486,12 @@ public class CustomConfig {
 	 * @throws InvalidConfigException If this config needs to be loaded and is in an invalid format
 	 */
 	public CustomConfig loadDefault(CustomConfig cfg, boolean override) throws IOException{
-//		cfg.comments.keySet().stream().filter(k -> override || !comments.containsKey(k)).forEach(k -> comments.put(k,cfg.comments.get(k)));
-//		cfg.properties.keySet().stream().filter(k -> override || !properties.containsKey(k)).forEach(k -> properties.put(k,cfg.properties.get(k)));
+		HashMap<String, Property> properties = getProperties();
+		HashMap<String, String> comments = getComments();
+		HashMap<String, Property> properties2 = cfg.getProperties();
+		HashMap<String, String> comments2 = cfg.getComments();
+		comments2.keySet().stream().filter(k -> override || !comments.containsKey(k)).forEach(k -> comments.put(k,comments2.get(k)));
+		properties2.keySet().stream().filter(k -> override || !properties.containsKey(k)).forEach(k -> properties.put(k,properties2.get(k)));
 		return this;
 	}
 
