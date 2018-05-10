@@ -58,4 +58,10 @@ public class ConfigExpansions {
 		
 	}
 	
+	public static class BukkitExpansions {
+		
+		
+		
+	}
+	
 }
