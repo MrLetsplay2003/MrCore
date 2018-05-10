@@ -17,9 +17,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -56,10 +56,11 @@ public class CustomConfig {
 	private File configFile;
 	private URL configURL;
 	private boolean isExternal, isCompact;
-	private HashMap<String, Property> properties;
-	private HashMap<String, String> comments;
-	private List<ConfigSaveProperty> defaultSaveProps;
+//	private HashMap<String, Property> properties;
+//	private HashMap<String, String> comments;
 	private HashMap<String, Object> defaults;
+	private ConfigSection parentSection;
+	private List<ConfigSaveProperty> defaultSaveProps;
 	private long lastEdited;
 
 	/**
@@ -81,15 +82,7 @@ public class CustomConfig {
 		isExternal = false;
 		isCompact = compact;
 		defaultSaveProps = Arrays.asList(defaultSaveProperties);
-		if(defaultSaveProps.contains(ConfigSaveProperty.KEEP_CONFIG_SORTING)) {
-			properties = new LinkedHashMap<>();
-			comments = new LinkedHashMap<>();
-			defaults = new LinkedHashMap<>();
-		}else {
-			properties = new HashMap<>();
-			comments = new HashMap<>();
-			defaults = new HashMap<>();
-		}
+		parentSection = new ConfigSection(this, null, null);
 	}
 	
 	/**
@@ -120,15 +113,7 @@ public class CustomConfig {
 		isExternal = true;
 		isCompact = compact;
 		defaultSaveProps = Arrays.asList(defaultSaveProperties);
-		if(defaultSaveProps.contains(ConfigSaveProperty.KEEP_CONFIG_SORTING)) {
-			properties = new LinkedHashMap<>();
-			comments = new LinkedHashMap<>();
-			defaults = new LinkedHashMap<>();
-		}else {
-			properties = new HashMap<>();
-			comments = new HashMap<>();
-			defaults = new HashMap<>();
-		}
+		parentSection = new ConfigSection(this, null, null);
 	}
 	
 	/**
@@ -174,7 +159,7 @@ public class CustomConfig {
 	/**
 	 * Saves the config with the given save properties<br>
 	 * This method ignores the default save properties if a non-null value is given
-	 * @param saveProperties The {@link me.mrletsplay.mrcore.config.CustomConfig.ConfigSaveProperty ConfigSaveProperty} options to be used when saving the config
+	 * @param saveProperties The {@link me.mrletsplay.mrcore.CustomConfigv1.CustomConfig.ConfigSaveProperty ConfigSaveProperty} options to be used when saving the config
 	 * @throws IOException If an IO error occurs while saving the config
 	 */
 	public void saveConfig(List<ConfigSaveProperty> saveProperties) throws IOException {
@@ -227,69 +212,10 @@ public class CustomConfig {
 	 * @throws IOException If an IO error occurs while saving the config
 	 */
 	public void saveConfig(OutputStream fOut, List<ConfigSaveProperty> saveProperties) throws IOException{
-		List<ConfigSaveProperty> props = saveProperties!=null?saveProperties:defaultSaveProps;
+//		List<ConfigSaveProperty> props = saveProperties!=null?saveProperties:defaultSaveProps;
 		if(!isCompact) {
-			List<String> so = sortProperties(props.contains(ConfigSaveProperty.SORT_ALPHABETICALLY));
 			BufferedWriter w = new BufferedWriter(new OutputStreamWriter(fOut, StandardCharsets.UTF_8));
-			if(comments.containsKey(null)) {
-				String[] splc = comments.get(null).replace("\r", "\n").split("\n", -1);
-				if(splc.length>0) {
-					if(props.contains(ConfigSaveProperty.SPACE_COMMENTED_PROPERTIES)) w.newLine();
-					for (String s : splc) {
-						w.write(headerCommentString + s);
-						w.newLine();
-					}
-				}
-			}
-			String lKey = null;
-			for (String key : so) {
-				String ktw = key;
-				StringBuilder lsb = new StringBuilder();
-				if (lKey != null) {
-					int hk = getHighestKey(lKey, key);
-					for (int i = 0; i < hk; i++) {
-						lsb.append(space);
-					}
-					String tK = getKeyFrom(key.split("\\."), hk);
-					String[] splK = tK.split("\\.");
-					for(int i = hk; i < splK.length-1; i++) {
-						w.write(lsb.toString()+splK[i]+splString);
-						lsb.append(space);
-						w.newLine();
-					}
-					ktw = splK[splK.length-1];
-				}
-				String ls = lsb.toString();
-				Property p = properties.get(key);
-				if((p!=null && p.getValue()!=null) || !getKeys(key, false, false).isEmpty() || props.contains(ConfigSaveProperty.INCLUDE_NULL)) {
-					if(comments.containsKey(key)){
-						String[] splc = comments.get(key).split("\n", -1);
-						if(splc.length>0) {
-							if(props.contains(ConfigSaveProperty.SPACE_COMMENTED_PROPERTIES)) w.newLine();
-							for(String s : splc){
-								w.write(ls + commentString + s);
-								w.newLine();
-							}
-						}
-					}
-					w.write(ls+ktw + splString + (p!=null&&p.getValue()!=null?(p.getType().equals(PropertyType.VALUE) ? p.getValue() : ""):""));
-					if(comments.containsKey(key)) {
-						if(props.contains(ConfigSaveProperty.SPACE_COMMENTED_PROPERTIES)) w.newLine();
-					}
-					w.newLine();
-					if (p!=null && p.getType().IS_LIST) {
-						String sp = "";
-						if (lKey != null) {
-							sp = space(getHighestKey(lKey, key));
-						}
-						for (Object s : (List<?>) p.getValue()) {
-							w.write(sp + space + entryString + s);
-							w.newLine();
-						}
-					}
-				}
-				lKey = key;
-			}
+			w.write(parentSection.saveToString());
 			w.close();
 		}else {
 			//Compact format
@@ -297,7 +223,7 @@ public class CustomConfig {
 			HashMap<String, Short> cKs = new HashMap<>();
 			
 			short i = 0;
-			for(String key : properties.keySet()) {
+			for(String key : getProperties().keySet()) {
 				String[] spl = key.split("\\.");
 				for(String part : spl) {
 					if(!cKs.containsKey(part)) {
@@ -314,7 +240,7 @@ public class CustomConfig {
 			out.writeShort(-1);
 			
 			//Properties
-			for(Map.Entry<String, Property> en : properties.entrySet()) {
+			for(Map.Entry<String, Property> en : getProperties().entrySet()) {
 				String key = en.getKey();
 				Property prop = en.getValue();
 				String[] splK = key.split("\\.");
@@ -337,7 +263,7 @@ public class CustomConfig {
 			out.writeByte(-1);
 			
 			//Comments
-			for(Map.Entry<String, String> en : comments.entrySet()) {
+			for(Map.Entry<String, String> en : getComments().entrySet()) {
 				String key = en.getKey();
 				String comment = en.getValue();
 				String[] splK = key.split("\\.");
@@ -357,16 +283,6 @@ public class CustomConfig {
 		StringBuilder sb = new StringBuilder();
 		for(int i = 0; i < length; i++) sb.append(space);
 		return sb.toString();
-	}
-	
-	private int getHighestKey(String lastKey, String currKey){
-		String[] spl = lastKey.split("\\.");
-		String[] spl2 = currKey.split("\\.");
-		int a = 1;
-		while(getKey(spl, a).equals(getKey(spl2, a)) && a <= spl.length && a <= spl2.length) {
-			a++;
-		}
-		return a-1;
 	}
 
 	/**
@@ -408,7 +324,7 @@ public class CustomConfig {
 	 * @throws InvalidConfigException If the config to be loaded is in an invalid format
 	 */
 	public CustomConfig loadConfig(InputStream in) throws IOException {
-		properties = defaultSaveProps.contains(ConfigSaveProperty.KEEP_CONFIG_SORTING)?new LinkedHashMap<>(): new HashMap<>();
+		parentSection = new ConfigSection(this, null, null);
 		if(!isExternal && configFile != null) lastEdited = configFile.lastModified();
 		if(isCompact) return loadConfig_Compact(in);
 		BufferedReader r = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
@@ -440,7 +356,6 @@ public class CustomConfig {
 						r.close();
 						throw new InvalidConfigException("Stage changed on LIST_ENTRY", l);
 					}
-//					addOrRemove(stages, lastP.getKey().split("\\."), stage - lastStage, l);
 				}else if(lastP==null) {
 					r.close();
 					throw new InvalidConfigException("Stage > 0 in first line", l);
@@ -461,8 +376,8 @@ public class CustomConfig {
 				}
 			}
 			if(!p.getType().equals(PropertyType.HEADER_COMMENT) && tmpHeader!=null) {
-				if(!comments.containsKey(null)){
-					comments.put(null, tmpHeader.stream().collect(Collectors.joining("\n")));
+				if(!parentSection.containsCommentKey(null)){
+					parentSection.setComment(null, tmpHeader.stream().collect(Collectors.joining("\n")));
 					tmpHeader = null;
 				}
 			}
@@ -536,14 +451,14 @@ public class CustomConfig {
 				boolean isList = in.readByte() == 1;
 				if(!isList) {
 					String prop = in.readUTF();
-					properties.put(key, new Property(key, PropertyType.VALUE, prop));
+					parentSection.set(key, new Property(key, PropertyType.VALUE, prop));
 				}else {
 					List<String> lst = new ArrayList<>();
 					short sz = in.readShort();
 					for(int i = 0; i < sz; i++) {
 						lst.add(in.readUTF());
 					}
-					properties.put(key, new Property(key, PropertyType.LIST, lst));
+					parentSection.set(key, new Property(key, PropertyType.LIST, lst));
 				}
 			}
 			
@@ -554,19 +469,18 @@ public class CustomConfig {
 				}
 				
 				String key = parts.stream().map(kp -> cKs.get(kp)).collect(Collectors.joining("."));
-				comments.put(key, in.readUTF());
+				parentSection.setComment(key, in.readUTF());
 			}
 			in.close();
-			return this;
 		}catch(EOFException e) {
 			in.close();
 			throw new InvalidConfigException("Invalid compact config", -1);
 		}
+		return this;
 	}
 
 	/**
-	 * Loads the given CustomConfig as default (If given properties don't exist, they will be created)<br>
-	 * This method will load the config if no call to {@link #loadConfig()} has been made
+	 * Loads the given CustomConfig as default (If given properties don't exist, they will be created)
 	 * @param cfg The CustomConfig to load the defaults from
 	 * @param override Whether currently existing properties should be overridden
 	 * @return The same CustomConfig instance
@@ -574,17 +488,13 @@ public class CustomConfig {
 	 * @throws InvalidConfigException If this config needs to be loaded and is in an invalid format
 	 */
 	public CustomConfig loadDefault(CustomConfig cfg, boolean override) throws IOException{
-		if(properties==null){
-			loadConfig();
-		}
-		cfg.comments.keySet().stream().filter(k -> override || !comments.containsKey(k)).forEach(k -> comments.put(k,cfg.comments.get(k)));
-		cfg.properties.keySet().stream().filter(k -> override || !properties.containsKey(k)).forEach(k -> properties.put(k,cfg.properties.get(k)));
+//		cfg.comments.keySet().stream().filter(k -> override || !comments.containsKey(k)).forEach(k -> comments.put(k,cfg.comments.get(k)));
+//		cfg.properties.keySet().stream().filter(k -> override || !properties.containsKey(k)).forEach(k -> properties.put(k,cfg.properties.get(k)));
 		return this;
 	}
 
 	/**
-	 * Loads the config defaults (see {@link #loadDefault(CustomConfig, boolean)}) from a given class path. This will use this classes {@link ClassLoader} to find the given path<br>
-	 * This method will load the config if no call to {@link #loadConfig()} has been made
+	 * Loads the config defaults (see {@link #loadDefault(CustomConfig, boolean)}) from a given class path. This will use this classes {@link ClassLoader} to find the given path
 	 * @param path The class path
 	 * @param override Whether currently existing properties should be overriden
 	 * @param clazz The class to use the classloader from
@@ -593,9 +503,6 @@ public class CustomConfig {
 	 * @throws InvalidConfigException If this config needs to be loaded and is in an invalid format or the config from the class path is in an invalid format
 	 */
 	public CustomConfig loadDefaultFromClassPath(String path, boolean override, Class<?> clazz) throws IOException{
-		if(properties==null){
-			loadConfig();
-		}
 		CustomConfig cfg = new CustomConfig((File) null, false).loadConfig(clazz.getClassLoader().getResourceAsStream(path));
 		loadDefault(cfg, override);
 		return this;
@@ -623,7 +530,7 @@ public class CustomConfig {
 	 * @return This config's property HashMap
 	 */
 	public HashMap<String, Property> getProperties(){
-		return properties;
+		return parentSection.getProperties(true);
 	}
 
 	/**
@@ -632,22 +539,22 @@ public class CustomConfig {
 	 * @return This config's comment HashMap
 	 */
 	public HashMap<String, String> getComments(){
-		return comments;
+		return parentSection.getComments(true);
 	}
 
 	private void setLoadedProperty(int currStage, List<String> stages, Property p){
 		if(currStage>0) {
-			properties.put(getKey(stages, currStage)+"."+p.getKey(), p);
+			parentSection.set(getKey(stages, currStage)+"."+p.getKey(), p);
 		}else {
-			properties.put(p.getKey(), p);
+			parentSection.set(p.getKey(), p);
 		}
 	}
 
 	private void setLoadedComment(int currStage, List<String> stages, String key, String comment){
 		if(currStage>0) {
-			comments.put(getKey(stages, currStage)+"."+key, comment);
+			parentSection.setComment(getKey(stages, currStage)+"."+key, comment);
 		}else {
-			comments.put(key, comment);
+			parentSection.setComment(key, comment);
 		}
 	}
 
@@ -696,50 +603,8 @@ public class CustomConfig {
 	private String getKey(List<String> stages, int currStage) {
 		return stages.stream().limit(currStage).collect(Collectors.joining("."));
 	}
-	
-	private List<String> sortProperties(boolean alphabetically){
-		List<String> tR = new ArrayList<>();
-		List<String> keys = getKeys(false);
-		if(alphabetically) Collections.sort(keys);
-		for(String s : keys) {
-			tR.add(s);
-			if(getKeys(s, false, true).size()>0) {
-				tR.addAll(sortSubsection(s, alphabetically));
-			}
-		}
-		return tR;
-	}
-	
-	private List<String> sortSubsection(String key, boolean alphabetically){
-		List<String> ks = new ArrayList<>();
-		List<String> keys = getKeys(key, false, true);
-		if(alphabetically) Collections.sort(keys);
-		for(String s : keys) {
-			ks.add(s);
-			if(getKeys(s, false, true).size()>0) {
-				ks.addAll(sortSubsection(s, alphabetically));
-			}
-		}
-		return ks;
-	}
-
-	private String getKeyFrom(String[] stages, int from) {
-		return Arrays.stream(stages).skip(from).collect(Collectors.joining("."));
-	}
-
-	private String getKey(String[] stages, int until) {
-		return Arrays.stream(stages).limit(until).collect(Collectors.joining("."));
-	}
 
 	private int getFileStage(String s) {
-//		int sSpaces = s.length()-s.replaceAll("^\\s+","").length();
-//		int sTabs = s.length()-s.replaceAll("^\\t+","").length();
-//		if(sSpaces % space.length()!=0) {
-//			return -1;
-//		}else {
-//			return (sSpaces/space.length())+(sTabs*(4/space.length()));
-//		}
-		
 		int indents = 0;
 		while(s.startsWith(space)) {
 			s = s.substring(space.length());
@@ -795,11 +660,7 @@ public class CustomConfig {
 				val = verifyString((String)val);
 			}
 		}
-		if(val==null) {
-			properties.remove(key);
-		}else {
-			properties.put(key, new Property(key, type, val));
-		}
+		parentSection.set(key, new Property(key, type, val));
 		if(save) try {
 			saveConfig(props);
 		} catch (IOException e) {
@@ -841,12 +702,7 @@ public class CustomConfig {
 	 * @param props The save properties to be used when saving the config (See {@link #saveConfig(List)})
 	 */
 	public void unset(String key, boolean deep, boolean save, List<ConfigSaveProperty> props) {
-		properties.remove(key);
-		if(deep) {
-			for(String k : getKeys(key, deep, true)) {
-				properties.remove(k);
-			}
-		}
+		parentSection.unset(key, deep);
 		if(save) {
 			try {
 				saveConfig(props);
@@ -917,9 +773,9 @@ public class CustomConfig {
 	 * @param props The save properties to use when saving the config (See {@link #saveConfig(List)})
 	 */
 	public void applyDefaults(boolean save, boolean alwaysAdd, List<ConfigSaveProperty> props) {
-		if(!properties.isEmpty() && !alwaysAdd) return;
+		if(!parentSection.isEmpty() && !alwaysAdd) return;
 		for(Map.Entry<String, Object> en : defaults.entrySet()) {
-			if(!properties.containsKey(en.getKey())) {
+			if(!parentSection.containsKey(en.getKey())) {
 				set(en.getKey(), en.getValue());
 			}
 		}
@@ -955,7 +811,7 @@ public class CustomConfig {
 	 * @param props The save properties to be used when saving the config (See {@link #saveConfig(List)})
 	 */
 	public void setComment(String key, String comment, boolean save, List<ConfigSaveProperty> props) {
-		comments.put(key, comment);
+		parentSection.setComment(key, comment);
 		if(save) try {
 			saveConfig(props);
 		} catch (IOException e) {
@@ -984,7 +840,7 @@ public class CustomConfig {
 	 * @param props The save properties to be used when saving the config (See {@link #saveConfig(List)})
 	 */
 	public void setHeader(String header, boolean save, List<ConfigSaveProperty> props) {
-		comments.put(null, header);
+		parentSection.setComment(null, header);
 		if(save) try {
 			saveConfig(props);
 		} catch (IOException e) {
@@ -1003,7 +859,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public String getString(String key, String defaultVal, boolean applyDefault) {
-		Property p = properties.get(key);
+		Property p = parentSection.get(key);
 		if(p!=null) {
 			return ((String)p.getValue()).replace("\\n", "\n").replace("\\r", "\r");
 		}else {
@@ -1016,7 +872,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public List<String> getStringList(String key) {
-		Property p = properties.get(key);
+		Property p = parentSection.get(key);
 		if(p!=null && p.getType().equals(PropertyType.LIST)) {
 			return castAllString((List<?>) p.getValue());
 		}
@@ -1027,7 +883,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public List<String> getStringList(String key, List<String> defaultVal, boolean applyDefault) {
-		Property p = properties.get(key);
+		Property p = parentSection.get(key);
 		if(p!=null && p.getType().equals(PropertyType.LIST)) {
 			return castAllString((List<?>) p.getValue());
 		}
@@ -1039,7 +895,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public Integer getInt(String key) {
-		Property p = properties.get(key);
+		Property p = parentSection.get(key);
 		if(p!=null){
 			return Integer.parseInt(String.valueOf(p.getValue()));
 		}else {
@@ -1051,7 +907,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public Integer getInt(String key, Integer defaultVal, boolean applyDefault) {
-		Property p = properties.get(key);
+		Property p = parentSection.get(key);
 		if(p!=null) {
 			return Integer.parseInt(String.valueOf(p.getValue()));
 		}else {
@@ -1064,7 +920,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public List<Integer> getIntegerList(String key) {
-		Property p = properties.get(key);
+		Property p = parentSection.get(key);
 		if(p!=null && p.getType().equals(PropertyType.LIST)) {
 			try {
 				return castAllInteger((List<?>) p.getValue());
@@ -1077,7 +933,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public List<Integer> getIntegerList(String key, List<Integer> defaultVal, boolean applyDefault) {
-		Property p = properties.get(key);
+		Property p = parentSection.get(key);
 		if(p!=null && p.getType().equals(PropertyType.LIST)) {
 			try {
 				return castAllInteger((List<?>) p.getValue());
@@ -1091,7 +947,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public Double getDouble(String key) {
-		Property p = properties.get(key);
+		Property p = parentSection.get(key);
 		if(p!=null){
 			return Double.valueOf(String.valueOf(p.getValue()));
 		}else {
@@ -1103,7 +959,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public Double getDouble(String key, Double defaultVal, boolean applyDefault) {
-		Property p = properties.get(key);
+		Property p = parentSection.get(key);
 		if(p!=null) {
 			return Double.valueOf(String.valueOf(p.getValue()));
 		}else {
@@ -1116,7 +972,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public List<Double> getDoubleList(String key) {
-		Property p = properties.get(key);
+		Property p = parentSection.get(key);
 		if(p!=null && p.getType().equals(PropertyType.LIST)) {
 			try {
 				return castAllDouble((List<?>) p.getValue());
@@ -1129,7 +985,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public List<Double> getDoubleList(String key, List<Double> defaultVal, boolean applyDefault) {
-		Property p = properties.get(key);
+		Property p = parentSection.get(key);
 		if(p!=null && p.getType().equals(PropertyType.LIST)) {
 			try {
 				return castAllDouble((List<?>) p.getValue());
@@ -1143,7 +999,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public boolean getBoolean(String key) {
-		Property p = properties.get(key);
+		Property p = parentSection.get(key);
 		if(p!=null){
 			return Boolean.valueOf(String.valueOf(p.getValue()));
 		}else {
@@ -1155,7 +1011,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public boolean getBoolean(String key, boolean defaultVal, boolean applyDefault) {
-		Property p = properties.get(key);
+		Property p = parentSection.get(key);
 		if(p!=null) {
 			return Boolean.valueOf(String.valueOf(p.getValue()));
 		}else {
@@ -1168,7 +1024,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public List<Boolean> getBooleanList(String key) {
-		Property p = properties.get(key);
+		Property p = parentSection.get(key);
 		if(p!=null && p.getType().equals(PropertyType.LIST)) {
 			try {
 				return castAllBoolean((List<?>) p.getValue());
@@ -1181,7 +1037,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public List<Boolean> getBooleanList(String key, List<Boolean> defaultVal, boolean applyDefault) {
-		Property p = properties.get(key);
+		Property p = parentSection.get(key);
 		if(p!=null && p.getType().equals(PropertyType.LIST)) {
 			try {
 				return castAllBoolean((List<?>) p.getValue());
@@ -1195,7 +1051,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public Object get(String key) {
-		Property p = properties.get(key);
+		Property p = parentSection.get(key);
 		if(p==null) return null;
 		return p.getValue();
 	}
@@ -1212,7 +1068,7 @@ public class CustomConfig {
 	 * @return The property value
 	 */
 	public Object get(String key, Object defaultVal, boolean applyDefault) {
-		Property p = properties.get(key);
+		Property p = parentSection.get(key);
 		if(p!=null){
 			return p.getValue();
 		}else{
@@ -1227,7 +1083,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public Long getLong(String key) {
-		Property p = properties.get(key);
+		Property p = parentSection.get(key);
 		if(p!=null){
 			return Long.parseLong(String.valueOf(p.getValue()));
 		}else {
@@ -1239,7 +1095,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public Long getLong(String key, Long defaultVal, boolean applyDefault) {
-		Property p = properties.get(key);
+		Property p = parentSection.get(key);
 		if(p!=null) {
 			return Long.parseLong(String.valueOf(p.getValue()));
 		}else {
@@ -1252,7 +1108,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public List<Long> getLongList(String key) {
-		Property p = properties.get(key);
+		Property p = parentSection.get(key);
 		if(p!=null && p.getType().equals(PropertyType.LIST)) {
 			try {
 				return castAllLong((List<?>) p.getValue());
@@ -1265,7 +1121,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public List<Long> getLongList(String key, List<Long> defaultVal, boolean applyDefault) {
-		Property p = properties.get(key);
+		Property p = parentSection.get(key);
 		if(p!=null && p.getType().equals(PropertyType.LIST)) {
 			try {
 				return castAllLong((List<?>) p.getValue());
@@ -1279,7 +1135,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public BigInteger getBigInteger(String key) {
-		Property p = properties.get(key);
+		Property p = parentSection.get(key);
 		if(p!=null){
 			return new BigInteger(String.valueOf(p.getValue()));
 		}else {
@@ -1291,7 +1147,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public BigInteger getBigInteger(String key, BigInteger defaultVal, boolean applyDefault) {
-		Property p = properties.get(key);
+		Property p = parentSection.get(key);
 		if(p!=null) {
 			return new BigInteger(String.valueOf(p.getValue()));
 		}else {
@@ -1304,7 +1160,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public List<BigInteger> getBigIntegerList(String key) {
-		Property p = properties.get(key);
+		Property p = parentSection.get(key);
 		if(p!=null && p.getType().equals(PropertyType.LIST)) {
 			try {
 				return castAllBigInteger((List<?>) p.getValue());
@@ -1317,7 +1173,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public List<BigInteger> getBigIntegerList(String key, List<BigInteger> defaultVal, boolean applyDefault) {
-		Property p = properties.get(key);
+		Property p = parentSection.get(key);
 		if(p!=null && p.getType().equals(PropertyType.LIST)) {
 			try {
 				return castAllBigInteger((List<?>) p.getValue());
@@ -1331,7 +1187,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public BigDecimal getBigDecimal(String key) {
-		Property p = properties.get(key);
+		Property p = parentSection.get(key);
 		if(p!=null){
 			return new BigDecimal(String.valueOf(p.getValue()));
 		}else {
@@ -1343,7 +1199,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public BigDecimal getBigDecimal(String key, BigDecimal defaultVal, boolean applyDefault) {
-		Property p = properties.get(key);
+		Property p = parentSection.get(key);
 		if(p!=null) {
 			return new BigDecimal(String.valueOf(p.getValue()));
 		}else {
@@ -1356,7 +1212,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public List<BigDecimal> getBigDecimalList(String key) {
-		Property p = properties.get(key);
+		Property p = parentSection.get(key);
 		if(p!=null && p.getType().equals(PropertyType.LIST)) {
 			try {
 				return castAllBigDecimal((List<?>) p.getValue());
@@ -1369,7 +1225,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public List<BigDecimal> getBigDecimalList(String key, List<BigDecimal> defaultVal, boolean applyDefault) {
-		Property p = properties.get(key);
+		Property p = parentSection.get(key);
 		if(p!=null && p.getType().equals(PropertyType.LIST)) {
 			try {
 				return castAllBigDecimal((List<?>) p.getValue());
@@ -1450,39 +1306,14 @@ public class CustomConfig {
 	 * @return A list of property keys
 	 */
 	public List<String> getKeys(String key, boolean deep, boolean fullKeys){
-		List<String> keys = new ArrayList<>();
-		for(String kk : properties.keySet()) {
-			if(kk.startsWith(key+".")){
-				if (!deep) {
-					kk = Arrays.stream(kk.split("\\.")).limit(key.split("\\.").length+1).collect(Collectors.joining("."));
-					if((kk.split("\\.").length - key.split("\\.").length)!=1) continue;
-				}
-				if(!fullKeys){
-					kk = kk.substring(key.length()+1);
-				}
-				if(!keys.contains(kk)) {
-					keys.add(kk);
-				}
-			}
-		}
-		return keys;
+		return parentSection.getKeys(key, deep, fullKeys);
 	}
 
 	/**
 	 * See {@link #getKeys(String, boolean, boolean)}
 	 */
 	public List<String> getKeys(boolean deep){
-		List<String> keys = new ArrayList<>();
-		for(String kk : properties.keySet()) {
-			if (!deep) {
-				kk = Arrays.stream(kk.split("\\.")).limit(1).collect(Collectors.joining("."));
-				if(kk.split("\\.").length!=1) continue;
-			}
-			if(!keys.contains(kk)) {
-				keys.add(kk);
-			}
-		}
-		return keys;
+		return parentSection.getKeys(deep, true);
 	}
 	
 	/**
@@ -1517,7 +1348,7 @@ public class CustomConfig {
 		if(save){
 			saveConfig(props);
 		}
-		properties.clear();
+		parentSection.clear();
 	}
 
 	/**
@@ -1535,6 +1366,10 @@ public class CustomConfig {
 	public boolean hasBeenModified() throws UnsupportedOperationException {
 		if(isExternal) throw new UnsupportedOperationException("Can't use hasBeenModified() on an external config");
 		return lastEdited != configFile.lastModified();
+	}
+	
+	public boolean hasProperty(ConfigSaveProperty prop) {
+		return defaultSaveProps.contains(prop);
 	}
 
 	/**
@@ -1570,12 +1405,16 @@ public class CustomConfig {
 			return "["+key+" => "+value+"]";
 		}
 	}
+	
+	public ConfigSection getParentSection() {
+		return parentSection;
+	}
 
 	/**
 	 * The config property type enum used for internal handling of config properties
 	 * @author MrLetsplay2003
 	 */
-	public enum PropertyType {
+	public static enum PropertyType {
 
 		COMMENT(false),
 		HEADER_COMMENT(false),
@@ -1595,7 +1434,7 @@ public class CustomConfig {
 	 * All config save properties that can be used. These provide additional features or change the behaviour when saving the config
 	 * @author MrLetsplay2003
 	 */
-	public enum ConfigSaveProperty{
+	public static enum ConfigSaveProperty{
 		
 		/**
 		 * When saving the config, all config properties will be sorted alphabetically<br>
@@ -1627,7 +1466,7 @@ public class CustomConfig {
 	 * An exception thrown when the given config is not in the correct format
 	 * @author MrLetsplay2003
 	 */
-	public class InvalidConfigException extends RuntimeException{
+	public static class InvalidConfigException extends RuntimeException{
 		
 		private static final long serialVersionUID = 1L;
 
@@ -1635,6 +1474,228 @@ public class CustomConfig {
 			super("Failed to load config: "+reason+(line!=-1?" (Line "+line+")":""));
 		}
 
+	}
+	
+	public static class ConfigSection {
+		
+		private CustomConfig config;
+		private ConfigSection parent;
+		private String name;
+		private HashMap<String, ConfigSection> subsections;
+		private HashMap<String, Property> properties;
+		private HashMap<String, String> comments;
+		
+		public ConfigSection(CustomConfig config, ConfigSection parent, String name) {
+			this.config = config;
+			this.parent = parent;
+			this.name = name;
+			boolean keepOrder = config.hasProperty(ConfigSaveProperty.KEEP_CONFIG_SORTING);
+			subsections = keepOrder ? new LinkedHashMap<>() : new HashMap<>();
+			properties = keepOrder ? new LinkedHashMap<>() : new HashMap<>();
+			comments = new HashMap<>();
+		}
+		
+		public ConfigSection getSubsection(String key) {
+			String[] spl = key.split("\\.");
+			if(spl.length > 1) {
+				ConfigSection sub = subsections.get(spl[0]);
+				if(sub == null) return null;
+				return sub.getSubsection(key.substring(spl[0].length() + 1));
+			}else {
+				return subsections.get(key);
+			}
+		}
+		
+		public ConfigSection getOrCreateSubsection(String key) {
+			String[] spl = key.split("\\.");
+			if(spl.length > 1) {
+				ConfigSection sub = subsections.get(spl[0]);
+				if(sub == null) return null;
+				return sub.getSubsection(key.substring(spl[0].length() + 1));
+			}else {
+				if(subsections.containsKey(key)) return subsections.get(key);
+				ConfigSection sub = new ConfigSection(config, this, key);
+				subsections.put(key, sub);
+				return sub;
+			}
+		}
+		
+		public void set(String key, Property property) {
+			String[] spl = key.split("\\.");
+			if(spl.length > 1) {
+				ConfigSection sub = getOrCreateSubsection(spl[0]);
+				sub.set(key.substring(spl[0].length() + 1), property);
+			}else {
+				if(property == null) {
+					properties.remove(key);
+				}else {
+					properties.put(key, property);
+				}
+			}
+		}
+		
+		public Property get(String key) {
+			String[] spl = key.split("\\.");
+			if(spl.length > 1) {
+				ConfigSection sub = getSubsection(spl[0]);
+				if(sub == null) return null;
+				return sub.get(key.substring(spl[0].length() + 1));
+			}else {
+				return properties.get(key);
+			}
+		}
+		
+		public void setComment(String key, String comment) {
+			if(key == null) comments.put(null, comment);
+			String[] spl = key.split("\\.");
+			if(spl.length > 1) {
+				ConfigSection sub = getOrCreateSubsection(spl[0]);
+				sub.setComment(key.substring(spl[0].length() + 1), comment);
+			}else {
+				if(comment == null) {
+					comments.remove(key);
+				}else {
+					comments.put(key, comment);
+				}
+			}
+		}
+		
+		public String getComment(String key) {
+			if(key == null) return comments.get(null);
+			String[] spl = key.split("\\.");
+			if(spl.length > 1) {
+				ConfigSection sub = getSubsection(spl[0]);
+				if(sub == null) return null;
+				return sub.getComment(key.substring(spl[0].length() + 1));
+			}else {
+				return comments.get(key);
+			}
+		}
+		
+		public boolean containsKey(String key) {
+			return properties.containsKey(key) || subsections.values().stream().anyMatch(s -> s.containsKey(key));
+		}
+		
+		public List<String> getKeys(String key, boolean deep, boolean fullKeys){
+			ConfigSection section = getSubsection(key);
+			if(section == null) return new ArrayList<>();
+			return section.getKeys(deep, fullKeys);
+		}
+		
+		public List<String> getKeys(boolean deep, boolean fullKeys) {
+			List<String> keys = new ArrayList<>(properties.keySet());
+			if(deep) {
+				subsections.values().forEach(s -> s.getKeys(deep, fullKeys).forEach(k -> keys.add(fullKeys ? name + k : k)));
+			}
+			return keys;
+		}
+		
+		public void unset(String key, boolean deep) {
+			String[] spl = key.split("\\.");
+			if(spl.length > 1) {
+				ConfigSection sub = getSubsection(spl[0]);
+				if(sub == null) return;
+				sub.unset(key.substring(spl[0].length() + 1), deep);
+			}else {
+				properties.remove(key);
+				if(deep) subsections.remove(key);
+			}
+		}
+		
+		public boolean containsCommentKey(String key) {
+			return comments.containsKey(key);
+		}
+		
+		public ConfigSection getParent() {
+			return parent;
+		}
+		
+		public String getName() {
+			return name;
+		}
+		
+		public String getFullName() {
+			if(parent == null || parent.getFullName() == null) return name;
+			return parent.getFullName() + name;
+		}
+		
+		public HashMap<String, ConfigSection> getSubsections() {
+			return subsections;
+		}
+		
+		public HashMap<String, Property> getProperties() {
+			return getProperties(false);
+		}
+		
+		public HashMap<String, String> getComments() {
+			return getComments(false);
+		}
+		
+		public HashMap<String, Property> getProperties(boolean deep) {
+			HashMap<String, Property> ps = new HashMap<>(properties);
+			if(deep) subsections.values().forEach(s -> s.getProperties(true).entrySet().stream()
+					.map(en -> new AbstractMap.SimpleEntry<>(name + "." + en.getKey(), en.getValue()))
+					.forEach(en -> ps.put(en.getKey(), en.getValue())));
+			return ps;
+		}
+		
+		public HashMap<String, String> getComments(boolean deep) {
+			HashMap<String, String> cs = new HashMap<>(comments);
+			if(deep) subsections.values().forEach(s -> s.getComments(true).entrySet().stream()
+					.map(en -> new AbstractMap.SimpleEntry<>(name + "." + en.getKey(), en.getValue()))
+					.forEach(en -> cs.put(en.getKey(), en.getValue())));
+			return cs;
+		}
+		
+		public boolean isEmpty() {
+			return properties.isEmpty() && subsections.isEmpty();
+		}
+		
+		public String saveToString() {
+			return saveToString(new ArrayList<>(), 0);
+		}
+		
+		private List<String> getSortedKeys(List<ConfigSaveProperty> props) {
+			List<String> keys = new ArrayList<>();
+			properties.keySet().forEach(keys::add);
+			subsections.keySet().forEach(s -> { if(!keys.contains(s)) keys.add(s);});
+			return keys;
+		}
+		
+		public String saveToString(List<ConfigSaveProperty> props, int indents) {
+			String indent = config.space(indents);
+			String lineSeparator = System.getProperty("line.separator");
+			StringBuilder section = new StringBuilder();
+			for(String key : getSortedKeys(props)) {
+				String comment = getComment(key);
+				if(comment != null) {
+					section.append(indent).append(config.commentString).append(comment).append(lineSeparator);
+				}
+				Property p = properties.get(key);
+				if(p != null) {
+					section.append(indent).append(key).append(config.splString).append(p.value.toString()).append(lineSeparator);
+				}else {
+					section.append(indent).append(key).append(config.splString).append(lineSeparator);
+				}
+				
+				ConfigSection sub = subsections.get(key);
+				if(sub != null) {
+					section.append(sub.saveToString(props, indents + 1));
+				}
+			}
+			return section.toString();
+		}
+		
+		public void clear() {
+			properties.clear();
+			subsections.clear();
+			comments.clear();
+		}
+		
+		public void delete() {
+			parent.subsections.remove(name);
+		}
+		
 	}
 
 }
