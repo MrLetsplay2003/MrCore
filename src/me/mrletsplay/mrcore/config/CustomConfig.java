@@ -1408,6 +1408,11 @@ public class CustomConfig {
 		}
 	}
 	
+	/**
+	 * Returns the parent section containing all the properties of this CustomConfig instance.<br>
+	 * Beware: All the methods inside this class are to be used with caution, nothing is documented yet
+	 * @return The parent section
+	 */
 	public ConfigSection getParentSection() {
 		return parentSection;
 	}
