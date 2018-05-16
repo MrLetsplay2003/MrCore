@@ -15,17 +15,9 @@ public class ConfigExpansions {
 	public static class ExpandableCustomConfig extends CustomConfig {
 		
 		private List<ObjectMapper<?>> mappers = new ArrayList<>();
-
-		public ExpandableCustomConfig(File configFile) {
-			this(configFile, new ConfigSaveProperty[0]);
-		}
 		
 		public ExpandableCustomConfig(File configFile, ConfigSaveProperty... defaultSaveProperties) {
 			super(configFile, defaultSaveProperties);
-		}
-
-		public ExpandableCustomConfig(URL configURL) {
-			this(configURL, new ConfigSaveProperty[0]);
 		}
 
 		public ExpandableCustomConfig(URL configURL, ConfigSaveProperty... defaultSaveProperties) {
