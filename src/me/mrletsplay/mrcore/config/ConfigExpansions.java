@@ -1,67 +1,35 @@
 package me.mrletsplay.mrcore.config;
 
+import java.io.File;
+import java.net.URL;
+
 public class ConfigExpansions {
-
-	public static class ConfigCustomizer {
-
-		private String 
-				space = CustomConfig.DEFAULT_SPACE,
-				splString = CustomConfig.DEFAULT_SPL_STRING,
-				entryString = CustomConfig.DEFAULT_ENTRY_STRING,
-				commentString = CustomConfig.DEFAULT_COMMENT_STRING,
-				headerCommentString = CustomConfig.DEFAULT_HEADER_COMMENT_STRING;
-		
-		public ConfigCustomizer withEntryPrefix(String entryPrefix) {
-			this.entryString = entryPrefix;
-			return this;
-		}
-		
-		public ConfigCustomizer withCommentPrefix(String commentPrefix) {
-			this.commentString = commentPrefix;
-			return this;
-		}
-		
-		public ConfigCustomizer withHeaderCommentPrefix(String headerCommentPrefix) {
-			this.headerCommentString = headerCommentPrefix;
-			return this;
-		}
-		
-		public ConfigCustomizer withIndentation(String indentation) {
-			this.space = indentation;
-			return this;
-		}
-		
-		public ConfigCustomizer withPropertySplitter(String propertySplitter) {
-			this.splString = propertySplitter;
-			return this;
-		}
-		
-		public String getEntryPrefix() {
-			return entryString;
-		}
-		
-		public String getCommentPrefix() {
-			return commentString;
-		}
-		
-		public String getHeaderCommentPrefix() {
-			return headerCommentString;
-		}
-		
-		public String getIndentation() {
-			return space;
-		}
-		
-		public String getPropertySplitter() {
-			return splString;
-		}
-		
-	}
 	
-	public static class BukkitExpansions {
+	/**
+	 * TODO: Bukkit implementation
+	 * @author MrLetsplay
+	 *
+	 */
+	public static class BukkitCustomConfig extends CustomConfig {
+
+		public BukkitCustomConfig(File configFile) {
+			this(configFile, new ConfigSaveProperty[0]);
+		}
+		
+		public BukkitCustomConfig(File configFile, ConfigSaveProperty[] defaultSaveProperties) {
+			super(configFile, defaultSaveProperties);
+		}
+
+		public BukkitCustomConfig(URL configURL) {
+			this(configURL, new ConfigSaveProperty[0]);
+		}
+
+		public BukkitCustomConfig(URL configURL, ConfigSaveProperty[] defaultSaveProperties) {
+			super(configURL, defaultSaveProperties);
+		}
 		
 		
-		
+
 	}
 	
 }

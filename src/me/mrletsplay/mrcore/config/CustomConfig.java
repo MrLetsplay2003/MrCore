@@ -2,9 +2,6 @@ package me.mrletsplay.mrcore.config;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -26,13 +23,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import me.mrletsplay.mrcore.config.ConfigExpansions.ConfigCustomizer;
-
 /**
  * - This is a config format based on two HashMaps, one for the properties and one for the comments<br>
  * - The file formatting is based on YAML, but is easier to read/edit for humans as it supports UTF-8 encoding, so you don't need to escape special characters<br>
  * - Every value is treated like a String or a List of Strings until further processing is requested using the get[type] methods<br>
  * - This config should be able to load most yaml-based configs without too much errors<br>
+ * - This config system is based on a line-by-line basis, so every line is interpreted by itself and placed in the correct context<br>
  * <br>
  * Feel free to use this in your projects however you want (You don't need to credit me)
  * @author MrLetsplay2003
@@ -44,43 +40,47 @@ public class CustomConfig {
 			DEFAULT_SPL_STRING = ": ",
 			DEFAULT_ENTRY_STRING = "- ",
 			DEFAULT_COMMENT_STRING = "# ",
-			DEFAULT_HEADER_COMMENT_STRING = "## ";
+			DEFAULT_HEADER_COMMENT_STRING = "## ",
+			DEFAULT_OBJECT_START_STRING = "{",
+			DEFAULT_OBJECT_END_STRING = "}";
 	
 	private String 
 			space = DEFAULT_SPACE,
 			splString = DEFAULT_SPL_STRING,
 			entryString = DEFAULT_ENTRY_STRING,
 			commentString = DEFAULT_COMMENT_STRING,
-			headerCommentString = DEFAULT_HEADER_COMMENT_STRING;
+			headerCommentString = DEFAULT_HEADER_COMMENT_STRING,
+			objectStartString = DEFAULT_OBJECT_START_STRING,
+			objectEndString = DEFAULT_OBJECT_END_STRING;
 
 	private File configFile;
 	private URL configURL;
-	private boolean isExternal, isCompact;
+	private boolean isExternal;
 	private HashMap<String, Object> defaults;
 	private ConfigSection parentSection;
 	private List<ConfigSaveProperty> defaultSaveProps;
 	private long lastEdited;
+	private ConfigFormatter formatter;
 
 	/**
 	 * See {@link #CustomConfig(File, boolean, ConfigSaveProperty...)}
 	 */
-	public CustomConfig(File configFile, boolean compact) {
-		this(configFile, compact, new ConfigSaveProperty[0]);
+	public CustomConfig(File configFile) {
+		this(configFile, new ConfigSaveProperty[0]);
 	}
 	
 	
 	/**
 	 * Creates a CustomConfig instance with the given config file
 	 * @param configFile The config file to be used
-	 * @param compact Whether to use the compact format or not
 	 * @param defaultSaveProperties The default {@link ConfigSaveProperty} options for this config
 	 */
-	public CustomConfig(File configFile, boolean compact, ConfigSaveProperty... defaultSaveProperties) {
+	public CustomConfig(File configFile, ConfigSaveProperty... defaultSaveProperties) {
 		this.configFile = configFile;
 		isExternal = false;
-		isCompact = compact;
 		defaultSaveProps = Arrays.asList(defaultSaveProperties);
 		parentSection = new ConfigSection(this, null, null);
+		formatter = new DefaultConfigFormatter(this);
 	}
 	
 	/**
@@ -95,23 +95,22 @@ public class CustomConfig {
 	/**
 	 * See {@link #CustomConfig(URL, boolean, ConfigSaveProperty...)}
 	 */
-	public CustomConfig(URL configURL, boolean compact) {
-		this(configURL, compact, new ConfigSaveProperty[0]);
+	public CustomConfig(URL configURL) {
+		this(configURL, new ConfigSaveProperty[0]);
 	}
 
 	/**
 	 * Creates a CustomConfig instance with the given config url<br>
 	 * Note: External CustomConfig instances can <b>not</b> be saved
 	 * @param configURL The config url to be used
-	 * @param compact Whether to use the compact format or not
 	 * @param defaultSaveProperties The default {@link ConfigSaveProperty} options for this config
 	 */
-	public CustomConfig(URL configURL, boolean compact, ConfigSaveProperty... defaultSaveProperties) {
+	public CustomConfig(URL configURL, ConfigSaveProperty... defaultSaveProperties) {
 		this.configURL = configURL;
 		isExternal = true;
-		isCompact = compact;
 		defaultSaveProps = Arrays.asList(defaultSaveProperties);
 		parentSection = new ConfigSection(this, null, null);
+		formatter = new DefaultConfigFormatter(this);
 	}
 	
 	/**
@@ -140,28 +139,53 @@ public class CustomConfig {
 	}
 	
 	/**
-	 * Adds a {@link ConfigCustomizer} to this config instance.<br>
-	 * This will determine the layout of a (non-compact) saved config and can also load configs with the given layout
-	 * @param custom The customizer to use
-	 * @return This config instance
+	 * Sets the property splitter for this CustomConfig (default: ": ")
+	 * @param splString The splitter to use
+	 * @return This CustomConfig instance
 	 */
-	public CustomConfig useCustomizer(ConfigCustomizer customizer) {
-		entryString = customizer.getEntryPrefix();
-		commentString = customizer.getCommentPrefix();
-		headerCommentString = customizer.getHeaderCommentPrefix();
-		space = customizer.getIndentation();
-		splString = customizer.getPropertySplitter();
+	public CustomConfig usePropertySplitter(String splString) {
+		this.splString = splString;
+		return this;
+	}
+
+	/**
+	 * Sets the header comment prefix for this CustomConfig (default: "## ")
+	 * @param headerCommentString The prefix to use
+	 * @return This CustomConfig instance
+	 */
+	public CustomConfig useHeaderCommentPrefix(String headerCommentString) {
+		this.headerCommentString = headerCommentString;
+		return this;
+	}
+
+	/**
+	 * Sets the entry prefix for this CustomConfig (default: "- ")
+	 * @param entryString The prefix to use
+	 * @return This CustomConfig instance
+	 */
+	public CustomConfig useEntryPrefix(String entryString) {
+		this.entryString = entryString;
+		return this;
+	}
+
+	/**
+	 * Sets the comment prefix for this CustomConfig (default: "# ")
+	 * @param commentString The prefix to use
+	 * @return This CustomConfig instance
+	 */
+	public CustomConfig useCommentPrefix(String commentString) {
+		this.commentString = commentString;
 		return this;
 	}
 
 	/**
 	 * Saves the config with the given save properties<br>
 	 * This method ignores the default save properties if a non-null value is given
-	 * @param saveProperties The {@link me.mrletsplay.mrcore.CustomConfigv1.CustomConfig.ConfigSaveProperty ConfigSaveProperty} options to be used when saving the config
+	 * @param saveProperties The {@link me.mrletsplay.mrcore.CustomConfigOld2.CustomConfig.ConfigSaveProperty ConfigSaveProperty} options to be used when saving the config
 	 * @throws IOException If an IO error occurs while saving the config
 	 */
 	public void saveConfig(List<ConfigSaveProperty> saveProperties) throws IOException {
-		if(isExternal) return;
+		if(isExternal) throw new UnsupportedOperationException("External configs cannot be saved");
 		configFile.getParentFile().mkdirs();
 		saveConfig(new FileOutputStream(configFile), saveProperties);
 	}
@@ -208,79 +232,15 @@ public class CustomConfig {
 	 * @param fOut The OutputStream to be used
 	 * @param saveProperties The save properties to be used
 	 * @throws IOException If an IO error occurs while saving the config
+	 * @throws UnsupportedOperationException If this config is external ({@link #isExternal()})
 	 */
 	public void saveConfig(OutputStream fOut, List<ConfigSaveProperty> saveProperties) throws IOException{
+		if(isExternal) throw new UnsupportedOperationException("External (url) configs cannot be saved!");
 		List<ConfigSaveProperty> props = saveProperties!=null?saveProperties:defaultSaveProps;
-		if(!isCompact) {
-			BufferedWriter w = new BufferedWriter(new OutputStreamWriter(fOut, StandardCharsets.UTF_8));
-			w.write(parentSection.saveToString(props, 0));
-			w.close();
-		}else {
-			//Compact format
-			DataOutputStream out = new DataOutputStream(fOut);
-			HashMap<String, Short> cKs = new HashMap<>();
-			
-			short i = 0;
-			for(String key : getProperties().keySet()) {
-				String[] spl = key.split("\\.");
-				for(String part : spl) {
-					if(!cKs.containsKey(part)) {
-						cKs.put(part, i++);
-					}
-				}
-			}
-			
-			//Keys
-			for(Map.Entry<String, Short> en : cKs.entrySet()) {
-				out.writeShort(en.getValue());
-				out.writeUTF(en.getKey());
-			}
-			out.writeShort(-1);
-			
-			//Properties
-			for(Map.Entry<String, Property> en : getProperties().entrySet()) {
-				String key = en.getKey();
-				Property prop = en.getValue();
-				String[] splK = key.split("\\.");
-				out.writeByte(splK.length);
-				for(String part : splK) {
-					out.writeShort(cKs.get(part));
-				}
-				if(!prop.getType().IS_LIST) {
-					out.writeByte(0);
-					out.writeUTF(prop.getValue().toString());
-				}else {
-					out.writeByte(1);
-					List<?> lst = (List<?>)prop.getValue();
-					out.writeShort(lst.size());
-					for(Object o : lst) {
-						out.writeUTF(o.toString());
-					}
-				}
-			}
-			out.writeByte(-1);
-			
-			//Comments
-			for(Map.Entry<String, String> en : getComments().entrySet()) {
-				String key = en.getKey();
-				String comment = en.getValue();
-				String[] splK = key.split("\\.");
-				out.writeByte(splK.length);
-				for(String part : splK) {
-					out.writeShort(cKs.get(part));
-				}
-				out.writeUTF(comment);
-			}
-			out.writeByte(-1);
-			out.close();
-		}
-		if(configFile!=null) lastEdited = configFile.lastModified();
-	}
-	
-	private String space(int length) {
-		StringBuilder sb = new StringBuilder();
-		for(int i = 0; i < length; i++) sb.append(space);
-		return sb.toString();
+		BufferedWriter w = new BufferedWriter(new OutputStreamWriter(fOut, StandardCharsets.UTF_8));
+		w.write(parentSection.saveToString(props, 0));
+		w.close();
+		if(configFile != null) lastEdited = configFile.lastModified();
 	}
 
 	/**
@@ -321,162 +281,140 @@ public class CustomConfig {
 	 * @throws IOException If an IO error occurs while loading the config
 	 * @throws InvalidConfigException If the config to be loaded is in an invalid format
 	 */
+
+	
 	public CustomConfig loadConfig(InputStream in) throws IOException {
 		parentSection = new ConfigSection(this, null, null);
 		if(!isExternal && configFile != null) lastEdited = configFile.lastModified();
-		if(isCompact) return loadConfig_Compact(in);
 		BufferedReader r = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
-		List<String> stages = new ArrayList<>();
-		int lastStage = 0;
-		String line;
-		Property lastP = null;
-		String tmpKey = null;
-		List<Object> tmpList = null;
-		List<String> tmpComments = null,
-					 tmpHeader = null;
-		int l = 0;
-		while((line=r.readLine())!=null) {
-			l++;
-			if(line.isEmpty() || line.trim().isEmpty()) continue;
-			int stage = getFileStage(line);
-			if(stage==-1) {
+		LineByLineReader lr = new LineByLineReader(this, r);
+		List<String> stageBuffer = new ArrayList<>();
+		ParsedLine line;
+		int lastStage = -1;
+		List<String> tmpComment = null;
+		while((line = lr.readLine()) != null) {
+			if(line.getStage() == -1) {
 				r.close();
-				throw new InvalidConfigException("Invalid stage", l);
+				throw new InvalidConfigException("Invalid stage", lr.getLineNumber());
 			}
-			List<String> tmpStages = new ArrayList<>(stages);
-			Property p = loadProperty(l,line);
-			if(p == null) {
-				continue;
-			}
-			if(stage!=lastStage) {
-				if(p.getType().equals(PropertyType.LIST_ENTRY)) {
-					if(!((lastP.getType().equals(PropertyType.LIST_START) && stage-lastStage == 1) || (lastP.getType().equals(PropertyType.LIST_ENTRY) && stage == lastStage))) {
-						r.close();
-						throw new InvalidConfigException("Stage changed on LIST_ENTRY", l);
+			addOrRemove(stageBuffer, line.key.split("\\."), line.getStage() - lastStage, lr.getLineNumber());
+			System.out.println(line.type +"/"+ line.key+"/"+line.value);
+			System.out.println(stageBuffer);
+			switch(line.type) {
+				case COMMENT:
+					lr.jumpBack();
+					tmpComment = loadComment(lr);
+					break;
+				case HEADER_COMMENT:
+					lr.jumpBack();
+					setLoadedComment(line.getStage(), stageBuffer, null, loadComment(lr).stream().collect(Collectors.joining("\n")));
+					tmpComment = null;
+					break;
+				case LIST_START:
+					if(tmpComment != null) {
+						setLoadedComment(line.getStage(), stageBuffer, line.key, tmpComment.stream().collect(Collectors.joining("\n")));
+						tmpComment = null;
 					}
-				}else if(lastP==null) {
-					r.close();
-					throw new InvalidConfigException("Stage > 0 in first line", l);
-				}else if(tmpComments!=null && p.getType().equals(PropertyType.COMMENT)){
-					r.close();
-					throw new InvalidConfigException("Stage changed on COMMENT: "+stage+", previously "+lastStage, l);
-				}else {
-					addOrRemove(stages, lastP.getKey().split("\\."), stage - lastStage + (lastP.getType().equals(PropertyType.LIST_ENTRY)?1:0), l);
-				}
+					setLoadedProperty(line.getStage(), stageBuffer, line.key, new Property(PropertyType.LIST, loadList(lr)));
+					break;
+				case PROPERTY:
+					if(tmpComment != null) {
+						setLoadedComment(line.getStage(), stageBuffer, line.key, tmpComment.stream().collect(Collectors.joining("\n")));
+						tmpComment = null;
+					}
+					setLoadedProperty(line.getStage(), stageBuffer, line.key, new Property(PropertyType.VALUE, loadValue(line.value, lr)));
+					break;
+				case OBJECT_END:
+					throw new InvalidConfigException("Unexpected OBJECT_END", lr.getLineNumber());
+				case LIST_ENTRY:
+					throw new InvalidConfigException("Unexpected LIST_ENTRY", lr.getLineNumber());
 			}
-			if(!p.getType().equals(PropertyType.COMMENT) && tmpComments!=null) {
-				if (p.getKey() != null) {
-					setLoadedComment(lastStage, tmpStages, p.getKey(), tmpComments.stream().collect(Collectors.joining("\n")));
-					tmpComments = null;
-				} else {
-					r.close();
-					throw new InvalidConfigException("No key for comment", l);
-				}
-			}
-			if(!p.getType().equals(PropertyType.HEADER_COMMENT) && tmpHeader!=null) {
-				if(!parentSection.containsCommentKey(null)){
-					parentSection.setComment(null, tmpHeader.stream().collect(Collectors.joining("\n")));
-					tmpHeader = null;
-				}
-			}
-			if(p.getType().equals(PropertyType.COMMENT)){
-				if(tmpComments==null) {
-					tmpComments = new ArrayList<>();
-				}
-				tmpComments.add((String)p.getValue());
-			}else if(p.getType().equals(PropertyType.HEADER_COMMENT)){
-				if(tmpHeader==null) {
-					tmpHeader = new ArrayList<>();
-				}
-				tmpHeader.add((String)p.getValue());
-			}else if(!p.getType().IS_LIST){
-				if(tmpList!=null){
-					if(!tmpList.isEmpty()) setLoadedProperty(lastStage-1, tmpStages, new Property(tmpKey, PropertyType.LIST, tmpList));
-					tmpList = null;
-					tmpKey = null;
-				}
-				setLoadedProperty(stage, stages, p);
-				lastP = p;
-			}else if(p.getType().equals(PropertyType.LIST_START)){
-				if(tmpList!=null){
-					if(!tmpList.isEmpty()) setLoadedProperty(lastStage-1, tmpStages, new Property(tmpKey, PropertyType.LIST, tmpList));
-				}
-				tmpList = new ArrayList<>();
-				tmpKey = p.getKey();
-				lastP = p;
-			}else if(p.getType().equals(PropertyType.LIST_ENTRY)){
-				if(tmpList == null || tmpKey == null){
-					r.close();
-					throw new IllegalArgumentException("Tried to add list value without list start (Line "+l+")");
-				}
-				tmpList.add(p.getValue());
-				lastP = new Property(lastP.getKey(), p.getType(), p.getValue());
-			}
-			lastStage = stage;
-		}
-		if(tmpList!=null && !tmpList.isEmpty()){
-			setLoadedProperty(lastStage-1, stages, new Property(tmpKey, PropertyType.LIST, tmpList));
+			lastStage = line.getStage();
 		}
 		r.close();
 		return this;
 	}
 	
-	private CustomConfig loadConfig_Compact(InputStream oIn) throws IOException {
-		DataInputStream in = new DataInputStream(oIn);
-		try {
-			HashMap<Short, String> cKs = new HashMap<>();
-			
-			if(in.available()==0) {
-				in.close();
-				return this;
+	public HashMap<String, Object> loadMap(LineByLineReader reader) throws IOException {
+		HashMap<String, Object> map = new HashMap<>();
+		ParsedLine line;
+		outer: while((line = reader.readLine()) != null) {
+			switch(line.type) {
+				case PROPERTY:
+					map.put(line.key, loadValue(line.value, reader));
+					break;
+				case LIST_START:
+					map.put(line.key, loadList(reader));
+					break;
+				case OBJECT_END:
+					break outer;
+				default:
+					reader.jumpBack();
+					break outer;
 			}
-			
-			//Keys
-			short id;
-			while((id = in.readShort())>=0) {
-				cKs.put(id, in.readUTF());
-			}
-			
-			//Properties
-			short len;
-			while((len = in.readByte())>=0) {
-				List<Short> parts = new ArrayList<>();
-				for(int i = 0; i < len; i++) {
-					parts.add(in.readShort());
-				}
-				
-				String key = parts.stream().map(kp -> cKs.get(kp)).collect(Collectors.joining("."));
-				boolean isList = in.readByte() == 1;
-				if(!isList) {
-					String prop = in.readUTF();
-					parentSection.set(key, new Property(key, PropertyType.VALUE, prop));
-				}else {
-					List<String> lst = new ArrayList<>();
-					short sz = in.readShort();
-					for(int i = 0; i < sz; i++) {
-						lst.add(in.readUTF());
-					}
-					parentSection.set(key, new Property(key, PropertyType.LIST, lst));
-				}
-			}
-			
-			while((len = in.readByte())>=0) {
-				List<Short> parts = new ArrayList<>();
-				for(int i = 0; i < len; i++) {
-					parts.add(in.readShort());
-				}
-				
-				String key = parts.stream().map(kp -> cKs.get(kp)).collect(Collectors.joining("."));
-				parentSection.setComment(key, in.readUTF());
-			}
-			in.close();
-		}catch(EOFException e) {
-			in.close();
-			throw new InvalidConfigException("Invalid compact config", -1);
 		}
-		return this;
+		return map;
 	}
 
+	public List<Object> loadList(LineByLineReader reader) throws IOException {
+		List<Object> list = new ArrayList<>();
+		ParsedLine line;
+		outer: while((line = reader.readLine()) != null) {
+			System.out.println(line.type);
+			switch(line.type) {
+				case LIST_ENTRY:
+					list.add(loadValue(line.value, reader));
+					break;
+				default:
+					reader.jumpBack();
+					break outer;
+			}
+		}
+		return list;
+	}
+
+	public List<String> loadComment(LineByLineReader reader) throws IOException {
+		List<String> comments = new ArrayList<>();
+		ParsedLine line;
+		outer: while((line = reader.readLine()) != null) {
+			switch(line.type) {
+				case COMMENT:
+					comments.add(line.value.val);
+					break;
+				default:
+					reader.jumpBack();
+					break outer;
+			}
+		}
+		return comments;
+	}
+
+	public List<String> loadHeaderComment(LineByLineReader reader) throws IOException {
+		List<String> comments = new ArrayList<>();
+		ParsedLine line;
+		outer: while((line = reader.readLine()) != null) {
+			switch(line.type) {
+				case HEADER_COMMENT:
+					comments.add(line.value.val);
+					break;
+				default:
+					reader.jumpBack();
+					break outer;
+			}
+		}
+		return comments;
+	}
+	
+	public Object loadValue(ParsedValue value, LineByLineReader reader) throws IOException {
+		switch(value.type) {
+			case DEFAULT:
+				return value.val;
+			case OBJECT_START:
+				return loadMap(reader);
+		}
+		return null;
+	}
+	
 	/**
 	 * Loads the given CustomConfig as default (If given properties don't exist, they will be created)
 	 * @param cfg The CustomConfig to load the defaults from
@@ -488,10 +426,16 @@ public class CustomConfig {
 	public CustomConfig loadDefault(CustomConfig cfg, boolean override) throws IOException{
 		HashMap<String, Property> properties = getProperties();
 		HashMap<String, String> comments = getComments();
-		HashMap<String, Property> properties2 = cfg.getProperties();
-		HashMap<String, String> comments2 = cfg.getComments();
-		comments2.keySet().stream().filter(k -> override || !comments.containsKey(k)).forEach(k -> comments.put(k,comments2.get(k)));
-		properties2.keySet().stream().filter(k -> override || !properties.containsKey(k)).forEach(k -> properties.put(k,properties2.get(k)));
+		for(Map.Entry<String, Property> en : cfg.getProperties().entrySet()) {
+			if(override || !properties.containsKey(en.getKey())) {
+				set(en.getKey(), en.getValue().getValue());
+			}
+		}
+		for(Map.Entry<String, String> en : cfg.getComments().entrySet()) {
+			if(override || !comments.containsKey(en.getKey())) {
+				setComment(en.getKey(), en.getValue());
+			}
+		}
 		return this;
 	}
 
@@ -505,7 +449,7 @@ public class CustomConfig {
 	 * @throws InvalidConfigException If this config needs to be loaded and is in an invalid format or the config from the class path is in an invalid format
 	 */
 	public CustomConfig loadDefaultFromClassPath(String path, boolean override, Class<?> clazz) throws IOException{
-		CustomConfig cfg = new CustomConfig((File) null, false).loadConfig(clazz.getClassLoader().getResourceAsStream(path));
+		CustomConfig cfg = new CustomConfig((File) null).loadConfig(clazz.getClassLoader().getResourceAsStream(path));
 		loadDefault(cfg, override);
 		return this;
 	}
@@ -544,11 +488,11 @@ public class CustomConfig {
 		return parentSection.getComments(true);
 	}
 
-	private void setLoadedProperty(int currStage, List<String> stages, Property p){
+	private void setLoadedProperty(int currStage, List<String> stages, String key, Property p){
 		if(currStage>0) {
-			parentSection.set(getKey(stages, currStage)+"."+p.getKey(), p);
+			parentSection.set(getKey(stages, currStage) + "." + key, p);
 		}else {
-			parentSection.set(p.getKey(), p);
+			parentSection.set(key, p);
 		}
 	}
 
@@ -560,34 +504,62 @@ public class CustomConfig {
 		}
 	}
 
-	private Property loadProperty(int line, String s) throws InvalidConfigException{
+	private ParsedLine parseLine(int line, String s) throws InvalidConfigException{
+		int indents = getFileStage(s);
 		String formattedLine = s.replaceAll("^\\s+","").replaceAll("^\\t+","");
-		if(formattedLine.startsWith(commentString)){
-			return new Property(null, PropertyType.COMMENT, formattedLine.substring(commentString.length()));
+		if(formattedLine.isEmpty()) return null;
+		
+		boolean tmpBool = false;
+		
+		if(tmpBool = formattedLine.startsWith(commentString) || formattedLine.startsWith(commentString.trim())){
+			return new ParsedLine(indents, null, LineType.COMMENT, new ParsedValue(ValueType.DEFAULT,
+					formattedLine.substring(tmpBool?commentString.length():commentString.trim().length())));
+//			return new ParsedLine(null, LineType.COMMENT, formattedLine.substring(tmpBool?commentString.length():commentString.trim().length()));
 		}
-		if(formattedLine.startsWith(headerCommentString)) {
-			return new Property(null, PropertyType.HEADER_COMMENT, formattedLine.substring(headerCommentString.length()));
+		
+		if(tmpBool = formattedLine.startsWith(headerCommentString) || formattedLine.startsWith(headerCommentString.trim())) {
+			return new ParsedLine(indents, null, LineType.COMMENT, new ParsedValue(ValueType.DEFAULT,
+					formattedLine.substring(tmpBool?headerCommentString.length():headerCommentString.trim().length())));
+//			return new ParsedLine(null, LineType.HEADER_COMMENT, formattedLine.substring(tmpBool?headerCommentString.length():headerCommentString.trim().length()));
 		}
+		
 		if(formattedLine.startsWith(entryString)) {
-			return new Property(null, PropertyType.LIST_ENTRY, formattedLine.substring(entryString.length()));
+//			type = LineType.LIST_ENTRY;
+//			formattedValue = formattedLine.substring(entryString.length());
+			
+			return new ParsedLine(indents, null, LineType.LIST_ENTRY, parseValue(formattedLine.substring(entryString.length())));
 		}
+		
 		if(formattedLine.equals(entryString.trim())) {
-			return new Property(null, PropertyType.LIST_ENTRY, "");
+			return new ParsedLine(indents, null, LineType.LIST_ENTRY, new ParsedValue(ValueType.DEFAULT, ""));
 		}
+		
 		String[] p = formattedLine.split(splString, 2);
 		if(p.length==2){
 			if(p[1].isEmpty()){
-				return new Property(p[0], PropertyType.LIST_START,true);
+				return new ParsedLine(indents, p[0], LineType.LIST_START, new ParsedValue(ValueType.DEFAULT, null));
 			}else{
-				return new Property(p[0], PropertyType.VALUE, p[1]);
+				return new ParsedLine(indents, p[0], LineType.PROPERTY, parseValue(p[1]));
 			}
-		}else if(p.length==1){
+		}/*else if(p.length==1){
+			System.out.println("U wot m8?");
 			if(p[0].endsWith(splString.trim())){
 				String k = p[0].substring(0, p[0].length()-splString.trim().length());
-				return new Property(k, PropertyType.LIST_START, true);
+				return new ParsedLine(k, LineType.LIST_START, true);
 			}
-		}
+		}*/
+		
+		if(formattedLine.equals(objectEndString)) return new ParsedLine(indents, null, LineType.OBJECT_END, null);
+		
+		
 		throw new InvalidConfigException("Invalid property \""+formattedLine+"\"",line);
+	}
+	
+	private ParsedValue parseValue(String value) {
+		if(value.equals(objectStartString)) {
+			return new ParsedValue(ValueType.OBJECT_START, value);
+		}
+		return new ParsedValue(ValueType.DEFAULT, value);
 	}
 
 	private void addOrRemove(List<String> s, String[] spl, int c, int l) {
@@ -641,28 +613,9 @@ public class CustomConfig {
 	 * @param save Whether this config should be saved
 	 * @param props The saveProperties to be used when saving the config (See {@link #saveConfig(List)})
 	 */
-	@SuppressWarnings("unchecked")
 	public void set(String key, Object val, boolean save, List<ConfigSaveProperty> props) {
-		PropertyType type;
-		if(val instanceof List<?>) {
-			type = PropertyType.LIST;
-			List<?> l = (List<?>)val;
-			if(l.size()>0) {
-				if(l.get(0) instanceof String) {
-					List<String> s = (List<String>)val;
-					for(int i = 0; i < s.size(); i++) {
-						s.set(i, verifyString(s.get(i)));
-					}
-					val = s;
-				}
-			}
-		}else{
-			type = PropertyType.VALUE;
-			if(val instanceof String) {
-				val = verifyString((String)val);
-			}
-		}
-		parentSection.set(key, new Property(key, type, val));
+		FormattedProperty fProp = formatter.formatObject(val);
+		parentSection.set(key, fProp.toProperty());
 		if(save) try {
 			saveConfig(props);
 		} catch (IOException e) {
@@ -714,10 +667,6 @@ public class CustomConfig {
 		}
 	}
 	
-	private static String verifyString(String s) {
-		return s.replace("\n", "\\n").replace("\r", "\\r");
-	}
-	
 	/**
 	 * Adds a default value to the config<br>
 	 * <br>
@@ -726,33 +675,8 @@ public class CustomConfig {
 	 * @param defaultVal The default value
 	 */
 	public void addDefault(String key, Object defaultVal) {
-//		addDefault(key, defaultVal, false);
 		defaults.put(key, defaultVal);
 	}
-	
-//	public void addDefault(String key, Object defaultVal, boolean save) {
-//		addDefault(key, defaultVal, save, null);
-//	}
-	
-//	public void addDefault(String key, Object defaultVal, boolean save, List<ConfigSaveProperty> props) {
-//		if(!properties.containsKey(key)) {
-//			set(key, defaultVal, save, props);
-//		}
-//	}
-//	
-//	public void addDefault(String forKey, String key, Object defaultVal) {
-//		addDefault(forKey, key, defaultVal, false);
-//	}
-//	
-//	public void addDefault(String forKey, String key, Object defaultVal, boolean save) {
-//		addDefault(forKey, key, defaultVal, save, null);
-//	}
-//	
-//	public void addDefault(String forKey, String key, Object defaultVal, boolean save, List<ConfigSaveProperty> props) {
-//		if(getKeys(forKey, false, true).isEmpty()) {
-//			set(key, defaultVal, save, props);
-//		}
-//	}
 
 	/**
 	 * See {@link #applyDefaults(boolean, boolean, List)}
@@ -1380,14 +1304,12 @@ public class CustomConfig {
 	 */
 	public static class Property {
 
-		private String key;
 		private Object value;
 		private PropertyType type;
 
-		public Property(String key, PropertyType type, Object value){
+		public Property(PropertyType type, Object value){
 			this.value = value;
 			this.type = type;
-			this.key = key;
 		}
 
 		public PropertyType getType() {
@@ -1397,14 +1319,10 @@ public class CustomConfig {
 		public Object getValue() {
 			return value;
 		}
-
-		public String getKey() {
-			return key;
-		}
 		
 		@Override
 		public String toString() {
-			return "["+key+" => "+value+"]";
+			return ""+value;
 		}
 	}
 	
@@ -1422,19 +1340,91 @@ public class CustomConfig {
 	 * @author MrLetsplay2003
 	 */
 	public static enum PropertyType {
+		
+		VALUE,
+		LIST,
+		MAP;
 
-		COMMENT(false),
-		HEADER_COMMENT(false),
-		LIST_START(true), LIST_ENTRY(true),
-		VALUE(false),
-		LIST(true);
+	}
+	
+	public static enum LineType {
+		
+		COMMENT,
+		HEADER_COMMENT,
+		PROPERTY,
+		LIST_START,
+		LIST_ENTRY,
+		OBJECT_END
+		
+	}
+	
+	public static enum ValueType {
+		
+		DEFAULT,
+		OBJECT_START
+		
+	}
+	
+	public static class ParsedLine {
+		
+		private int stage;
+		private String key;
+		private ParsedValue value;
+		private LineType type;
 
-		public final boolean IS_LIST;
-
-		PropertyType(boolean isList) {
-			IS_LIST = isList;
+		public ParsedLine(int stage, String key, LineType type, ParsedValue value){
+			this.stage = stage;
+			this.value = value;
+			this.type = type;
+			this.key = key;
+		}
+		
+		public int getStage() {
+			return stage;
 		}
 
+		public LineType getType() {
+			return type;
+		}
+
+		public ParsedValue getValue() {
+			return value;
+		}
+
+		public String getKey() {
+			return key;
+		}
+		
+		@Override
+		public String toString() {
+			return "["+key+" => "+value+"]";
+		}
+		
+	}
+	
+	public static class ParsedValue {
+		
+		private ValueType type;
+		private String val;
+		
+		public ParsedValue(ValueType type, String val) {
+			this.type = type;
+			this.val = val;
+		}
+		
+		public ValueType getType() {
+			return type;
+		}
+		
+		public Object getValue() {
+			return val;
+		}
+		
+		@Override
+		public String toString() {
+			return "Parsed[("+type+") "+val+"]";
+		}
+		
 	}
 
 	/**
@@ -1590,9 +1580,9 @@ public class CustomConfig {
 		}
 		
 		public List<String> getKeys(boolean deep, boolean fullKeys) {
-			List<String> keys = new ArrayList<>(properties.keySet());
+			List<String> keys = new ArrayList<>(properties.keySet()).stream().map(k -> fullKeys && name!=null ? name + "." + k : k).collect(Collectors.toList());
 			if(deep) {
-				subsections.values().forEach(s -> s.getKeys(deep, fullKeys).forEach(k -> keys.add(fullKeys ? name + k : k)));
+				subsections.values().forEach(s -> s.getKeys(deep, fullKeys).forEach(k -> keys.add(fullKeys && name != null ? name + "." + k : k)));
 			}
 			return keys;
 		}
@@ -1639,9 +1629,13 @@ public class CustomConfig {
 		}
 		
 		public HashMap<String, Property> getProperties(boolean deep) {
-			HashMap<String, Property> ps = new HashMap<>(properties);
+			HashMap<String, Property> ps = new HashMap<>();
+			properties.entrySet().stream()
+					.map(en -> new AbstractMap.SimpleEntry<String, Property>(name != null ? name + "." + en.getKey() : en.getKey(), en.getValue()))
+					.forEach(en -> ps.put(en.getKey(), en.getValue()));
+			
 			if(deep) subsections.values().forEach(s -> s.getProperties(true).entrySet().stream()
-					.map(en -> new AbstractMap.SimpleEntry<>(name + "." + en.getKey(), en.getValue()))
+					.map(en -> new AbstractMap.SimpleEntry<>((name==null?"":name + ".") + en.getKey(), en.getValue()))
 					.forEach(en -> ps.put(en.getKey(), en.getValue())));
 			return ps;
 		}
@@ -1649,7 +1643,7 @@ public class CustomConfig {
 		public HashMap<String, String> getComments(boolean deep) {
 			HashMap<String, String> cs = new HashMap<>(comments);
 			if(deep) subsections.values().forEach(s -> s.getComments(true).entrySet().stream()
-					.map(en -> new AbstractMap.SimpleEntry<>(name + "." + en.getKey(), en.getValue()))
+					.map(en -> new AbstractMap.SimpleEntry<>((name==null?"":name + ".") + en.getKey(), en.getValue()))
 					.forEach(en -> cs.put(en.getKey(), en.getValue())));
 			return cs;
 		}
@@ -1670,7 +1664,7 @@ public class CustomConfig {
 		}
 		
 		public String saveToString(List<ConfigSaveProperty> props, int indents) {
-			String indent = config.space(indents);
+			String indent = config.formatter.space(indents);
 			String lineSeparator = System.getProperty("line.separator");
 			StringBuilder section = new StringBuilder();
 			for(String key : getSortedKeys(props)) {
@@ -1680,7 +1674,7 @@ public class CustomConfig {
 				}
 				Property p = properties.get(key);
 				if(p != null) {
-					section.append(indent).append(key).append(config.splString).append(p.value.toString()).append(lineSeparator);
+					config.formatter.formatProperty(key, config.formatter.formatObject(p.value), indents).forEach(section::append);
 				}else {
 					section.append(indent).append(key).append(config.splString).append(lineSeparator);
 				}
@@ -1700,9 +1694,228 @@ public class CustomConfig {
 		}
 		
 		public void delete() {
-			parent.subsections.remove(name);
+			if(parent != null) parent.subsections.remove(name);
 		}
 		
 	}
+	
+	public static abstract class ConfigFormatter {
+		
+		private CustomConfig config;
+		
+		public ConfigFormatter(CustomConfig config) {
+			this.config = config;
+		}
+		
+		public CustomConfig getConfig() {
+			return config;
+		}
+		
+		public abstract FormattedProperty formatObject(Object o);
+		
+		public abstract List<String> formatProperty(String key, FormattedProperty p, int indents);
+		
+		public abstract List<String> formatValue(String key, Object val, int indents);
 
+		public abstract List<String> formatListFully(String key, List<?> list, int indents);
+
+		public abstract List<String> formatList(List<?> list, int indents);
+		
+		public abstract List<String> formatMapFully(String key, Map<String, ?> map, int indents);
+		
+		public abstract List<String> formatMap(Map<String, ?> map, int indents);
+		
+		public String space(int length) {
+			StringBuilder sb = new StringBuilder();
+			for(int i = 0; i < length; i++) sb.append(config.space);
+			return sb.toString();
+		}
+		
+		public static String newLine() {
+			return System.getProperty("line.separator");
+		}
+		
+		public static String escapeString(String s) {
+			return s.replace("\n", "\\n").replace("\r", "\\r");
+		}
+		
+		public static String unescapeString(String s) {
+			return s.replace("\\n", "\n").replace("\\r", "\r");
+		}
+		
+	}
+	
+	public static class FormattedProperty {
+		
+		private Object val;
+		private PropertyType type;
+		
+		private FormattedProperty(PropertyType type, Object val) {
+			this.type = type;
+			this.val = val;
+		}
+		
+		public static FormattedProperty other(Object o) {
+			return new FormattedProperty(PropertyType.VALUE, o);
+		}
+		
+		public static FormattedProperty list(List<?> list) {
+			return new FormattedProperty(PropertyType.LIST, list);
+		}
+		
+		public static FormattedProperty map(Map<String,?> map) {
+			return new FormattedProperty(PropertyType.MAP, map);
+		}
+		
+		private Property toProperty() {
+			return new Property(type, val);
+		}
+		
+	}
+	
+	public static class DefaultConfigFormatter extends ConfigFormatter {
+
+		public DefaultConfigFormatter(CustomConfig config) {
+			super(config);
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public FormattedProperty formatObject(Object o) {
+			if(o instanceof List<?>) {
+				List<?> l = (List<?>) o;
+				return FormattedProperty.list(l);
+			}
+			if(o instanceof Map<?,?>) {
+				Map<?,?> mp = (Map<?,?>) o;
+				if(!mp.isEmpty() && mp.keySet().stream().findFirst().get() instanceof String) {
+					Map<String, ?> map = (Map<String, ?>) o;
+					return FormattedProperty.map(map);
+				}
+			}
+			return FormattedProperty.other(o);
+		}
+
+		@Override
+		public List<String> formatListFully(String key, List<?> list, int indents) {
+			List<String> lines = new ArrayList<>();
+			lines.addAll(formatValue(key, null, indents));
+			lines.addAll(formatList(list, indents + 1));
+			return lines;
+		}
+		
+		@Override
+		public List<String> formatList(List<?> list, int indents) {
+			List<String> lines = new ArrayList<>();
+			String space = space(indents);
+			for(Object o : list) {
+				lines.add(
+						new StringBuilder()
+							.append(space)
+							.append(getConfig().entryString)
+							.append(escapeString(o.toString()))
+							.append(newLine())
+						.toString());
+			}
+			return lines;
+		}
+
+		@Override
+		public List<String> formatValue(String key, Object val, int indents) {
+			return Arrays.asList(new StringBuilder()
+						.append(space(indents))
+						.append(key)
+						.append(getConfig().splString)
+						.append(val!=null?escapeString(val.toString()):"")
+						.append(newLine())
+					.toString());
+		}
+
+		@Override
+		public List<String> formatMapFully(String key, Map<String,?> map, int indents) {
+			List<String> lines = new ArrayList<>();
+			lines.addAll(formatValue(key, getConfig().objectStartString, indents));
+			lines.addAll(formatMap(map, indents + 1));
+			lines.add(new StringBuilder().append(space(indents)).append(getConfig().objectEndString).append(newLine()).toString());
+			return lines;
+		}
+		
+		@Override
+		public List<String> formatMap(Map<String, ?> map, int indents) {
+			List<String> lines = new ArrayList<>();
+			for(Map.Entry<String,?> en : map.entrySet()) {
+				FormattedProperty prop = formatObject(en.getValue());
+				lines.addAll(formatProperty((String) en.getKey(), prop, indents));
+			}
+			return lines;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public List<String> formatProperty(String key, FormattedProperty prop, int indents) {
+			List<String> lines = new ArrayList<>();
+			Property p = prop.toProperty();
+			switch(p.type) {
+				case VALUE:
+					lines.addAll(formatValue(key, p.value, indents));
+					break;
+				case LIST:
+					formatListFully(key, (List<?>) p.value, indents).forEach(lines::add);
+					break;
+				case MAP:
+					formatMapFully(key, (Map<String,?>) p.value, indents).forEach(lines::add);
+					break;
+				default:
+					break;
+			}
+			return lines;
+		}
+		
+	}
+	
+	public static class LineByLineReader {
+		
+		private int lineNum;
+		private ParsedLine override, lastLine;
+		private CustomConfig config;
+		private BufferedReader reader;
+		
+		public LineByLineReader(CustomConfig cfg, BufferedReader reader) {
+			this.config = cfg;
+			this.reader = reader;
+			this.lineNum = 0;
+		}
+		
+		private String supplyLine() throws IOException {
+			String line = "";
+			while(line.trim().isEmpty()) {
+				line = reader.readLine();
+				lineNum++;
+				if(line == null) return null;
+			}
+			return line;
+		}
+		
+		public int getLineNumber() {
+			return lineNum;
+		}
+		
+		public ParsedLine readLine() throws IOException {
+			if(override != null) {
+				ParsedLine tmp = override;
+				override = null;
+				return tmp;
+			}
+			String line = supplyLine();
+			if(line == null) return null;
+			lastLine = config.parseLine(lineNum, line);
+			return lastLine;
+		}
+		
+		public void jumpBack() {
+			override = lastLine;
+		}
+		
+	}
+	
 }

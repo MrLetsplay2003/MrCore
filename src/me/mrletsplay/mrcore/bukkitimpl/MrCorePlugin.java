@@ -23,7 +23,7 @@ public class MrCorePlugin extends JavaPlugin{
 		getLogger().info("And MrCore is on board as well! :wave:");
 		Bukkit.getPluginManager().registerEvents(new GUIListener(), this);
 		getCommand("mrcoreui").setExecutor(new UIListener());
-		config = new CustomConfig(new File(getDataFolder(), "config.yml"), false).loadConfigSafely();
+		config = new CustomConfig(new File(getDataFolder(), "config.yml")).loadConfigSafely();
 		if(config.getBoolean("versioning.check-update", true, true)) {
 			String version = config.getString("versioning.version-to-use", "latest", true);
 			MrCoreUpdateChecker.checkForUpdate(version);

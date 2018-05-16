@@ -54,7 +54,7 @@ public class LocaleProvider {
 	 */
 	public LocaleProvider registerLocale(String locale, CustomConfig config) {
 		try {
-			CustomConfig tmpCfg = new CustomConfig(getLocaleFile(locale), false).loadConfigSafely().loadDefault(config, false);
+			CustomConfig tmpCfg = new CustomConfig(getLocaleFile(locale)).loadConfigSafely().loadDefault(config, false);
 			tmpCfg.saveConfigSafely();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -155,7 +155,7 @@ public class LocaleProvider {
 		if(!localeFile.exists()) {
 			return null;
 		}
-		return new CustomConfig(localeFile, false).loadConfigSafely();
+		return new CustomConfig(localeFile).loadConfigSafely();
 	}
 	
 	
@@ -208,7 +208,7 @@ public class LocaleProvider {
 		 * @return The config for this locale
 		 */
 		public CustomConfig getCustomLocaleConfig(String locale) {
-			CustomConfig cfg = new CustomConfig(getCustomLocaleFile(locale), false).loadConfigSafely();
+			CustomConfig cfg = new CustomConfig(getCustomLocaleFile(locale)).loadConfigSafely();
 			Locale defaults = provider.getDefaultLocale();
 			if(defaults != null) {
 				try {
