@@ -186,6 +186,10 @@ public class CustomConfig {
 		this.formatter = formatter;
 	}
 	
+	public ConfigFormatter getFormatter() {
+		return formatter;
+	}
+	
 	/**
 	 * Saves the config with the given save properties<br>
 	 * This method ignores the default save properties if a non-null value is given
@@ -479,8 +483,6 @@ public class CustomConfig {
 	}
 
 	/**
-	 * Returns this config's property HashMap<br>
-	 * Any changes to this HashMap will also affect this config
 	 * @return This config's property HashMap
 	 */
 	public HashMap<String, Property> getProperties(){
@@ -488,8 +490,6 @@ public class CustomConfig {
 	}
 
 	/**
-	 * Returns this config's comment HashMap<br>
-	 * Any changes to this HashMap will also affect this config
 	 * @return This config's comment HashMap
 	 */
 	public HashMap<String, String> getComments(){
@@ -1802,7 +1802,15 @@ public class CustomConfig {
 			return new FormattedProperty(PropertyType.MAP, map);
 		}
 		
-		private Property toProperty() {
+		public PropertyType getType() {
+			return type;
+		}
+		
+		public Object getValue() {
+			return val;
+		}
+		
+		public Property toProperty() {
 			return new Property(type, val);
 		}
 		
@@ -1839,18 +1847,33 @@ public class CustomConfig {
 			return lines;
 		}
 		
+		@SuppressWarnings("unchecked")
 		@Override
 		public List<String> formatList(List<?> list, int indents) {
 			List<String> lines = new ArrayList<>();
 			String space = space(indents);
 			for(Object o : list) {
-				lines.add(
-						new StringBuilder()
-							.append(space)
-							.append(getConfig().entryString)
-							.append(escapeString(o.toString()))
-							.append(newLine())
-						.toString());
+				StringBuilder b = new StringBuilder()
+					.append(space)
+					.append(getConfig().entryString);
+				FormattedProperty prop = formatObject(o);
+				switch(prop.type) {
+					case VALUE:
+						b.append(escapeString(o.toString()));
+						break;
+					case LIST:
+						//Coming soon
+						break;
+					case MAP:
+						b.append(getConfig().objectStartString).append(newLine());
+						lines.add(b.toString());
+						b = new StringBuilder();
+						lines.addAll(formatMap((Map<String, ?>) prop.val, indents + 1));
+						lines.add(getConfig().objectEndString);
+						break;
+				}
+				b.append(newLine());
+				lines.add(b.toString());
 			}
 			return lines;
 		}

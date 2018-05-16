@@ -42,6 +42,12 @@ public class ConfigExpansions {
 			return ((ObjectMapper<T>)mapper).constructObject(getMap(key));
 		}
 		
+		@SuppressWarnings("unchecked")
+		public <T> List<T> getMappableList(String key, Class<T> mappingClass) {
+			ObjectMapper<?> mapper = mappers.stream().filter(m -> m.mappingClass.equals(mappingClass)).findFirst().orElse(null);
+			return (List<T>) ((ObjectMapper<T>)mapper).constructObject(getMap(key));
+		}
+		
 		public List<ObjectMapper<?>> getMappers() {
 			return mappers;
 		}
