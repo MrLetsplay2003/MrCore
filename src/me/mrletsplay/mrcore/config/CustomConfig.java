@@ -61,14 +61,6 @@ public class CustomConfig {
 	private List<ConfigSaveProperty> defaultSaveProps;
 	private long lastEdited;
 	private ConfigFormatter formatter;
-
-	/**
-	 * See {@link #CustomConfig(File, boolean, ConfigSaveProperty...)}
-	 */
-	public CustomConfig(File configFile) {
-		this(configFile, new ConfigSaveProperty[0]);
-	}
-	
 	
 	/**
 	 * Creates a CustomConfig instance with the given config file
@@ -90,13 +82,6 @@ public class CustomConfig {
 	 */
 	public File getConfigFile() {
 		return configFile;
-	}
-
-	/**
-	 * See {@link #CustomConfig(URL, boolean, ConfigSaveProperty...)}
-	 */
-	public CustomConfig(URL configURL) {
-		this(configURL, new ConfigSaveProperty[0]);
 	}
 
 	/**
