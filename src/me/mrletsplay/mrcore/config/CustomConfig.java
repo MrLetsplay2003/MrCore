@@ -519,19 +519,14 @@ public class CustomConfig {
 		if(tmpBool = formattedLine.startsWith(commentString) || formattedLine.startsWith(commentString.trim())){
 			return new ParsedLine(indents, null, LineType.COMMENT, new ParsedValue(ValueType.DEFAULT,
 					formattedLine.substring(tmpBool?commentString.length():commentString.trim().length())));
-//			return new ParsedLine(null, LineType.COMMENT, formattedLine.substring(tmpBool?commentString.length():commentString.trim().length()));
 		}
 		
 		if(tmpBool = formattedLine.startsWith(headerCommentString) || formattedLine.startsWith(headerCommentString.trim())) {
 			return new ParsedLine(indents, null, LineType.COMMENT, new ParsedValue(ValueType.DEFAULT,
 					formattedLine.substring(tmpBool?headerCommentString.length():headerCommentString.trim().length())));
-//			return new ParsedLine(null, LineType.HEADER_COMMENT, formattedLine.substring(tmpBool?headerCommentString.length():headerCommentString.trim().length()));
 		}
 		
 		if(formattedLine.startsWith(entryString)) {
-//			type = LineType.LIST_ENTRY;
-//			formattedValue = formattedLine.substring(entryString.length());
-			
 			return new ParsedLine(indents, null, LineType.LIST_ENTRY, parseValue(formattedLine.substring(entryString.length())));
 		}
 		
@@ -1938,6 +1933,7 @@ public class CustomConfig {
 			this.config = cfg;
 			this.reader = reader;
 			this.lineNum = 0;
+			this.overrideIndex = -1;
 			this.lastLines = new ArrayList<>();
 		}
 		
@@ -1956,7 +1952,7 @@ public class CustomConfig {
 		}
 		
 		public ParsedLine readLine() throws IOException {
-			if(overrideIndex != -1 || overrideIndex >= lastLines.size()) {
+			if(overrideIndex != -1 && overrideIndex >= lastLines.size()) {
 				ParsedLine tmp = lastLines.get(overrideIndex);
 				overrideIndex++;
 				return tmp;
