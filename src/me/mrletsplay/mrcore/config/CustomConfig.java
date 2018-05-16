@@ -177,7 +177,15 @@ public class CustomConfig {
 		this.commentString = commentString;
 		return this;
 	}
-
+	
+	/**
+	 * Sets the formatter for this config instance
+	 * @param formatter The formatter to use
+	 */
+	public void setFormatter(ConfigFormatter formatter) {
+		this.formatter = formatter;
+	}
+	
 	/**
 	 * Saves the config with the given save properties<br>
 	 * This method ignores the default save properties if a non-null value is given
@@ -1156,6 +1164,33 @@ public class CustomConfig {
 			try {
 				return castAllBigDecimal((List<?>) p.getValue());
 			} catch (NumberFormatException ignored){}
+		}
+		if(applyDefault) set(key, defaultVal, false);
+		return defaultVal;
+	}
+
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getMap(String key) {
+		Property p = parentSection.get(key);
+		if(p!=null && p.getType().equals(PropertyType.LIST)) {
+			try {
+				return (Map<String, Object>) p.getValue();
+			} catch (NumberFormatException ignored){}
+		}
+		return new HashMap<>();
+	}
+	
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getMap(String key, Map<String, Object> defaultVal, boolean applyDefault) {
+		Property p = parentSection.get(key);
+		if(p!=null && p.getType().equals(PropertyType.MAP)) {
+			return (Map<String, Object>) p.getValue();
 		}
 		if(applyDefault) set(key, defaultVal, false);
 		return defaultVal;
