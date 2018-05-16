@@ -181,7 +181,7 @@ public class CustomConfig {
 	/**
 	 * Saves the config with the given save properties<br>
 	 * This method ignores the default save properties if a non-null value is given
-	 * @param saveProperties The {@link me.mrletsplay.mrcore.CustomConfigOld2.CustomConfig.ConfigSaveProperty ConfigSaveProperty} options to be used when saving the config
+	 * @param saveProperties The {@link ConfigSaveProperty} options to be used when saving the config
 	 * @throws IOException If an IO error occurs while saving the config
 	 */
 	public void saveConfig(List<ConfigSaveProperty> saveProperties) throws IOException {
