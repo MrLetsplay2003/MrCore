@@ -12,6 +12,7 @@ public class MrCore {
 	 * - Chat GUIs (via commands)
 	 * - JSON (?)
 	 * - MySQL
+	 * - Multi-Plugin ("Modules")
 	 */
 	
 	private static final String VERSION = "1.7";
