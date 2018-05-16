@@ -151,6 +151,7 @@ public class CompactCustomConfig extends CustomConfig {
 			return this;
 		}catch(EOFException e) {
 			in.close();
+			e.printStackTrace();
 			throw new InvalidConfigException("Invalid compact config", -1);
 		}
 	}
@@ -188,7 +189,7 @@ public class CompactCustomConfig extends CustomConfig {
 	
 	private String readKey(HashMap<Short, String> lookupTable, DataInputStream in) throws IOException {
 		List<Short> parts = new ArrayList<>();
-		short len = in.readShort();
+		short len = in.readByte();
 		if(len <= 0) return null;
 		for(int i = 0; i < len; i++) {
 			parts.add(in.readShort());

@@ -295,8 +295,6 @@ public class CustomConfig {
 				throw new InvalidConfigException("Invalid stage", lr.getLineNumber());
 			}
 			addOrRemove(stageBuffer, line.key.split("\\."), line.getStage() - lastStage, lr.getLineNumber());
-			System.out.println(line.type +"/"+ line.key+"/"+line.value);
-			System.out.println(stageBuffer);
 			switch(line.type) {
 				case COMMENT:
 					lr.jumpBack();
@@ -352,12 +350,26 @@ public class CustomConfig {
 		}
 		return map;
 	}
+	
+	public Object loadGenericObject(LineByLineReader reader) throws IOException {
+		ParsedLine line = reader.readLine();
+		switch(line.type) {
+			case LIST_START:
+			case PROPERTY:
+				reader.jumpBack();
+				return loadMap(reader);
+			case LIST_ENTRY:
+				reader.jumpBack();
+				return loadList(reader);
+			default:
+				throw new InvalidConfigException("Invalid generic object", reader.lineNum);
+		}
+	}
 
 	public List<Object> loadList(LineByLineReader reader) throws IOException {
 		List<Object> list = new ArrayList<>();
 		ParsedLine line;
 		outer: while((line = reader.readLine()) != null) {
-			System.out.println(line.type);
 			switch(line.type) {
 				case LIST_ENTRY:
 					list.add(loadValue(line.value, reader));
@@ -534,13 +546,7 @@ public class CustomConfig {
 			}else{
 				return new ParsedLine(indents, p[0], LineType.PROPERTY, parseValue(p[1]));
 			}
-		}/*else if(p.length==1){
-			System.out.println("U wot m8?");
-			if(p[0].endsWith(splString.trim())){
-				String k = p[0].substring(0, p[0].length()-splString.trim().length());
-				return new ParsedLine(k, LineType.LIST_START, true);
-			}
-		}*/
+		}
 		
 		if(formattedLine.equals(objectEndString)) return new ParsedLine(indents, null, LineType.OBJECT_END, null);
 		
@@ -1847,7 +1853,11 @@ public class CustomConfig {
 						b.append(escapeString(o.toString()));
 						break;
 					case LIST:
-						//Coming soon
+						b.append(getConfig().objectStartString).append(newLine());
+						lines.add(b.toString());
+						b = new StringBuilder();
+						lines.addAll(formatList((List<?>) prop.val, indents + 1));
+						lines.add(getConfig().objectEndString);
 						break;
 					case MAP:
 						b.append(getConfig().objectStartString).append(newLine());
@@ -1919,7 +1929,8 @@ public class CustomConfig {
 	public static class LineByLineReader {
 		
 		private int lineNum;
-		private ParsedLine override, lastLine;
+		private int overrideIndex;
+		private List<ParsedLine> lastLines;
 		private CustomConfig config;
 		private BufferedReader reader;
 		
@@ -1927,6 +1938,7 @@ public class CustomConfig {
 			this.config = cfg;
 			this.reader = reader;
 			this.lineNum = 0;
+			this.lastLines = new ArrayList<>();
 		}
 		
 		private String supplyLine() throws IOException {
@@ -1944,19 +1956,21 @@ public class CustomConfig {
 		}
 		
 		public ParsedLine readLine() throws IOException {
-			if(override != null) {
-				ParsedLine tmp = override;
-				override = null;
+			if(overrideIndex != -1 || overrideIndex >= lastLines.size()) {
+				ParsedLine tmp = lastLines.get(overrideIndex);
+				overrideIndex++;
 				return tmp;
 			}
+			overrideIndex = -1;
 			String line = supplyLine();
 			if(line == null) return null;
-			lastLine = config.parseLine(lineNum, line);
-			return lastLine;
+			ParsedLine pLine = config.parseLine(lineNum, line);
+			lastLines.add(pLine);
+			return pLine;
 		}
 		
 		public void jumpBack() {
-			override = lastLine;
+			overrideIndex = overrideIndex == -1 ? lastLines.size()-1 : overrideIndex--;
 		}
 		
 	}
