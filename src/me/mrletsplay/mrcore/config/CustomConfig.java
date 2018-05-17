@@ -1085,69 +1085,6 @@ public class CustomConfig {
 				.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
 	}
 
-//	private List<String> castAllString(List<?> in){
-//		List<String> out = new ArrayList<>();
-//		for(Object o : in){
-//			out.add(String.valueOf(o));
-//		}
-//		return out;
-//	}
-//
-//	private List<Integer> castAllInteger(List<?> in) throws NumberFormatException{
-//		List<Integer> out = new ArrayList<>();
-//		for(Object o : in){
-//			out.add(Integer.parseInt(String.valueOf(o)));
-//		}
-//		return out;
-//	}
-//
-//	private List<Long> castAllLong(List<?> in) throws NumberFormatException{
-//		List<Long> out = new ArrayList<>();
-//		for(Object o : in){
-//			out.add(Long.parseLong(String.valueOf(o)));
-//		}
-//		return out;
-//	}
-//
-//	private List<Double> castAllDouble(List<?> in) throws NumberFormatException{
-//		List<Double> out = new ArrayList<>();
-//		for(Object o : in){
-//			out.add(Double.parseDouble(String.valueOf(o)));
-//		}
-//		return out;
-//	}
-//
-//	private List<Boolean> castAllBoolean(List<?> in) throws IllegalArgumentException{
-//		List<Boolean> out = new ArrayList<>();
-//		for(Object o : in){
-//			String v = String.valueOf(o);
-//			if(v.equalsIgnoreCase("true")){
-//				out.add(true);
-//			}else if(v.equalsIgnoreCase("false")){
-//				out.add(false);
-//			}else{
-//				throw new IllegalArgumentException("Invalid boolean list");
-//			}
-//		}
-//		return out;
-//	}
-//	
-//	private List<BigInteger> castAllBigInteger(List<?> in) throws NumberFormatException{
-//		List<BigInteger> out = new ArrayList<>();
-//		for(Object o : in){
-//			out.add(new BigInteger(String.valueOf(o)));
-//		}
-//		return out;
-//	}
-//	
-//	private List<BigDecimal> castAllBigDecimal(List<?> in) throws NumberFormatException{
-//		List<BigDecimal> out = new ArrayList<>();
-//		for(Object o : in){
-//			out.add(new BigDecimal(String.valueOf(o)));
-//		}
-//		return out;
-//	}
-
 	/**
 	 * Returns the list of keys for the subproperties for the given key
 	 * @param key The key
