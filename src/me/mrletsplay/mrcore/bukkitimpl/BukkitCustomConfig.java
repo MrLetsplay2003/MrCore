@@ -3,6 +3,7 @@ package me.mrletsplay.mrcore.bukkitimpl;
 import java.io.File;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
@@ -66,6 +67,17 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 	
 	public Location getLocation(String key, Location defaultVal, boolean applyDefault) {
 		Location o = getMappable(key, Location.class);
+		if(o != null) return o;
+		if(applyDefault) set(key, defaultVal);
+		return defaultVal;
+	}
+	
+	public List<Location> getLocationList(String key) {
+		return getMappableList(key, Location.class);
+	}
+	
+	public List<Location> getLocationList(String key, List<Location> defaultVal, boolean applyDefault) {
+		List<Location> o = getMappableList(key, Location.class);
 		if(o != null) return o;
 		if(applyDefault) set(key, defaultVal);
 		return defaultVal;

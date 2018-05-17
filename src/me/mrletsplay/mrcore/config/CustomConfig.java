@@ -992,6 +992,15 @@ public class CustomConfig {
 	public Map<String, Object> getMap(String key) {
 		return getGenericMap(key, Object.class, new HashMap<>(), false);
 	}
+
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public List<Map<String, Object>> getMapList(String key) {
+		List<Map> maps = getGenericList(key, Map.class);
+		return maps.stream().map(e -> (Map<String, Object>)e).collect(Collectors.toList());
+	}
 	
 	/**
 	 * See {@link #get(String, Object, boolean)}
