@@ -419,7 +419,7 @@ public class CustomConfig {
 			case DEFAULT:
 				return value.val;
 			case OBJECT_START:
-				return loadMap(reader);
+				return loadGenericObject(reader);
 		}
 		return null;
 	}
@@ -779,201 +779,112 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public String getString(String key, String defaultVal, boolean applyDefault) {
-		Property p = parentSection.get(key);
-		if(p!=null) {
-			return ((String)p.getValue()).replace("\\n", "\n").replace("\\r", "\r");
-		}else {
-			if(applyDefault) set(key, defaultVal, false);
-			return defaultVal;
-		}
+		return getGeneric(key, String.class, defaultVal, applyDefault);
 	}
 
 	/**
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public List<String> getStringList(String key) {
-		Property p = parentSection.get(key);
-		if(p!=null && p.getType().equals(PropertyType.LIST)) {
-			return castAllString((List<?>) p.getValue());
-		}
-		return new ArrayList<>();
+		return getGenericList(key, String.class, new ArrayList<>(), false);
 	}
 
 	/**
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public List<String> getStringList(String key, List<String> defaultVal, boolean applyDefault) {
-		Property p = parentSection.get(key);
-		if(p!=null && p.getType().equals(PropertyType.LIST)) {
-			return castAllString((List<?>) p.getValue());
-		}
-		if(applyDefault) set(key, defaultVal, false);
-		return defaultVal;
+		return getGenericList(key, String.class, defaultVal, applyDefault);
 	}
 
 	/**
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public Integer getInt(String key) {
-		Property p = parentSection.get(key);
-		if(p!=null){
-			return Integer.parseInt(String.valueOf(p.getValue()));
-		}else {
-			return null;
-		}
+		return getGeneric(key, Integer.class, null, false);
 	}
 
 	/**
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public Integer getInt(String key, Integer defaultVal, boolean applyDefault) {
-		Property p = parentSection.get(key);
-		if(p!=null) {
-			return Integer.parseInt(String.valueOf(p.getValue()));
-		}else {
-			if(applyDefault) set(key, defaultVal, false);
-			return defaultVal;
-		}
+		return getGeneric(key, Integer.class, defaultVal, applyDefault);
 	}
 
 	/**
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public List<Integer> getIntegerList(String key) {
-		Property p = parentSection.get(key);
-		if(p!=null && p.getType().equals(PropertyType.LIST)) {
-			try {
-				return castAllInteger((List<?>) p.getValue());
-			} catch (NumberFormatException ignored){}
-		}
-		return new ArrayList<>();
+		return getGenericList(key, Integer.class, new ArrayList<>(), false);
 	}
 
 	/**
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public List<Integer> getIntegerList(String key, List<Integer> defaultVal, boolean applyDefault) {
-		Property p = parentSection.get(key);
-		if(p!=null && p.getType().equals(PropertyType.LIST)) {
-			try {
-				return castAllInteger((List<?>) p.getValue());
-			} catch (NumberFormatException ignored){}
-		}
-		if(applyDefault) set(key, defaultVal, false);
-		return defaultVal;
+		return getGenericList(key, Integer.class, defaultVal, applyDefault);
 	}
 
 	/**
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public Double getDouble(String key) {
-		Property p = parentSection.get(key);
-		if(p!=null){
-			return Double.valueOf(String.valueOf(p.getValue()));
-		}else {
-			return null;
-		}
+		return getGeneric(key, Double.class, null, false);
 	}
 
 	/**
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public Double getDouble(String key, Double defaultVal, boolean applyDefault) {
-		Property p = parentSection.get(key);
-		if(p!=null) {
-			return Double.valueOf(String.valueOf(p.getValue()));
-		}else {
-			if(applyDefault) set(key, defaultVal, false);
-			return defaultVal;
-		}
+		return getGeneric(key, Double.class, defaultVal, applyDefault);
 	}
 
 	/**
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public List<Double> getDoubleList(String key) {
-		Property p = parentSection.get(key);
-		if(p!=null && p.getType().equals(PropertyType.LIST)) {
-			try {
-				return castAllDouble((List<?>) p.getValue());
-			} catch (NumberFormatException ignored){}
-		}
-		return new ArrayList<>();
+		return getGenericList(key, Double.class, new ArrayList<>(), false);
 	}
 
 	/**
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public List<Double> getDoubleList(String key, List<Double> defaultVal, boolean applyDefault) {
-		Property p = parentSection.get(key);
-		if(p!=null && p.getType().equals(PropertyType.LIST)) {
-			try {
-				return castAllDouble((List<?>) p.getValue());
-			} catch (NumberFormatException ignored){}
-		}
-		if(applyDefault) set(key, defaultVal, false);
-		return defaultVal;
+		return getGenericList(key, Double.class, defaultVal, applyDefault);
 	}
 
 	/**
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public boolean getBoolean(String key) {
-		Property p = parentSection.get(key);
-		if(p!=null){
-			return Boolean.valueOf(String.valueOf(p.getValue()));
-		}else {
-			return false;
-		}
+		return getGeneric(key, Boolean.class, false, false);
 	}
 
 	/**
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public boolean getBoolean(String key, boolean defaultVal, boolean applyDefault) {
-		Property p = parentSection.get(key);
-		if(p!=null) {
-			return Boolean.valueOf(String.valueOf(p.getValue()));
-		}else {
-			if(applyDefault) set(key, defaultVal, false);
-			return defaultVal;
-		}
+		return getGeneric(key, Boolean.class, defaultVal, applyDefault);
 	}
 
 	/**
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public List<Boolean> getBooleanList(String key) {
-		Property p = parentSection.get(key);
-		if(p!=null && p.getType().equals(PropertyType.LIST)) {
-			try {
-				return castAllBoolean((List<?>) p.getValue());
-			} catch (IllegalArgumentException ignored){}
-		}
-		return new ArrayList<>();
+		return getGenericList(key, Boolean.class, new ArrayList<>(), false);
 	}
 
 	/**
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public List<Boolean> getBooleanList(String key, List<Boolean> defaultVal, boolean applyDefault) {
-		Property p = parentSection.get(key);
-		if(p!=null && p.getType().equals(PropertyType.LIST)) {
-			try {
-				return castAllBoolean((List<?>) p.getValue());
-			} catch (IllegalArgumentException ignored){}
-		}
-		if(applyDefault) set(key, defaultVal, false);
-		return defaultVal;
+		return getGenericList(key, Boolean.class, defaultVal, applyDefault);
 	}
 
 	/**
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public Object get(String key) {
-		Property p = parentSection.get(key);
-		if(p==null) return null;
-		return p.getValue();
+		return getGeneric(key, Object.class, null, false);
 	}
 
 	/**
@@ -988,185 +899,98 @@ public class CustomConfig {
 	 * @return The property value
 	 */
 	public Object get(String key, Object defaultVal, boolean applyDefault) {
-		Property p = parentSection.get(key);
-		if(p!=null){
-			return p.getValue();
-		}else{
-			if(applyDefault){
-				set(key, defaultVal, false);
-			}
-			return defaultVal;
-		}
+		return getGeneric(key, Object.class, defaultVal, applyDefault);
 	}
 
 	/**
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public Long getLong(String key) {
-		Property p = parentSection.get(key);
-		if(p!=null){
-			return Long.parseLong(String.valueOf(p.getValue()));
-		}else {
-			return null;
-		}
+		return getGeneric(key, Long.class, null, false);
 	}
 
 	/**
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public Long getLong(String key, Long defaultVal, boolean applyDefault) {
-		Property p = parentSection.get(key);
-		if(p!=null) {
-			return Long.parseLong(String.valueOf(p.getValue()));
-		}else {
-			if(applyDefault) set(key, defaultVal, false);
-			return defaultVal;
-		}
+		return getGeneric(key, Long.class, defaultVal, applyDefault);
 	}
 
 	/**
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public List<Long> getLongList(String key) {
-		Property p = parentSection.get(key);
-		if(p!=null && p.getType().equals(PropertyType.LIST)) {
-			try {
-				return castAllLong((List<?>) p.getValue());
-			} catch (NumberFormatException ignored){}
-		}
-		return new ArrayList<>();
+		return getGenericList(key, Long.class, new ArrayList<>(), false);
 	}
 
 	/**
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public List<Long> getLongList(String key, List<Long> defaultVal, boolean applyDefault) {
-		Property p = parentSection.get(key);
-		if(p!=null && p.getType().equals(PropertyType.LIST)) {
-			try {
-				return castAllLong((List<?>) p.getValue());
-			} catch (NumberFormatException ignored){}
-		}
-		if(applyDefault) set(key, defaultVal, false);
-		return defaultVal;
+		return getGenericList(key, Long.class, defaultVal, applyDefault);
 	}
 
 	/**
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public BigInteger getBigInteger(String key) {
-		Property p = parentSection.get(key);
-		if(p!=null){
-			return new BigInteger(String.valueOf(p.getValue()));
-		}else {
-			return null;
-		}
+		return getGeneric(key, BigInteger.class, null, false);
 	}
 
 	/**
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public BigInteger getBigInteger(String key, BigInteger defaultVal, boolean applyDefault) {
-		Property p = parentSection.get(key);
-		if(p!=null) {
-			return new BigInteger(String.valueOf(p.getValue()));
-		}else {
-			if(applyDefault) set(key, defaultVal, false);
-			return defaultVal;
-		}
+		return getGeneric(key, BigInteger.class, defaultVal, applyDefault);
 	}
 
 	/**
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public List<BigInteger> getBigIntegerList(String key) {
-		Property p = parentSection.get(key);
-		if(p!=null && p.getType().equals(PropertyType.LIST)) {
-			try {
-				return castAllBigInteger((List<?>) p.getValue());
-			} catch (NumberFormatException ignored){}
-		}
-		return new ArrayList<>();
+		return getGenericList(key, BigInteger.class, new ArrayList<>(), false);
 	}
 
 	/**
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public List<BigInteger> getBigIntegerList(String key, List<BigInteger> defaultVal, boolean applyDefault) {
-		Property p = parentSection.get(key);
-		if(p!=null && p.getType().equals(PropertyType.LIST)) {
-			try {
-				return castAllBigInteger((List<?>) p.getValue());
-			} catch (NumberFormatException ignored){}
-		}
-		if(applyDefault) set(key, defaultVal, false);
-		return defaultVal;
+		return getGenericList(key, BigInteger.class, defaultVal, applyDefault);
 	}
 
 	/**
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public BigDecimal getBigDecimal(String key) {
-		Property p = parentSection.get(key);
-		if(p!=null){
-			return new BigDecimal(String.valueOf(p.getValue()));
-		}else {
-			return null;
-		}
+		return getGeneric(key, BigDecimal.class, null, false);
 	}
 
 	/**
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public BigDecimal getBigDecimal(String key, BigDecimal defaultVal, boolean applyDefault) {
-		Property p = parentSection.get(key);
-		if(p!=null) {
-			return new BigDecimal(String.valueOf(p.getValue()));
-		}else {
-			if(applyDefault) set(key, defaultVal, false);
-			return defaultVal;
-		}
+		return getGeneric(key, BigDecimal.class, defaultVal, applyDefault);
 	}
 
 	/**
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public List<BigDecimal> getBigDecimalList(String key) {
-		Property p = parentSection.get(key);
-		if(p!=null && p.getType().equals(PropertyType.LIST)) {
-			try {
-				return castAllBigDecimal((List<?>) p.getValue());
-			} catch (NumberFormatException ignored){}
-		}
-		return new ArrayList<>();
+		return getGenericList(key, BigDecimal.class, new ArrayList<>(), false);
 	}
 
 	/**
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public List<BigDecimal> getBigDecimalList(String key, List<BigDecimal> defaultVal, boolean applyDefault) {
-		Property p = parentSection.get(key);
-		if(p!=null && p.getType().equals(PropertyType.LIST)) {
-			try {
-				return castAllBigDecimal((List<?>) p.getValue());
-			} catch (NumberFormatException ignored){}
-		}
-		if(applyDefault) set(key, defaultVal, false);
-		return defaultVal;
+		return getGenericList(key, BigDecimal.class, defaultVal, applyDefault);
 	}
 
 	/**
 	 * See {@link #get(String, Object, boolean)}
 	 */
-	@SuppressWarnings("unchecked")
 	public Map<String, Object> getMap(String key) {
-		Property p = parentSection.get(key);
-		if(p!=null && p.getType().equals(PropertyType.LIST)) {
-			try {
-				return (Map<String, Object>) p.getValue();
-			} catch (NumberFormatException ignored){}
-		}
-		return new HashMap<>();
+		return getGenericMap(key, Object.class, new HashMap<>(), false);
 	}
 	
 	/**
@@ -1181,69 +1005,148 @@ public class CustomConfig {
 		if(applyDefault) set(key, defaultVal, false);
 		return defaultVal;
 	}
-
-	private List<String> castAllString(List<?> in){
-		List<String> out = new ArrayList<>();
-		for(Object o : in){
-			out.add(String.valueOf(o));
+	
+	public <T> T getGeneric(String key, Class<T> clazz) {
+		Property prop = parentSection.get(key);
+		if(prop == null) return null;
+		if(!prop.type.equals(PropertyType.VALUE)) throw new InvalidTypeException(key, "Invalid property type "+prop.type);
+		try {
+			return castGeneric(prop.value, clazz);
+		}catch(Exception e) {
+			throw new InvalidTypeException(key, "Failed to cast type", e);
 		}
-		return out;
-	}
-
-	private List<Integer> castAllInteger(List<?> in) throws NumberFormatException{
-		List<Integer> out = new ArrayList<>();
-		for(Object o : in){
-			out.add(Integer.parseInt(String.valueOf(o)));
-		}
-		return out;
-	}
-
-	private List<Long> castAllLong(List<?> in) throws NumberFormatException{
-		List<Long> out = new ArrayList<>();
-		for(Object o : in){
-			out.add(Long.parseLong(String.valueOf(o)));
-		}
-		return out;
-	}
-
-	private List<Double> castAllDouble(List<?> in) throws NumberFormatException{
-		List<Double> out = new ArrayList<>();
-		for(Object o : in){
-			out.add(Double.parseDouble(String.valueOf(o)));
-		}
-		return out;
-	}
-
-	private List<Boolean> castAllBoolean(List<?> in) throws IllegalArgumentException{
-		List<Boolean> out = new ArrayList<>();
-		for(Object o : in){
-			String v = String.valueOf(o);
-			if(v.equalsIgnoreCase("true")){
-				out.add(true);
-			}else if(v.equalsIgnoreCase("false")){
-				out.add(false);
-			}else{
-				throw new IllegalArgumentException("Invalid boolean list");
-			}
-		}
-		return out;
 	}
 	
-	private List<BigInteger> castAllBigInteger(List<?> in) throws NumberFormatException{
-		List<BigInteger> out = new ArrayList<>();
-		for(Object o : in){
-			out.add(new BigInteger(String.valueOf(o)));
-		}
-		return out;
+	public <T> T getGeneric(String key, Class<T> clazz, T defaultVal, boolean applyDefault) {
+		T obj = getGeneric(key, clazz);
+		if(obj != null) return obj;
+		if(applyDefault) set(key, defaultVal);
+		return defaultVal;
 	}
 	
-	private List<BigDecimal> castAllBigDecimal(List<?> in) throws NumberFormatException{
-		List<BigDecimal> out = new ArrayList<>();
-		for(Object o : in){
-			out.add(new BigDecimal(String.valueOf(o)));
+	public <T> List<T> getGenericList(String key, Class<T> clazz) {
+		Property prop = parentSection.get(key);
+		if(prop == null) return null;
+		if(!prop.type.equals(PropertyType.LIST)) throw new InvalidTypeException(key, "Invalid property type"+prop.type);
+		try {
+			return castGenericList((List<?>) prop.value, clazz);
+		}catch(Exception e) {
+			throw new InvalidTypeException(key, "Failed to cast type", e);
 		}
-		return out;
 	}
+	
+	public <T> List<T> getGenericList(String key, Class<T> clazz, List<T> defaultVal, boolean applyDefault) {
+		List<T> obj = getGenericList(key, clazz);
+		if(obj != null) return obj;
+		if(applyDefault) set(key, defaultVal);
+		return defaultVal;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T> Map<String, T> getGenericMap(String key, Class<T> clazz) {
+		Property prop = parentSection.get(key);
+		if(prop == null) return null;
+		if(!prop.type.equals(PropertyType.MAP)) throw new InvalidTypeException(key, "Invalid property type"+prop.type);
+		try {
+			return castGenericMap((Map<String, ?>) prop.value, clazz);
+		}catch(Exception e) {
+			throw new InvalidTypeException(key, "Failed to cast type", e);
+		}
+	}
+	
+	public <T> Map<String, T> getGenericMap(String key, Class<T> clazz, Map<String, T> defaultVal, boolean applyDefault) {
+		Map<String, T> obj = getGenericMap(key, clazz);
+		if(obj != null) return obj;
+		if(applyDefault) set(key, defaultVal);
+		return defaultVal;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private <T> T castGeneric(Object obj, Class<T> clazz) {
+		if(clazz.equals(Object.class)) return (T) obj;
+		String val = (String) obj;
+		if(clazz.equals(String.class)) return (T) val;
+		if(clazz.equals(Boolean.class)) return (T) Boolean.valueOf(val);
+		if(clazz.equals(Integer.class)) return (T) Integer.valueOf(val);
+		if(clazz.equals(Double.class)) return (T) Double.valueOf(val);
+		if(clazz.equals(Long.class)) return (T) Long.valueOf(val);
+		if(clazz.equals(BigInteger.class)) return (T) new BigInteger(val);
+		if(clazz.equals(BigDecimal.class)) return (T) new BigDecimal(val);
+		throw new InvalidTypeException("Unsupported type: "+clazz.getName());
+	}
+	
+	private <T> List<T> castGenericList(List<?> list, Class<T> clazz) {
+		return list.stream().map(o -> castGeneric(o, clazz)).collect(Collectors.toList());
+	}
+	
+	private <T> Map<String, T> castGenericMap(Map<String, ?> map, Class<T> clazz) {
+		return map.entrySet().stream()
+				.map(e -> new AbstractMap.SimpleEntry<>(e.getKey(), castGeneric(e.getValue(), clazz)))
+				.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+	}
+
+//	private List<String> castAllString(List<?> in){
+//		List<String> out = new ArrayList<>();
+//		for(Object o : in){
+//			out.add(String.valueOf(o));
+//		}
+//		return out;
+//	}
+//
+//	private List<Integer> castAllInteger(List<?> in) throws NumberFormatException{
+//		List<Integer> out = new ArrayList<>();
+//		for(Object o : in){
+//			out.add(Integer.parseInt(String.valueOf(o)));
+//		}
+//		return out;
+//	}
+//
+//	private List<Long> castAllLong(List<?> in) throws NumberFormatException{
+//		List<Long> out = new ArrayList<>();
+//		for(Object o : in){
+//			out.add(Long.parseLong(String.valueOf(o)));
+//		}
+//		return out;
+//	}
+//
+//	private List<Double> castAllDouble(List<?> in) throws NumberFormatException{
+//		List<Double> out = new ArrayList<>();
+//		for(Object o : in){
+//			out.add(Double.parseDouble(String.valueOf(o)));
+//		}
+//		return out;
+//	}
+//
+//	private List<Boolean> castAllBoolean(List<?> in) throws IllegalArgumentException{
+//		List<Boolean> out = new ArrayList<>();
+//		for(Object o : in){
+//			String v = String.valueOf(o);
+//			if(v.equalsIgnoreCase("true")){
+//				out.add(true);
+//			}else if(v.equalsIgnoreCase("false")){
+//				out.add(false);
+//			}else{
+//				throw new IllegalArgumentException("Invalid boolean list");
+//			}
+//		}
+//		return out;
+//	}
+//	
+//	private List<BigInteger> castAllBigInteger(List<?> in) throws NumberFormatException{
+//		List<BigInteger> out = new ArrayList<>();
+//		for(Object o : in){
+//			out.add(new BigInteger(String.valueOf(o)));
+//		}
+//		return out;
+//	}
+//	
+//	private List<BigDecimal> castAllBigDecimal(List<?> in) throws NumberFormatException{
+//		List<BigDecimal> out = new ArrayList<>();
+//		for(Object o : in){
+//			out.add(new BigDecimal(String.valueOf(o)));
+//		}
+//		return out;
+//	}
 
 	/**
 	 * Returns the list of keys for the subproperties for the given key
@@ -1418,7 +1321,7 @@ public class CustomConfig {
 		
 		@Override
 		public String toString() {
-			return "["+key+" => "+value+"]";
+			return "[("+type+")"+key+" => "+value+"]";
 		}
 		
 	}
@@ -1486,10 +1389,36 @@ public class CustomConfig {
 	 */
 	public static class InvalidConfigException extends RuntimeException{
 		
-		private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = -3103267125846837725L;
 
-		InvalidConfigException(String reason, int line){
+		public InvalidConfigException(String reason, int line){
 			super("Failed to load config: "+reason+(line!=-1?" (Line "+line+")":""));
+		}
+
+		public InvalidConfigException(String reason, int line, Throwable cause){
+			super("Failed to load config: "+reason+(line!=-1?" (Line "+line+")":""), cause);
+		}
+
+	}
+
+	/**
+	 * An exception thrown when the given config is not in the correct format
+	 * @author MrLetsplay2003
+	 */
+	public static class InvalidTypeException extends RuntimeException{
+		
+		private static final long serialVersionUID = -329316730029087146L;
+
+		public InvalidTypeException(String reason){
+			super(reason);
+		}
+
+		public InvalidTypeException(String key, String reason){
+			super("Failed to get property \""+key+"\": "+reason);
+		}
+
+		public InvalidTypeException(String key, String reason, Throwable cause){
+			super("Failed to get property \""+key+"\": "+reason, cause);
 		}
 
 	}
@@ -1852,14 +1781,14 @@ public class CustomConfig {
 						lines.add(b.toString());
 						b = new StringBuilder();
 						lines.addAll(formatList((List<?>) prop.val, indents + 1));
-						lines.add(getConfig().objectEndString);
+						lines.add(new StringBuilder(space).append(getConfig().objectEndString).toString());
 						break;
 					case MAP:
 						b.append(getConfig().objectStartString).append(newLine());
 						lines.add(b.toString());
 						b = new StringBuilder();
 						lines.addAll(formatMap((Map<String, ?>) prop.val, indents + 1));
-						lines.add(getConfig().objectEndString);
+						lines.add(new StringBuilder(space).append(getConfig().objectEndString).toString());
 						break;
 				}
 				b.append(newLine());
@@ -1952,7 +1881,7 @@ public class CustomConfig {
 		}
 		
 		public ParsedLine readLine() throws IOException {
-			if(overrideIndex != -1 && overrideIndex >= lastLines.size()) {
+			if(overrideIndex != -1 && overrideIndex < lastLines.size()) {
 				ParsedLine tmp = lastLines.get(overrideIndex);
 				overrideIndex++;
 				return tmp;
