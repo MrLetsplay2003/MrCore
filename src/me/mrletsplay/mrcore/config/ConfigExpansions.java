@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ConfigExpansions {
 	
@@ -26,14 +27,15 @@ public class ConfigExpansions {
 		
 		@SuppressWarnings("unchecked")
 		public <T> T getMappable(String key, Class<T> mappingClass) {
-			ObjectMapper<?> mapper = mappers.stream().filter(m -> m.mappingClass.equals(mappingClass)).findFirst().orElse(null);
-			return ((ObjectMapper<T>)mapper).constructObject(getMap(key));
+			ObjectMapper<T> mapper = (ObjectMapper<T>) mappers.stream().filter(m -> m.mappingClass.equals(mappingClass)).findFirst().orElse(null);
+			return mapper.constructObject(getMap(key));
 		}
 		
 		@SuppressWarnings("unchecked")
 		public <T> List<T> getMappableList(String key, Class<T> mappingClass) {
-			ObjectMapper<?> mapper = mappers.stream().filter(m -> m.mappingClass.equals(mappingClass)).findFirst().orElse(null);
-			return (List<T>) ((ObjectMapper<T>)mapper).constructObject(getMap(key));
+			ObjectMapper<T> mapper = (ObjectMapper<T>) mappers.stream().filter(m -> m.mappingClass.equals(mappingClass)).findFirst().orElse(null);
+			List<Map<String, Object>> list = getMapList(key);
+			return list.stream().map(e -> mapper.constructObject(e)).collect(Collectors.toList());
 		}
 		
 		public List<ObjectMapper<?>> getMappers() {
