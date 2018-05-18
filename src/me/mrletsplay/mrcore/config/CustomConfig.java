@@ -338,7 +338,7 @@ public class CustomConfig {
 		ParsedLine l = reader.getLastLine();
 		int startStage = l.getStage();
 		while((line = reader.readLine()) != null) {
-			if(line.getStage() < startStage)
+			if(line.getStage() <= startStage)
 				return null;
 			if(line.getStage() - startStage != 1)
 				throw new InvalidConfigException("Invalid stage change ("+(line.getStage() - startStage)+")", reader.getLineNumber());
@@ -346,7 +346,7 @@ public class CustomConfig {
 				case LIST_START:
 				case PROPERTY:
 					reader.jumpBack();
-					return loadSubsection(reader); //TODO
+					return loadSubsection(reader);
 				case LIST_ENTRY:
 					reader.jumpBack();
 					return loadList(reader);
@@ -386,6 +386,7 @@ public class CustomConfig {
 						tmpComment = null;
 					}
 					Object o = loadListOrSubsection(reader);
+					if(o == null) break;
 					if(o instanceof ConfigSection) {
 						section.subsections.put(line.key, new ConfigSection((ConfigSection) o, section, line.key));
 					}else if(o instanceof List<?>) {
