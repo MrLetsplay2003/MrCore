@@ -15,10 +15,12 @@ public class ConfigExpansions {
 		
 		public ExpandableCustomConfig(File configFile, ConfigSaveProperty... defaultSaveProperties) {
 			super(configFile, defaultSaveProperties);
+			setFormatter(new ExpandableConfigFormatter(this));
 		}
 
 		public ExpandableCustomConfig(URL configURL, ConfigSaveProperty... defaultSaveProperties) {
 			super(configURL, defaultSaveProperties);
+			setFormatter(new ExpandableConfigFormatter(this));
 		}
 		
 		public void registerMapper(ObjectMapper<?> mapper) {
@@ -28,28 +30,26 @@ public class ConfigExpansions {
 		@SuppressWarnings("unchecked")
 		public <T> T getMappable(String key, Class<T> mappingClass) {
 			ObjectMapper<T> mapper = (ObjectMapper<T>) mappers.stream().filter(m -> m.mappingClass.equals(mappingClass)).findFirst().orElse(null);
-			return mapper.constructObject(getMap(key));
+			try {
+				return mapper.constructObject(getMap(key));
+			} catch(Exception e) {
+				throw new InvalidTypeException(key, "Failed to parse into "+mappingClass.getName(), e);
+			}
 		}
 		
 		@SuppressWarnings("unchecked")
 		public <T> List<T> getMappableList(String key, Class<T> mappingClass) {
 			ObjectMapper<T> mapper = (ObjectMapper<T>) mappers.stream().filter(m -> m.mappingClass.equals(mappingClass)).findFirst().orElse(null);
 			List<Map<String, Object>> list = getMapList(key);
-			return list.stream().map(e -> mapper.constructObject(e)).collect(Collectors.toList());
+			try {
+				return list.stream().map(e -> mapper.constructObject(e)).collect(Collectors.toList());
+			} catch(Exception e) {
+				throw new InvalidTypeException(key, "Failed to parse into "+mappingClass.getName(), e);
+			}
 		}
 		
 		public List<ObjectMapper<?>> getMappers() {
 			return mappers;
-		}
-		
-		@Override
-		public void set(String key, Object val, boolean save, List<ConfigSaveProperty> props) {
-			final Object o = val;
-			ObjectMapper<?> mapper = mappers.stream().filter(m -> m.canMap(o)).findFirst().orElse(null);
-			if(mapper != null) {
-				val = mapper.map(val);
-			}
-			super.set(key, val, save, props);
 		}
 		
 		public static abstract class ObjectMapper<T> {
@@ -72,6 +72,30 @@ public class ConfigExpansions {
 			public abstract Map<String, Object> mapObject(T object);
 			
 			public abstract T constructObject(Map<String, Object> map);
+			
+		}
+		
+		public static class ExpandableConfigFormatter extends DefaultConfigFormatter {
+
+			private ExpandableCustomConfig config;
+			
+			public ExpandableConfigFormatter(ExpandableCustomConfig config) {
+				super(config);
+				this.config = config;
+			}
+			
+			@Override
+			public FormattedProperty formatObject(Object o) {
+				FormattedProperty fp = super.formatObject(o);
+				if(fp.isSpecific()) return fp;
+				
+				ObjectMapper<?> mapper = config.mappers.stream().filter(m -> m.canMap(o)).findFirst().orElse(null);
+				if(mapper != null) {
+					return FormattedProperty.map(mapper.map(o));
+				}
+				
+				return fp;
+			}
 			
 		}
 		

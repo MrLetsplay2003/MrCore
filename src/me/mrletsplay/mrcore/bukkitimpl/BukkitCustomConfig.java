@@ -8,24 +8,17 @@ import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
 import me.mrletsplay.mrcore.config.ConfigExpansions.ExpandableCustomConfig;
 
 public class BukkitCustomConfig extends ExpandableCustomConfig {
-
-	public BukkitCustomConfig(File configFile) {
-		this(configFile, new ConfigSaveProperty[0]);
-	}
 	
 	public BukkitCustomConfig(File configFile, ConfigSaveProperty... defaultSaveProperties) {
 		super(configFile, defaultSaveProperties);
 		registerMappers();
 	}
-
-	public BukkitCustomConfig(URL configURL) {
-		this(configURL, new ConfigSaveProperty[0]);
-	}
-
+	
 	public BukkitCustomConfig(URL configURL, ConfigSaveProperty... defaultSaveProperties) {
 		super(configURL, defaultSaveProperties);
 		registerMappers();
@@ -59,6 +52,67 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 			}
 			
 		});
+		
+//		registerMapper(new ObjectMapper<ItemStack>(ItemStack.class) {
+//
+//			@Override
+//			public Map<String, Object> mapObject(ItemStack it) {
+//				Map<String, Object> map = new HashMap<>();
+//				map.put("type", it.getType());
+//				map.put("durability", it.getDurability());
+//				map.put("amount", it.getAmount());
+//				if(it.hasItemMeta()) {
+//					ItemMeta m = it.getItemMeta();
+//					map.put("name", m.getDisplayName());
+//					map.put("lore", m.getLore());
+//					if(!m.getEnchants().isEmpty()) {
+//						HashMap<String, Integer> enchMap = new HashMap<>();
+//						for(Map.Entry<Enchantment, Integer> ench : m.getEnchants().entrySet()) {
+//							enchMap.put(ench.getKey().getName(), ench.getValue());
+//						}
+//						map.put("enchantments", enchMap);
+//					}
+//					if(!m.getItemFlags().isEmpty()) {
+//						map.put("flags", m.getItemFlags().stream().map(f -> f.name()).collect(Collectors.toList()));
+//					}
+//				}
+//				return map;
+//			}
+//
+//			@Override
+//			public ItemStack constructObject(Map<String, Object> map) {
+//				return null;
+//			}
+//			
+//		});
+	}
+	
+	public static class BukkitConfigFormatter extends ExpandableConfigFormatter {
+
+		private BukkitCustomConfig config;
+		
+		public BukkitConfigFormatter(BukkitCustomConfig config) {
+			super(config);
+			this.config = config;
+		}
+		
+		@Override
+		public FormattedProperty formatObject(Object o) {
+			FormattedProperty fp = super.formatObject(o);
+			if(fp.isSpecific()) return fp;
+			
+			if(o instanceof ConfigurationSerializable) {
+				return FormattedProperty.map(((ConfigurationSerializable) o).serialize());
+			}
+			
+			return fp;
+		}
+		
+		@Override
+		public BukkitCustomConfig getConfig() {
+			return config;
+		}
+		
 	}
 	
 	public Location getLocation(String key) {
@@ -82,5 +136,49 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 		if(applyDefault) set(key, defaultVal);
 		return defaultVal;
 	}
+	
+//	public static void setTexture(SkullMeta im, String url) {
+//		GameProfile profile = new GameProfile(UUID.randomUUID(), null);
+//		profile.getProperties().put("textures", new com.mojang.authlib.properties.Property("textures", new String(Base64.getEncoder().encode(("{textures:{SKIN:{url:\""+url+"\"}}}").getBytes()))));
+//		Field profileField = null;
+//		try {
+//			profileField = im.getClass().getDeclaredField("profile");
+//			profileField.setAccessible(true);
+//			profileField.set(im, profile);
+//		} catch (Exception e1) {
+//			e1.printStackTrace();
+//		}
+//	}
+//	
+//	public static void setRawTexture(SkullMeta im, String raw) {
+//		GameProfile profile = new GameProfile(UUID.randomUUID(), null);
+//		profile.getProperties().put("textures", new com.mojang.authlib.properties.Property("textures", raw));
+//		Field profileField = null;
+//		try {
+//			profileField = im.getClass().getDeclaredField("profile");
+//			profileField.setAccessible(true);
+//			profileField.set(im, profile);
+//		} catch (Exception e1) {
+//			e1.printStackTrace();
+//		}
+//	}
+//	
+//	public static String getRawTexture(SkullMeta m) {
+//		try {
+//			Field profileField = m.getClass().getDeclaredField("profile");
+//			profileField.setAccessible(true);
+//			GameProfile profile = (GameProfile) profileField.get(m);
+//			if(profile != null) {
+//				Collection<com.mojang.authlib.properties.Property> txt = profile.getProperties().get("textures");
+//				Iterator<com.mojang.authlib.properties.Property> it = txt.iterator();
+//				if(it.hasNext()) {
+//					return it.next().getValue();
+//				}
+//			}
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		return null;
+//	}
 	
 }
