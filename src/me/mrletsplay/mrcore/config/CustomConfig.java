@@ -287,47 +287,7 @@ public class CustomConfig {
 		if(!isExternal && configFile != null) lastEdited = configFile.lastModified();
 		BufferedReader r = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
 		LineByLineReader lr = new LineByLineReader(this, r);
-		List<String> stageBuffer = new ArrayList<>();
-		ParsedLine line;
-		int lastStage = -1;
-		List<String> tmpComment = null;
-		while((line = lr.readLine()) != null) {
-			if(line.getStage() == -1) {
-				r.close();
-				throw new InvalidConfigException("Invalid stage", lr.getLineNumber());
-			}
-			addOrRemove(stageBuffer, line.key.split("\\."), line.getStage() - lastStage, lr.getLineNumber());
-			switch(line.type) {
-				case COMMENT:
-					lr.jumpBack();
-					tmpComment = loadComment(lr);
-					break;
-				case HEADER_COMMENT:
-					lr.jumpBack();
-					setLoadedComment(line.getStage(), stageBuffer, null, loadComment(lr).stream().collect(Collectors.joining("\n")));
-					tmpComment = null;
-					break;
-				case LIST_START:
-					if(tmpComment != null) {
-						setLoadedComment(line.getStage(), stageBuffer, line.key, tmpComment.stream().collect(Collectors.joining("\n")));
-						tmpComment = null;
-					}
-					setLoadedProperty(line.getStage(), stageBuffer, line.key, new Property(PropertyType.LIST, loadList(lr)));
-					break;
-				case PROPERTY:
-					if(tmpComment != null) {
-						setLoadedComment(line.getStage(), stageBuffer, line.key, tmpComment.stream().collect(Collectors.joining("\n")));
-						tmpComment = null;
-					}
-					setLoadedProperty(line.getStage(), stageBuffer, line.key, new Property(PropertyType.VALUE, loadValue(line.value, lr)));
-					break;
-				case OBJECT_END:
-					throw new InvalidConfigException("Unexpected OBJECT_END", lr.getLineNumber());
-				case LIST_ENTRY:
-					throw new InvalidConfigException("Unexpected LIST_ENTRY", lr.getLineNumber());
-			}
-			lastStage = line.getStage();
-		}
+		parentSection = loadSubsection(lr);
 		r.close();
 		return this;
 	}
@@ -335,7 +295,12 @@ public class CustomConfig {
 	public HashMap<String, Object> loadMap(LineByLineReader reader) throws IOException {
 		HashMap<String, Object> map = new HashMap<>();
 		ParsedLine line;
+		int stage = reader.getLastLine().getStage();
 		outer: while((line = reader.readLine()) != null) {
+			if(line.getStage() < stage) {
+				reader.jumpBack();
+				break;
+			}
 			switch(line.type) {
 				case PROPERTY:
 					map.put(line.key, loadValue(line.value, reader));
@@ -364,8 +329,83 @@ public class CustomConfig {
 				reader.jumpBack();
 				return loadList(reader);
 			default:
-				throw new InvalidConfigException("Invalid generic object", reader.lineNum);
+				throw new InvalidConfigException("Invalid generic object, got "+line.type, reader.lineNum);
 		}
+	}
+	
+	public Object loadListOrSubsection(LineByLineReader reader) throws IOException {
+		ParsedLine line;
+		ParsedLine l = reader.getLastLine();
+		int startStage = l.getStage();
+		while((line = reader.readLine()) != null) {
+			if(line.getStage() < startStage)
+				return null;
+			if(line.getStage() - startStage != 1)
+				throw new InvalidConfigException("Invalid stage change ("+(line.getStage() - startStage)+")", reader.getLineNumber());
+			switch(line.type) {
+				case LIST_START:
+				case PROPERTY:
+					reader.jumpBack();
+					return loadSubsection(reader); //TODO
+				case LIST_ENTRY:
+					reader.jumpBack();
+					return loadList(reader);
+				default:
+					throw new InvalidConfigException("Invalid list or subsection, got "+line.type, reader.lineNum);
+			}
+		}
+		return null;
+	}
+	
+	public ConfigSection loadSubsection(LineByLineReader reader) throws IOException {
+		ConfigSection section = new ConfigSection(this, null, null);
+		ParsedLine l = reader.getLastLine();
+		int startStage = l != null ? l.getStage() : 0;
+		List<String> tmpComment = null;
+		ParsedLine line;
+		while((line = reader.readLine()) != null) {
+			if(line.getStage() == -1) throw new InvalidConfigException("Invalid stage", reader.getLineNumber());
+			if(line.getKey() == null) throw new InvalidConfigException("Missing key", reader.getLineNumber());
+			if(line.getStage() < startStage) {
+				reader.jumpBack();
+				return section;
+			}
+			switch(line.type) {
+				case COMMENT:
+					reader.jumpBack();
+					tmpComment = loadComment(reader);
+					break;
+				case HEADER_COMMENT:
+					reader.jumpBack();
+					section.setComment(null, loadComment(reader).stream().collect(Collectors.joining("\n")));
+					tmpComment = null;
+					break;
+				case LIST_START:
+					if(tmpComment != null) {
+						section.setComment(line.getKey(), tmpComment.stream().collect(Collectors.joining("\n")));
+						tmpComment = null;
+					}
+					Object o = loadListOrSubsection(reader);
+					if(o instanceof ConfigSection) {
+						section.subsections.put(line.key, new ConfigSection((ConfigSection) o, section, line.key));
+					}else if(o instanceof List<?>) {
+						section.set(line.key, new Property(PropertyType.LIST, o));
+					}
+					break;
+				case PROPERTY:
+					if(tmpComment != null) {
+						setComment(line.getKey(), tmpComment.stream().collect(Collectors.joining("\n")));
+						tmpComment = null;
+					}
+					section.set(line.getKey(), new Property(PropertyType.VALUE, loadValue(line.value, reader)));
+					break;
+				case OBJECT_END:
+					throw new InvalidConfigException("Unexpected OBJECT_END", reader.getLineNumber());
+				case LIST_ENTRY:
+					throw new InvalidConfigException("Unexpected LIST_ENTRY", reader.getLineNumber());
+			}
+		}
+		return section;
 	}
 
 	public List<Object> loadList(LineByLineReader reader) throws IOException {
@@ -495,22 +535,6 @@ public class CustomConfig {
 		return parentSection.getComments(true);
 	}
 
-	private void setLoadedProperty(int currStage, List<String> stages, String key, Property p){
-		if(currStage>0) {
-			parentSection.set(getKey(stages, currStage) + "." + key, p);
-		}else {
-			parentSection.set(key, p);
-		}
-	}
-
-	private void setLoadedComment(int currStage, List<String> stages, String key, String comment){
-		if(currStage>0) {
-			parentSection.setComment(getKey(stages, currStage)+"."+key, comment);
-		}else {
-			parentSection.setComment(key, comment);
-		}
-	}
-
 	private ParsedLine parseLine(int line, String s) throws InvalidConfigException{
 		int indents = getFileStage(s);
 		String formattedLine = s.replaceAll("^\\s+","").replaceAll("^\\t+","");
@@ -557,23 +581,7 @@ public class CustomConfig {
 		}
 		return new ParsedValue(ValueType.DEFAULT, value);
 	}
-
-	private void addOrRemove(List<String> s, String[] spl, int c, int l) {
-		if(c>0) {
-			if(c > spl.length) throw new InvalidConfigException("Invalid stage change", l);
-			s.addAll(Arrays.asList(spl).subList(0, c));
-		}else {
-			if(Math.abs(c) > s.size()) throw new InvalidConfigException("Invalid stage change", l);
-			for(int i = 0; i < Math.abs(c); i++) {
-				s.remove(s.size()-1);
-			}
-		}
-	}
-
-	private String getKey(List<String> stages, int currStage) {
-		return stages.stream().limit(currStage).collect(Collectors.joining("."));
-	}
-
+	
 	private int getFileStage(String s) {
 		int indents = 0;
 		while(s.startsWith(space)) {
@@ -1075,7 +1083,7 @@ public class CustomConfig {
 	@SuppressWarnings("unchecked")
 	private <T> T castGeneric(Object obj, Class<T> clazz) {
 		if(clazz.equals(Object.class)) return (T) obj;
-		String val = (String) obj; //TODO
+		String val = (String) obj;
 		if(clazz.equals(String.class)) return (T) val;
 		if(clazz.equals(Boolean.class)) return (T) Boolean.valueOf(val);
 		if(clazz.equals(Integer.class)) return (T) Integer.valueOf(val);
@@ -1388,6 +1396,15 @@ public class CustomConfig {
 			subsections = keepOrder ? new LinkedHashMap<>() : new HashMap<>();
 			properties = keepOrder ? new LinkedHashMap<>() : new HashMap<>();
 			comments = new HashMap<>();
+		}
+		
+		public ConfigSection(ConfigSection from, ConfigSection parent, String name) {
+			this.config = from.config;
+			this.parent = parent;
+			this.name = name;
+			subsections = from.subsections;
+			properties = from.properties;
+			comments = from.comments;
 		}
 		
 		public ConfigSection getSubsection(String key) {
@@ -1832,10 +1849,14 @@ public class CustomConfig {
 			return lineNum;
 		}
 		
+		public ParsedLine getLastLine() {
+			return !lastLines.isEmpty() ? lastLines.get(lastLines.size()-1) : null;
+		}
+		
 		public ParsedLine readLine() throws IOException {
 			if(overrideIndex != -1 && overrideIndex < lastLines.size()) {
-				ParsedLine tmp = lastLines.get(overrideIndex);
-				overrideIndex++;
+				ParsedLine tmp = lastLines.get(overrideIndex++);
+				if(overrideIndex >= lastLines.size()) overrideIndex = -1;
 				return tmp;
 			}
 			overrideIndex = -1;
@@ -1847,7 +1868,7 @@ public class CustomConfig {
 		}
 		
 		public void jumpBack() {
-			overrideIndex = overrideIndex == -1 ? lastLines.size()-1 : overrideIndex--;
+			overrideIndex = (overrideIndex == -1 ? lastLines.size()-1 : overrideIndex--);
 		}
 		
 	}
