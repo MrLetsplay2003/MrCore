@@ -1075,7 +1075,7 @@ public class CustomConfig {
 	@SuppressWarnings("unchecked")
 	private <T> T castGeneric(Object obj, Class<T> clazz) {
 		if(clazz.equals(Object.class)) return (T) obj;
-		String val = (String) obj;
+		String val = (String) obj; //TODO
 		if(clazz.equals(String.class)) return (T) val;
 		if(clazz.equals(Boolean.class)) return (T) Boolean.valueOf(val);
 		if(clazz.equals(Integer.class)) return (T) Integer.valueOf(val);
@@ -1678,7 +1678,7 @@ public class CustomConfig {
 		}
 		
 		public Property toProperty() {
-			return new Property(type, val);
+			return new Property(type, type.equals(PropertyType.VALUE) ? val.toString() : val);
 		}
 		
 	}
