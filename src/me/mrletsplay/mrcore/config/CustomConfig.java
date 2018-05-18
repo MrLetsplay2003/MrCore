@@ -1667,6 +1667,10 @@ public class CustomConfig {
 			return type;
 		}
 		
+		public boolean isSpecific() {
+			return !type.equals(PropertyType.VALUE);
+		}
+		
 		public Object getValue() {
 			return val;
 		}

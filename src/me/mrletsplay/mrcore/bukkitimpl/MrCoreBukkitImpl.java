@@ -8,6 +8,7 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -43,7 +44,8 @@ public class MrCoreBukkitImpl {
 			plugin.getLogger().info("Downloading from "+downloadL+"...");
 			download(new URL(downloadL), mrCoreFile);
 			plugin.getLogger().info("Downloaded MrCore jar");
-			Bukkit.getPluginManager().loadPlugin(mrCoreFile);
+			Plugin p = Bukkit.getPluginManager().loadPlugin(mrCoreFile);
+			Bukkit.getPluginManager().enablePlugin(p);
 			plugin.getLogger().info("Loaded MrCore successfully");
 			
 			if(oldProtocol != null) System.setProperty("https.protocols", oldProtocol);
