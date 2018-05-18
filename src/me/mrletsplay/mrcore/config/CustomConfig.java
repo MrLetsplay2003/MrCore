@@ -341,7 +341,7 @@ public class CustomConfig {
 			if(line.getStage() <= startStage)
 				return null;
 			if(line.getStage() - startStage != 1)
-				throw new InvalidConfigException("Invalid stage change ("+(line.getStage() - startStage)+")", reader.getLineNumber());
+				throw new InvalidConfigException("Invalid stage change ("+(line.getStage() - startStage)+")", line.lineNum);
 			switch(line.type) {
 				case LIST_START:
 				case PROPERTY:
@@ -364,8 +364,8 @@ public class CustomConfig {
 		List<String> tmpComment = null;
 		ParsedLine line;
 		while((line = reader.readLine()) != null) {
-			if(line.getStage() == -1) throw new InvalidConfigException("Invalid stage", reader.getLineNumber());
-			if(line.getKey() == null) throw new InvalidConfigException("Missing key", reader.getLineNumber());
+			if(line.getStage() == -1) throw new InvalidConfigException("Invalid stage", line.lineNum);
+			if(line.getKey() == null) throw new InvalidConfigException("Missing key", line.lineNum);
 			if(line.getStage() < startStage) {
 				reader.jumpBack();
 				return section;
@@ -401,9 +401,9 @@ public class CustomConfig {
 					section.set(line.getKey(), new Property(PropertyType.VALUE, loadValue(line.value, reader)));
 					break;
 				case OBJECT_END:
-					throw new InvalidConfigException("Unexpected OBJECT_END", reader.getLineNumber());
+					throw new InvalidConfigException("Unexpected OBJECT_END", line.lineNum);
 				case LIST_ENTRY:
-					throw new InvalidConfigException("Unexpected LIST_ENTRY", reader.getLineNumber());
+					throw new InvalidConfigException("Unexpected LIST_ENTRY", line.lineNum);
 			}
 		}
 		return section;
@@ -544,33 +544,33 @@ public class CustomConfig {
 		boolean tmpBool = false;
 		
 		if(tmpBool = formattedLine.startsWith(commentString) || formattedLine.startsWith(commentString.trim())){
-			return new ParsedLine(indents, null, LineType.COMMENT, new ParsedValue(ValueType.DEFAULT,
+			return new ParsedLine(line, indents, null, LineType.COMMENT, new ParsedValue(ValueType.DEFAULT,
 					formattedLine.substring(tmpBool?commentString.length():commentString.trim().length())));
 		}
 		
 		if(tmpBool = formattedLine.startsWith(headerCommentString) || formattedLine.startsWith(headerCommentString.trim())) {
-			return new ParsedLine(indents, null, LineType.COMMENT, new ParsedValue(ValueType.DEFAULT,
+			return new ParsedLine(line, indents, null, LineType.COMMENT, new ParsedValue(ValueType.DEFAULT,
 					formattedLine.substring(tmpBool?headerCommentString.length():headerCommentString.trim().length())));
 		}
 		
 		if(formattedLine.startsWith(entryString)) {
-			return new ParsedLine(indents, null, LineType.LIST_ENTRY, parseValue(formattedLine.substring(entryString.length())));
+			return new ParsedLine(line, indents, null, LineType.LIST_ENTRY, parseValue(formattedLine.substring(entryString.length())));
 		}
 		
 		if(formattedLine.equals(entryString.trim())) {
-			return new ParsedLine(indents, null, LineType.LIST_ENTRY, new ParsedValue(ValueType.DEFAULT, ""));
+			return new ParsedLine(line, indents, null, LineType.LIST_ENTRY, new ParsedValue(ValueType.DEFAULT, ""));
 		}
 		
 		String[] p = formattedLine.split(splString, 2);
 		if(p.length==2){
 			if(p[1].isEmpty()){
-				return new ParsedLine(indents, p[0], LineType.LIST_START, new ParsedValue(ValueType.DEFAULT, null));
+				return new ParsedLine(line, indents, p[0], LineType.LIST_START, new ParsedValue(ValueType.DEFAULT, null));
 			}else{
-				return new ParsedLine(indents, p[0], LineType.PROPERTY, parseValue(p[1]));
+				return new ParsedLine(line, indents, p[0], LineType.PROPERTY, parseValue(p[1]));
 			}
 		}
 		
-		if(formattedLine.equals(objectEndString)) return new ParsedLine(indents, null, LineType.OBJECT_END, null);
+		if(formattedLine.equals(objectEndString)) return new ParsedLine(line, indents, null, LineType.OBJECT_END, null);
 		
 		
 		throw new InvalidConfigException("Invalid property \""+formattedLine+"\"",line);
@@ -1248,16 +1248,21 @@ public class CustomConfig {
 	
 	public static class ParsedLine {
 		
-		private int stage;
+		private int stage, lineNum;
 		private String key;
 		private ParsedValue value;
 		private LineType type;
 
-		public ParsedLine(int stage, String key, LineType type, ParsedValue value){
+		public ParsedLine(int lineNum, int stage, String key, LineType type, ParsedValue value){
+			this.lineNum = lineNum;
 			this.stage = stage;
 			this.value = value;
 			this.type = type;
 			this.key = key;
+		}
+		
+		public int getLineNumber() {
+			return lineNum;
 		}
 		
 		public int getStage() {
@@ -1846,9 +1851,9 @@ public class CustomConfig {
 			return line;
 		}
 		
-		public int getLineNumber() {
-			return lineNum;
-		}
+//		public int getLineNumber() {
+//			return lineNum;
+//		}
 		
 		public ParsedLine getLastLine() {
 			return !lastLines.isEmpty() ? lastLines.get(lastLines.size()-1) : null;
