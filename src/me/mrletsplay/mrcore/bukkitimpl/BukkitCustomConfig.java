@@ -16,11 +16,13 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 	
 	public BukkitCustomConfig(File configFile, ConfigSaveProperty... defaultSaveProperties) {
 		super(configFile, defaultSaveProperties);
+		setFormatter(new BukkitConfigFormatter(this));
 		registerMappers();
 	}
 	
 	public BukkitCustomConfig(URL configURL, ConfigSaveProperty... defaultSaveProperties) {
 		super(configURL, defaultSaveProperties);
+		setFormatter(new BukkitConfigFormatter(this));
 		registerMappers();
 	}
 	
