@@ -71,6 +71,7 @@ public class CustomConfig {
 		this.configFile = configFile;
 		isExternal = false;
 		defaultSaveProps = Arrays.asList(defaultSaveProperties);
+		defaults = new HashMap<>();
 		parentSection = new ConfigSection(this, null, null);
 		formatter = new DefaultConfigFormatter(this);
 	}
@@ -94,6 +95,7 @@ public class CustomConfig {
 		this.configURL = configURL;
 		isExternal = true;
 		defaultSaveProps = Arrays.asList(defaultSaveProperties);
+		defaults = new HashMap<>();
 		parentSection = new ConfigSection(this, null, null);
 		formatter = new DefaultConfigFormatter(this);
 	}
