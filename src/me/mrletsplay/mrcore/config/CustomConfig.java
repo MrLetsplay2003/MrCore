@@ -280,8 +280,6 @@ public class CustomConfig {
 	 * @throws IOException If an IO error occurs while loading the config
 	 * @throws InvalidConfigException If the config to be loaded is in an invalid format
 	 */
-
-	
 	public CustomConfig loadConfig(InputStream in) throws IOException {
 		parentSection = new ConfigSection(this, null, null);
 		if(!isExternal && configFile != null) lastEdited = configFile.lastModified();
@@ -295,7 +293,7 @@ public class CustomConfig {
 	public HashMap<String, Object> loadMap(LineByLineReader reader) throws IOException {
 		HashMap<String, Object> map = new HashMap<>();
 		ParsedLine line;
-		int stage = reader.getLastLine().getStage();
+		int stage = reader.getPreviousLine().getStage();
 		outer: while((line = reader.readLine()) != null) {
 			if(line.getStage() < stage) {
 				reader.jumpBack();
@@ -335,7 +333,7 @@ public class CustomConfig {
 	
 	public Object loadListOrSubsection(LineByLineReader reader) throws IOException {
 		ParsedLine line;
-		ParsedLine l = reader.getLastLine();
+		ParsedLine l = reader.getPreviousLine();
 		int startStage = l.getStage();
 		while((line = reader.readLine()) != null) {
 			if(line.getStage() <= startStage)
@@ -359,14 +357,14 @@ public class CustomConfig {
 	
 	public ConfigSection loadSubsection(LineByLineReader reader) throws IOException {
 		ConfigSection section = new ConfigSection(this, null, null);
-		ParsedLine l = reader.getLastLine();
-		int startStage = l != null ? l.getStage() : 0;
+		ParsedLine l = reader.getPreviousLine();
+		int startStage = l != null ? l.getStage() : -1;
 		List<String> tmpComment = null;
 		ParsedLine line;
 		while((line = reader.readLine()) != null) {
 			if(line.getStage() == -1) throw new InvalidConfigException("Invalid stage", line.lineNum);
-			if(line.getKey() == null) throw new InvalidConfigException("Missing key", line.lineNum);
-			if(line.getStage() < startStage) {
+			if(!line.type.equals(LineType.COMMENT) && line.getKey() == null) throw new InvalidConfigException("Missing key", line.lineNum);
+			if(line.getStage() <= startStage) {
 				reader.jumpBack();
 				return section;
 			}
@@ -1562,7 +1560,10 @@ public class CustomConfig {
 		}
 		
 		public HashMap<String, String> getComments(boolean deep) {
-			HashMap<String, String> cs = new HashMap<>(comments);
+			HashMap<String, String> cs = new HashMap<>();
+			comments.entrySet().stream()
+				.map(en -> new AbstractMap.SimpleEntry<String, String>(name != null ? name + "." + en.getKey() : en.getKey(), en.getValue()))
+				.forEach(en -> cs.put(en.getKey(), en.getValue()));
 			if(deep) subsections.values().forEach(s -> s.getComments(true).entrySet().stream()
 					.map(en -> new AbstractMap.SimpleEntry<>((name==null?"":name + ".") + en.getKey(), en.getValue()))
 					.forEach(en -> cs.put(en.getKey(), en.getValue())));
@@ -1849,6 +1850,10 @@ public class CustomConfig {
 				if(line == null) return null;
 			}
 			return line;
+		}
+		
+		public ParsedLine getPreviousLine() {
+			return overrideIndex == -1 ? (lastLines.isEmpty() ? null : lastLines.get(lastLines.size() - 1)) : lastLines.get(overrideIndex - 1);
 		}
 		
 		public ParsedLine getLastLine() {
