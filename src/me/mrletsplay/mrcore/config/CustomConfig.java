@@ -361,7 +361,7 @@ public class CustomConfig {
 		int startStage = l != null ? l.getStage() : -1;
 		List<String> tmpComment = null;
 		ParsedLine line;
-		while((line = reader.readLine()) != null) {asd
+		while((line = reader.readLine()) != null) {
 			if(line.getStage() == -1) throw new InvalidConfigException("Invalid stage", line.lineNum);
 			if(line.getStage() <= startStage) {
 				reader.jumpBack();
