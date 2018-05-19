@@ -395,7 +395,7 @@ public class CustomConfig {
 						setComment(line.getKey(), tmpComment.stream().collect(Collectors.joining("\n")));
 						tmpComment = null;
 					}
-					section.set(line.getKey(), new Property(PropertyType.VALUE, loadValue(line.value, reader)));
+					section.set(line.getKey(), formatter.formatObject(loadValue(line.value, reader)).toProperty());
 					break;
 				case OBJECT_END:
 					throw new InvalidConfigException("Unexpected OBJECT_END", line.lineNum);
