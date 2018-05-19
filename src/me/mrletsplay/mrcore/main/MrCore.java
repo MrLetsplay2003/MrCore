@@ -15,7 +15,7 @@ public class MrCore {
 	 * - Multi-Plugin ("Modules")
 	 */
 	
-	private static final String VERSION = "1.8.2";
+	private static final String VERSION = "1.8.3";
 	
 	public static String getVersion() {
 		return VERSION;
