@@ -1442,7 +1442,7 @@ public class CustomConfig {
 				ConfigSection sub = getOrCreateSubsection(spl[0]);
 				sub.set(key.substring(spl[0].length() + 1), property);
 			}else {
-				if(property == null) {
+				if(property == null || property.value == null) {
 					properties.remove(key);
 				}else {
 					properties.put(key, property);
@@ -1702,7 +1702,7 @@ public class CustomConfig {
 		}
 		
 		public Property toProperty() {
-			return new Property(type, type.equals(PropertyType.VALUE) ? val.toString() : val);
+			return new Property(type, val != null ? (type.equals(PropertyType.VALUE) ? val.toString() : val) : null);
 		}
 		
 	}
