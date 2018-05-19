@@ -1851,10 +1851,6 @@ public class CustomConfig {
 			return line;
 		}
 		
-//		public int getLineNumber() {
-//			return lineNum;
-//		}
-		
 		public ParsedLine getLastLine() {
 			return !lastLines.isEmpty() ? lastLines.get(lastLines.size()-1) : null;
 		}
