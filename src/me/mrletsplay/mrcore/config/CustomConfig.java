@@ -336,8 +336,10 @@ public class CustomConfig {
 		ParsedLine l = reader.getPreviousLine();
 		int startStage = l.getStage();
 		while((line = reader.readLine()) != null) {
-			if(line.getStage() <= startStage)
+			if(line.getStage() <= startStage) {
+				reader.jumpBack();
 				return null;
+			}
 			if(line.getStage() - startStage != 1)
 				throw new InvalidConfigException("Invalid stage change ("+(line.getStage() - startStage)+")", line.lineNum);
 			switch(line.type) {
