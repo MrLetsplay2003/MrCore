@@ -1499,6 +1499,7 @@ public class CustomConfig {
 		
 		public List<String> getKeys(boolean deep, boolean fullKeys) {
 			List<String> keys = new ArrayList<>(properties.keySet()).stream().map(k -> fullKeys && name!=null ? name + "." + k : k).collect(Collectors.toList());
+			keys.addAll(subsections.keySet().stream().map(k -> fullKeys && name!=null ? name + "." + k : k).collect(Collectors.toList()));
 			if(deep) {
 				subsections.values().forEach(s -> s.getKeys(deep, fullKeys).forEach(k -> keys.add(fullKeys && name != null ? name + "." + k : k)));
 			}
