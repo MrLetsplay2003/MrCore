@@ -687,11 +687,14 @@ public class GUIUtils {
 		@SuppressWarnings("unchecked")
 		@EventHandler
 		public void onInvClick(InventoryClickEvent e) {
+			System.out.println("asd");
 			if(e.getClickedInventory() == null) return;
-			e.setResult(Result.ALLOW);
 			Inventory inv = e.getInventory();
 			Player player = (Player) e.getWhoClicked();
+			System.out.println("df");
 			if(inv.getHolder() instanceof GUIHolder) {
+				System.out.println("GHI");
+				e.setResult(Result.ALLOW);
 				GUIHolder holder = (GUIHolder) inv.getHolder();
 				GUI gui = holder.gui;
 				ClickAction action = ClickAction.getFromEvent(e);
