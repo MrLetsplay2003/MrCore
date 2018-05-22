@@ -14,7 +14,7 @@ public class MrCore {
 	 * - MySQL
 	 * - Multi-Plugin ("Modules")
 	 * 
-	 * shift click
+	 * shift click (gui)
 	 */
 	
 	private static final String VERSION = "1.8.3";
