@@ -35,6 +35,12 @@ import java.util.stream.Collectors;
  */
 public class CustomConfig {
 	
+	private static final String VERSION = "2.0";
+	
+	public static String getVersion() {
+		return VERSION;
+	}
+	
 	public static final String
 			DEFAULT_SPACE = "  ",
 			DEFAULT_SPL_STRING = ": ",
@@ -42,7 +48,8 @@ public class CustomConfig {
 			DEFAULT_COMMENT_STRING = "# ",
 			DEFAULT_HEADER_COMMENT_STRING = "## ",
 			DEFAULT_OBJECT_START_STRING = "{",
-			DEFAULT_OBJECT_END_STRING = "}";
+			DEFAULT_OBJECT_END_STRING = "}",
+			DEFAULT_CUSTOMCONFIG_VERSION_STRING = "### CustomConfig version: ";
 	
 	private String 
 			space = DEFAULT_SPACE,
@@ -51,7 +58,10 @@ public class CustomConfig {
 			commentString = DEFAULT_COMMENT_STRING,
 			headerCommentString = DEFAULT_HEADER_COMMENT_STRING,
 			objectStartString = DEFAULT_OBJECT_START_STRING,
-			objectEndString = DEFAULT_OBJECT_END_STRING;
+			objectEndString = DEFAULT_OBJECT_END_STRING,
+			customConfigVersionString = DEFAULT_CUSTOMCONFIG_VERSION_STRING,
+			
+			instanceVersion;
 
 	private File configFile;
 	private URL configURL;
@@ -108,6 +118,15 @@ public class CustomConfig {
 		this.defaultSaveProps = Arrays.asList(defaultSaveProps);
 	}
 
+	/**
+	 * Returns this CustomConfig instance's version<br>
+	 * This may not always be equal to {@link #getVersion()}!
+	 * @return This CustomConfig's version
+	 */
+	public String getInstanceVersion() {
+		return instanceVersion;
+	}
+	
 	/**
 	 * Returns the config url if external, returns <b>null</b> otherwise<br>
 	 * Check whether the config is external using {@link CustomConfig#isExternal() isExternal()}
@@ -237,6 +256,7 @@ public class CustomConfig {
 		if(isExternal) throw new UnsupportedOperationException("External (url) configs cannot be saved!");
 		List<ConfigSaveProperty> props = saveProperties!=null?saveProperties:defaultSaveProps;
 		BufferedWriter w = new BufferedWriter(new OutputStreamWriter(fOut, StandardCharsets.UTF_8));
+		w.write(customConfigVersionString + getVersion());
 		w.write(parentSection.saveToString(props, 0));
 		w.close();
 		if(configFile != null) lastEdited = configFile.lastModified();
@@ -285,6 +305,13 @@ public class CustomConfig {
 		if(!isExternal && configFile != null) lastEdited = configFile.lastModified();
 		BufferedReader r = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
 		LineByLineReader lr = new LineByLineReader(this, r);
+		ParsedLine ln = lr.readLine();
+		if(ln == null) return this;
+		if(ln.getType().equals(LineType.CUSTOMCONFIG_VERSION)) {
+			instanceVersion = ln.getValue().val;
+		}else {
+			lr.jumpBack();
+		}
 		parentSection = loadSubsection(lr);
 		r.close();
 		return this;
@@ -399,10 +426,8 @@ public class CustomConfig {
 					}
 					section.set(line.getKey(), formatter.formatObject(loadValue(line.value, reader)).toProperty());
 					break;
-				case OBJECT_END:
-					throw new InvalidConfigException("Unexpected OBJECT_END", line.lineNum);
-				case LIST_ENTRY:
-					throw new InvalidConfigException("Unexpected LIST_ENTRY", line.lineNum);
+				default:
+					throw new InvalidConfigException("Unexpected "+line.type, line.lineNum);
 			}
 		}
 		return section;
@@ -567,6 +592,11 @@ public class CustomConfig {
 		if(formattedLine.isEmpty()) return null;
 		
 		boolean tmpBool = false;
+		
+		if(tmpBool = formattedLine.startsWith(customConfigVersionString) || formattedLine.startsWith(customConfigVersionString.trim())){
+			return new ParsedLine(line, indents, null, LineType.CUSTOMCONFIG_VERSION, new ParsedValue(ValueType.DEFAULT,
+					formattedLine.substring(tmpBool?commentString.length():commentString.trim().length())));
+		}
 		
 		if(tmpBool = formattedLine.startsWith(commentString) || formattedLine.startsWith(commentString.trim())){
 			return new ParsedLine(line, indents, null, LineType.COMMENT, new ParsedValue(ValueType.DEFAULT,
@@ -1257,6 +1287,7 @@ public class CustomConfig {
 	
 	public static enum LineType {
 		
+		CUSTOMCONFIG_VERSION,
 		COMMENT,
 		HEADER_COMMENT,
 		PROPERTY,
