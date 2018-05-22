@@ -13,6 +13,7 @@ import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
@@ -30,7 +31,7 @@ public class GUIUtils {
 		private HashMap<Integer, GUIElement> elements;
 		private GUIDragDropListener dragDrop;
 		private GUIAction action;
-		private HashMap<String, Object> properties;
+		private HashMap<String, Object> properties = new HashMap<>();
 		
 		/**
 		 * Creates a GUI builder for a single page GUI
@@ -523,7 +524,6 @@ public class GUIUtils {
 	
 	public static class GUI {
 		
-		private GUIHolder holder;
 		private GUIBuilder builder;
 		
 		/**
@@ -533,7 +533,6 @@ public class GUIUtils {
 		 */
 		public GUI(GUIBuilder builder) {
 			this.builder = builder;
-			this.holder = new GUIHolder(this);
 		}
 		
 		/**
@@ -544,23 +543,23 @@ public class GUIUtils {
 		public Inventory getForPlayer(Player p) {
 			Inventory inv;
 			if(builder.isCustomType) {
-				inv = Bukkit.createInventory(holder.clone(), builder.invType, builder.title);
+				inv = Bukkit.createInventory(new GUIHolder(this), builder.invType, builder.title);
 			} else {
-				inv = Bukkit.createInventory(holder.clone(), builder.size, builder.title);
+				inv = Bukkit.createInventory(new GUIHolder(this), builder.size, builder.title);
 			}
 			for(Map.Entry<Integer, GUIElement> el : builder.elements.entrySet()) {
 				inv.setItem(el.getKey(), el.getValue().getItem(p));
 			}
 			return inv;
 		}
-		
+
 		/**
-		 * Returns the default GUIHolder for this GUI<br>
-		 * Can be used to set GUI-specific properties (See {@link GUIHolder#setProperty(String, Object)})
+		 * Returns the default GUIHolder properties for this GUI<br>
+		 * Can be used to set GUI-specific properties
 		 * @return The GUIHolder instance for this GUI (unique to this GUI)
 		 */
-		public GUIHolder getHolder() {
-			return holder;
+		public HashMap<String, Object> getDefaultHolderProperties() {
+			return builder.properties;
 		}
 		
 		/**
@@ -634,7 +633,7 @@ public class GUIUtils {
 		 */
 		public Inventory getForPlayer(Player p, int page) {
 			Inventory base = super.getForPlayer(p);
-			GUIHolder holder = (GUIHolder)base.getHolder();
+			GUIHolder holder = (GUIHolder) base.getHolder();
 			holder.getProperties().put("page", page);
 			List<Integer> slots = builder.customItemSlots;
 			int nSlots = slots.size();
@@ -687,13 +686,10 @@ public class GUIUtils {
 		@SuppressWarnings("unchecked")
 		@EventHandler
 		public void onInvClick(InventoryClickEvent e) {
-			System.out.println("asd");
 			if(e.getClickedInventory() == null) return;
 			Inventory inv = e.getInventory();
 			Player player = (Player) e.getWhoClicked();
-			System.out.println("df");
 			if(inv.getHolder() instanceof GUIHolder) {
-				System.out.println("GHI");
 				e.setResult(Result.ALLOW);
 				GUIHolder holder = (GUIHolder) inv.getHolder();
 				GUI gui = holder.gui;
@@ -728,17 +724,20 @@ public class GUIUtils {
 					}
 				} else {
 					//Player inv clicked
-					System.out.println(e.getAction());
-					if(e.getClick().isShiftClick()) {
+					
+					if(e.getAction().equals(InventoryAction.MOVE_TO_OTHER_INVENTORY)) {
 						e.setCancelled(true);
 						return;
 					}
+					
 					if(gui.builder.dragDrop != null) {
 						ItemStack pickedUp = e.getCurrentItem();
 						if(pickedUp!=null) {
 							GUIDragDropEvent event = new GUIDragDropEvent(player, pickedUp, e.getClickedInventory(), gui, holder, e);
 							gui.builder.dragDrop.onDragDrop(event);
-							if(event.isCancelled()) e.setCancelled(true);
+							if(event.isCancelled()) {
+								e.setCancelled(true);
+							}
 						}
 					}else {
 						e.setCancelled(true);
@@ -752,6 +751,7 @@ public class GUIUtils {
 	public static class GUIHolder implements InventoryHolder {
 
 		private GUI gui;
+		private HashMap<String, Object> properties;
 		
 		/**
 		 * Creates a gui holder for the specified GUI<br>
@@ -759,18 +759,19 @@ public class GUIUtils {
 		 * @param gui The GUI this holder is for
 		 */
 		public GUIHolder(GUI gui) {
-			this(gui, new HashMap<>());
+			this.gui = gui;
+			this.properties = new HashMap<>(this.gui.builder.properties);
 		}
-
+		
 		/**
 		 * Creates a gui holder for the specified GUI<br>
 		 * It will not automatically be registered to the GUI
 		 * @param gui The GUI this holder is for
-		 * @param props The property HashMap to be used
+		 * @param properties The property hashmap to use
 		 */
-		public GUIHolder(GUI gui, HashMap<String, Object> props) {
+		public GUIHolder(GUI gui, HashMap<String, Object> properties) {
 			this.gui = gui;
-			this.gui.builder.properties = props;
+			this.properties = properties;
 		}
 		
 		/**
@@ -781,20 +782,28 @@ public class GUIUtils {
 		}
 		
 		/**
-		 * Sets a property in the property HashMap to a specific value<br>
-		 * If this is the default holder specified by {@link GUI#getHolder()}, the properties set by this method will be passed down to all children GUIs (inventories)
+		 * Sets a property in the property HashMap to a specific value
 		 * @param key The key of the property
 		 * @param value The value of the property
 		 */
 		public void setProperty(String key, Object value) {
-			this.gui.builder.properties.put(key, value);
+			properties.put(key, value);
+		}
+		
+		/**
+		 * Gets a property from the property HashMap
+		 * @param key The key of the property
+		 * @return The value of the property or null if not set
+		 */
+		public Object getProperty(String key) {
+			return properties.get(key);
 		}
 		
 		/**
 		 * @return The property HashMap for this holder
 		 */
 		public HashMap<String, Object> getProperties() {
-			return this.gui.builder.properties;
+			return properties;
 		}
 		
 		/**
