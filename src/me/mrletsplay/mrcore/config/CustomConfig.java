@@ -35,8 +35,15 @@ import java.util.stream.Collectors;
  */
 public class CustomConfig {
 	
-	private static final String VERSION = "2.0";
+	private static final String VERSION = "1.0";
 	
+	/**
+	 * Returns this CustomConfig class's config version<br>
+	 * This value might not be the newest version nor the value returned by {@link #getInstanceVersion()}<br>
+	 * This value is used to tell the config loader what version this is<br>
+	 * It's also used to convert the config using the {@link } //TODO
+	 * @return This CustomConfig class's config version
+	 */
 	public static String getVersion() {
 		return VERSION;
 	}
@@ -61,7 +68,7 @@ public class CustomConfig {
 			objectEndString = DEFAULT_OBJECT_END_STRING,
 			customConfigVersionString = DEFAULT_CUSTOMCONFIG_VERSION_STRING,
 			
-			instanceVersion;
+			instanceVersion = VERSION;
 
 	private File configFile;
 	private URL configURL;
@@ -120,7 +127,8 @@ public class CustomConfig {
 
 	/**
 	 * Returns this CustomConfig instance's version<br>
-	 * This may not always be equal to {@link #getVersion()}!
+	 * This may not always be equal to {@link #getVersion()}!<br>
+	 * If this config wasn't loaded yet (using {@link #loadConfig(InputStream)}) this method will return the value specified by {@link #getVersion()}
 	 * @return This CustomConfig's version
 	 */
 	public String getInstanceVersion() {
@@ -547,14 +555,14 @@ public class CustomConfig {
 	}
 
 	/**
-	 * Sets this CustomConfig's properties.<br>
+	 * Sets this CustomConfig's (raw) properties.<br>
 	 * This will not delete any existing properties but will override them if specified in the HashMap
 	 * @param properties The property map to load
 	 * @return This CustomConfig instance
 	 */
-	public CustomConfig setProperties(HashMap<String, Property> properties) {
+	public CustomConfig setRawProperties(HashMap<String, Object> properties) {
 		properties.entrySet().forEach(en -> {
-			parentSection.set(en.getKey(), en.getValue());
+			set(en.getKey(), en.getValue());
 		});
 		return this;
 	}
@@ -570,6 +578,14 @@ public class CustomConfig {
 			parentSection.setComment(en.getKey(), en.getValue());
 		});
 		return this;
+	}
+	
+	/**
+	 * @return This CustomConfig's (raw) property map
+	 */
+	public Map<String, Object> getRawProperties() {
+		return getProperties().entrySet().stream()
+				.collect(Collectors.toMap(en -> (String) en.getKey(), en -> en.getValue().getValue()));
 	}
 	
 	/**
