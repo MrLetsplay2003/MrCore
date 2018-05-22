@@ -522,6 +522,32 @@ public class CustomConfig {
 	}
 
 	/**
+	 * Sets this CustomConfig's properties.<br>
+	 * This will not delete any existing properties but will override them if specified in the HashMap
+	 * @param properties The property map to load
+	 * @return This CustomConfig instance
+	 */
+	public CustomConfig setProperties(HashMap<String, Property> properties) {
+		properties.entrySet().forEach(en -> {
+			parentSection.set(en.getKey(), en.getValue());
+		});
+		return this;
+	}
+
+	/**
+	 * Sets this CustomConfig's comments.<br>
+	 * This will not delete any existing comments but will override them if specified in the HashMap
+	 * @param properties The comment map to load
+	 * @return This CustomConfig instance
+	 */
+	public CustomConfig setComments(HashMap<String, String> comments) {
+		comments.entrySet().forEach(en -> {
+			parentSection.setComment(en.getKey(), en.getValue());
+		});
+		return this;
+	}
+	
+	/**
 	 * @return This config's property HashMap
 	 */
 	public HashMap<String, Property> getProperties(){

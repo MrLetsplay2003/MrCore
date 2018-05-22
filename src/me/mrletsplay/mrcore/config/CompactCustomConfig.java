@@ -16,6 +16,9 @@ import java.util.stream.Collectors;
 
 public class CompactCustomConfig extends CustomConfig {
 	
+	private static final String VERSION = "2.0";
+	private String instanceVersion;
+	
 	public CompactCustomConfig(File configFile) {
 		this(configFile, new ConfigSaveProperty[0]);
 	}
@@ -32,10 +35,20 @@ public class CompactCustomConfig extends CustomConfig {
 		super(configURL, defaultSaveProperties);
 	}
 	
+	public static String getVersion() {
+		return VERSION;
+	}
+	
+	public String getInstanceVersion() {
+		return instanceVersion;
+	}
+	
 	@Override
 	public void saveConfig(OutputStream fOut, List<ConfigSaveProperty> saveProperties) throws IOException {
 		if(isExternal()) throw new UnsupportedOperationException("External (url) configs cannot be saved");
 		DataOutputStream out = new DataOutputStream(fOut);
+		
+		out.writeUTF(getVersion());
 		
 		HashMap<String, Short> cKs = new HashMap<>();
 		
@@ -131,6 +144,8 @@ public class CompactCustomConfig extends CustomConfig {
 				in.close();
 				return this;
 			}
+			
+			instanceVersion = in.readUTF();
 			
 			//Keys
 			short id;
