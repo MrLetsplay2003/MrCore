@@ -5,6 +5,8 @@ import java.io.File;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import me.mrletsplay.mrcore.bukkitimpl.ChatUI.UIListener;
@@ -29,6 +31,18 @@ public class MrCorePlugin extends JavaPlugin{
 			MrCoreUpdateChecker.checkForUpdate(version);
 		}
 		config.saveConfigSafely();
+	}
+	
+	@Override
+	public void onDisable() {
+		//Close all GUIs because them staying open would cause bugs
+		for(Player p : Bukkit.getOnlinePlayers()) {
+			if(p.getOpenInventory() != null && p.getOpenInventory().getTopInventory() != null) {
+				Inventory inv = p.getOpenInventory().getTopInventory();
+				if(GUIUtils.getGUI(inv) != null) p.closeInventory();
+			}
+		}
+		getLogger().info("Goodbye");
 	}
 	
 	@Override
