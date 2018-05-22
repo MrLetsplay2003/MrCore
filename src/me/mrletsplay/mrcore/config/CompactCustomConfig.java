@@ -19,16 +19,8 @@ public class CompactCustomConfig extends CustomConfig {
 	private static final String VERSION = "2.0";
 	private String instanceVersion;
 	
-	public CompactCustomConfig(File configFile) {
-		this(configFile, new ConfigSaveProperty[0]);
-	}
-	
 	public CompactCustomConfig(File configFile, ConfigSaveProperty... defaultSaveProperties) {
 		super(configFile, defaultSaveProperties);
-	}
-
-	public CompactCustomConfig(URL configURL) {
-		this(configURL, new ConfigSaveProperty[0]);
 	}
 
 	public CompactCustomConfig(URL configURL, ConfigSaveProperty... defaultSaveProperties) {
