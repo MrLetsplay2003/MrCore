@@ -31,6 +31,7 @@ public class CompactCustomConfig extends CustomConfig {
 		return VERSION;
 	}
 	
+	@Override
 	public String getInstanceVersion() {
 		return instanceVersion;
 	}
