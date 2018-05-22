@@ -13,6 +13,8 @@ public class MrCore {
 	 * - JSON (?)
 	 * - MySQL
 	 * - Multi-Plugin ("Modules")
+	 * 
+	 * shift click
 	 */
 	
 	private static final String VERSION = "1.8.3";
