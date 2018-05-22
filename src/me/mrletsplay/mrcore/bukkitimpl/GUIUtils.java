@@ -728,6 +728,11 @@ public class GUIUtils {
 					}
 				} else {
 					//Player inv clicked
+					System.out.println(e.getAction());
+					if(e.getClick().isShiftClick()) {
+						e.setCancelled(true);
+						return;
+					}
 					if(gui.builder.dragDrop != null) {
 						ItemStack pickedUp = e.getCurrentItem();
 						if(pickedUp!=null) {
