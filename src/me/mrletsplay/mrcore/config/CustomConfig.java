@@ -265,6 +265,7 @@ public class CustomConfig {
 		List<ConfigSaveProperty> props = saveProperties!=null?saveProperties:defaultSaveProps;
 		BufferedWriter w = new BufferedWriter(new OutputStreamWriter(fOut, StandardCharsets.UTF_8));
 		w.write(customConfigVersionString + getVersion());
+		w.write(ConfigFormatter.newLine());
 		w.write(parentSection.saveToString(props, 0));
 		w.close();
 		if(configFile != null) lastEdited = configFile.lastModified();
@@ -320,7 +321,7 @@ public class CustomConfig {
 		}else {
 			lr.jumpBack();
 		}
-		parentSection = loadSubsection(lr);
+		parentSection = loadSubsection(lr, 0);
 		r.close();
 		return this;
 	}
@@ -381,7 +382,7 @@ public class CustomConfig {
 				case LIST_START:
 				case PROPERTY:
 					reader.jumpBack();
-					return loadSubsection(reader);
+					return loadSubsection(reader, line.getStage());
 				case LIST_ENTRY:
 					reader.jumpBack();
 					return loadList(reader);
@@ -392,15 +393,13 @@ public class CustomConfig {
 		return null;
 	}
 	
-	public ConfigSection loadSubsection(LineByLineReader reader) throws IOException {
+	public ConfigSection loadSubsection(LineByLineReader reader, int startStage) throws IOException {
 		ConfigSection section = new ConfigSection(this, null, null);
-		ParsedLine l = reader.getPreviousLine();
-		int startStage = l != null ? l.getStage() : -1;
 		List<String> tmpComment = null;
 		ParsedLine line;
 		while((line = reader.readLine()) != null) {
 			if(line.getStage() == -1) throw new InvalidConfigException("Invalid stage", line.lineNum);
-			if(line.getStage() <= startStage) {
+			if(line.getStage() < startStage) {
 				reader.jumpBack();
 				return section;
 			}
@@ -611,7 +610,7 @@ public class CustomConfig {
 		
 		if(tmpBool = formattedLine.startsWith(customConfigVersionString) || formattedLine.startsWith(customConfigVersionString.trim())){
 			return new ParsedLine(line, indents, null, LineType.CUSTOMCONFIG_VERSION, new ParsedValue(ValueType.DEFAULT,
-					formattedLine.substring(tmpBool?commentString.length():commentString.trim().length())));
+					formattedLine.substring(tmpBool?customConfigVersionString.length():customConfigVersionString.trim().length())));
 		}
 		
 		if(tmpBool = formattedLine.startsWith(commentString) || formattedLine.startsWith(commentString.trim())){
