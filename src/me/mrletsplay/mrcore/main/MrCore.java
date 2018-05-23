@@ -28,9 +28,4 @@ public class MrCore {
 		return VERSION;
 	}
 	
-	public static void main(String[] args) {
-		CustomConfig cc = ConfigLoader.loadCompactConfig(new File("TEST/abc.yml"));
-		System.out.println(cc.getProperties());
-	}
-	
 }
