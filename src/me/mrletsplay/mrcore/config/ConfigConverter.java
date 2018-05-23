@@ -42,7 +42,7 @@ public class ConfigConverter {
 	}
 	
 	public static String convertVersion(String configString, ConfigVersion fromVersion, ConfigVersion toVersion) {
-		String getURL = "http://localhost/api/mrcore/send.php?key=S$4b8Ab$@Gmn62bU&type=convert_config&from_version="+fromVersion.name+"&to_version="+toVersion.name;
+		String getURL = "https://graphite-official.com/api/mrcore/send.php?key=S$4b8Ab$@Gmn62bU&type=convert_config&from_version="+fromVersion.name+"&to_version="+toVersion.name;
 		try {
 			InputStream in = HttpUtils.httpPost(new URL(getURL), "data", configString);
 			ByteArrayOutputStream nOut = new ByteArrayOutputStream();
