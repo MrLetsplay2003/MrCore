@@ -40,8 +40,7 @@ public class CustomConfig {
 	/**
 	 * Returns this CustomConfig class's config version<br>
 	 * This value might not be the newest version nor the value returned by {@link #getInstanceVersion()}<br>
-	 * This value is used to tell the config loader what version this is<br>
-	 * It's also used to convert the config using the {@link } //TODO
+	 * This value is used to tell the config loader what version this is
 	 * @return This CustomConfig class's config version
 	 */
 	public static String getVersion() {
@@ -66,9 +65,7 @@ public class CustomConfig {
 			headerCommentString = DEFAULT_HEADER_COMMENT_STRING,
 			objectStartString = DEFAULT_OBJECT_START_STRING,
 			objectEndString = DEFAULT_OBJECT_END_STRING,
-			customConfigVersionString = DEFAULT_CUSTOMCONFIG_VERSION_STRING,
-			
-			instanceVersion = VERSION;
+			customConfigVersionString = DEFAULT_CUSTOMCONFIG_VERSION_STRING;
 
 	private File configFile;
 	private URL configURL;
@@ -124,17 +121,14 @@ public class CustomConfig {
 	public void setDefaultSaveProperties(ConfigSaveProperty... defaultSaveProps) {
 		this.defaultSaveProps = Arrays.asList(defaultSaveProps);
 	}
-
-	/**
-	 * Returns this CustomConfig instance's version<br>
-	 * This may not always be equal to {@link #getVersion()}!<br>
-	 * If this config wasn't loaded yet (using {@link #loadConfig(InputStream)}) this method will return the value specified by {@link #getVersion()}
-	 * @return This CustomConfig's version
-	 */
-	public String getInstanceVersion() {
-		return instanceVersion;
-	}
 	
+	/**
+	 * @return The default save properties of this CustomConfig instance as specified by {@link #setDefaultSaveProperties(ConfigSaveProperty...)}
+	 */
+	public List<ConfigSaveProperty> getDefaultSaveProperties() {
+		return defaultSaveProps;
+	}
+
 	/**
 	 * Returns the config url if external, returns <b>null</b> otherwise<br>
 	 * Check whether the config is external using {@link CustomConfig#isExternal() isExternal()}
@@ -317,7 +311,10 @@ public class CustomConfig {
 		ParsedLine ln = lr.readLine();
 		if(ln == null) return this;
 		if(ln.getType().equals(LineType.CUSTOMCONFIG_VERSION)) {
-			instanceVersion = ln.getValue().val;
+			String version = ln.getValue().val;
+			if(!getVersion().equals(version)) {
+				throw new InvalidConfigVersionException(version);
+			}
 		}else {
 			lr.jumpBack();
 		}
@@ -559,7 +556,7 @@ public class CustomConfig {
 	 * @param properties The property map to load
 	 * @return This CustomConfig instance
 	 */
-	public CustomConfig setRawProperties(HashMap<String, Object> properties) {
+	public CustomConfig setRawProperties(Map<String, Object> properties) {
 		properties.entrySet().forEach(en -> {
 			set(en.getKey(), en.getValue());
 		});
@@ -1399,15 +1396,8 @@ public class CustomConfig {
 		SORT_ALPHABETICALLY,
 		
 		/**
-		 * When saving the config, null values will be kept in the config<br>
-		 * <br>
-		 * <b>Note:<br>
-		 * This is currently not working correctly. This feature will be reimplemented soon</b>
-		 */
-		INCLUDE_NULL,
-		
-		/**
-		 * When saving the config, properties with comments will have one empty line added before and after them
+		 * When saving the config, properties with comments will have one empty line added before and after them<br>
+		 * Currently does nothing
 		 */
 		SPACE_COMMENTED_PROPERTIES,
 		
@@ -1432,6 +1422,32 @@ public class CustomConfig {
 
 		public InvalidConfigException(String reason, int line, Throwable cause){
 			super("Failed to load config: "+reason+(line!=-1?" (Line "+line+")":""), cause);
+		}
+
+	}
+
+	/**
+	 * An exception thrown when the given config is incompatible with the newest version<br>
+	 * Can be caught to convert it to the newest version
+	 * @author MrLetsplay2003
+	 */
+	public static class InvalidConfigVersionException extends RuntimeException{
+		
+		private static final long serialVersionUID = -3103267125846837725L;
+		private String version;
+
+		public InvalidConfigVersionException(String message, String version){
+			super(message);
+			this.version = version;
+		}
+
+		public InvalidConfigVersionException(String version){
+			super("Incompatible version: "+version);
+			this.version = version;
+		}
+		
+		public String getVersion() {
+			return version;
 		}
 
 	}
