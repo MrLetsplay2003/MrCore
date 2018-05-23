@@ -1684,7 +1684,12 @@ public class CustomConfig {
 			for(String key : getSortedKeys(props)) {
 				String comment = getComment(key);
 				if(comment != null) {
-					section.append(indent).append(config.commentString).append(comment).append(lineSeparator);
+					Arrays.stream(comment.split("\n")).forEach(cl -> {
+						section.append(indent)
+						.append(config.commentString).append(cl)
+						.append(lineSeparator);
+					});
+					
 				}
 				Property p = properties.get(key);
 				if(p != null) {
