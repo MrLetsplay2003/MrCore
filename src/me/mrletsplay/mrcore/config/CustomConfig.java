@@ -376,6 +376,8 @@ public class CustomConfig {
 			if(line.getStage() - startStage != 1)
 				throw new InvalidConfigException("Invalid stage change ("+(line.getStage() - startStage)+")", line.lineNum);
 			switch(line.type) {
+				case COMMENT:
+				case HEADER_COMMENT:
 				case LIST_START:
 				case PROPERTY:
 					reader.jumpBack();
@@ -383,6 +385,7 @@ public class CustomConfig {
 				case LIST_ENTRY:
 					reader.jumpBack();
 					return loadList(reader);
+					
 				default:
 					throw new InvalidConfigException("Invalid list or subsection, got "+line.type, reader.lineNum);
 			}
