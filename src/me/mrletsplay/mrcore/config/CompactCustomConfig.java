@@ -16,8 +16,7 @@ import java.util.stream.Collectors;
 
 public class CompactCustomConfig extends CustomConfig {
 	
-	private static final String VERSION = "1.0";
-	private String instanceVersion;
+	private static final String VERSION = "1.0_compact";
 	
 	public CompactCustomConfig(File configFile, ConfigSaveProperty... defaultSaveProperties) {
 		super(configFile, defaultSaveProperties);
@@ -29,11 +28,6 @@ public class CompactCustomConfig extends CustomConfig {
 	
 	public static String getVersion() {
 		return VERSION;
-	}
-	
-	@Override
-	public String getInstanceVersion() {
-		return instanceVersion;
 	}
 	
 	@Override
@@ -138,7 +132,10 @@ public class CompactCustomConfig extends CustomConfig {
 				return this;
 			}
 			
-			instanceVersion = in.readUTF();
+			String version = in.readUTF();
+			if(!getVersion().equals(version)) {
+				throw new InvalidConfigVersionException(version);
+			}
 			
 			//Keys
 			short id;
