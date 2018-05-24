@@ -151,7 +151,7 @@ public class ItemUtils {
 			
 			if(m1 instanceof SkullMeta && m2 instanceof SkullMeta) {
 				SkullMeta s1 = (SkullMeta) m1, s2 = (SkullMeta) m2;
-				//Using SkullMeta#getOwner() for backwards compatability
+				// Using SkullMeta#getOwner() for backwards compatability
 				applyComparison(s1, s2, s -> s.getOwner(), ComparisonParameter.SKULL_OWNER, res);
 			}
 			
@@ -173,7 +173,9 @@ public class ItemUtils {
 	}
 	
 	private static <T> boolean compare(T o1, T o2, Function<T, Object> function) {
-		return function.apply(o1).equals(function.apply(o2));
+		Object p1 = function.apply(o1), p2 = function.apply(o2);
+		if(p1 == p2) return true;
+		return p1 != null && p1.equals(p2);
 	}
 	
 	public static class ComparisonResult {
