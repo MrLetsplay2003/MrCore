@@ -23,7 +23,16 @@ public class JSON {
 		}
 		
 		public Object get(String key) {
+			if(!properties.containsKey(key)) throw new JSONException("Object doesn't have the property \""+key+"\"");
 			return properties.get(key);
+		}
+		
+		public String getString(String key) {
+			return (String) get(key);
+		}
+		
+		public Boolean getBoolean(String key) {
+			return (Boolean) get(key);
 		}
 		
 		public Number getNumber(String key) {
@@ -67,6 +76,14 @@ public class JSON {
 		
 		public JSONArray(String source) {
 			super((JSONArray) JSONParser.parse(source));
+		}
+		
+		public String getString(int index) {
+			return (String) get(index);
+		}
+		
+		public Boolean getBoolean(int index) {
+			return (Boolean) get(index);
 		}
 		
 		public Number getNumber(int index) {
@@ -383,7 +400,21 @@ public class JSON {
 		
 	}
 	
-	public static class JSONParseException extends RuntimeException {
+	public static class JSONException extends RuntimeException {
+
+		private static final long serialVersionUID = -3632660903729890508L;
+
+		public JSONException(String message) {
+			super(message);
+		}
+		
+		public JSONException(String message, Throwable cause) {
+			super(message, cause);
+		}
+		
+	}
+	
+	public static class JSONParseException extends JSONException {
 		
 		private static final long serialVersionUID = 79760301767911820L;
 
@@ -397,7 +428,7 @@ public class JSON {
 		
 	}
 	
-	public static class JSONFormatException extends RuntimeException {
+	public static class JSONFormatException extends JSONException {
 
 		private static final long serialVersionUID = -7705694369818306658L;
 
