@@ -8,6 +8,7 @@ import java.net.URL;
 import java.util.Arrays;
 
 import me.mrletsplay.mrcore.http.HttpUtils;
+import me.mrletsplay.mrcore.misc.JSON.JSONObject;
 
 public class ConfigConverter {
 
@@ -42,16 +43,21 @@ public class ConfigConverter {
 	}
 	
 	public static String convertVersion(String configString, ConfigVersion fromVersion, ConfigVersion toVersion) {
-		String getURL = "https://graphite-official.com/api/mrcore/send.php?key=S$4b8Ab$@Gmn62bU&type=convert_config&from_version="+fromVersion.name+"&to_version="+toVersion.name;
+		String getURL = "https://graphite-official.com/api/mrcore/convert_config.php?from_version="+fromVersion.name+"&to_version="+toVersion.name;
 		try {
-			InputStream in = HttpUtils.httpPost(new URL(getURL), "data", configString);
+			InputStream in = HttpUtils.httpPost(new URL(getURL), "data=" + configString);
 			ByteArrayOutputStream nOut = new ByteArrayOutputStream();
 			byte[] buf = new byte[1024];
 			int len;
 			while((len = in.read(buf)) > 0) {
 				nOut.write(buf, 0, len);
 			}
-			return new String(nOut.toByteArray());
+			JSONObject obj = new JSONObject(new String(nOut.toByteArray()));
+			if(obj.getBoolean("success")) {
+				return obj.getString("data");
+			}else {
+				throw new ConfigConversionException("Failed to convert config: "+obj.getString("error"));
+			}
 		}catch(IOException e) {
 			throw new ConfigConversionException("Failed to convert config", e);
 		}
@@ -89,6 +95,10 @@ public class ConfigConverter {
 	public static class ConfigConversionException extends RuntimeException {
 		
 		private static final long serialVersionUID = -5048538918090166448L;
+
+		public ConfigConversionException(String message) {
+			super(message);
+		}
 
 		public ConfigConversionException(String message, Exception cause) {
 			super(message, cause);
