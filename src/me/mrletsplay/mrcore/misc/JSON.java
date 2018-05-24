@@ -26,6 +26,30 @@ public class JSON {
 			return properties.get(key);
 		}
 		
+		public Number getNumber(String key) {
+			return (Number) get(key);
+		}
+		
+		public int getInt(String key) {
+			return getNumber(key).intValue();
+		}
+		
+		public long getLong(String key) {
+			return getNumber(key).longValue();
+		}
+		
+		public double getDouble(String key) {
+			return getNumber(key).doubleValue();
+		}
+		
+		public JSONObject getJSONObject(String key) {
+			return (JSONObject) get(key);
+		}
+		
+		public JSONArray getJSONArray(String key) {
+			return (JSONArray) get(key);
+		}
+		
 		@Override
 		public String toString() {
 			return JSONFormatter.formatObject(this).toString();
@@ -59,6 +83,14 @@ public class JSON {
 		
 		public double getDouble(int index) {
 			return getNumber(index).doubleValue();
+		}
+		
+		public JSONObject getJSONObject(int index) {
+			return (JSONObject) get(index);
+		}
+		
+		public JSONArray getJSONArray(int index) {
+			return (JSONArray) get(index);
 		}
 		
 		@Override

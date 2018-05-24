@@ -230,10 +230,7 @@ public class ItemUtils {
 	public static enum ComparisonParameter {
 		
 		ALL_APPLICABLE,
-//		ALL_BASIC,
 		NONE_APPLICABLE,
-		
-//		NULL,
 		
 		TYPE,
 		AMOUNT,
