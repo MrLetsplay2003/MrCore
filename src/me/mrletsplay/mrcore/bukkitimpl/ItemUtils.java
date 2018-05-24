@@ -1,9 +1,11 @@
 package me.mrletsplay.mrcore.bukkitimpl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -14,6 +16,8 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 
 public class ItemUtils {
 
@@ -133,106 +137,104 @@ public class ItemUtils {
 		}
 	}
 	
-	@Deprecated //TODO
+	@SuppressWarnings("deprecation")
 	public static ComparisonResult compareItems(ItemStack item1, ItemStack item2) {
-		return null;
-//		if(item1 == null || item2 == null) {
-//			if(item1 == item2) {
-//				return new ComparisonResult(Arrays.asList(ComparisonParameter.NULL));
-//			}else {
-//				return new ComparisonResult(Arrays.asList(ComparisonParameter.NONE_APPLICABLE));
-//			}
-//		}else {
-//			List<ComparisonParameter> params = new ArrayList<>();
-//			List<ComparisonParameter> antiParams = new ArrayList<>();
-//			if(item1.getType().equals(item2.getType())) {
-//				params.add(ComparisonParameter.TYPE);
-//			}
-//			if(item1.getDurability() == item2.getDurability()) {
-//				params.add(ComparisonParameter.DURABILITY);
-//			}
-//			if(item1.hasItemMeta() == item2.hasItemMeta()) {
-//				ItemMeta m1 = item1.getItemMeta();
-//				ItemMeta m2 = item2.getItemMeta();
-//				if(m1.hasDisplayName() && m2.hasDisplayName()) {
-//					if(m1.getDisplayName().equals(m2.getDisplayName())) {
-//						params.add(ComparisonParameter.NAME);
-//					}
-//				}
-//				
-//				if(equalsIncludeNull(m1.getDisplayName(), m2.getDisplayName())) {
-//					
-//				}
-//				
-//				if(m1.hasLore() && m2.hasLore()) {
-//					if(m1.getLore().equals(m2.getLore())) {
-//						params.add(ComparisonParameter.LORE);
-//					}else {
-//						antiParams.add(ComparisonParameter.LORE);
-//					}
-//				}
-//				
-//				if(m1.getEnchants().equals(m2.getEnchants())) {
-//					params.add(ComparisonParameter.ENCHANTS);
-//				}else {
-//					antiParams.add(ComparisonParameter.ENCHANTS);
-//				}
-//				
-//				if(m1 instanceof SkullMeta && m2 instanceof SkullMeta) {
-//					SkullMeta s1 = (SkullMeta) m1;
-//					SkullMeta s2 = (SkullMeta) m2;
-//					if(s1.hasOwner() == s2.hasOwner()) {
-//						if(s1.getOwningPlayer().equals(s2.getOwningPlayer())) {
-//							params.add(ComparisonParameter.SKULL_OWNER);
-//						}else {
-//							antiParams.add(ComparisonParameter.SKULL_OWNER);
-//						}
-//					}
-//				}else if(m1 instanceof LeatherArmorMeta && m2 instanceof LeatherArmorMeta) {
-//					LeatherArmorMeta l1 = (LeatherArmorMeta) m1;
-//					LeatherArmorMeta l2 = (LeatherArmorMeta) m2;
-//					if(l1.getColor().equals(l2.getColor())) {
-//						params.add(ComparisonParameter.LEATHER_ARMOR_COLOR);
-//					}
-//				}
-//			}
-//			return new ComparisonResult(params);
-//		}
+		ComparisonResult res = new ComparisonResult();
+		applyComparison(item1, item2, i -> i.getType(), ComparisonParameter.TYPE, res);
+		applyComparison(item1, item2, i -> i.getAmount(), ComparisonParameter.AMOUNT, res);
+		applyComparison(item1, item2, i -> i.getDurability(), ComparisonParameter.DURABILITY, res);
+		if(item1.hasItemMeta() && item2.hasItemMeta()) {
+			ItemMeta m1 = item1.getItemMeta(), m2 = item2.getItemMeta();
+			applyComparison(m1, m2, m -> m.getDisplayName(), ComparisonParameter.NAME, res);
+			applyComparison(m1, m2, m -> m.getLore(), ComparisonParameter.LORE, res);
+			applyComparison(m1, m2, m -> m.getEnchants(), ComparisonParameter.ENCHANTS, res);
+			
+			if(m1 instanceof SkullMeta && m2 instanceof SkullMeta) {
+				SkullMeta s1 = (SkullMeta) m1, s2 = (SkullMeta) m2;
+				//Using SkullMeta#getOwner() for backwards compatability
+				applyComparison(s1, s2, s -> s.getOwner(), ComparisonParameter.SKULL_OWNER, res);
+			}
+			
+			if(m1 instanceof LeatherArmorMeta && m2 instanceof LeatherArmorMeta) {
+				LeatherArmorMeta a1 = (LeatherArmorMeta) m1, a2 = (LeatherArmorMeta) m2;
+				applyComparison(a1, a2, a -> a.getColor(), ComparisonParameter.LEATHER_ARMOR_COLOR, res);
+			}
+			
+		}
+		return res;
 	}
 	
-	private static boolean equalsIncludeNull(Object a, Object b) {
-		if(a == b) return true;
-		return(a != null && b.equals(a));
+	private static <T> void applyComparison(T o1, T o2, Function<T, Object> function, ComparisonParameter param, ComparisonResult result) {
+		if(compare(o1, o2, function)) {
+			result.matches.add(param);
+		}else {
+			result.doesntMatch.add(param);
+		}
+	}
+	
+	private static <T> boolean compare(T o1, T o2, Function<T, Object> function) {
+		return function.apply(o1).equals(function.apply(o2));
 	}
 	
 	public static class ComparisonResult {
 		
-//		private List<ComparisonParameter> parametersApply;
-//		private List<ComparisonParameter> parametersDontApply;
-//		
-//		public ComparisonResult(List<ComparisonParameter> params) {
-//			this.parameters = params;
-//		}
-//		
-//		public List<ComparisonParameter> getParameters() {
-//			return parameters;
-//		}
-//		
-//		public boolean matches(ComparisonParameter... params) {
-//			return parameters.containsAll(Arrays.asList(params));
-//		}
+		private List<ComparisonParameter> matches, doesntMatch;
+		
+		private ComparisonResult() {
+			this.matches = new ArrayList<>();
+			this.doesntMatch = new ArrayList<>();
+		}
+		
+		public List<ComparisonParameter> getParametersMatching() {
+			return matches;
+		}
+		
+		public List<ComparisonParameter> getParametersNotMatching() {
+			return doesntMatch;
+		}
+		
+		public boolean matches(ComparisonParameter... params) {
+			return Arrays.stream(params).allMatch(p -> matches(p));
+		}
+		
+		public boolean matchesExplicitly(ComparisonParameter... params) {
+			return Arrays.stream(params).allMatch(p -> matchesExplicitly(p));
+		}
+		
+		public boolean matches(ComparisonParameter param) {
+			switch(param) {
+				case ALL_APPLICABLE:
+					return doesntMatch.isEmpty();
+				case NONE_APPLICABLE:
+					return matches.isEmpty();
+				default:
+					return !doesntMatch.contains(param);
+			}
+		}
+		
+		public boolean matchesExplicitly(ComparisonParameter param) {
+			switch(param) {
+				case ALL_APPLICABLE:
+					return doesntMatch.isEmpty();
+				case NONE_APPLICABLE:
+					return matches.isEmpty();
+				default:
+					return matches.contains(param);
+			}
+		}
 		
 	}
 	
 	public static enum ComparisonParameter {
 		
 		ALL_APPLICABLE,
-		ALL_BASIC,
+//		ALL_BASIC,
 		NONE_APPLICABLE,
 		
-		NULL,
+//		NULL,
 		
 		TYPE,
+		AMOUNT,
 		DURABILITY,
 		NAME,
 		LORE,
