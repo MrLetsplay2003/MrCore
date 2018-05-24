@@ -1,10 +1,5 @@
 package me.mrletsplay.mrcore.main;
 
-import java.io.File;
-
-import me.mrletsplay.mrcore.config.ConfigLoader;
-import me.mrletsplay.mrcore.config.CustomConfig;
-
 public class MrCore {
 
 	/*
