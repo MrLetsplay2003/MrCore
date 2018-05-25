@@ -17,12 +17,14 @@ public class JARLoader extends URLClassLoader {
 
 	private URL url, jarURL;
 	private ClassLoader parent;
+	private JarURLConnection jarConnection;
 	
-	public JARLoader(File file) throws MalformedURLException {
+	public JARLoader(File file) throws IOException {
 		super(new URL[] {file.toURI().toURL()});
 		this.url = file.toURI().toURL();
 		this.jarURL = new URL("jar", "", url + "!/");
 		this.parent = JARLoader.class.getClassLoader();
+		jarConnection = (JarURLConnection) jarURL.openConnection();
 	}
 	
 	public Class<?> getJavaMainClass() throws IOException, ClassNotFoundException {
@@ -32,6 +34,10 @@ public class JARLoader extends URLClassLoader {
 		String name = attr.getValue(Attributes.Name.MAIN_CLASS);
 		if(name == null) return null;
 		return loadClass(name);
+	}
+	
+	public JarURLConnection getJarConnection() {
+		return jarConnection;
 	}
 	
 	@Override
@@ -44,8 +50,7 @@ public class JARLoader extends URLClassLoader {
 	}
 	
 	public Class<?> getBukkitMainClass() throws IOException, ClassNotFoundException {
-		JarURLConnection con = (JarURLConnection) jarURL.openConnection();
-		Enumeration<JarEntry> ents = con.getJarFile().entries();
+		Enumeration<JarEntry> ents = jarConnection.getJarFile().entries();
 		while(ents.hasMoreElements()) {
 			System.out.println(ents.nextElement().getName());
 		}
