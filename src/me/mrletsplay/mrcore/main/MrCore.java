@@ -28,9 +28,9 @@ public class MrCore {
 	}
 	
 	public static void main(String[] args) throws ClassNotFoundException, MalformedURLException, IOException, InstantiationException, IllegalAccessException {
-		JARLoader loader = new JARLoader(new File("D:/Testserver/Testserver Spigot 1.8 - Kopie - Kopie/plugins/MrCore_1.9.1.jar"));
-		System.out.println(loader.getBukkitMainClass().newInstance());
-		loader.close();
+		
+		
+//		
 	}
 	
 }
