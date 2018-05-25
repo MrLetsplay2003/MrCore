@@ -1,6 +1,7 @@
 package me.mrletsplay.mrcore.bukkitimpl;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -12,6 +13,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import me.mrletsplay.mrcore.bukkitimpl.ChatUI.UIListener;
 import me.mrletsplay.mrcore.bukkitimpl.GUIUtils.GUIListener;
 import me.mrletsplay.mrcore.config.CustomConfig;
+import me.mrletsplay.mrcore.main.ExtensionLoader;
 import me.mrletsplay.mrcore.main.MrCore;
 
 public class MrCorePlugin extends JavaPlugin{
@@ -31,6 +33,12 @@ public class MrCorePlugin extends JavaPlugin{
 			MrCoreUpdateChecker.checkForUpdate(version);
 		}
 		config.saveConfigSafely();
+		
+		try {
+			ExtensionLoader.loadExtension(new File("D:/Testserver/Testserver Spigot 1.8 - Kopie - Kopie/plugins/MrCore_BukkitImpl/extensions/EI2.jar"));
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
