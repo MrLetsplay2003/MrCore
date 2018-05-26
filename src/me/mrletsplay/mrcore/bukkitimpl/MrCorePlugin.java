@@ -33,6 +33,10 @@ public class MrCorePlugin extends JavaPlugin{
 		config.saveConfigSafely();
 	}
 	
+	public static JavaPlugin getInstance() {
+		return pl;
+	}
+	
 	@Override
 	public void onDisable() {
 		//Close all GUIs because them staying open would cause bugs
@@ -42,6 +46,7 @@ public class MrCorePlugin extends JavaPlugin{
 				if(GUIUtils.getGUI(inv) != null) p.closeInventory();
 			}
 		}
+		
 		getLogger().info("Goodbye");
 	}
 	
