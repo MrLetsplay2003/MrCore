@@ -691,7 +691,10 @@ public class GUIUtils {
 		protected void openNewInstance(Player player, GUIHolder oldHolder) {
 			GUI newThis = builder.build();
 			player.closeInventory();
-			player.openInventory(newThis.getForPlayer(player));
+			Inventory inv = newThis.getForPlayer(player);
+			GUIHolder newHolder = (GUIHolder) inv;
+			newHolder.properties = oldHolder.properties;
+			player.openInventory(inv);
 		}
 		
 	}
@@ -767,7 +770,10 @@ public class GUIUtils {
 		protected void openNewInstance(Player player, GUIHolder oldHolder) {
 			GUIMultiPage<T> newThis = builder.build();
 			player.closeInventory();
-			player.openInventory(newThis.getForPlayer(player, (int) oldHolder.getProperty("page")));
+			Inventory inv = newThis.getForPlayer(player, (int) oldHolder.getProperty("page"));
+			GUIHolder newHolder = (GUIHolder) inv;
+			newHolder.properties = oldHolder.properties;
+			player.openInventory(inv);
 		}
 		
 	}
