@@ -337,7 +337,7 @@ public class CustomConfig {
 					map.put(line.key, loadValue(line.value, reader));
 					break;
 				case LIST_START:
-					map.put(line.key, loadList(reader));
+					map.put(line.key, loadList(reader, line.getStage() + 1));
 					break;
 				case OBJECT_END:
 					break outer;
@@ -355,10 +355,13 @@ public class CustomConfig {
 			case LIST_START:
 			case PROPERTY:
 				reader.jumpBack();
-				return loadMap(reader);
+				Map<String, Object> map = loadMap(reader);
+				return map;
 			case LIST_ENTRY:
 				reader.jumpBack();
-				return loadList(reader);
+				List<?> list = loadList(reader, line.getStage());
+				if(!reader.readLine().getType().equals(LineType.OBJECT_END)) throw new InvalidConfigException("Missing object end for list object", reader.lineNum);
+				return list;
 			default:
 				throw new InvalidConfigException("Invalid generic object, got "+line.type, reader.lineNum);
 		}
@@ -384,7 +387,7 @@ public class CustomConfig {
 					return loadSubsection(reader, line.getStage());
 				case LIST_ENTRY:
 					reader.jumpBack();
-					return loadList(reader);
+					return loadList(reader, line.getStage());
 					
 				default:
 					throw new InvalidConfigException("Invalid list or subsection, got "+line.type, reader.lineNum);
@@ -440,10 +443,14 @@ public class CustomConfig {
 		return section;
 	}
 
-	public List<Object> loadList(LineByLineReader reader) throws IOException {
+	public List<Object> loadList(LineByLineReader reader, int startStage) throws IOException {
 		List<Object> list = new ArrayList<>();
 		ParsedLine line;
 		outer: while((line = reader.readLine()) != null) {
+			if(line.getStage() < startStage) {
+				reader.jumpBack();
+				return list;
+			}
 			switch(line.type) {
 				case LIST_ENTRY:
 					list.add(loadValue(line.value, reader));
