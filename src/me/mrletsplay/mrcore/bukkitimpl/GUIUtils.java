@@ -766,7 +766,6 @@ public class GUIUtils {
 		protected void openNewInstance(Player player, Inventory oldInv, GUIHolder oldHolder) {
 			Inventory newInv = getForPlayer(player, (int) oldHolder.getProperty("page"));
 			changeInventory(oldInv, newInv);
-			System.out.println("changed!: ");
 		}
 		
 	}
