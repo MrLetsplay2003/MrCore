@@ -681,20 +681,16 @@ public class GUIUtils {
 		 */
 		public void refreshInstance(Player player) {
 			if(player.getOpenInventory() != null && player.getOpenInventory().getTopInventory() != null) {
-				GUIHolder holder = GUIUtils.getGUIHolder(player.getOpenInventory().getTopInventory());
+				Inventory oldInv = player.getOpenInventory().getTopInventory();
+				GUIHolder holder = GUIUtils.getGUIHolder(oldInv);
 				if(holder != null && holder.gui.equals(this)) {
-					openNewInstance(player, holder);
+					openNewInstance(player, oldInv, holder);
 				}
 			}
 		}
 		
-		protected void openNewInstance(Player player, GUIHolder oldHolder) {
-			GUI newThis = builder.build();
-			player.closeInventory();
-			Inventory inv = newThis.getForPlayer(player);
-			GUIHolder newHolder = (GUIHolder) inv;
-			newHolder.properties = oldHolder.properties;
-			player.openInventory(inv);
+		protected void openNewInstance(Player player, Inventory oldInv, GUIHolder oldHolder) {
+			changeInventory(oldInv, getForPlayer(player));
 		}
 		
 	}
@@ -767,13 +763,10 @@ public class GUIUtils {
 		}
 		
 		@Override
-		protected void openNewInstance(Player player, GUIHolder oldHolder) {
-			GUIMultiPage<T> newThis = builder.build();
-			player.closeInventory();
-			Inventory inv = newThis.getForPlayer(player, (int) oldHolder.getProperty("page"));
-			GUIHolder newHolder = (GUIHolder) inv;
-			newHolder.properties = oldHolder.properties;
-			player.openInventory(inv);
+		protected void openNewInstance(Player player, Inventory oldInv, GUIHolder oldHolder) {
+			Inventory newInv = getForPlayer(player, (int) oldHolder.getProperty("page"));
+			changeInventory(oldInv, newInv);
+			System.out.println("changed!: ");
 		}
 		
 	}
@@ -975,6 +968,10 @@ public class GUIUtils {
 		}else {
 			return null;
 		}
+	}
+	
+	public static void changeInventory(Inventory oldInv, Inventory newInv) {
+		oldInv.setContents(newInv.getContents());
 	}
 
 }
