@@ -21,6 +21,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 
 public class GUIUtils {
 	
@@ -46,6 +47,7 @@ public class GUIUtils {
 			this.size = rows * 9;
 			this.isCustomType = false;
 			this.elements = new HashMap<>();
+			this.properties = new HashMap<>();
 		}
 
 		/**
@@ -59,6 +61,7 @@ public class GUIUtils {
 			this.invType = type;
 			this.isCustomType = true;
 			this.elements = new HashMap<>();
+			this.properties = new HashMap<>();
 		}
 		
 		/**
@@ -69,7 +72,11 @@ public class GUIUtils {
 		 * @return This GUIBuilder instance
 		 */
 		public GUIBuilder addElement(int slot, GUIElement e) {
-			elements.put(slot, e);
+			if(e != null) {
+				elements.put(slot, e);
+			}else {
+				elements.remove(slot);
+			}
 			return this;
 		}
 		
@@ -118,6 +125,14 @@ public class GUIUtils {
 		 */
 		public void setProperties(HashMap<String, Object> properties) {
 			this.properties = properties;
+		}
+		
+		/**
+		 * Adds a default property for this GUIBuilder
+		 * @param properties The properties to use
+		 */
+		public void addProperty(String key, Object value) {
+			properties.put(key, value);
 		}
 		
 		/**
@@ -573,12 +588,7 @@ public class GUIUtils {
 		
 		private GUIBuilder builder;
 		
-		/**
-		 * Creates a GUI<br>
-		 * It is not recommended to use this method. Use {@link GUIBuilder#build()} instead
-		 * @param builder The builder this GUI was built from
-		 */
-		public GUI(GUIBuilder builder) {
+		protected GUI(GUIBuilder builder) {
 			this.builder = builder;
 		}
 		
@@ -647,19 +657,50 @@ public class GUIUtils {
 			return builder;
 		}
 		
+		/**
+		 * Refreshes all (opened) instances of this GUI<br>
+		 * <br>
+		 * This method iterates through every player on the server, sees if they have that specific GUI open<br>
+		 * and, if they do, replaces it with a newly built instance of that GUI using {@link #refreshInstance(Player)}<br>
+		 * <br>
+		 * This call is equivalent to calling<br>
+		 * <code>
+		 * for(Player player : Bukkit.getOnlinePlayers()) {<br>
+		 * &nbsp;&nbsp;&nbsp;&nbsp;gui.refreshInstance(player);<br>
+		 * }
+		 * </code>
+		 */
+		public void refreshAllInstances() {
+			for(Player player : Bukkit.getOnlinePlayers()) refreshInstance(player);
+		}
+		
+		/**
+		 * Refreshes a specific player's instance of this GUI<br>
+		 * If the player doesn't have an this GUI open, this method will do nothing
+		 * @param player The player to refresh this GUI for
+		 */
+		public void refreshInstance(Player player) {
+			if(player.getOpenInventory() != null && player.getOpenInventory().getTopInventory() != null) {
+				GUIHolder holder = GUIUtils.getGUIHolder(player.getOpenInventory().getTopInventory());
+				if(holder != null && holder.gui.equals(this)) {
+					openNewInstance(player, holder);
+				}
+			}
+		}
+		
+		protected void openNewInstance(Player player, GUIHolder oldHolder) {
+			GUI newThis = builder.build();
+			player.closeInventory();
+			player.openInventory(newThis.getForPlayer(player));
+		}
+		
 	}
 	
 	public static class GUIMultiPage<T> extends GUI {
 
 		private GUIBuilderMultiPage<T> builder;
 		
-
-		/**
-		 * Creates a GUI<br>
-		 * It is not recommended to use this method. Use {@link GUIBuilderMultiPage#build()} instead
-		 * @param builder The builder this GUI was built from
-		 */
-		public GUIMultiPage(GUIBuilderMultiPage<T> builder) {
+		protected GUIMultiPage(GUIBuilderMultiPage<T> builder) {
 			super(builder);
 			this.builder = builder;
 		}
@@ -720,6 +761,13 @@ public class GUIUtils {
 				throw new IllegalArgumentException("Provided inventory is not a GUIMultiPage");
 			}
 			return (int) holder.getProperties().get("page");
+		}
+		
+		@Override
+		protected void openNewInstance(Player player, GUIHolder oldHolder) {
+			GUIMultiPage<T> newThis = builder.build();
+			player.closeInventory();
+			player.openInventory(newThis.getForPlayer(player, (int) oldHolder.getProperty("page")));
 		}
 		
 	}
@@ -829,7 +877,9 @@ public class GUIUtils {
 		}
 		
 		/**
-		 * Sets a property in the property HashMap to a specific value
+		 * Sets a property in the property HashMap to a specific value<br>
+		 * If you're implementing this into a plugin and don't want to modify a "raw" property (like mrcore_page)<br>
+		 * or one from another plugin, use {@link #setProperty(Plugin, String, Object)}
 		 * @param key The key of the property
 		 * @param value The value of the property
 		 */
@@ -838,12 +888,36 @@ public class GUIUtils {
 		}
 		
 		/**
-		 * Gets a property from the property HashMap
+		 * Gets a property from the property HashMap<br>
+		 * If you're implementing this into a plugin and don't want to modify a "raw" property (like mrcore_page)<br>
+		 * or one from another plugin, use {@link #getProperty(Plugin, String)}
 		 * @param key The key of the property
 		 * @return The value of the property or null if not set
 		 */
 		public Object getProperty(String key) {
 			return properties.get(key);
+		}
+		
+		/**
+		 * Sets a property in the property HashMap<br>
+		 * This is a convenience method to easily create cross-plugin compatible properties<br>
+		 * with the same name
+		 * @param key
+		 * @param value
+		 */
+		public void setProperty(Plugin plugin, String key, Object value) {
+			properties.put(plugin.getName()+"_"+key, value);
+		}
+		
+		/**
+		 * Gets a plugin-specific property from the property HashMap<br>
+		 * This is a convenience method to easily create cross-plugin compatible properties<br>
+		 * with the same name
+		 * @param key The key of the property
+		 * @return The value of the property or null if not set
+		 */
+		public Object getProperty(Plugin plugin, String key) {
+			return properties.get(plugin.getName()+"_"+key);
 		}
 		
 		/**
@@ -879,6 +953,19 @@ public class GUIUtils {
 	public static GUI getGUI(Inventory inv) {
 		if(inv.getHolder() instanceof GUIHolder) {
 			return ((GUIHolder) inv.getHolder()).gui;
+		}else {
+			return null;
+		}
+	}
+	
+	/**
+	 * Gets a GUIHolder from an inventory
+	 * @param inv The inventory to be converted
+	 * @return The respective GUIHolder, null if none (not a GUI)
+	 */
+	public static GUIHolder getGUIHolder(Inventory inv) {
+		if(inv.getHolder() instanceof GUIHolder) {
+			return (GUIHolder) inv.getHolder();
 		}else {
 			return null;
 		}
