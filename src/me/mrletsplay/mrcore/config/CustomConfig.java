@@ -1712,6 +1712,8 @@ public class CustomConfig {
 					section.append(indent).append(key).append(config.splString).append(lineSeparator);
 				}
 				
+				if(comment != null && props.contains(ConfigSaveProperty.SPACE_COMMENTED_PROPERTIES)) section.append(lineSeparator);
+				
 				ConfigSection sub = subsections.get(key);
 				if(sub != null) {
 					section.append(sub.saveToString(props, indents + 1));
