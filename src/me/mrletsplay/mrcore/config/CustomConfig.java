@@ -1563,7 +1563,10 @@ public class CustomConfig {
 		}
 		
 		public void setComment(String key, String comment) {
-			if(key == null) comments.put(null, comment);
+			if(key == null) {
+				comments.put(null, comment);
+				return;
+			}
 			String[] spl = key.split("\\.");
 			if(spl.length > 1) {
 				ConfigSection sub = getOrCreateSubsection(spl[0]);
