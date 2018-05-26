@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
@@ -68,6 +70,23 @@ public class GUIUtils {
 		 */
 		public GUIBuilder addElement(int slot, GUIElement e) {
 			elements.put(slot, e);
+			return this;
+		}
+		
+		/**
+		 * Convenience version of {@link #addElement(int, GUIElement)}
+		 * @param slot The slot to add the element to
+		 * @param e The element to add
+		 * @return This GUIBuilder instance
+		 */
+		public GUIBuilder addElement(int slot, Function<Player, ItemStack> e) {
+			elements.put(slot, new GUIElement() {
+				
+				@Override
+				public ItemStack getItem(Player p) {
+					return e.apply(p);
+				}
+			});
 			return this;
 		}
 		
@@ -186,6 +205,12 @@ public class GUIUtils {
 		}
 		
 		@Override
+		public GUIBuilderMultiPage<T> addElement(int slot, Function<Player, ItemStack> e) {
+			super.addElement(slot, e);
+			return this;
+		}
+		
+		@Override
 		public GUIBuilderMultiPage<T> setActionListener(GUIAction a) {
 			super.setActionListener(a);
 			return this;
@@ -267,6 +292,22 @@ public class GUIUtils {
 			return this;
 		}
 		
+		/**
+		 * Convenience version of {@link #setAction(GUIElementAction)}
+		 * @param a The action to be called
+		 * @return This GUIElement instance
+		 */
+		public GUIElement setAction(Consumer<GUIElementActionEvent> a) {
+			this.action = new GUIElementAction() {
+				
+				@Override
+				public void onAction(GUIElementActionEvent event) {
+					a.accept(event);
+				}
+			};
+			return this;
+		}
+		
 	}
 	
 	public static class StaticGUIElement extends GUIElement{
@@ -284,6 +325,12 @@ public class GUIUtils {
 		
 		@Override
 		public StaticGUIElement setAction(GUIElementAction a) {
+			super.setAction(a);
+			return this;
+		}
+		
+		@Override
+		public StaticGUIElement setAction(Consumer<GUIElementActionEvent> a) {
 			super.setAction(a);
 			return this;
 		}

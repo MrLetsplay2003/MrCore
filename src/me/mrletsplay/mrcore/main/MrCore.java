@@ -13,6 +13,8 @@ public class MrCore {
 	 * - JSON (?)
 	 * - MySQL
 	 * - Multi-Plugin ("Modules")
+	 * - Consumer<GUISomethingEvent>
+	 * - GUIBuildAction
 	 * 
 	 * shift click (gui)
 	 */
