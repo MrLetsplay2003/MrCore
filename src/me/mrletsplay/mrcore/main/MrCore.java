@@ -1,9 +1,5 @@
 package me.mrletsplay.mrcore.main;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-
 public class MrCore {
 
 	/*
@@ -25,12 +21,6 @@ public class MrCore {
 	
 	public static String getVersion() {
 		return VERSION;
-	}
-	
-	public static void main(String[] args) throws ClassNotFoundException, MalformedURLException, IOException, InstantiationException, IllegalAccessException {
-		
-		
-//		
 	}
 	
 }
