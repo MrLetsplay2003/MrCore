@@ -1697,6 +1697,7 @@ public class CustomConfig {
 			for(String key : getSortedKeys(props)) {
 				String comment = getComment(key);
 				if(comment != null) {
+					if(props.contains(ConfigSaveProperty.SPACE_COMMENTED_PROPERTIES)) section.append(lineSeparator);
 					Arrays.stream(comment.split("\n")).forEach(cl -> {
 						section.append(indent)
 						.append(config.commentString).append(cl)
