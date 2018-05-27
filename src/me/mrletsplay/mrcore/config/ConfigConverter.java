@@ -74,7 +74,6 @@ public class ConfigConverter {
 	 */
 	public static enum ConfigVersion {
 		
-		vGraphite_compact("graphite_compact"),
 		v1_0("1.0"),
 		v1_0_compact("1.0_compact");
 		
