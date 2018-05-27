@@ -43,7 +43,11 @@ public class ConfigConverter {
 	}
 	
 	public static String convertVersion(String configString, ConfigVersion fromVersion, ConfigVersion toVersion) {
-		String getURL = "https://graphite-official.com/api/mrcore/convert_config.php?from_version="+fromVersion.name+"&to_version="+toVersion.name;
+		return convertVersion(configString, fromVersion.name, toVersion.name);
+	}
+	
+	public static String convertVersion(String configString, String fromVersion, String toVersion) {
+		String getURL = "https://graphite-official.com/api/mrcore/convert_config.php?from_version="+fromVersion+"&to_version="+toVersion;
 		try {
 			InputStream in = HttpUtils.httpPost(new URL(getURL), "data=" + configString);
 			ByteArrayOutputStream nOut = new ByteArrayOutputStream();
@@ -69,6 +73,7 @@ public class ConfigConverter {
 	 */
 	public static enum ConfigVersion {
 		
+		vGraphite_compact("graphite_compact"),
 		v1_0("1.0"),
 		v1_0_compact("1.0_compact");
 		
