@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.Arrays;
 
 import me.mrletsplay.mrcore.http.HttpUtils;
@@ -49,7 +50,7 @@ public class ConfigConverter {
 	public static String convertVersion(String configString, String fromVersion, String toVersion) {
 		String getURL = "https://graphite-official.com/api/mrcore/convert_config.php?from_version="+fromVersion+"&to_version="+toVersion;
 		try {
-			InputStream in = HttpUtils.httpPost(new URL(getURL), "data=" + configString);
+			InputStream in = HttpUtils.httpPost(new URL(getURL), "data=" + URLEncoder.encode(configString, "UTF-8"));
 			ByteArrayOutputStream nOut = new ByteArrayOutputStream();
 			byte[] buf = new byte[1024];
 			int len;
