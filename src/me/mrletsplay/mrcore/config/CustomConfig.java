@@ -1160,7 +1160,6 @@ public class CustomConfig {
 	
 	@SuppressWarnings("unchecked")
 	public static <T> T castGeneric(Object obj, Class<T> clazz) {
-		if(clazz.equals(obj.getClass())) return (T) obj; //TODO
 		if(clazz.equals(Object.class)) return (T) obj;
 		if(clazz.equals(Map.class)) return (T) obj;
 		if(clazz.equals(List.class)) return (T) obj;
