@@ -2,13 +2,20 @@ package me.mrletsplay.mrcore.bukkitimpl;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import me.mrletsplay.mrcore.config.ConfigExpansions.ExpandableCustomConfig;
 
@@ -55,38 +62,47 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 			
 		});
 		
-//		registerMapper(new ObjectMapper<ItemStack>(ItemStack.class) {
-//
-//			@Override
-//			public Map<String, Object> mapObject(ItemStack it) {
-//				Map<String, Object> map = new HashMap<>();
-//				map.put("type", it.getType());
-//				map.put("durability", it.getDurability());
-//				map.put("amount", it.getAmount());
-//				if(it.hasItemMeta()) {
-//					ItemMeta m = it.getItemMeta();
-//					map.put("name", m.getDisplayName());
-//					map.put("lore", m.getLore());
-//					if(!m.getEnchants().isEmpty()) {
-//						HashMap<String, Integer> enchMap = new HashMap<>();
-//						for(Map.Entry<Enchantment, Integer> ench : m.getEnchants().entrySet()) {
-//							enchMap.put(ench.getKey().getName(), ench.getValue());
-//						}
-//						map.put("enchantments", enchMap);
-//					}
-//					if(!m.getItemFlags().isEmpty()) {
-//						map.put("flags", m.getItemFlags().stream().map(f -> f.name()).collect(Collectors.toList()));
-//					}
-//				}
-//				return map;
-//			}
-//
-//			@Override
-//			public ItemStack constructObject(Map<String, Object> map) {
-//				return null;
-//			}
-//			
-//		});
+		registerMapper(new ObjectMapper<ItemStack>(ItemStack.class) {
+
+			@Override
+			public Map<String, Object> mapObject(ItemStack it) {
+				Map<String, Object> map = new HashMap<>();
+				map.put("type", it.getType());
+				map.put("amount", it.getAmount());
+				map.put("durability", it.getDurability());
+				if(it.hasItemMeta()) {
+					ItemMeta m = it.getItemMeta();
+					map.put("name", m.getDisplayName());
+					map.put("lore", m.getLore());
+					if(!m.getEnchants().isEmpty()) {
+						HashMap<String, Integer> enchMap = new HashMap<>();
+						for(Map.Entry<Enchantment, Integer> ench : m.getEnchants().entrySet()) {
+							enchMap.put(ench.getKey().getName(), ench.getValue());
+						}
+						map.put("enchantments", enchMap);
+					}
+					if(!m.getItemFlags().isEmpty()) {
+						map.put("flags", m.getItemFlags().stream().map(f -> f.name()).collect(Collectors.toList()));
+					}
+				}
+				return map;
+			}
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public ItemStack constructObject(Map<String, Object> map) {
+				ItemStack it = new ItemStack(Material.getMaterial((String) map.get("type")), (int) map.getOrDefault("amount", 1), (short) map.getOrDefault("durability", 0));
+				ItemMeta m = it.getItemMeta();
+				m.setDisplayName((String) map.get("name"));
+				m.setLore((List<String>) map.getOrDefault("lore", new ArrayList<>()));
+				Map<String, Integer> enchs = (Map<String, Integer>) map.getOrDefault("enchantments", new HashMap<>());
+				enchs.forEach((en, lvl) -> m.addEnchant(Enchantment.getByName(en), lvl, true));
+				List<String> flags = (List<String>) map.getOrDefault("flags", new ArrayList<>());
+				flags.forEach(f -> m.addItemFlags(ItemFlag.valueOf(f)));
+				return it;
+			}
+			
+		});
 	}
 	
 	public static class BukkitConfigFormatter extends ExpandableConfigFormatter {
@@ -134,6 +150,28 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 	
 	public List<Location> getLocationList(String key, List<Location> defaultVal, boolean applyDefault) {
 		List<Location> o = getMappableList(key, Location.class);
+		if(o != null) return o;
+		if(applyDefault) set(key, defaultVal);
+		return defaultVal;
+	}
+	
+	public ItemStack getItemStack(String key) {
+		return getMappable(key, ItemStack.class);
+	}
+	
+	public ItemStack getItemStack(String key, ItemStack defaultVal, boolean applyDefault) {
+		ItemStack o = getMappable(key, ItemStack.class);
+		if(o != null) return o;
+		if(applyDefault) set(key, defaultVal);
+		return defaultVal;
+	}
+	
+	public List<ItemStack> getItemStackList(String key) {
+		return getMappableList(key, ItemStack.class);
+	}
+	
+	public List<ItemStack> getItemStackList(String key, List<ItemStack> defaultVal, boolean applyDefault) {
+		List<ItemStack> o = getMappableList(key, ItemStack.class);
 		if(o != null) return o;
 		if(applyDefault) set(key, defaultVal);
 		return defaultVal;

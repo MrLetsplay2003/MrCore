@@ -683,14 +683,22 @@ public class GUIUtils {
 			if(player.getOpenInventory() != null && player.getOpenInventory().getTopInventory() != null) {
 				Inventory oldInv = player.getOpenInventory().getTopInventory();
 				GUIHolder holder = GUIUtils.getGUIHolder(oldInv);
+//				System.out.println(holder+"/"+holder.gui+"/"+this);#
+				System.out.println((holder != null)+"/"+holder.gui.equals(this));
 				if(holder != null && holder.gui.equals(this)) {
+					System.out.println("kldjsf");
 					openNewInstance(player, oldInv, holder);
 				}
 			}
 		}
 		
-		protected void openNewInstance(Player player, Inventory oldInv, GUIHolder oldHolder) {
-			changeInventory(oldInv, getForPlayer(player));
+		protected void openNewInstance(Player player, Inventory oldInv, GUIHolder holder) {
+			Inventory newInv = getForPlayer(player);
+			GUIHolder newHolder = getGUIHolder(newInv);
+			changeInventory(oldInv, newInv);
+			
+			// This should preserve all custom properties while still remaining all the "refreshed" ones
+			holder.properties.putAll(newHolder.properties);
 		}
 		
 	}
@@ -763,9 +771,13 @@ public class GUIUtils {
 		}
 		
 		@Override
-		protected void openNewInstance(Player player, Inventory oldInv, GUIHolder oldHolder) {
-			Inventory newInv = getForPlayer(player, (int) oldHolder.getProperty("page"));
+		protected void openNewInstance(Player player, Inventory oldInv, GUIHolder holder) {
+			Inventory newInv = getForPlayer(player, (int) holder.getProperty("page"));
+			GUIHolder newHolder = getGUIHolder(newInv);
 			changeInventory(oldInv, newInv);
+			
+			// This should preserve all custom properties while still remaining all the "refreshed" ones
+			holder.properties.putAll(newHolder.properties);
 		}
 		
 	}
