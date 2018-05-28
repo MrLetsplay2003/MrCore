@@ -888,7 +888,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public Integer getInt(String key) {
-		return getGeneric(key, Integer.class, null, false);
+		return getGeneric(key, Integer.class, 0, false);
 	}
 
 	/**
@@ -916,7 +916,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public Double getDouble(String key) {
-		return getGeneric(key, Double.class, null, false);
+		return getGeneric(key, Double.class, 0D, false);
 	}
 
 	/**
@@ -1159,7 +1159,8 @@ public class CustomConfig {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private <T> T castGeneric(Object obj, Class<T> clazz) {
+	public static <T> T castGeneric(Object obj, Class<T> clazz) {
+		if(clazz.equals(obj.getClass())) return (T) obj; //TODO
 		if(clazz.equals(Object.class)) return (T) obj;
 		if(clazz.equals(Map.class)) return (T) obj;
 		if(clazz.equals(List.class)) return (T) obj;
@@ -1168,17 +1169,19 @@ public class CustomConfig {
 		if(clazz.equals(Boolean.class)) return (T) Boolean.valueOf(val);
 		if(clazz.equals(Integer.class)) return (T) Integer.valueOf(val);
 		if(clazz.equals(Double.class)) return (T) Double.valueOf(val);
+		if(clazz.equals(Float.class)) return (T) Float.valueOf(val);
+		if(clazz.equals(Short.class)) return (T) Short.valueOf(val);
 		if(clazz.equals(Long.class)) return (T) Long.valueOf(val);
 		if(clazz.equals(BigInteger.class)) return (T) new BigInteger(val);
 		if(clazz.equals(BigDecimal.class)) return (T) new BigDecimal(val);
 		throw new InvalidTypeException("Unsupported type: "+clazz.getName());
 	}
 	
-	private <T> List<T> castGenericList(List<?> list, Class<T> clazz) {
+	public static <T> List<T> castGenericList(List<?> list, Class<T> clazz) {
 		return list.stream().map(o -> castGeneric(o, clazz)).collect(Collectors.toList());
 	}
 	
-	private <T> Map<String, T> castGenericMap(Map<String, ?> map, Class<T> clazz) {
+	public static <T> Map<String, T> castGenericMap(Map<String, ?> map, Class<T> clazz) {
 		return map.entrySet().stream()
 				.map(e -> new AbstractMap.SimpleEntry<>(e.getKey(), castGeneric(e.getValue(), clazz)))
 				.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
@@ -1808,10 +1811,6 @@ public class CustomConfig {
 		
 		public boolean isSpecific() {
 			return !type.equals(PropertyType.VALUE);
-		}
-		
-		public Object getValue() {
-			return val;
 		}
 		
 		public Property toProperty() {

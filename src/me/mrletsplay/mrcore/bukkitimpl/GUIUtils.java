@@ -683,10 +683,7 @@ public class GUIUtils {
 			if(player.getOpenInventory() != null && player.getOpenInventory().getTopInventory() != null) {
 				Inventory oldInv = player.getOpenInventory().getTopInventory();
 				GUIHolder holder = GUIUtils.getGUIHolder(oldInv);
-//				System.out.println(holder+"/"+holder.gui+"/"+this);#
-				System.out.println((holder != null)+"/"+holder.gui.equals(this));
 				if(holder != null && holder.gui.equals(this)) {
-					System.out.println("kldjsf");
 					openNewInstance(player, oldInv, holder);
 				}
 			}
