@@ -1,13 +1,5 @@
 package me.mrletsplay.mrcore.main;
 
-import java.io.File;
-import java.io.StringReader;
-
-import org.bukkit.configuration.file.YamlConfiguration;
-
-import me.mrletsplay.mrcore.bukkitimpl.BukkitCustomConfig;
-import me.mrletsplay.mrcore.config.ConfigConverter;
-
 public class MrCore {
 
 	/*
