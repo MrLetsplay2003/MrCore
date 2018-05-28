@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -119,9 +118,9 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 			FormattedProperty fp = super.formatObject(o);
 			if(fp.isSpecific()) return fp;
 			
-			if(o instanceof ConfigurationSerializable) {
-				return FormattedProperty.map(((ConfigurationSerializable) o).serialize());
-			}
+//			if(o instanceof ConfigurationSerializable) {
+//				return FormattedProperty.map(((ConfigurationSerializable) o).serialize());
+//			}
 			
 			return fp;
 		}
