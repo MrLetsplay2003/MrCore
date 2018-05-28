@@ -96,7 +96,7 @@ public class ConfigExpansions {
 				
 				ObjectMapper<?> mapper = config.mappers.stream().filter(m -> m.canMap(o)).findFirst().orElse(null);
 				if(mapper != null) {
-					return FormattedProperty.map(mapper.map(o));
+					return FormattedProperty.map(this, mapper.map(o));
 				}
 				
 				return fp;

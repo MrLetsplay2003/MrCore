@@ -1796,12 +1796,16 @@ public class CustomConfig {
 			return new FormattedProperty(PropertyType.VALUE, o);
 		}
 		
-		public static FormattedProperty list(List<?> list) {
-			return new FormattedProperty(PropertyType.LIST, list);
+		public static FormattedProperty list(ConfigFormatter formatter, List<?> list) {
+			return new FormattedProperty(PropertyType.LIST, list.stream()
+					.map(en -> formatter.formatObject(en).toProperty().getValue())
+					.collect(Collectors.toList()));
 		}
 		
-		public static FormattedProperty map(Map<String,?> map) {
-			return new FormattedProperty(PropertyType.MAP, map);
+		public static FormattedProperty map(ConfigFormatter formatter, Map<String,?> map) {
+			return new FormattedProperty(PropertyType.MAP, map.entrySet().stream()
+					.map(en -> new AbstractMap.SimpleEntry<>(en.getKey(), formatter.formatObject(en.getValue()).toProperty().getValue()))
+					.collect(Collectors.toMap(en -> en.getKey(), en -> en.getValue())));
 		}
 		
 		public PropertyType getType() {
@@ -1829,13 +1833,13 @@ public class CustomConfig {
 		public FormattedProperty formatObject(Object o) {
 			if(o instanceof List<?>) {
 				List<?> l = (List<?>) o;
-				return FormattedProperty.list(l);
+				return FormattedProperty.list(this, l);
 			}
 			if(o instanceof Map<?,?>) {
 				Map<?,?> mp = (Map<?,?>) o;
 				if(!mp.isEmpty() && mp.keySet().stream().findFirst().get() instanceof String) {
 					Map<String, ?> map = (Map<String, ?>) o;
-					return FormattedProperty.map(map);
+					return FormattedProperty.map(this, map);
 				}
 			}
 			return FormattedProperty.other(o);
