@@ -8,6 +8,9 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Arrays;
 
+import org.bukkit.configuration.file.YamlConfiguration;
+
+import me.mrletsplay.mrcore.bukkitimpl.BukkitCustomConfig;
 import me.mrletsplay.mrcore.http.HttpUtils;
 import me.mrletsplay.mrcore.misc.JSON.JSONObject;
 
@@ -60,6 +63,35 @@ public class ConfigConverter {
 			JSONObject obj = new JSONObject(new String(nOut.toByteArray()));
 			if(obj.getBoolean("success")) {
 				return obj.getString("data");
+			}else {
+				throw new ConfigConversionException("Failed to convert config: "+obj.getString("error"));
+			}
+		}catch(IOException e) {
+			throw new ConfigConversionException("Failed to convert config", e);
+		}
+	}
+	
+	/**
+	 * Converts a bukkit YamlConfiguration to a BukkitCustomConfig<br>
+	 * by making a POST request to <a href="http://graphite-official.com/api/mrcore/convert_yaml.php">The YAML conversion API</a><br>
+	 * @param bukkitConfig The bukkit YamlConfiguration instance to convert
+	 * @param saveTo The BukkitCustomConfig to save the properties to
+	 * @return The <code>saveTo</code> parameter with the properties set to the ones of the bukkit config
+	 */
+	public static BukkitCustomConfig convertYaml(YamlConfiguration bukkitConfig, BukkitCustomConfig saveTo) {
+		String getURL = "https://graphite-official.com/api/mrcore/convert_yaml.php";
+		try {
+			String cfgString = bukkitConfig.saveToString();
+			InputStream in = HttpUtils.httpPost(new URL(getURL), "data=" + URLEncoder.encode(cfgString, "UTF-8"));
+			ByteArrayOutputStream nOut = new ByteArrayOutputStream();
+			byte[] buf = new byte[1024];
+			int len;
+			while((len = in.read(buf)) > 0) {
+				nOut.write(buf, 0, len);
+			}
+			JSONObject obj = new JSONObject(new String(nOut.toByteArray()));
+			if(obj.getBoolean("success")) {
+				return (BukkitCustomConfig) saveTo.loadConfig(new ByteArrayInputStream(obj.getString("data").getBytes()));
 			}else {
 				throw new ConfigConversionException("Failed to convert config: "+obj.getString("error"));
 			}
