@@ -102,6 +102,7 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 				enchs.forEach((en, lvl) -> m.addEnchant(Enchantment.getByName(en), lvl, true));
 				List<String> flags = (List<String>) map.getOrDefault("flags", new ArrayList<>());
 				flags.forEach(f -> m.addItemFlags(ItemFlag.valueOf(f)));
+				it.setItemMeta(m);
 				return it;
 			}
 			
@@ -126,11 +127,12 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 //				return FormattedProperty.map(((ConfigurationSerializable) o).serialize());
 //			}
 			
-			ObjectMapper<?> mapper = config.getMappers().stream().filter(m -> m.canMap(o)).findFirst().orElse(null);
+//			ObjectMapper<?> mapper = config.getMappers().stream().filter(m -> m.canMap(o)).findFirst().orElse(null);
+//			
+//			if(mapper == null) return fp;
 			
-			if(mapper == null) return fp;
-			
-			return FormattedProperty.map(mapper.map(o));
+//			return FormattedProperty.map(mapper.map(o));
+			return fp;
 		}
 		
 		@Override
