@@ -81,7 +81,7 @@ public class CompactCustomConfig extends CustomConfig {
 	
 	@SuppressWarnings("unchecked")
 	private void writeValue(Object o, DataOutputStream out) throws IOException {
-		FormattedProperty form = getFormatter().formatObject(o);
+		Property form = getFormatter().formatObject(o).toProperty();
 		switch(form.getType()) {
 			case VALUE:
 				out.writeByte(0);

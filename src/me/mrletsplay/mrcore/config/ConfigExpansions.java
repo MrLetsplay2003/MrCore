@@ -3,6 +3,7 @@ package me.mrletsplay.mrcore.config;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -63,6 +64,10 @@ public class ConfigExpansions {
 			public boolean canMap(Object o) {
 				if(o == null) return false;
 				return mappingClass.isAssignableFrom(o.getClass());
+			}
+			
+			public boolean requireKeys(Map<String, Object> map, String... keys) {
+				return Arrays.stream(keys).allMatch(map::containsKey);
 			}
 			
 			public Map<String, Object> map(Object o) {

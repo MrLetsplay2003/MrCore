@@ -49,13 +49,14 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 
 			@Override
 			public Location constructObject(Map<String, Object> map) {
+				if(!requireKeys(map, "world", "x", "y", "z")) return null;
 				return new Location(
 							Bukkit.getWorld((String) map.get("world")),
-							(double) map.get("x"),
-							(double) map.get("y"),
-							(double) map.get("z"),
-							(float) map.get("yaw"),
-							(float) map.get("pitch")
+							castGeneric(map.get("x"), Double.class),
+							castGeneric(map.get("y"), Double.class),
+							castGeneric(map.get("z"), Double.class),
+							castGeneric(map.get("yaw"), Float.class),
+							castGeneric(map.get("pitch"), Float.class)
 						);
 			}
 			
@@ -90,11 +91,14 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 			@SuppressWarnings("unchecked")
 			@Override
 			public ItemStack constructObject(Map<String, Object> map) {
-				ItemStack it = new ItemStack(Material.getMaterial((String) map.get("type")), (int) map.getOrDefault("amount", 1), (short) map.getOrDefault("durability", 0));
+				if(!map.containsKey("type")) return null;
+				ItemStack it = new ItemStack(Material.getMaterial((String) map.get("type")),
+						castGeneric(map.getOrDefault("amount", 1), Integer.class),
+						castGeneric(map.getOrDefault("durability", 0), Short.class));
 				ItemMeta m = it.getItemMeta();
 				m.setDisplayName((String) map.get("name"));
 				m.setLore((List<String>) map.getOrDefault("lore", new ArrayList<>()));
-				Map<String, Integer> enchs = (Map<String, Integer>) map.getOrDefault("enchantments", new HashMap<>());
+				Map<String, Integer> enchs = castGenericMap((Map<String, ?>) map.getOrDefault("enchantments", new HashMap<>()), Integer.class);
 				enchs.forEach((en, lvl) -> m.addEnchant(Enchantment.getByName(en), lvl, true));
 				List<String> flags = (List<String>) map.getOrDefault("flags", new ArrayList<>());
 				flags.forEach(f -> m.addItemFlags(ItemFlag.valueOf(f)));
@@ -122,7 +126,11 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 //				return FormattedProperty.map(((ConfigurationSerializable) o).serialize());
 //			}
 			
-			return fp;
+			ObjectMapper<?> mapper = config.getMappers().stream().filter(m -> m.canMap(o)).findFirst().orElse(null);
+			
+			if(mapper == null) return fp;
+			
+			return FormattedProperty.map(mapper.map(o));
 		}
 		
 		@Override
