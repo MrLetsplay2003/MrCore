@@ -73,7 +73,7 @@ public class ConfigConverter {
 	
 	/**
 	 * Converts a bukkit YamlConfiguration to a BukkitCustomConfig<br>
-	 * by making a POST request to <a href="http://graphite-official.com/api/mrcore/convert_yaml.php">The YAML conversion API</a><br>
+	 * by making a POST request to <a href="http://graphite-official.com/api/mrcore/convert_yaml.php">The YAML conversion API</a>
 	 * @param bukkitConfig The bukkit YamlConfiguration instance to convert
 	 * @param saveTo The BukkitCustomConfig to save the properties to
 	 * @return The <code>saveTo</code> parameter with the properties set to the ones of the bukkit config
