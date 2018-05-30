@@ -36,7 +36,8 @@ public class ConfigExpansions {
 				return super.castGeneric(obj, clazz);
 			}catch(InvalidTypeException e) {
 				ObjectMapper<T> mapper = getMapper(clazz);
-				if(!(obj instanceof Map) || mapper == null) throw new InvalidTypeException("Unsupported type: "+clazz.getName());
+				if(!(obj instanceof Map)) throw new InvalidTypeException("Unsupported type: "+clazz.getName()+" (Value not a map)");
+				if(mapper == null) throw new InvalidTypeException("No mapper defined for "+clazz.getName());
 				return mapper.constructObject((Map<String, Object>) obj);
 			}
 		}
@@ -67,8 +68,8 @@ public class ConfigExpansions {
 		}
 		
 		public <T> List<T> getMappableList(String key, Class<T> mappingClass) {
-			List<Map<String, Object>> list = getMapList(key);
 			try {
+				List<Map<String, Object>> list = getMapList(key);
 				ObjectMapper<T> mapper = getMapper(mappingClass);
 				if(mapper == null) throw new InvalidTypeException("No mapper defined for "+mappingClass.getName());
 				return list.stream().map(e -> mapper.constructObject(e)).collect(Collectors.toList());
@@ -78,11 +79,16 @@ public class ConfigExpansions {
 		}
 		
 		public <T> List<T> getMappableList(String key, Class<T> mappingClass, List<T> defaultValue, boolean applyDefault) {
-			ObjectMapper<T> mapper = getMapper(mappingClass);
-			if(mapper == null) throw new InvalidTypeException("No mapper defined for "+mappingClass.getName());
-			List<Map<String, Object>> list = getMapList(key, defaultValue.stream().map(i -> mapper.map(i)).collect(Collectors.toList()), applyDefault);
 			try {
-				return list.stream().map(e -> mapper.constructObject(e)).collect(Collectors.toList());
+				ObjectMapper<T> mapper = getMapper(mappingClass);
+				if(mapper == null) throw new InvalidTypeException("No mapper defined for "+mappingClass.getName());
+				List<Map<String, Object>> list = getMapList(key, null, false);
+				if(list == null) {
+					if(applyDefault) set(key, defaultValue);
+					return defaultValue;
+				}else {
+					return list.stream().map(e -> mapper.constructObject(e)).collect(Collectors.toList());
+				}
 			} catch(Exception e) {
 				throw new InvalidTypeException(key, "Failed to parse into "+mappingClass.getName(), e);
 			}
