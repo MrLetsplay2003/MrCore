@@ -98,6 +98,10 @@ public class ConfigExpansions {
 				return mapObject(mappingClass.cast(o));
 			}
 			
+			public <G> G castGeneric(Object o, Class<G> clazz) {
+				return getConfig().castGeneric(o, clazz);
+			}
+			
 			public abstract Map<String, Object> mapObject(T object);
 			
 			public abstract T constructObject(Map<String, Object> map);
