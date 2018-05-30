@@ -1,4 +1,5 @@
 # MrCore
+[![](https://jitpack.io/v/MrLetsplay2003/MrCore.svg)](https://jitpack.io/#MrLetsplay2003/MrCore)
 
 This is a simple to use library to make life easier, both for developers and users
 
