@@ -26,6 +26,7 @@ public class ConfigExpansions {
 		
 		public void registerMapper(ObjectMapper<?> mapper) {
 			mappers.add(mapper);
+			mapper.init(this);
 		}
 		
 		@SuppressWarnings("unchecked")
@@ -70,9 +71,18 @@ public class ConfigExpansions {
 		public static abstract class ObjectMapper<T> {
 			
 			public Class<T> mappingClass;
+			public ExpandableCustomConfig config;
 			
 			public ObjectMapper(Class<T> clazz) {
 				this.mappingClass = clazz;
+			}
+			
+			protected void init(ExpandableCustomConfig config) {
+				this.config = config;
+			}
+			
+			public ExpandableCustomConfig getConfig() {
+				return config;
 			}
 			
 			public boolean canMap(Object o) {
