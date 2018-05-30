@@ -1,11 +1,11 @@
-package me.mrletsplay.mrcore.main;
+ package me.mrletsplay.mrcore.main;
 
 public class MrCore {
 
 	/*
 	 * TODO:
 	 * - Color chat message parser (for BaseComponents)
-	 * - Load/save items (CC)
+	 * - Load/save items (CC) [X]
 	 * - NMS
 	 * - CC custom parser [X]
 	 * - Command system
@@ -15,11 +15,12 @@ public class MrCore {
 	 * - Multi-Plugin ("Modules")
 	 * - Consumer<GUISomethingEvent>
 	 * - GUIBuildAction
+	 * - Tab complete
 	 * 
 	 * shift click (gui)
 	 */
 	
-	private static final String VERSION = "1.9.3";
+	private static final String VERSION = "1.9.4";
 	
 	public static String getVersion() {
 		return VERSION;

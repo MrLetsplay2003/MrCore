@@ -29,20 +29,34 @@ public class ConfigExpansions {
 		}
 		
 		@SuppressWarnings("unchecked")
-		public <T> T getMappable(String key, Class<T> mappingClass) {
-			ObjectMapper<T> mapper = (ObjectMapper<T>) mappers.stream().filter(m -> m.mappingClass.equals(mappingClass)).findFirst().orElse(null);
+		@Override
+		public <T> T castGeneric(Object obj, Class<T> clazz) {
 			try {
-				return mapper.constructObject(getMap(key));
+				return super.castGeneric(obj, clazz);
+			}catch(InvalidTypeException e) {
+				ObjectMapper<T> mapper = getMapper(clazz);
+				if(!(obj instanceof Map) || mapper == null) throw new InvalidTypeException("Unsupported type: "+clazz.getName());
+				return mapper.constructObject((Map<String, Object>) obj);
+			}
+		}
+		
+		@SuppressWarnings("unchecked")
+		public <T> ObjectMapper<T> getMapper(Class<T> mappingClass) {
+			return (ObjectMapper<T>) mappers.stream().filter(m -> m.mappingClass.equals(mappingClass)).findFirst().orElse(null);
+		}
+		
+		public <T> T getMappable(String key, Class<T> mappingClass) {
+			try {
+				return getMapper(mappingClass).constructObject(getMap(key));
 			} catch(Exception e) {
 				throw new InvalidTypeException(key, "Failed to parse into "+mappingClass.getName(), e);
 			}
 		}
 		
-		@SuppressWarnings("unchecked")
 		public <T> List<T> getMappableList(String key, Class<T> mappingClass) {
-			ObjectMapper<T> mapper = (ObjectMapper<T>) mappers.stream().filter(m -> m.mappingClass.equals(mappingClass)).findFirst().orElse(null);
 			List<Map<String, Object>> list = getMapList(key);
 			try {
+				ObjectMapper<T> mapper = getMapper(mappingClass);
 				return list.stream().map(e -> mapper.constructObject(e)).collect(Collectors.toList());
 			} catch(Exception e) {
 				throw new InvalidTypeException(key, "Failed to parse into "+mappingClass.getName(), e);

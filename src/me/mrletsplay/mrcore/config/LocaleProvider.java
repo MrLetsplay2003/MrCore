@@ -1,7 +1,6 @@
 package me.mrletsplay.mrcore.config;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * Provides language files for your application
@@ -19,7 +18,8 @@ public class LocaleProvider {
 	/**
 	 * Constructs a locale provider with the given locale folder<br>
 	 * This will not allow for custom locales by default<br>
-	 * The default parameter format is prefix = "{", suffix = "}"
+	 * The default parameter format is prefix = "{", suffix = "}"<br>
+	 * The default null mode is {@link LocaleNullMode#USE_NULL}
 	 * @param localeFolder The folder to save the locales in
 	 * @see <a href="https://github.com/MrLetsplay2003/MrCore/wiki/LocaleProvider">LocaleProvider wiki</a>
 	 */
@@ -53,12 +53,9 @@ public class LocaleProvider {
 	 * @return This LocaleProvider instance
 	 */
 	public LocaleProvider registerLocale(String locale, CustomConfig config) {
-		try {
-			CustomConfig tmpCfg = new CustomConfig(getLocaleFile(locale)).loadConfigSafely().loadDefault(config, false);
-			tmpCfg.saveConfigSafely();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		CustomConfig tmpCfg = new CustomConfig(getLocaleFile(locale)).loadConfigSafely().loadDefault(config, false);
+		tmpCfg.saveConfigSafely();
+		tmpCfg.loadConfigSafely();
 		return this;
 	}
 	
@@ -211,12 +208,8 @@ public class LocaleProvider {
 			CustomConfig cfg = new CustomConfig(getCustomLocaleFile(locale)).loadConfigSafely();
 			Locale defaults = provider.getDefaultLocale();
 			if(defaults != null) {
-				try {
-					cfg.loadDefault(defaults.cfg, false);
-					cfg.saveConfigSafely();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				cfg.loadDefault(defaults.cfg, false);
+				cfg.saveConfigSafely();
 			}
 			return cfg;
 		}
@@ -252,12 +245,12 @@ public class LocaleProvider {
 		 * Returns a message by the given path<br>
 		 * If no message at that path is defined, the {@link LocaleProvider}'s {@link LocaleNullMode} will decide what should be returned<br>
 		 * This method is equal to<br>
-		 * {@code <code>locale.getMessage(path, new String[]{});</code>}
+		 * {@code <code>locale.getMessage(path, new String[0]);</code>}
 		 * @param path The path of the message
 		 * @return The message from the config
 		 */
 		public String getMessage(String path) {
-			return getMessage(path, new String[] {});
+			return getMessage(path, new String[0]);
 		}
 		
 		/**

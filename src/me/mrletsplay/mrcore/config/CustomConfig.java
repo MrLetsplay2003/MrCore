@@ -513,7 +513,7 @@ public class CustomConfig {
 	 * @throws IOException If an IO error occurs while loading the config
 	 * @throws InvalidConfigException If this config needs to be loaded and is in an invalid format
 	 */
-	public CustomConfig loadDefault(CustomConfig cfg, boolean override) throws IOException{
+	public CustomConfig loadDefault(CustomConfig cfg, boolean override) {
 		HashMap<String, Property> properties = getProperties();
 		HashMap<String, String> comments = getComments();
 		for(Map.Entry<String, Property> en : cfg.getProperties().entrySet()) {
@@ -1159,7 +1159,7 @@ public class CustomConfig {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <T> T castGeneric(Object obj, Class<T> clazz) {
+	public <T> T castGeneric(Object obj, Class<T> clazz) {
 		if(clazz.equals(Object.class)) return (T) obj;
 		if(clazz.equals(Map.class)) return (T) obj;
 		if(clazz.equals(List.class)) return (T) obj;
@@ -1176,11 +1176,11 @@ public class CustomConfig {
 		throw new InvalidTypeException("Unsupported type: "+clazz.getName());
 	}
 	
-	public static <T> List<T> castGenericList(List<?> list, Class<T> clazz) {
+	public <T> List<T> castGenericList(List<?> list, Class<T> clazz) {
 		return list.stream().map(o -> castGeneric(o, clazz)).collect(Collectors.toList());
 	}
 	
-	public static <T> Map<String, T> castGenericMap(Map<String, ?> map, Class<T> clazz) {
+	public <T> Map<String, T> castGenericMap(Map<String, ?> map, Class<T> clazz) {
 		return map.entrySet().stream()
 				.map(e -> new AbstractMap.SimpleEntry<>(e.getKey(), castGeneric(e.getValue(), clazz)))
 				.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));

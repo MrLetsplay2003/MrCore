@@ -9,7 +9,6 @@ import java.nio.channels.ReadableByteChannel;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -23,7 +22,7 @@ public class MrCoreBukkitImpl {
 	 * Version "latest" is to be used with caution, because i'm horrible at sustaining backwards-compatability
 	 * @param plugin The plugin to load it for
 	 */
-	public static void loadMrCore(JavaPlugin plugin) {
+	public static void loadMrCore(Plugin plugin) {
 		if(Bukkit.getPluginManager().isPluginEnabled(MRCORE_PLUGIN_NAME)) {
 			return;
 		}
