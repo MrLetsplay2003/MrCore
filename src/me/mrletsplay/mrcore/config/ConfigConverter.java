@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -32,7 +33,7 @@ public class ConfigConverter {
 	 */
 	public static CustomConfig convertToLatestVersion(String config, CustomConfig toConfig, ConfigVersion fromVersion) {
 		try {
-			return toConfig.loadConfig(new ByteArrayInputStream(convertVersion(config, fromVersion, ConfigVersion.getCurrentVersion()).getBytes()));
+			return toConfig.loadConfig(new ByteArrayInputStream(convertVersion(config, fromVersion, ConfigVersion.getCurrentVersion()).getBytes(StandardCharsets.UTF_8)));
 		} catch (IOException e) {
 			throw new ConfigConversionException("Couldn't convert config", e);
 		}
@@ -40,7 +41,7 @@ public class ConfigConverter {
 	
 	public static CompactCustomConfig convertToLatestCompactVersion(String config, CompactCustomConfig toConfig, ConfigVersion fromVersion) {
 		try {
-			return (CompactCustomConfig) toConfig.loadConfig(new ByteArrayInputStream(convertVersion(config, fromVersion, ConfigVersion.getCurrentCompactVersion()).getBytes()));
+			return (CompactCustomConfig) toConfig.loadConfig(new ByteArrayInputStream(convertVersion(config, fromVersion, ConfigVersion.getCurrentCompactVersion()).getBytes(StandardCharsets.UTF_8)));
 		} catch (IOException e) {
 			throw new ConfigConversionException("Couldn't convert config", e);
 		}
@@ -91,7 +92,7 @@ public class ConfigConverter {
 			}
 			JSONObject obj = new JSONObject(new String(nOut.toByteArray()));
 			if(obj.getBoolean("success")) {
-				return (BukkitCustomConfig) saveTo.loadConfig(new ByteArrayInputStream(obj.getString("data").getBytes()));
+				return (BukkitCustomConfig) saveTo.loadConfig(new ByteArrayInputStream(obj.getString("data").getBytes(StandardCharsets.UTF_8)));
 			}else {
 				throw new ConfigConversionException("Failed to convert config: "+obj.getString("error"));
 			}
