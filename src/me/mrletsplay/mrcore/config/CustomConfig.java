@@ -1089,6 +1089,15 @@ public class CustomConfig {
 		List<Map> maps = getGenericList(key, Map.class);
 		return maps.stream().map(e -> (Map<String, Object>)e).collect(Collectors.toList());
 	}
+
+	/**
+	 * See {@link #get(String, Object, boolean)}
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public List<Map<String, Object>> getMapList(String key, List<Map<String, Object>> defaultVal, boolean applyDefault) {
+		List<Map> maps = getGenericList(key, Map.class, new ArrayList<Map>(defaultVal), applyDefault);
+		return maps.stream().map(e -> (Map<String, Object>)e).collect(Collectors.toList());
+	}
 	
 	/**
 	 * See {@link #get(String, Object, boolean)}
