@@ -1163,6 +1163,7 @@ public class CustomConfig {
 		if(clazz.equals(Object.class)) return (T) obj;
 		if(clazz.equals(Map.class)) return (T) obj;
 		if(clazz.equals(List.class)) return (T) obj;
+		if(!(obj instanceof String)) throw new InvalidTypeException("Unsupported type: "+clazz.getName()); 
 		String val = (String) obj;
 		if(clazz.equals(String.class)) return (T) val;
 		if(clazz.equals(Boolean.class)) return (T) Boolean.valueOf(val);
