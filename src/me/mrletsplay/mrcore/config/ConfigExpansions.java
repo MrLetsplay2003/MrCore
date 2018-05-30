@@ -54,10 +54,29 @@ public class ConfigExpansions {
 			}
 		}
 		
+		public <T> T getMappable(String key, Class<T> mappingClass, T defaultValue, boolean applyDefault) {
+			try {
+				ObjectMapper<T> mapper = getMapper(mappingClass);
+				return mapper.constructObject(getMap(key, mapper.mapObject(defaultValue), applyDefault));
+			} catch(Exception e) {
+				throw new InvalidTypeException(key, "Failed to parse into "+mappingClass.getName(), e);
+			}
+		}
+		
 		public <T> List<T> getMappableList(String key, Class<T> mappingClass) {
 			List<Map<String, Object>> list = getMapList(key);
 			try {
 				ObjectMapper<T> mapper = getMapper(mappingClass);
+				return list.stream().map(e -> mapper.constructObject(e)).collect(Collectors.toList());
+			} catch(Exception e) {
+				throw new InvalidTypeException(key, "Failed to parse into "+mappingClass.getName(), e);
+			}
+		}
+		
+		public <T> List<T> getMappableList(String key, Class<T> mappingClass, List<T> defaultValue, boolean applyDefault) {
+			ObjectMapper<T> mapper = getMapper(mappingClass);
+			List<Map<String, Object>> list = getMapList(key, defaultValue.stream().map(i -> mapper.map(i)).collect(Collectors.toList()), applyDefault);
+			try {
 				return list.stream().map(e -> mapper.constructObject(e)).collect(Collectors.toList());
 			} catch(Exception e) {
 				throw new InvalidTypeException(key, "Failed to parse into "+mappingClass.getName(), e);
