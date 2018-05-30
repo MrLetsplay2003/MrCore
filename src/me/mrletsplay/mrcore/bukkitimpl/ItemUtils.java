@@ -229,18 +229,25 @@ public class ItemUtils {
 	
 	public static enum ComparisonParameter {
 		
-		ALL_APPLICABLE,
-		NONE_APPLICABLE,
+		ALL_APPLICABLE(true),
+		NONE_APPLICABLE(true),
 		
-		TYPE,
-		AMOUNT,
-		DURABILITY,
-		NAME,
-		LORE,
-		ENCHANTS,
-		SKULL_OWNER,
+		TYPE(false),
+		AMOUNT(false),
+		DURABILITY(false),
+		NAME(false),
+		LORE(false),
+		ENCHANTS(false),
+		SKULL_OWNER(false),
 //		SKULL_TEXTURE,
-		LEATHER_ARMOR_COLOR
+		LEATHER_ARMOR_COLOR(false);
+		
+		public final boolean isParameterCollection;
+		
+		private ComparisonParameter(boolean isCollection) {
+			this.isParameterCollection = isCollection;
+		}
+		
 		
 	}
 	
