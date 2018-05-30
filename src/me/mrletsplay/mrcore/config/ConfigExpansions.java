@@ -48,7 +48,9 @@ public class ConfigExpansions {
 		
 		public <T> T getMappable(String key, Class<T> mappingClass) {
 			try {
-				return getMapper(mappingClass).constructObject(getMap(key));
+				ObjectMapper<T> mapper = getMapper(mappingClass);
+				if(mapper == null) throw new InvalidTypeException("No mapper defined for "+mappingClass.getName());
+				return mapper.constructObject(getMap(key));
 			} catch(Exception e) {
 				throw new InvalidTypeException(key, "Failed to parse into "+mappingClass.getName(), e);
 			}
@@ -57,6 +59,7 @@ public class ConfigExpansions {
 		public <T> T getMappable(String key, Class<T> mappingClass, T defaultValue, boolean applyDefault) {
 			try {
 				ObjectMapper<T> mapper = getMapper(mappingClass);
+				if(mapper == null) throw new InvalidTypeException("No mapper defined for "+mappingClass.getName());
 				return mapper.constructObject(getMap(key, mapper.mapObject(defaultValue), applyDefault));
 			} catch(Exception e) {
 				throw new InvalidTypeException(key, "Failed to parse into "+mappingClass.getName(), e);
@@ -67,6 +70,7 @@ public class ConfigExpansions {
 			List<Map<String, Object>> list = getMapList(key);
 			try {
 				ObjectMapper<T> mapper = getMapper(mappingClass);
+				if(mapper == null) throw new InvalidTypeException("No mapper defined for "+mappingClass.getName());
 				return list.stream().map(e -> mapper.constructObject(e)).collect(Collectors.toList());
 			} catch(Exception e) {
 				throw new InvalidTypeException(key, "Failed to parse into "+mappingClass.getName(), e);
@@ -75,6 +79,7 @@ public class ConfigExpansions {
 		
 		public <T> List<T> getMappableList(String key, Class<T> mappingClass, List<T> defaultValue, boolean applyDefault) {
 			ObjectMapper<T> mapper = getMapper(mappingClass);
+			if(mapper == null) throw new InvalidTypeException("No mapper defined for "+mappingClass.getName());
 			List<Map<String, Object>> list = getMapList(key, defaultValue.stream().map(i -> mapper.map(i)).collect(Collectors.toList()), applyDefault);
 			try {
 				return list.stream().map(e -> mapper.constructObject(e)).collect(Collectors.toList());
