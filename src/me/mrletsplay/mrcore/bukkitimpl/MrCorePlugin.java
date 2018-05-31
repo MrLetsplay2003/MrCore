@@ -23,6 +23,7 @@ public class MrCorePlugin extends JavaPlugin{
 	public void onEnable() {
 		pl = this;
 		getLogger().info("And MrCore is on board as well! :wave:");
+		MaterialLookup.loadAll();
 		Bukkit.getPluginManager().registerEvents(new GUIListener(), this);
 		getCommand("mrcoreui").setExecutor(new UIListener());
 		config = new CustomConfig(new File(getDataFolder(), "config.yml")).loadConfigSafely();
