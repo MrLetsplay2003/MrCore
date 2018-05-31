@@ -1,6 +1,7 @@
 package me.mrletsplay.mrcore.misc;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
@@ -72,6 +73,10 @@ public class JSON {
 
 		public JSONArray() {
 			super();
+		}
+
+		public JSONArray(Collection<Object> collection) {
+			super(collection);
 		}
 		
 		public JSONArray(String source) {
