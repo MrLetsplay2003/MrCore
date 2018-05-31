@@ -75,7 +75,7 @@ public class JSON {
 			super();
 		}
 
-		public JSONArray(Collection<Object> collection) {
+		public JSONArray(Collection<?> collection) {
 			super(collection);
 		}
 		

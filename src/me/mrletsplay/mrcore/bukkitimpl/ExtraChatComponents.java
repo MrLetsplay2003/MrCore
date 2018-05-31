@@ -13,6 +13,12 @@ import net.md_5.bungee.chat.ComponentSerializer;
 
 public class ExtraChatComponents {
 	
+	/**
+	 * 
+	 * @author Mr
+	 * @deprecated Doesn't work yet, still needs to be implemented
+	 */
+	@Deprecated
 	public static class ItemChatComponent {
 		
 		private ItemStack item;
@@ -25,7 +31,6 @@ public class ExtraChatComponents {
 			return item;
 		}
 		
-		@SuppressWarnings("deprecation")
 		public BaseComponent[] toBase() {
 			JSONObject o = new JSONObject();
 			MaterialLookup lookup = MaterialLookup.byMaterial(item.getType());
@@ -37,7 +42,7 @@ public class ExtraChatComponents {
 				if(meta.hasDisplayName() || meta.hasLore()) {
 					JSONObject display = new JSONObject();
 					if(meta.hasDisplayName()) display.set("Name", meta.getDisplayName());
-					if(meta.hasLore()) display.set("Lore", meta.getLore());
+					if(meta.hasLore()) display.set("Lore", new JSONArray(meta.getLore()));
 					tag.set("display", display);
 				}
 				if(meta.hasEnchants()) {
