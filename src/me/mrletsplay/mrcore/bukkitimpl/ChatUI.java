@@ -316,7 +316,7 @@ public class ChatUI {
 		private UIElementAction action;
 		private String hoverText;
 		
-		public abstract String getLayout(Player p);
+		public abstract BaseComponent getLayout(Player p);
 		
 		/**
 		 * Sets the action for this UIElement<br>
@@ -347,19 +347,28 @@ public class ChatUI {
 	 */
 	public static class StaticUIElement extends UIElement {
 		
-		private String layout;
+		private BaseComponent layout;
+		
+		/**
+		 * Constructs a UI element
+		 * @param text The static text layout to use
+		 * @see {@link StaticUIElement}
+		 */
+		public StaticUIElement(String text) {
+			this.layout = new TextComponent(text);
+		}
 		
 		/**
 		 * Constructs a UI element
 		 * @param layout The static layout to use
 		 * @see {@link StaticUIElement}
 		 */
-		public StaticUIElement(String layout) {
+		public StaticUIElement(BaseComponent layout) {
 			this.layout = layout;
 		}
 		
 		@Override
-		public String getLayout(Player p) {
+		public BaseComponent getLayout(Player p) {
 			return layout;
 		}
 		
@@ -605,8 +614,8 @@ public class ChatUI {
 	
 	private static class UILayoutParser {
 		
-		public static TextComponent parseElement(UIElement element, Player p, String instanceID, String elementID) {
-			TextComponent tc = new TextComponent(element.getLayout(p));
+		public static BaseComponent parseElement(UIElement element, Player p, String instanceID, String elementID) {
+			BaseComponent tc = element.getLayout(p);
 			if(element.hoverText != null)
 				tc.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(element.hoverText).create()));
 			if(element.action != null)
