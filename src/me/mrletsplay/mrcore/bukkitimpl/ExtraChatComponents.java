@@ -9,21 +9,18 @@ import org.bukkit.inventory.meta.ItemMeta;
 import me.mrletsplay.mrcore.misc.JSON.JSONArray;
 import me.mrletsplay.mrcore.misc.JSON.JSONObject;
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.chat.ComponentSerializer;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 
 public class ExtraChatComponents {
 	
 	/**
-	 * 
-	 * @author Mr
-	 * @deprecated Doesn't work yet, still needs to be implemented
+	 * @author MrLetsplay2003
 	 */
-	@Deprecated
-	public static class ItemChatComponent {
+	public static class ItemStackComponent {
 		
 		private ItemStack item;
 		
-		public ItemChatComponent(ItemStack item) {
+		public ItemStackComponent(ItemStack item) {
 			this.item = item;
 		}
 		
@@ -31,10 +28,11 @@ public class ExtraChatComponents {
 			return item;
 		}
 		
+		@SuppressWarnings("deprecation")
 		public BaseComponent[] toBase() {
 			JSONObject o = new JSONObject();
 			MaterialLookup lookup = MaterialLookup.byMaterial(item.getType());
-			o.set("id", "minecraft:"+lookup.getMinecraftID());
+			o.set("id", lookup.getMinecraftID());
 			o.set("Count", item.getAmount());
 			if(item.hasItemMeta()) {
 				ItemMeta meta = item.getItemMeta();
@@ -57,7 +55,8 @@ public class ExtraChatComponents {
 				}
 				o.set("tag", tag);
 			}
-			return ComponentSerializer.parse(o.toString());
+			BaseComponent[] b = new ComponentBuilder(o.toString()).create();
+			return b;
 		}
 		
 	}

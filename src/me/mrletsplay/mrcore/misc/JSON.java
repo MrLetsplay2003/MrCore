@@ -346,9 +346,9 @@ public class JSON {
 						.append("\"")
 						.append(escapeString(en.getKey()))
 						.append("\"")
-						.append(": ")
+						.append(":")
 						.append(formatGeneric(en.getValue())))
-				.collect(Collectors.joining(", ")));
+				.collect(Collectors.joining(",")));
 			return builder.append("}");
 		}
 		
@@ -356,7 +356,7 @@ public class JSON {
 			StringBuilder builder = new StringBuilder("[");
 			builder.append(array.stream()
 				.map(en -> formatGeneric(en))
-				.collect(Collectors.joining(", ")));
+				.collect(Collectors.joining(",")));
 			return builder.append("]");
 		}
 		
