@@ -613,7 +613,7 @@ public class ChatUI {
 	}
 	
 	private static class UILayoutParser {
-		 
+		
 		public static BaseComponent parseElement(UIElement element, Player p, String instanceID, String elementID) {
 			BaseComponent tc = element.getLayout(p);
 			if(element.hoverText != null)
