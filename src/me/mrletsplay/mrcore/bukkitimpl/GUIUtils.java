@@ -35,6 +35,7 @@ public class GUIUtils {
 		private GUIDragDropListener dragDrop;
 		private GUIAction action;
 		private HashMap<String, Object> properties = new HashMap<>();
+		GUIBuildAction buildAction;
 		
 		/**
 		 * Creates a GUI builder for a single page GUI
@@ -129,10 +130,22 @@ public class GUIUtils {
 		
 		/**
 		 * Adds a default property for this GUIBuilder
-		 * @param properties The properties to use
+		 * @param key The key of the property
+		 * @param value the value of the property
 		 */
 		public void addProperty(String key, Object value) {
 			properties.put(key, value);
+		}
+		
+		/**
+		 * Sets the build action/build listener for this instance<br>
+		 * This can be used to add instance-specific items to the GUI when the GUI is built or refreshed<br>
+		 * Note: This is not called when the {@link #build()} method is used but rather when the {@link GUI#getForPlayer(Player)} method is called
+		 * @param buildAction The buid action listener to use
+		 */
+		public GUIBuilder setBuildAction(GUIBuildAction buildAction) {
+			this.buildAction = buildAction;
+			return this;
 		}
 		
 		/**
@@ -274,6 +287,12 @@ public class GUIUtils {
 						event.setCancelled(true);
 					}
 				});
+		}
+		
+		@Override
+		public GUIBuilderMultiPage<T> setBuildAction(GUIBuildAction buildAction) {
+			super.setBuildAction(buildAction);
+			return this;
 		}
 		
 		@Override
@@ -558,6 +577,42 @@ public class GUIUtils {
 		
 	}
 	
+	public static abstract class GUIBuildAction {
+		
+		public abstract void onBuild(GUIBuildEvent event);
+		
+	}
+	
+	public static class GUIBuildEvent {
+		
+		private GUIHolder holder;
+		private Player player;
+		private Inventory inv;
+		
+		public GUIBuildEvent(GUIHolder holder, Player player, Inventory inv) {
+			this.holder = holder;
+			this.player = player;
+			this.inv = inv;
+		}
+		
+		public GUIHolder getHolder() {
+			return holder;
+		}
+		
+		public Player getPlayer() {
+			return player;
+		}
+		
+		public Inventory getInventory() {
+			return inv;
+		}
+		
+		public GUI getGUI() {
+			return holder.gui;
+		}
+		
+	}
+	
 	public static enum ClickAction {
 		
 		LEFT_CLICK,
@@ -599,14 +654,16 @@ public class GUIUtils {
 		 */
 		public Inventory getForPlayer(Player p) {
 			Inventory inv;
+			GUIHolder holder = new GUIHolder(this);
 			if(builder.isCustomType) {
-				inv = Bukkit.createInventory(new GUIHolder(this), builder.invType, builder.title);
+				inv = Bukkit.createInventory(holder, builder.invType, builder.title);
 			} else {
-				inv = Bukkit.createInventory(new GUIHolder(this), builder.size, builder.title);
+				inv = Bukkit.createInventory(holder, builder.size, builder.title);
 			}
 			for(Map.Entry<Integer, GUIElement> el : builder.elements.entrySet()) {
 				inv.setItem(el.getKey(), el.getValue().getItem(p));
 			}
+			if(builder.buildAction != null && !(this instanceof GUIMultiPage)) builder.buildAction.onBuild(new GUIBuildEvent(holder, p, inv));
 			return inv;
 		}
 
@@ -744,6 +801,7 @@ public class GUIUtils {
 					elSlots.put(slot, el);
 				}
 				holder.getProperties().put("page-elements", elSlots);
+				if(builder.buildAction != null) builder.buildAction.onBuild(new GUIBuildEvent(holder, p, base));
 				return base;
 			}else {
 				return null;
@@ -943,9 +1001,10 @@ public class GUIUtils {
 		}
 		
 		/**
-		 * It is not recommended for this method to be used as it could cause errors in some cases
+		 * @deprecated It is not recommended for this method to be used as it could cause errors in some cases
 		 */
 		@Override
+		@Deprecated
 		public Inventory getInventory() {
 			return gui.getForPlayer(null);
 		}
