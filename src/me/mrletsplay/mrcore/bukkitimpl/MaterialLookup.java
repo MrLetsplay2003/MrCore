@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Material;
+import org.bukkit.material.MaterialData;
 
 import me.mrletsplay.mrcore.http.HttpUtils;
 import me.mrletsplay.mrcore.misc.JSON.JSONArray;
@@ -37,7 +38,16 @@ public class MaterialLookup {
 	}
 
 	public static MaterialLookup byMaterial(Material material) {
-		return lookups.stream().filter(m -> m.material.equals(material)).findFirst().orElse(null);
+		return byMaterial(material, (short) 0);
+	}
+
+	public static MaterialLookup byMaterial(Material material, short data) {
+		return lookups.stream().filter(m -> m.material.equals(material) && m.data == data).findFirst().orElse(null);
+	}
+
+	@SuppressWarnings("deprecation")
+	public static MaterialLookup byMaterial(MaterialData materialData) {
+		return byMaterial(materialData.getItemType(), materialData.getData());
 	}
 
 	public static MaterialLookup byID(int id, short data) {
