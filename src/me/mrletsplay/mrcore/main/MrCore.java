@@ -16,6 +16,7 @@ public class MrCore {
 	 * - Consumer<GUISomethingEvent>
 	 * - GUIBuildAction
 	 * - Tab complete
+	 * - Better placeholders
 	 * 
 	 * shift click (gui)
 	 */
