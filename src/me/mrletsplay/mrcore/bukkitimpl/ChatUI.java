@@ -96,6 +96,21 @@ public class ChatUI {
 		}
 		
 		/**
+		 * @deprecated Use {@link #addNextPageElement(String, UIElement)} instead
+		 */
+		@Deprecated
+		public UIBuilderMultiPage<T> addNextPageElement(String key, String layout){
+			return addElement(key, new StaticUIElement(layout).setAction(new UIElementAction() {
+				
+				@Override
+				public void action(UIElementActionEvent event) {
+					int page = (int) event.getUIInstance().getProperties().get("page");
+					((UIMultiPage<?>) event.getUIInstance().getUI()).getForPlayer(event.getPlayer(), page-1);
+				}
+			}));
+		}
+		
+		/**
 		 * Adds a "next page" element to the UI<br>
 		 * This will have the default action of switching to the page after the current one<br>
 		 * If there is no page before the current one, the click will be ignored
@@ -104,7 +119,22 @@ public class ChatUI {
 		 * @return This UIBuilderMultiPage instance
 		 * @see {@link UIBuilder#addElement(String, UIElement)}
 		 */
-		public UIBuilderMultiPage<T> addNextPageElement(String key, String layout){
+		public UIBuilderMultiPage<T> addNextPageElement(String key, UIElement layout){
+			return addElement(key, layout.setAction(new UIElementAction() {
+				
+				@Override
+				public void action(UIElementActionEvent event) {
+					int page = (int) event.getUIInstance().getProperties().get("page");
+					((UIMultiPage<?>) event.getUIInstance().getUI()).getForPlayer(event.getPlayer(), page-1);
+				}
+			}));
+		}
+
+		/**
+		 * @deprecated Use {@link #addPreviousPageElement(String, UIElement)} instead
+		 */
+		@Deprecated
+		public UIBuilderMultiPage<T> addPreviousPageElement(String key, String layout){
 			return addElement(key, new StaticUIElement(layout).setAction(new UIElementAction() {
 				
 				@Override
@@ -120,12 +150,12 @@ public class ChatUI {
 		 * This will have the default action of switching to the page before the current one<br>
 		 * If there is no page before the current one, the click will be ignored
 		 * @param key The element key
-		 * @param layout The layout string to use
+		 * @param layout The layout to use
 		 * @return This UIBuilderMultiPage instance
 		 * @see {@link UIBuilder#addElement(String, UIElement)}
 		 */
-		public UIBuilderMultiPage<T> addPreviousPageElement(String key, String layout){
-			return addElement(key, new StaticUIElement(layout).setAction(new UIElementAction() {
+		public UIBuilderMultiPage<T> addPreviousPageElement(String key, UIElement layout){
+			return addElement(key, layout.setAction(new UIElementAction() {
 				
 				@Override
 				public void action(UIElementActionEvent event) {
