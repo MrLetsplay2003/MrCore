@@ -100,14 +100,7 @@ public class ChatUI {
 		 */
 		@Deprecated
 		public UIBuilderMultiPage<T> addNextPageElement(String key, String layout){
-			return addElement(key, new StaticUIElement(layout).setAction(new UIElementAction() {
-				
-				@Override
-				public void action(UIElementActionEvent event) {
-					int page = (int) event.getUIInstance().getProperties().get("page");
-					((UIMultiPage<?>) event.getUIInstance().getUI()).getForPlayer(event.getPlayer(), page-1);
-				}
-			}));
+			return addNextPageElement(key, new StaticUIElement(layout));
 		}
 		
 		/**
@@ -125,7 +118,8 @@ public class ChatUI {
 				@Override
 				public void action(UIElementActionEvent event) {
 					int page = (int) event.getUIInstance().getProperties().get("page");
-					((UIMultiPage<?>) event.getUIInstance().getUI()).getForPlayer(event.getPlayer(), page-1);
+					UIMessage msg = ((UIMultiPage<?>) event.getUIInstance().getUI()).getForPlayer(event.getPlayer(), page+1);
+					if(msg != null) msg.sendToPlayer(event.getPlayer());
 				}
 			}));
 		}
@@ -135,14 +129,7 @@ public class ChatUI {
 		 */
 		@Deprecated
 		public UIBuilderMultiPage<T> addPreviousPageElement(String key, String layout){
-			return addElement(key, new StaticUIElement(layout).setAction(new UIElementAction() {
-				
-				@Override
-				public void action(UIElementActionEvent event) {
-					int page = (int) event.getUIInstance().getProperties().get("page");
-					((UIMultiPage<?>) event.getUIInstance().getUI()).getForPlayer(event.getPlayer(), page-1);
-				}
-			}));
+			return addPreviousPageElement(key, new StaticUIElement(layout));
 		}
 
 		/**
@@ -160,7 +147,8 @@ public class ChatUI {
 				@Override
 				public void action(UIElementActionEvent event) {
 					int page = (int) event.getUIInstance().getProperties().get("page");
-					((UIMultiPage<?>) event.getUIInstance().getUI()).getForPlayer(event.getPlayer(), page-1);
+					UIMessage msg = ((UIMultiPage<?>) event.getUIInstance().getUI()).getForPlayer(event.getPlayer(), page-1);
+					if(msg != null) msg.sendToPlayer(event.getPlayer());
 				}
 			}));
 		}
@@ -605,7 +593,7 @@ public class ChatUI {
 			List<T> items = builder.supplier.getItems();
 			UILayoutMultiPage lmp = (UILayoutMultiPage) builder.layout;
 			int nPg = items.size()/lmp.nItems;
-			if(page > nPg || page < 0) return null;
+			if(page >= nPg || page < 0) return null;
 			HashMap<String, Object> props = uiMessage.instance.properties;
 			props.put("page", page);
 			HashMap<String, UIElement> elements = (HashMap<String, UIElement>) props.get("elements");
