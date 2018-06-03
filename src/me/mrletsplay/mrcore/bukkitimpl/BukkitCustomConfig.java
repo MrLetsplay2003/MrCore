@@ -21,6 +21,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import me.mrletsplay.mrcore.config.ConfigExpansions.ExpandableCustomConfig;
@@ -72,6 +73,7 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 		
 		registerMapper(new ObjectMapper<ItemStack>(ItemStack.class) {
 
+			@SuppressWarnings("deprecation")
 			@Override
 			public Map<String, Object> mapObject(ItemStack it) {
 				Map<String, Object> map = new HashMap<>();
@@ -92,6 +94,23 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 					if(!m.getItemFlags().isEmpty()) {
 						map.put("flags", m.getItemFlags().stream().map(f -> f.name()).collect(Collectors.toList()));
 					}
+					
+					if(m instanceof SkullMeta) {
+						SkullMeta sM = (SkullMeta) m;
+						if(sM.hasOwner()) {
+							// Using SkullMeta#getOwner for backwards compatability
+							map.put("skull-owner", sM.getOwner());
+						}else {
+							String texture = getTexture(sM);
+							if(texture != null) map.put("skull-texture", texture);
+						}
+					}
+					
+					if(m instanceof LeatherArmorMeta) {
+						LeatherArmorMeta lM = (LeatherArmorMeta) m;
+						map.put("leather-armor-color", Integer.toHexString(lM.getColor().asRGB()));
+					}
+					
 				}
 				return map;
 			}
