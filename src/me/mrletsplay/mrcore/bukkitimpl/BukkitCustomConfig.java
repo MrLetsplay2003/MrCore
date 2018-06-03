@@ -142,6 +142,11 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 					setTexture(sM, (String) map.get("skull-texture"));
 				}
 				
+				if(requireKeys(map, "skull-hash")) {
+					SkullMeta sM = (SkullMeta) m;
+					setRawTexture(sM, (String) map.get("skull-hash"));
+				}
+				
 				if(requireKeys(map, "leather-armor-color")) {
 					LeatherArmorMeta lM = (LeatherArmorMeta) m;
 					lM.setColor(Color.fromRGB(Integer.parseInt((String) map.get("leather-armor-color"), 16)));
@@ -236,6 +241,24 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 				.invoke(propertyMap, "textures",
 						propertyClass.getConstructor(String.class, String.class)
 						.newInstance("textures", Base64.getEncoder().encodeToString(("{textures:{SKIN:{url:\""+url+"\"}}}").getBytes())));
+			Field profileField = im.getClass().getDeclaredField("profile");
+			profileField.setAccessible(true);
+			profileField.set(im, gameProfile);
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | NoSuchFieldException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void setRawTexture(SkullMeta im, String raw) {
+		try {
+			Class<?> gameProfileClass = Class.forName("com.mojang.authlib.GameProfile");
+			Class<?> propertyClass = Class.forName("com.mojang.authlib.properties.Property");
+			Object gameProfile = gameProfileClass.getConstructor(UUID.class, String.class).newInstance(UUID.randomUUID(), null);
+			Object propertyMap = gameProfileClass.getMethod("getProperties").invoke(gameProfile);
+			propertyMap.getClass().getMethod("put", String.class, propertyClass)
+				.invoke(propertyMap, "textures",
+						propertyClass.getConstructor(String.class, String.class)
+						.newInstance("textures", Base64.getEncoder().encodeToString(raw.getBytes())));
 			Field profileField = im.getClass().getDeclaredField("profile");
 			profileField.setAccessible(true);
 			profileField.set(im, gameProfile);
