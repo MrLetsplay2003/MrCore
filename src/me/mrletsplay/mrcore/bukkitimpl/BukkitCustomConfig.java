@@ -237,7 +237,7 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 			Class<?> propertyClass = Class.forName("com.mojang.authlib.properties.Property");
 			Object gameProfile = gameProfileClass.getConstructor(UUID.class, String.class).newInstance(UUID.randomUUID(), null);
 			Object propertyMap = gameProfileClass.getMethod("getProperties").invoke(gameProfile);
-			propertyMap.getClass().getMethod("put", String.class, propertyClass)
+			propertyMap.getClass().getMethod("put", Object.class, Object.class)
 				.invoke(propertyMap, "textures",
 						propertyClass.getConstructor(String.class, String.class)
 						.newInstance("textures", Base64.getEncoder().encodeToString(("{textures:{SKIN:{url:\""+url+"\"}}}").getBytes())));
@@ -255,10 +255,10 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 			Class<?> propertyClass = Class.forName("com.mojang.authlib.properties.Property");
 			Object gameProfile = gameProfileClass.getConstructor(UUID.class, String.class).newInstance(UUID.randomUUID(), null);
 			Object propertyMap = gameProfileClass.getMethod("getProperties").invoke(gameProfile);
-			propertyMap.getClass().getMethod("put", String.class, propertyClass)
+			propertyMap.getClass().getMethod("put", Object.class, Object.class)
 				.invoke(propertyMap, "textures",
 						propertyClass.getConstructor(String.class, String.class)
-						.newInstance("textures", Base64.getEncoder().encodeToString(raw.getBytes())));
+						.newInstance("textures", raw));
 			Field profileField = im.getClass().getDeclaredField("profile");
 			profileField.setAccessible(true);
 			profileField.set(im, gameProfile);
@@ -274,13 +274,13 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 			Object gameProfile = profileField.get(im);
 			if(gameProfile != null) {
 				Object propertyMap = gameProfile.getClass().getMethod("getProperties").invoke(gameProfile);
-				Collection<?> propertyCollection = (Collection<?>) propertyMap.getClass().getMethod("get", String.class).invoke(propertyMap, "textures");
+				Collection<?> propertyCollection = (Collection<?>) propertyMap.getClass().getMethod("get", Object.class).invoke(propertyMap, "textures");
 				Iterator<?> propertyIterator = propertyCollection.iterator();
 				
 				if(propertyIterator.hasNext()) {
 					Object property = propertyIterator.next();
-					String rawTexture = (String) property.getClass().getMethod("getValue").invoke(property);
-					String texture = rawTexture.substring("{textures:{SKIN:{url:\"".length(), rawTexture.length() - "\"}}}".length());
+					String rawTexture = new String(Base64.getDecoder().decode(((String)property.getClass().getMethod("getValue").invoke(property)).getBytes()));
+					String texture = rawTexture.substring("{\"textures\":{\"SKIN\":{\"url\":\"".length(), rawTexture.length() - "\"}}}".length());
 					return texture;
 				}
 			}
