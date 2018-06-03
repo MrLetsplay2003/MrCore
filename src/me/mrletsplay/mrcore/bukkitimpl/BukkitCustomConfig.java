@@ -15,6 +15,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -115,7 +116,7 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 				return map;
 			}
 
-			@SuppressWarnings("unchecked")
+			@SuppressWarnings({ "unchecked", "deprecation" })
 			@Override
 			public ItemStack constructObject(Map<String, Object> map) {
 				if(!map.containsKey("type")) return null;
@@ -129,6 +130,23 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 				enchs.forEach((en, lvl) -> m.addEnchant(Enchantment.getByName(en), lvl, true));
 				List<String> flags = (List<String>) map.getOrDefault("flags", new ArrayList<>());
 				flags.forEach(f -> m.addItemFlags(ItemFlag.valueOf(f)));
+				
+				if(requireKeys(map, "skull-owner")) {
+					SkullMeta sM = (SkullMeta) m;
+					// Using SkullMeta#setOwner for backwards compatability
+					sM.setOwner((String) map.get("skull-owner"));
+				}
+				
+				if(requireKeys(map, "skull-texture")) {
+					SkullMeta sM = (SkullMeta) m;
+					setTexture(sM, (String) map.get("skull-texture"));
+				}
+				
+				if(requireKeys(map, "leather-armor-color")) {
+					LeatherArmorMeta lM = (LeatherArmorMeta) m;
+					lM.setColor(Color.fromRGB(Integer.parseInt((String) map.get("leather-armor-color"), 16)));
+				}
+				
 				it.setItemMeta(m);
 				return it;
 			}
