@@ -653,6 +653,12 @@ public class GUIUtils {
 		 * @return An inventory representation of this GUI
 		 */
 		public Inventory getForPlayer(Player p) {
+			Inventory inv = buildInternally(p);
+			if(builder.buildAction != null && !(this instanceof GUIMultiPage)) builder.buildAction.onBuild(new GUIBuildEvent((GUIHolder) inv.getHolder(), p, inv));
+			return inv;
+		}
+		
+		protected Inventory buildInternally(Player p) {
 			Inventory inv;
 			GUIHolder holder = new GUIHolder(this);
 			if(builder.isCustomType) {
@@ -663,7 +669,6 @@ public class GUIUtils {
 			for(Map.Entry<Integer, GUIElement> el : builder.elements.entrySet()) {
 				inv.setItem(el.getKey(), el.getValue().getItem(p));
 			}
-			if(builder.buildAction != null && !(this instanceof GUIMultiPage)) builder.buildAction.onBuild(new GUIBuildEvent(holder, p, inv));
 			return inv;
 		}
 
@@ -749,10 +754,12 @@ public class GUIUtils {
 		protected void openNewInstance(Player player, Inventory oldInv, GUIHolder holder) {
 			Inventory newInv = getForPlayer(player);
 			GUIHolder newHolder = getGUIHolder(newInv);
-			changeInventory(oldInv, newInv);
 			
 			// This should preserve all custom properties while still remaining all the "refreshed" ones
 			holder.properties.putAll(newHolder.properties);
+			
+			if(builder.buildAction != null) builder.buildAction.onBuild(new GUIBuildEvent(holder, player, newInv));
+			changeInventory(oldInv, newInv);
 		}
 		
 	}
@@ -781,6 +788,12 @@ public class GUIUtils {
 		 * @return An inventory representation for this GUI, null if the page doesn't exist
 		 */
 		public Inventory getForPlayer(Player p, int page) {
+			Inventory inv = buildInternally(p, page);
+			if(builder.buildAction != null) builder.buildAction.onBuild(new GUIBuildEvent((GUIHolder) inv.getHolder(), p, inv));
+			return inv;
+		}
+		
+		protected Inventory buildInternally(Player p, int page) {
 			Inventory base = super.getForPlayer(p);
 			GUIHolder holder = (GUIHolder) base.getHolder();
 			holder.getProperties().put("page", page);
@@ -801,7 +814,6 @@ public class GUIUtils {
 					elSlots.put(slot, el);
 				}
 				holder.getProperties().put("page-elements", elSlots);
-				if(builder.buildAction != null) builder.buildAction.onBuild(new GUIBuildEvent(holder, p, base));
 				return base;
 			}else {
 				return null;
@@ -829,10 +841,12 @@ public class GUIUtils {
 		protected void openNewInstance(Player player, Inventory oldInv, GUIHolder holder) {
 			Inventory newInv = getForPlayer(player, (int) holder.getProperty("page"));
 			GUIHolder newHolder = getGUIHolder(newInv);
-			changeInventory(oldInv, newInv);
 			
 			// This should preserve all custom properties while still remaining all the "refreshed" ones
 			holder.properties.putAll(newHolder.properties);
+			
+			if(builder.buildAction != null) builder.buildAction.onBuild(new GUIBuildEvent(holder, player, newInv));
+			changeInventory(oldInv, newInv);
 		}
 		
 	}
