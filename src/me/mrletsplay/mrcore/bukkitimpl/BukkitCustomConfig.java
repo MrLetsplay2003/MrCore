@@ -1,11 +1,17 @@
 package me.mrletsplay.mrcore.bukkitimpl;
 
 import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
@@ -15,8 +21,10 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 
 import me.mrletsplay.mrcore.config.ConfigExpansions.ExpandableCustomConfig;
+import me.mrletsplay.mrcore.misc.OtherTools.FriendlyException;
 
 public class BukkitCustomConfig extends ExpandableCustomConfig {
 	
@@ -179,6 +187,47 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 		if(o != null) return o;
 		if(applyDefault) set(key, defaultVal);
 		return defaultVal;
+	}
+	
+	public static void setTexture(SkullMeta im, String url) {
+		try {
+			Class<?> gameProfileClass = Class.forName("com.mojang.authlib.GameProfile");
+			Class<?> propertyClass = Class.forName("com.mojang.authlib.properties.Property");
+			Object gameProfile = gameProfileClass.getConstructor(UUID.class, String.class).newInstance(UUID.randomUUID(), null);
+			Object propertyMap = gameProfileClass.getMethod("getProperties").invoke(gameProfile);
+			propertyMap.getClass().getMethod("put", String.class, propertyClass)
+				.invoke(propertyMap, "textures",
+						propertyClass.getConstructor(String.class, String.class)
+						.newInstance("textures", Base64.getEncoder().encodeToString(("{textures:{SKIN:{url:\""+url+"\"}}}").getBytes())));
+			Field profileField = im.getClass().getDeclaredField("profile");
+			profileField.setAccessible(true);
+			profileField.set(im, gameProfile);
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | NoSuchFieldException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static String getTexture(SkullMeta im) {
+		try {
+			Field profileField = im.getClass().getDeclaredField("profile");
+			profileField.setAccessible(true);
+			Object gameProfile = profileField.get(im);
+			if(gameProfile != null) {
+				Object propertyMap = gameProfile.getClass().getMethod("getProperties").invoke(gameProfile);
+				Collection<?> propertyCollection = (Collection<?>) propertyMap.getClass().getMethod("get", String.class).invoke(propertyMap, "textures");
+				Iterator<?> propertyIterator = propertyCollection.iterator();
+				
+				if(propertyIterator.hasNext()) {
+					Object property = propertyIterator.next();
+					String rawTexture = (String) property.getClass().getMethod("getValue").invoke(property);
+					String texture = rawTexture.substring("{textures:{SKIN:{url:\"".length(), rawTexture.length() - "\"}}}".length());
+					return texture;
+				}
+			}
+			return null;
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | NoSuchFieldException e) {
+			throw new FriendlyException(e);
+		}
 	}
 	
 //	public static void setTexture(SkullMeta im, String url) {
