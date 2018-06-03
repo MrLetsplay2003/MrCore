@@ -1815,6 +1815,7 @@ public class CustomConfig {
 		public static FormattedProperty map(ConfigFormatter formatter, Map<String,?> map) {
 			return new FormattedProperty(PropertyType.MAP, map.entrySet().stream()
 					.map(en -> new AbstractMap.SimpleEntry<>(en.getKey(), formatter.formatObject(en.getValue()).toProperty().getValue()))
+					.filter(en -> en.getValue() != null)
 					.collect(Collectors.toMap(en -> en.getKey(), en -> en.getValue())));
 		}
 		
