@@ -12,6 +12,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import me.mrletsplay.mrcore.bukkitimpl.ChatUI.UIListener;
 import me.mrletsplay.mrcore.bukkitimpl.GUIUtils.GUIListener;
 import me.mrletsplay.mrcore.config.CustomConfig;
+import me.mrletsplay.mrcore.extensions.ExtensionLoader;
+import me.mrletsplay.mrcore.extensions.MrCorePluginLoader;
 import me.mrletsplay.mrcore.main.MrCore;
 
 public class MrCorePlugin extends JavaPlugin{
@@ -32,10 +34,15 @@ public class MrCorePlugin extends JavaPlugin{
 			MrCoreUpdateChecker.checkForUpdate(version);
 		}
 		config.saveConfigSafely();
+		ExtensionLoader.loadExtensions(MrCorePluginLoader.getInstance().getPluginFolder());
 	}
 	
 	public static JavaPlugin getInstance() {
 		return pl;
+	}
+	
+	public static File getBaseFolder() {
+		return getInstance().getDataFolder();
 	}
 	
 	@Override
