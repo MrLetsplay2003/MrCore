@@ -276,12 +276,9 @@ public class MrCoreExtension implements Plugin {
             command = getServer().getPluginCommand(getDescription().getName().toLowerCase() + ":" + alias);
         }
 		
-//		System.out.println(command + "/" + command.getPlugin());
-
         if (command != null /*&& command.getPlugin() == this*/) {
             return command;
         } else {
-			System.out.println(command);
             return null;
         }
     }

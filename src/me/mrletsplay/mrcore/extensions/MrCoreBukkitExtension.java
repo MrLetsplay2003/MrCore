@@ -45,8 +45,6 @@ public class MrCoreBukkitExtension extends MrCoreExtension {
 	
 	private Object invokeMethod(String name, List<Class<?>> classes, Object... args) {
 		try {
-//			System.out.println(">> invoke "+name);
-//			System.out.println(Arrays.stream(extensionClass.getMethods()).map(m -> m.getName() + " | "+Arrays.toString(m.getParameterTypes())).collect(Collectors.joining("\n")));
 			return extensionClass.getMethod(name, classes.stream().toArray(Class[]::new))
 				.invoke(extension, args);
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
