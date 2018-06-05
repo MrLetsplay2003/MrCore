@@ -34,7 +34,7 @@ public class ExtensionLoader {
 	
 	private static MrCoreExtension preLoad(File f) {
 		JARLoader loader = null;
-		System.out.println("Load "+f);
+		MrCorePlugin.pl.getLogger().info("Pre-loading plugin @ "+f);
 		try {
 			loader = new JARLoader(f);
 			
@@ -116,9 +116,6 @@ public class ExtensionLoader {
                 }
             }
         }
-        
-        System.out.println(dependencies);
-        System.out.println(softDependencies);
         
         while (!plugins.isEmpty()) {
             boolean missingDependency = true;

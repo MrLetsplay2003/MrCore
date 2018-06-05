@@ -69,7 +69,6 @@ public class JARLoader extends URLClassLoader {
 	}
 	
 	public Class<?> loadClassInternally(String name, boolean usePluginClasses) throws ClassNotFoundException {
-//		System.out.println("Load class "+name);
 		try {
 			return super.loadClass(name);
 		}catch(ClassNotFoundException e) {
