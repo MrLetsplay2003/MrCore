@@ -43,15 +43,7 @@ public class ExtensionLoader {
 				MrCoreExtension ex = (MrCoreExtension) mainClazz.newInstance();
 				ex.init(loader);
 				return ex;
-			}/*else if(mainClazz.getSuperclass() != null && mainClazz.getSuperclass().getName().equals("org.bukkit.plugin.java.JavaPlugin")) {
-				Object ex = mainClazz.newInstance();
-//				mainClazz.getMethod("init", JARLoader.class).invoke(ex, loader);
-//				MrCoreBukkitExtension ext = new MrCoreBukkitExtension(mainClazz, ex);
-				MrCoreExtension ext = (MrCoreExtension) ex;
-				ext.init(loader);
-				Bukkit.getPluginManager().enablePlugin(ext);
-				return ext;
-			}*/else {
+			}else {
 				loader.close();
 				throw new FriendlyException("Failed to load plugin. Invalid type of main class ("+mainClazz.getName()+")");
 			}
