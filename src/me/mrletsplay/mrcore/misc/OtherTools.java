@@ -175,6 +175,10 @@ public class OtherTools {
 			super(reason);
 		}
 		
+		public FriendlyException(String reason, Throwable cause) {
+			super(reason, cause);
+		}
+		
 	}
 	
 }
