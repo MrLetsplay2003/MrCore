@@ -40,7 +40,7 @@ public class JARLoader extends URLClassLoader {
 			}
 			in.close();
 			byte[] objp = out.toByteArray();
-			defineClass("org.bukkit.plugin.java.JavaPlugin", objp, 0, objp.length);
+			defineClass("org.bukkit.plugin.java.JavaPlugin", objp, 0, objp.length); // TODO: Download/Include
 		}catch(Exception e) {
 			e.printStackTrace();
 		}

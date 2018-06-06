@@ -10,11 +10,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.server.TabCompleteEvent;
 import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.InvalidDescriptionException;
 import org.bukkit.plugin.InvalidPluginException;
@@ -27,7 +29,7 @@ import org.bukkit.plugin.UnknownDependencyException;
 import me.mrletsplay.mrcore.bukkitimpl.MrCorePlugin;
 import me.mrletsplay.mrcore.misc.OtherTools.FriendlyException;
 
-public class MrCorePluginLoader implements PluginLoader {
+public class MrCorePluginLoader implements PluginLoader, Listener {
 
 	public static MrCorePluginLoader instance = new MrCorePluginLoader();
 	
@@ -46,7 +48,11 @@ public class MrCorePluginLoader implements PluginLoader {
 	}
 	
 	public List<MrCoreExtension> getEnabledPlugins() {
-		return plugins;
+		return plugins.stream().filter(e -> e.isEnabled()).collect(Collectors.toList());
+	}
+	
+	public MrCoreExtension getPlugin(String name) {
+		return plugins.stream().filter(p -> p.getName().equals(name)).findFirst().orElse(null);
 	}
 	
 	@Override
@@ -80,37 +86,42 @@ public class MrCorePluginLoader implements PluginLoader {
 		return listeners;
 	}
 
+	/**
+	 * @see ExtensionManager#enableExtension(MrCoreExtension)
+	 */
 	@Override
 	@Deprecated
 	public void enablePlugin(Plugin p) {
 		MrCoreExtension ex = (MrCoreExtension) p;
 		ex.onLoad();
 		ex.setEnabled(true);
+		plugins.add((MrCoreExtension) p);
 	}
 
 	@Override
 	public void disablePlugin(Plugin p) {
 		MrCoreExtension ex = (MrCoreExtension) p;
 		ex.setEnabled(false);
+		plugins.remove(p);
 	}
 	
 	public void disablePlugins() {
-		
+		plugins.forEach(MrCorePluginLoader.getInstance()::disablePlugin);
 	}
 
 	@Override
 	public PluginDescriptionFile getPluginDescription(File f) throws InvalidDescriptionException {
-		return null;
+		return ExtensionManager.preLoad(f).getDescription();
 	}
 
 	@Override
 	public Pattern[] getPluginFileFilters() {
-		return null;
+		return new Pattern[0];
 	}
 
 	@Override
 	public MrCoreExtension loadPlugin(File f) throws InvalidPluginException, UnknownDependencyException {
-		return ExtensionLoader.loadExtension(f);
+		return ExtensionManager.loadExtension(f);
 	}
 	
 	public File getPluginDataFolder() {
@@ -119,6 +130,16 @@ public class MrCorePluginLoader implements PluginLoader {
 	
 	public File getPluginFolder() {
 		return new File(MrCorePlugin.pl.getDataFolder(), "extensions");
+	}
+	
+	@EventHandler
+	public void onTab(TabCompleteEvent e) {
+		e.getCompletions().clear();
+		if(e.getBuffer().charAt(0) == '/') {
+			for(MrCoreExtension ex : getEnabledPlugins()) {
+				e.getCompletions().add(ex.getName());
+			}
+		}
 	}
 
 }

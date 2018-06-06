@@ -21,18 +21,23 @@ import org.bukkit.plugin.UnknownDependencyException;
 import me.mrletsplay.mrcore.bukkitimpl.MrCorePlugin;
 import me.mrletsplay.mrcore.misc.OtherTools.FriendlyException;
 
-public class ExtensionLoader {
+public class ExtensionManager {
 	
 	public static MrCoreExtension loadExtension(File file) {
 		return enableExtension(preLoad(file));
 	}
 	
-	private static MrCoreExtension enableExtension(MrCoreExtension ex) {
+	public static MrCoreExtension enableExtension(MrCoreExtension ex) {
 		Bukkit.getPluginManager().enablePlugin(ex);
 		return ex;
 	}
 	
-	private static MrCoreExtension preLoad(File f) {
+	public static MrCoreExtension disableExtension(MrCoreExtension ex) {
+		Bukkit.getPluginManager().disablePlugin(ex);
+		return ex;
+	}
+	
+	static MrCoreExtension preLoad(File f) {
 		JARLoader loader = null;
 		MrCorePlugin.pl.getLogger().info("Pre-loading plugin @ "+f);
 		try {
@@ -216,7 +221,7 @@ public class ExtensionLoader {
             }
         }
         
-        extensions.forEach(ExtensionLoader::enableExtension);
+        extensions.forEach(ExtensionManager::enableExtension);
         
 		return extensions;
 	}
