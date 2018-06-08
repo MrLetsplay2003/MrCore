@@ -17,7 +17,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -51,12 +50,14 @@ public class MrCoreExtension implements Plugin {
 	public void init(JARLoader loader) {
 		this.loader = loader;
 		try {
-			desc = new PluginDescriptionFile(new InputStreamReader(loader.getResource("plugin.yml").openStream()));
+			InputStreamReader in = new InputStreamReader(loader.getResource("plugin.yml").openStream());
+			desc = new PluginDescriptionFile(in);
+			in.close();
 		} catch (InvalidDescriptionException | IOException e) {
 			e.printStackTrace();
 		}
 		this.dataFolder = new File(MrCorePluginLoader.getInstance().getPluginDataFolder(), getName());
-		this.configFile = new File(getDataFolder(), "config.yml");
+		this.configFile = new File(dataFolder, "config.yml");
 	}
 	
 	public ClassLoader getClassLoader() {
@@ -68,12 +69,12 @@ public class MrCoreExtension implements Plugin {
 	}
 
 	@Override
-	public List<String> onTabComplete(CommandSender arg0, Command arg1, String arg2, String[] arg3) {
+	public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
 		return null;
 	}
 
 	@Override
-	public boolean onCommand(CommandSender arg0, Command arg1, String arg2, String[] arg3) {
+	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		return false;
 	}
 
@@ -89,7 +90,6 @@ public class MrCoreExtension implements Plugin {
 	@Override
 	public void reloadConfig() {
 		config = YamlConfiguration.loadConfiguration(configFile);
-
         final InputStream defConfigStream = getResource("config.yml");
         if (defConfigStream == null) {
             return;
@@ -100,6 +100,7 @@ public class MrCoreExtension implements Plugin {
         defConfig = new YamlConfiguration();
         try {
             contents = ByteStreams.toByteArray(defConfigStream);
+            defConfigStream.close();
         } catch (final IOException e) {
             getLogger().log(Level.SEVERE, "Unexpected failure reading config.yml", e);
             return;
@@ -227,7 +228,7 @@ public class MrCoreExtension implements Plugin {
 
 	@Override
 	public void saveResource(String resourcePath, boolean replace) {
-		if (resourcePath == null || resourcePath.equals("")) {
+		if (resourcePath == null || resourcePath.isEmpty()) {
             throw new IllegalArgumentException("ResourcePath cannot be null or empty");
         }
 
@@ -268,19 +269,21 @@ public class MrCoreExtension implements Plugin {
 		this.naggable = naggable;
 	}
 	
-	public PluginCommand getCommand(String name) {
-        String alias = name.toLowerCase();
-        PluginCommand command = getServer().getPluginCommand(alias);
+	public PluginCommandWrapper getCommand(String name) {
+		String alias = name.toLowerCase();
+		PluginCommandWrapper command = MrCorePluginLoader.getInstance().getCommand(name);
+//		PluginCommand command = getServer().getPluginCommand(alias);
 
-        if (command == null /*|| command.getPlugin() != this*/) {
-            command = getServer().getPluginCommand(getDescription().getName().toLowerCase() + ":" + alias);
-        }
-		
-        if (command != null /*&& command.getPlugin() == this*/) {
-            return command;
-        } else {
-            return null;
-        }
-    }
+		if (command == null /* || command.getPlugin() != this */) {
+			command = MrCorePluginLoader.getInstance().getCommand(getDescription().getName().toLowerCase() + ":" + alias);
+		}
+
+		if (command != null /* && command.getPlugin() == this */) {
+//			return new PluginCommandWrapper(command);
+			return command;
+		} else {
+			return null;
+		}
+	}
 	
 }

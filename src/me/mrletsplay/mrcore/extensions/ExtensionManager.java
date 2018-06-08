@@ -2,6 +2,7 @@ package me.mrletsplay.mrcore.extensions;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -28,16 +29,26 @@ public class ExtensionManager {
 	}
 	
 	public static MrCoreExtension enableExtension(MrCoreExtension ex) {
-		Bukkit.getPluginManager().enablePlugin(ex);
+//		Bukkit.getPluginManager().enablePlugin(ex);
+		MrCorePluginLoader.getInstance().enablePlugin(ex);
 		return ex;
 	}
 	
 	public static MrCoreExtension disableExtension(MrCoreExtension ex) {
-		Bukkit.getPluginManager().disablePlugin(ex);
+//		Bukkit.getPluginManager().disablePlugin(ex);
 		return ex;
 	}
 	
-	static MrCoreExtension preLoad(File f) {
+	public static void unloadExtension(MrCoreExtension ex) {
+		if(ex.isEnabled()) Bukkit.getPluginManager().disablePlugin(ex);
+		try {
+			ex.getLoader().close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	protected static MrCoreExtension preLoad(File f) {
 		JARLoader loader = null;
 		MrCorePlugin.pl.getLogger().info("Pre-loading plugin @ "+f);
 		try {
@@ -47,14 +58,15 @@ public class ExtensionManager {
 			if(MrCoreExtension.class.isAssignableFrom(mainClazz)) {
 				MrCoreExtension ex = (MrCoreExtension) mainClazz.newInstance();
 				ex.init(loader);
+				MrCorePluginLoader.getInstance().addPlugin(ex);
 				return ex;
 			}else {
 				loader.close();
 				throw new FriendlyException("Failed to load plugin. Invalid type of main class ("+mainClazz.getName()+")");
 			}
-		} catch (IOException | InstantiationException | IllegalAccessException | ClassNotFoundException | IllegalArgumentException | SecurityException e) {
+		} catch (IOException | InstantiationException | IllegalAccessException | ClassNotFoundException | IllegalArgumentException | SecurityException | URISyntaxException e) {
 			try {
-				loader.close();
+				if(loader != null) loader.close();
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
