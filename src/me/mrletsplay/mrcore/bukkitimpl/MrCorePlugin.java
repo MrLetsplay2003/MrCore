@@ -1,7 +1,6 @@
 package me.mrletsplay.mrcore.bukkitimpl;
 
 import java.io.File;
-import java.io.IOException;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -14,6 +13,7 @@ import me.mrletsplay.mrcore.bukkitimpl.ChatUI.UIListener;
 import me.mrletsplay.mrcore.bukkitimpl.GUIUtils.GUIListener;
 import me.mrletsplay.mrcore.config.CustomConfig;
 import me.mrletsplay.mrcore.extensions.ExtensionManager;
+import me.mrletsplay.mrcore.extensions.JARLoader;
 import me.mrletsplay.mrcore.extensions.MrCoreExtension;
 import me.mrletsplay.mrcore.extensions.MrCorePluginLoader;
 import me.mrletsplay.mrcore.main.MrCore;
@@ -37,7 +37,13 @@ public class MrCorePlugin extends JavaPlugin{
 			MrCoreUpdateChecker.checkForUpdate(version);
 		}
 		config.saveConfigSafely();
+		
+		JARLoader.registerFakeClass("org.bukkit.plugin.java.JavaPlugin", new File(getBaseFolder(), "JavaPlugin.class"));
+		JARLoader.registerFakeClass("org.bukkit.command.PluginCommand", new File(getBaseFolder(), "PluginCommand.class"));
+		
 		ExtensionManager.loadExtensions(MrCorePluginLoader.getInstance().getPluginFolder());
+		
+		getLogger().info("Loaded a total of "+(JARLoader.totalBytesLoaded/1024)+" kb of classes");
 	}
 	
 	public static JavaPlugin getInstance() {
@@ -116,12 +122,7 @@ public class MrCorePlugin extends JavaPlugin{
 						sender.sendMessage("§cPlugin not found");
 						return true;
 					}
-					if(ex.isEnabled()) ExtensionManager.disableExtension(ex);
-					try {
-						ex.getLoader().close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+					ExtensionManager.unloadExtension(ex);
 					sender.sendMessage("§aPlugin unloaded successfully");
 				}else if(args[1].equalsIgnoreCase("info")) {
 					if(args.length == 2) return sendCommandHelp(sender, "plugins");
@@ -131,6 +132,10 @@ public class MrCorePlugin extends JavaPlugin{
 						return true;
 					}
 					sender.sendMessage("§cNot implemented yet");
+				}else if(args[1].equalsIgnoreCase("list")) {
+					MrCorePluginLoader.getInstance().getAllPlugins().forEach(pl -> {
+						sender.sendMessage("§7"+pl.getName()+" §8| "+(pl.isEnabled() ? "§aEnabled" : "§cDisabled"));
+					});
 				}else {
 					sendCommandHelp(sender, "plugins");
 				}
