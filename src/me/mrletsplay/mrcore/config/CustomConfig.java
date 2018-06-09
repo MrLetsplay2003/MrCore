@@ -353,7 +353,6 @@ public class CustomConfig {
 		int stage = reader.getPreviousLine().stage;
 		ParsedLine line = reader.readLine();
 		if(line.stage  < stage) {
-			System.out.println("askljdklsadj");
 			return "";
 		}
 		switch(line.type) {
@@ -1747,7 +1746,6 @@ public class CustomConfig {
 					section.addAll(sub.saveToLines(props, indents + 1));
 				}
 			}
-//			System.out.println(section);
 			return section;
 		}
 		
