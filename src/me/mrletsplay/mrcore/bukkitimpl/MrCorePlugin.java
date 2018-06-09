@@ -64,6 +64,8 @@ public class MrCorePlugin extends JavaPlugin{
 			}
 		}
 		
+		MrCorePluginLoader.getInstance().unloadPlugins();
+		
 		getLogger().info("Goodbye");
 	}
 	
