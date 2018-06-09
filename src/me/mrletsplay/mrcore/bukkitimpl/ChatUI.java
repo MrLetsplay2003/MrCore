@@ -664,18 +664,13 @@ public class ChatUI {
 			for(Object o : messageElements) {
 				if(o instanceof BaseComponent) {
 					cb.append((BaseComponent) o);
+				}else if(o instanceof BaseComponent[]) {
+					cb.append((BaseComponent[]) o);
 				}else if(o instanceof UILayoutElement) {
 					UILayoutElement el = (UILayoutElement) o;
 					if(el.type.equals(UILayoutElementType.NEWLINE)) {
 						lines.add(cb.create());
 						cb = new ComponentBuilder("");
-					}
-				}else if(o instanceof UILayoutElement[]) {
-					for(UILayoutElement el : (UILayoutElement[]) o) {
-						if(el.type.equals(UILayoutElementType.NEWLINE)) {
-							lines.add(cb.create());
-							cb = new ComponentBuilder("");
-						}
 					}
 				}
 			}
