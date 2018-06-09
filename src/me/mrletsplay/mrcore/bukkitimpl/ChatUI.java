@@ -1,6 +1,7 @@
 package me.mrletsplay.mrcore.bukkitimpl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -334,7 +335,7 @@ public class ChatUI {
 		private UIElementAction action;
 		private String hoverText;
 		
-		public abstract BaseComponent getLayout(Player p);
+		public abstract BaseComponent[] getLayout(Player p);
 		
 		/**
 		 * Sets the action for this UIElement<br>
@@ -365,7 +366,7 @@ public class ChatUI {
 	 */
 	public static class StaticUIElement extends UIElement {
 		
-		private BaseComponent layout;
+		private BaseComponent[] layout;
 		
 		/**
 		 * Constructs a UI element
@@ -373,7 +374,7 @@ public class ChatUI {
 		 * @see {@link StaticUIElement}
 		 */
 		public StaticUIElement(String text) {
-			this.layout = new TextComponent(text);
+			this.layout = new BaseComponent[] {new TextComponent(text)};
 		}
 		
 		/**
@@ -381,12 +382,12 @@ public class ChatUI {
 		 * @param layout The static layout to use
 		 * @see {@link StaticUIElement}
 		 */
-		public StaticUIElement(BaseComponent layout) {
+		public StaticUIElement(BaseComponent... layout) {
 			this.layout = layout;
 		}
 		
 		@Override
-		public BaseComponent getLayout(Player p) {
+		public BaseComponent[] getLayout(Player p) {
 			return layout;
 		}
 		
@@ -632,13 +633,13 @@ public class ChatUI {
 	
 	private static class UILayoutParser {
 		
-		public static BaseComponent parseElement(UIElement element, Player p, String instanceID, String elementID) {
-			BaseComponent tc = element.getLayout(p);
+		public static BaseComponent[] parseElement(UIElement element, Player p, String instanceID, String elementID) {
+			BaseComponent[] tcs = element.getLayout(p);
 			if(element.hoverText != null)
-				tc.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(element.hoverText).create()));
+				Arrays.stream(tcs).forEach(tc -> tc.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(element.hoverText).create())));
 			if(element.action != null)
-				tc.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/mrcoreui "+instanceID+" "+elementID));
-			return tc;
+				Arrays.stream(tcs).forEach(tc -> tc.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/mrcoreui "+instanceID+" "+elementID)));
+			return tcs;
 		}
 		
 	}
@@ -668,6 +669,13 @@ public class ChatUI {
 					if(el.type.equals(UILayoutElementType.NEWLINE)) {
 						lines.add(cb.create());
 						cb = new ComponentBuilder("");
+					}
+				}else if(o instanceof UILayoutElement[]) {
+					for(UILayoutElement el : (UILayoutElement[]) o) {
+						if(el.type.equals(UILayoutElementType.NEWLINE)) {
+							lines.add(cb.create());
+							cb = new ComponentBuilder("");
+						}
 					}
 				}
 			}
