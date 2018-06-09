@@ -18,7 +18,7 @@ public class PluginCommandWrapper extends Command implements PluginIdentifiableC
 
 	private PluginCommand base;
 
-	public PluginCommandWrapper(String name, Plugin owner) {
+	public PluginCommandWrapper(String name, MrCoreExtension owner) {
 		super(name);
 		try {
 			base = PluginCommand.class.getDeclaredConstructor(String.class, Plugin.class).newInstance(name, owner);
@@ -30,6 +30,7 @@ public class PluginCommandWrapper extends Command implements PluginIdentifiableC
 
 	public PluginCommandWrapper(PluginCommand base) {
 		super(base.getName());
+		if(!(base.getPlugin() instanceof MrCoreExtension)) throw new IllegalArgumentException("Plugin needs to be a MrCoreExtension");
 		this.base = base;
 	}
 
@@ -58,8 +59,8 @@ public class PluginCommandWrapper extends Command implements PluginIdentifiableC
 		return base.getTabCompleter();
 	}
 
-	public Plugin getPlugin() {
-		return base.getPlugin();
+	public MrCoreExtension getPlugin() {
+		return (MrCoreExtension) base.getPlugin();
 	}
 
 	public List<String> tabComplete(CommandSender sender, String alias, String[] args) {

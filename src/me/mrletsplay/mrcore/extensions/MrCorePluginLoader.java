@@ -42,10 +42,10 @@ import me.mrletsplay.mrcore.misc.OtherTools.FriendlyException;
 
 public class MrCorePluginLoader implements PluginLoader, Listener, CommandMap {
 
-	public static MrCorePluginLoader instance = new MrCorePluginLoader();
-	public static File pluginFolder = new File(MrCorePlugin.getBaseFolder(), "extensions");
-	public static File pluginDataFolder = new File(MrCorePlugin.getBaseFolder(), "extensions");
-	public static HashMap<String, PluginCommandWrapper> commands = new HashMap<>();
+	private static MrCorePluginLoader instance = new MrCorePluginLoader();
+	private static File pluginFolder = new File(MrCorePlugin.getBaseFolder(), "extensions");
+	private static File pluginDataFolder = new File(MrCorePlugin.getBaseFolder(), "extensions");
+	private static HashMap<String, PluginCommandWrapper> commands = new HashMap<>();
 	
 	static {
 		if(!pluginFolder.exists()) pluginFolder.mkdirs();
@@ -145,7 +145,7 @@ public class MrCorePluginLoader implements PluginLoader, Listener, CommandMap {
 		ex.setEnabled(false);
 	}
 	
-	public void disablePlugins() {
+	public void unloadPlugins() {
 		plugins.forEach(ExtensionManager::unloadExtension);
 	}
 
