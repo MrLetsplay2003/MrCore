@@ -116,7 +116,13 @@ public class MrCorePlugin extends JavaPlugin{
 					sender.sendMessage("§aPlugin reloaded successfully");
 				}else if(args[1].equalsIgnoreCase("load")) {
 					if(args.length == 2) return sendCommandHelp(sender, "plugins");
-					sender.sendMessage("§cNot implemented yet");
+					File f = new File(MrCorePluginLoader.getInstance().getPluginFolder(), args[2]);
+					if(!f.exists()) {
+						sender.sendMessage("§cFile not found");
+						return true;
+					}
+					MrCoreExtension ex = ExtensionManager.loadExtension(f);
+					sender.sendMessage("§aSuccessfully loaded the plugin §b"+ex.getName());
 				}else if(args[1].equalsIgnoreCase("unload")) {
 					if(args.length == 2) return sendCommandHelp(sender, "plugins");
 					MrCoreExtension ex = MrCorePluginLoader.getInstance().getPlugin(args[2]);
@@ -160,9 +166,9 @@ public class MrCorePlugin extends JavaPlugin{
 		}else if(topic.equalsIgnoreCase("plugins")) {
 			sender.sendMessage("§6/mrcore plugins enable <Name> §b- Enables a plugin");
 			sender.sendMessage("§6/mrcore plugins disable <Name>§b- Disables a plugin");
-			sender.sendMessage("§6/mrcore plugins reload <Name> §b- Reloads a plugin"); 
-			sender.sendMessage("§6/mrcore plugins load <File name> §b- Loads the plugin from the given file");
-			sender.sendMessage("§6/mrcore plugins unload <Name> §b- Unloads a plugin to allow changing it");
+			sender.sendMessage("§6/mrcore plugins reload <Name> §b- Reloads a plugin");
+			sender.sendMessage("§6/mrcore plugins load <File name> §b- Loads a plugin from the given file");
+			sender.sendMessage("§6/mrcore plugins unload <Name> §b- Fully unloads a plugin");
 			sender.sendMessage("§6/mrcore plugins info <Name> §b- Shows info about a plugin");
 		}else {
 			sender.sendMessage("§cUnknown topic");

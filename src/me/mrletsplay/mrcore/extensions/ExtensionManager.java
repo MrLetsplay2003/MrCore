@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.UnknownDependencyException;
 
@@ -29,18 +28,17 @@ public class ExtensionManager {
 	}
 	
 	public static MrCoreExtension enableExtension(MrCoreExtension ex) {
-//		Bukkit.getPluginManager().enablePlugin(ex);
 		MrCorePluginLoader.getInstance().enablePlugin(ex);
 		return ex;
 	}
 	
 	public static MrCoreExtension disableExtension(MrCoreExtension ex) {
-//		Bukkit.getPluginManager().disablePlugin(ex);
+		MrCorePluginLoader.getInstance().disablePlugin(ex);
 		return ex;
 	}
 	
 	public static void unloadExtension(MrCoreExtension ex) {
-		if(ex.isEnabled()) Bukkit.getPluginManager().disablePlugin(ex);
+		if(ex.isEnabled()) MrCorePluginLoader.getInstance().disablePlugin(ex);
 		try {
 			ex.getLoader().close();
 		} catch (IOException e) {
