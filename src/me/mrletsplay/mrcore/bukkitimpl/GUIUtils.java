@@ -5,8 +5,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
@@ -81,22 +79,22 @@ public class GUIUtils {
 			return this;
 		}
 		
-		/**
-		 * Convenience version of {@link #addElement(int, GUIElement)}
-		 * @param slot The slot to add the element to
-		 * @param e The element to add
-		 * @return This GUIBuilder instance
-		 */
-		public GUIBuilder addElement(int slot, Function<GUIBuildEvent, ItemStack> e) {
-			elements.put(slot, new GUIElement() {
-				
-				@Override
-				public ItemStack getItem(GUIBuildEvent event) {
-					return e.apply(event);
-				}
-			});
-			return this;
-		}
+//		/**
+//		 * Convenience version of {@link #addElement(int, GUIElement)}
+//		 * @param slot The slot to add the element to
+//		 * @param e The element to add
+//		 * @return This GUIBuilder instance
+//		 */
+//		public GUIBuilder addElement(int slot, Function<GUIBuildEvent, ItemStack> e) {
+//			elements.put(slot, new GUIElement() {
+//				
+//				@Override
+//				public ItemStack getItem(GUIBuildEvent event) {
+//					return e.apply(event);
+//				}
+//			});
+//			return this;
+//		}
 		
 		/**
 		 * Sets the {@link GUIAction} listener for this GUI<br>
@@ -232,11 +230,11 @@ public class GUIUtils {
 			return this;
 		}
 		
-		@Override
-		public GUIBuilderMultiPage<T> addElement(int slot, Function<GUIBuildEvent, ItemStack> e) {
-			super.addElement(slot, e);
-			return this;
-		}
+//		@Override
+//		public GUIBuilderMultiPage<T> addElement(int slot, Function<GUIBuildEvent, ItemStack> e) {
+//			super.addElement(slot, e);
+//			return this;
+//		}
 		
 		@Override
 		public GUIBuilderMultiPage<T> setActionListener(GUIAction a) {
@@ -326,21 +324,21 @@ public class GUIUtils {
 			return this;
 		}
 		
-		/**
-		 * Convenience version of {@link #setAction(GUIElementAction)}
-		 * @param a The action to be called
-		 * @return This GUIElement instance
-		 */
-		public GUIElement setAction(Consumer<GUIElementActionEvent> a) {
-			this.action = new GUIElementAction() {
-				
-				@Override
-				public void onAction(GUIElementActionEvent event) {
-					a.accept(event);
-				}
-			};
-			return this;
-		}
+//		/**
+//		 * Convenience version of {@link #setAction(GUIElementAction)}
+//		 * @param a The action to be called
+//		 * @return This GUIElement instance
+//		 */
+//		public GUIElement setAction(Consumer<GUIElementActionEvent> a) {
+//			this.action = new GUIElementAction() {
+//				
+//				@Override
+//				public void onAction(GUIElementActionEvent event) {
+//					a.accept(event);
+//				}
+//			};
+//			return this;
+//		}
 		
 	}
 	
@@ -363,17 +361,18 @@ public class GUIUtils {
 			return this;
 		}
 		
-		@Override
-		public StaticGUIElement setAction(Consumer<GUIElementActionEvent> a) {
-			super.setAction(a);
-			return this;
-		}
+//		@Override
+//		public StaticGUIElement setAction(Consumer<GUIElementActionEvent> a) {
+//			super.setAction(a);
+//			return this;
+//		}
 		
 	}
 
-	public static abstract class GUIElementAction {
+	@FunctionalInterface
+	public static interface GUIElementAction {
 		
-		public abstract void onAction(GUIElementActionEvent event);
+		public void onAction(GUIElementActionEvent event);
 		
 	}
 	
@@ -443,9 +442,10 @@ public class GUIUtils {
 		
 	}
 	
-	public static abstract class GUIDragDropListener {
+	@FunctionalInterface
+	public static interface GUIDragDropListener {
 		
-		public abstract void onDragDrop(GUIDragDropEvent event);
+		public void onDragDrop(GUIDragDropEvent event);
 		
 	}
 	
@@ -503,9 +503,10 @@ public class GUIUtils {
 		
 	}
 	
-	public static abstract class GUIAction {
+	@FunctionalInterface
+	public static interface GUIAction {
 
-		public abstract void onAction(GUIActionEvent event);
+		public void onAction(GUIActionEvent event);
 		
 	}
 	
@@ -577,9 +578,10 @@ public class GUIUtils {
 		
 	}
 	
-	public static abstract class GUIBuildAction {
+	@FunctionalInterface
+	public static interface GUIBuildAction {
 		
-		public abstract void onBuild(GUIBuildEvent event);
+		public void onBuild(GUIBuildEvent event);
 		
 	}
 	
