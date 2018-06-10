@@ -18,6 +18,7 @@ public class MrCore {
 	 * - Tab complete
 	 * - Better placeholders
 	 * - Animated GUIs
+	 * - Maven plugin
 	 * 
 	 * shift click (gui)
 	 */

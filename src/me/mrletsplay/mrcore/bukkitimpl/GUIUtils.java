@@ -673,8 +673,7 @@ public class GUIUtils {
 		
 		protected Inventory buildInternally(Player p, Map<String, Object> properties) {
 			Inventory inv;
-			GUIHolder holder = new GUIHolder(this);
-			holder.properties.putAll(properties);
+			GUIHolder holder = new GUIHolder(this, properties);
 			if(builder.isCustomType) {
 				inv = Bukkit.createInventory(holder, builder.invType, builder.title);
 			} else {
@@ -769,7 +768,7 @@ public class GUIUtils {
 		}
 		
 		protected void openNewInstance(Player player, Inventory oldInv, GUIHolder holder) {
-			Inventory newInv = getForPlayer(player);
+			Inventory newInv = getForPlayer(player, holder.getProperties());
 			GUIHolder newHolder = getGUIHolder(newInv);
 			
 			// This should preserve all custom properties while still remaining all the "refreshed" ones
@@ -879,7 +878,7 @@ public class GUIUtils {
 		
 		@Override
 		protected void openNewInstance(Player player, Inventory oldInv, GUIHolder holder) {
-			Inventory newInv = getForPlayer(player, (int) holder.getProperty("page"));
+			Inventory newInv = getForPlayer(player, (int) holder.getProperty("page"), holder.getProperties());
 			GUIHolder newHolder = getGUIHolder(newInv);
 			
 			// This should preserve all custom properties while still remaining all the "refreshed" ones
@@ -985,21 +984,12 @@ public class GUIUtils {
 		 * Creates a gui holder for the specified GUI<br>
 		 * It will not automatically be registered to the GUI
 		 * @param gui The GUI this holder is for
-		 */
-		public GUIHolder(GUI gui) {
-			this.gui = gui;
-			this.properties = new HashMap<>(this.gui.builder.properties);
-		}
-		
-		/**
-		 * Creates a gui holder for the specified GUI<br>
-		 * It will not automatically be registered to the GUI
-		 * @param gui The GUI this holder is for
 		 * @param properties The property hashmap to use
 		 */
 		public GUIHolder(GUI gui, Map<String, Object> properties) {
 			this.gui = gui;
 			this.properties = properties;
+			this.properties.putAll(this.gui.builder.properties);
 		}
 		
 		/**
@@ -1065,7 +1055,9 @@ public class GUIUtils {
 		 * @return A copy of this GUIHolder
 		 */
 		public GUIHolder clone() {
-			return new GUIHolder(gui, new HashMap<>(this.gui.builder.properties));
+			GUIHolder newH = new GUIHolder(gui, properties);
+			newH.properties = new HashMap<>(properties);
+			return newH;
 		}
 		
 		/**
