@@ -87,12 +87,12 @@ public class GUIUtils {
 		 * @param e The element to add
 		 * @return This GUIBuilder instance
 		 */
-		public GUIBuilder addElement(int slot, Function<Player, ItemStack> e) {
+		public GUIBuilder addElement(int slot, Function<GUIBuildEvent, ItemStack> e) {
 			elements.put(slot, new GUIElement() {
 				
 				@Override
-				public ItemStack getItem(Player p) {
-					return e.apply(p);
+				public ItemStack getItem(GUIBuildEvent event) {
+					return e.apply(event);
 				}
 			});
 			return this;
@@ -233,7 +233,7 @@ public class GUIUtils {
 		}
 		
 		@Override
-		public GUIBuilderMultiPage<T> addElement(int slot, Function<Player, ItemStack> e) {
+		public GUIBuilderMultiPage<T> addElement(int slot, Function<GUIBuildEvent, ItemStack> e) {
 			super.addElement(slot, e);
 			return this;
 		}
@@ -314,7 +314,7 @@ public class GUIUtils {
 
 		private GUIElementAction action;
 		
-		public abstract ItemStack getItem(Player p);
+		public abstract ItemStack getItem(GUIBuildEvent event);
 		
 		/**
 		 * Sets the {@link GUIElementAction} for this element
@@ -353,7 +353,7 @@ public class GUIUtils {
 		}
 
 		@Override
-		public ItemStack getItem(Player p) {
+		public ItemStack getItem(GUIBuildEvent event) {
 			return it;
 		}
 		
@@ -666,8 +666,11 @@ public class GUIUtils {
 			} else {
 				inv = Bukkit.createInventory(holder, builder.size, builder.title);
 			}
+			
+			GUIBuildEvent event = new GUIBuildEvent(holder, p, inv);
+			
 			for(Map.Entry<Integer, GUIElement> el : builder.elements.entrySet()) {
-				inv.setItem(el.getKey(), el.getValue().getItem(p));
+				inv.setItem(el.getKey(), el.getValue().getItem(event));
 			}
 			return inv;
 		}
@@ -804,13 +807,16 @@ public class GUIUtils {
 			List<GUIElement> elements = items.stream().map(i -> supp.toGUIElement(p, i)).collect(Collectors.toList());
 			HashMap<Integer, GUIElement> elSlots = new HashMap<>();
 			int pages = items.size()/nSlots;
+			
+			GUIBuildEvent event = new GUIBuildEvent(holder, p, base);
+			
 			if(page <= pages && page >= 0) {
 				int start = page*nSlots;
 				int end = (items.size()<=start+nSlots)?items.size():start+nSlots;
 				for(int i = start; i < end; i++){
 					GUIElement el = elements.get(i);
 					int slot = slots.get(i-start);
-					base.setItem(slot, el.getItem(p));
+					base.setItem(slot, el.getItem(event));
 					elSlots.put(slot, el);
 				}
 				holder.getProperties().put("page-elements", elSlots);
