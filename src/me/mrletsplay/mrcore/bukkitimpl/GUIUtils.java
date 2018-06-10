@@ -304,7 +304,7 @@ public class GUIUtils {
 		
 		public abstract List<T> getItems();
 		
-		public abstract GUIElement toGUIElement(Player p, T item);
+		public abstract GUIElement toGUIElement(GUIBuildEvent event, T item);
 		
 	}
 	
@@ -835,13 +835,15 @@ public class GUIUtils {
 			holder.getProperties().put("page", page);
 			List<Integer> slots = builder.customItemSlots;
 			int nSlots = slots.size();
-			ItemSupplier<T> supp = builder.supplier;
-			List<T> items = supp.getItems();
-			List<GUIElement> elements = items.stream().map(i -> supp.toGUIElement(p, i)).collect(Collectors.toList());
-			Map<Integer, GUIElement> elSlots = new HashMap<>();
-			int pages = items.size()/nSlots;
 			
 			GUIBuildEvent event = new GUIBuildEvent(holder, p, base);
+			
+			ItemSupplier<T> supp = builder.supplier;
+			List<T> items = supp.getItems();
+			
+			List<GUIElement> elements = items.stream().map(i -> supp.toGUIElement(event, i)).collect(Collectors.toList());
+			Map<Integer, GUIElement> elSlots = new HashMap<>();
+			int pages = items.size()/nSlots;
 			
 			if(page <= pages && page >= 0) {
 				int start = page*nSlots;
