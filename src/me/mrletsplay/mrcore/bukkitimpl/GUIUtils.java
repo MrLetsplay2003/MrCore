@@ -960,6 +960,20 @@ public class GUIUtils {
 		
 	}
 	
+	public static class GUIHolderPropertyMap extends HashMap<String, Object> {
+
+		private static final long serialVersionUID = 8608526183300903401L;
+		
+		public void put(Plugin pl, String key, Object value) {
+			super.put(pl.getName()+"_"+key, value);
+		}
+		
+		public Object get(Plugin pl, String key) {
+			return super.get(pl.getName()+"_"+key);
+		}
+		
+	}
+	
 	public static class GUIHolder implements InventoryHolder {
 
 		private GUI gui;
