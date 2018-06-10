@@ -17,6 +17,7 @@ public class MrCore {
 	 * - GUIBuildAction
 	 * - Tab complete
 	 * - Better placeholders
+	 * - Animated GUIs
 	 * 
 	 * shift click (gui)
 	 */
