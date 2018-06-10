@@ -31,10 +31,10 @@ public class GUIUtils {
 		private int size;
 		private InventoryType invType;
 		private boolean isCustomType;
-		private HashMap<Integer, GUIElement> elements;
+		private Map<Integer, GUIElement> elements;
 		private GUIDragDropListener dragDrop;
 		private GUIAction action;
-		private HashMap<String, Object> properties = new HashMap<>();
+		private Map<String, Object> properties = new HashMap<>();
 		GUIBuildAction buildAction;
 		
 		/**
@@ -124,7 +124,7 @@ public class GUIUtils {
 		 * Sets the default properties for this GUIBuilder
 		 * @param properties The properties to use
 		 */
-		public void setProperties(HashMap<String, Object> properties) {
+		public void setProperties(Map<String, Object> properties) {
 			this.properties = properties;
 		}
 		
@@ -646,21 +646,33 @@ public class GUIUtils {
 		protected GUI(GUIBuilder builder) {
 			this.builder = builder;
 		}
-		
+
 		/**
 		 * Returns this GUI represented as an inventory for the specified player
 		 * @param p The player this inventory is for (Used in all method calls to GUIElements and similar)
 		 * @return An inventory representation of this GUI
 		 */
 		public Inventory getForPlayer(Player p) {
-			Inventory inv = buildInternally(p);
+			Inventory inv = buildInternally(p, new HashMap<>());
+			if(builder.buildAction != null && !(this instanceof GUIMultiPage)) builder.buildAction.onBuild(new GUIBuildEvent((GUIHolder) inv.getHolder(), p, inv));
+			return inv;
+		}
+
+		/**
+		 * Returns this GUI represented as an inventory for the specified player
+		 * @param p The player this inventory is for (Used in all method calls to GUIElements and similar)
+		 * @return An inventory representation of this GUI
+		 */
+		public Inventory getForPlayer(Player p, Map<String, Object> properties) {
+			Inventory inv = buildInternally(p, properties);
 			if(builder.buildAction != null && !(this instanceof GUIMultiPage)) builder.buildAction.onBuild(new GUIBuildEvent((GUIHolder) inv.getHolder(), p, inv));
 			return inv;
 		}
 		
-		protected Inventory buildInternally(Player p) {
+		protected Inventory buildInternally(Player p, Map<String, Object> properties) {
 			Inventory inv;
 			GUIHolder holder = new GUIHolder(this);
+			holder.properties.putAll(properties);
 			if(builder.isCustomType) {
 				inv = Bukkit.createInventory(holder, builder.invType, builder.title);
 			} else {
@@ -680,7 +692,7 @@ public class GUIUtils {
 		 * Can be used to set GUI-specific properties
 		 * @return The GUIHolder instance for this GUI (unique to this GUI)
 		 */
-		public HashMap<String, Object> getDefaultHolderProperties() {
+		public Map<String, Object> getDefaultHolderProperties() {
 			return builder.properties;
 		}
 		
@@ -695,7 +707,7 @@ public class GUIUtils {
 		/**
 		 * @return All the elements in this GUI. This does not include page-specific items for {@link GUIMultiPage} GUIs
 		 */
-		public HashMap<Integer, GUIElement> getElements(){
+		public Map<Integer, GUIElement> getElements(){
 			return builder.elements;
 		}
 		
@@ -791,13 +803,33 @@ public class GUIUtils {
 		 * @return An inventory representation for this GUI, null if the page doesn't exist
 		 */
 		public Inventory getForPlayer(Player p, int page) {
-			Inventory inv = buildInternally(p, page);
+			Inventory inv = buildInternally(p, page, new HashMap<>());
 			if(builder.buildAction != null) builder.buildAction.onBuild(new GUIBuildEvent((GUIHolder) inv.getHolder(), p, inv));
 			return inv;
 		}
 		
-		protected Inventory buildInternally(Player p, int page) {
-			Inventory base = super.getForPlayer(p);
+		/**
+		 * This will return page 0 of the GUI
+		 */
+		@Override
+		public Inventory getForPlayer(Player p, Map<String, Object> properties) {
+			return getForPlayer(p, 0, properties);
+		}
+		
+		/**
+		 * Returns an inventory representation of the specified page of this GUI for a specified player
+		 * @param p The player this inventory is for (Used in all method calls to GUIElements and similar)
+		 * @param page The page to be used
+		 * @return An inventory representation for this GUI, null if the page doesn't exist
+		 */
+		public Inventory getForPlayer(Player p, int page, Map<String, Object> properties) {
+			Inventory inv = buildInternally(p, page, properties);
+			if(builder.buildAction != null) builder.buildAction.onBuild(new GUIBuildEvent((GUIHolder) inv.getHolder(), p, inv));
+			return inv;
+		}
+		
+		protected Inventory buildInternally(Player p, int page, Map<String, Object> properties) {
+			Inventory base = super.getForPlayer(p, properties);
 			GUIHolder holder = (GUIHolder) base.getHolder();
 			holder.getProperties().put("page", page);
 			List<Integer> slots = builder.customItemSlots;
@@ -805,7 +837,7 @@ public class GUIUtils {
 			ItemSupplier<T> supp = builder.supplier;
 			List<T> items = supp.getItems();
 			List<GUIElement> elements = items.stream().map(i -> supp.toGUIElement(p, i)).collect(Collectors.toList());
-			HashMap<Integer, GUIElement> elSlots = new HashMap<>();
+			Map<Integer, GUIElement> elSlots = new HashMap<>();
 			int pages = items.size()/nSlots;
 			
 			GUIBuildEvent event = new GUIBuildEvent(holder, p, base);
@@ -894,7 +926,7 @@ public class GUIUtils {
 						if(!event.isCancelled()) e.setCancelled(false);
 					}
 					if(gui instanceof GUIMultiPage<?>) {
-						HashMap<Integer, GUIElement> pageElements = (HashMap<Integer, GUIElement>) holder.getProperties().get("page-elements");
+						Map<Integer, GUIElement> pageElements = (Map<Integer, GUIElement>) holder.getProperties().get("page-elements");
 						GUIElement pElClicked = pageElements.get(slot);
 						if(pElClicked != null && pElClicked.action != null) {
 							GUIElementActionEvent event = new GUIElementActionEvent(player, action, inv, gui, holder, e);
@@ -931,7 +963,7 @@ public class GUIUtils {
 	public static class GUIHolder implements InventoryHolder {
 
 		private GUI gui;
-		private HashMap<String, Object> properties;
+		private Map<String, Object> properties;
 		
 		/**
 		 * Creates a gui holder for the specified GUI<br>
@@ -949,7 +981,7 @@ public class GUIUtils {
 		 * @param gui The GUI this holder is for
 		 * @param properties The property hashmap to use
 		 */
-		public GUIHolder(GUI gui, HashMap<String, Object> properties) {
+		public GUIHolder(GUI gui, Map<String, Object> properties) {
 			this.gui = gui;
 			this.properties = properties;
 		}
@@ -1008,7 +1040,7 @@ public class GUIUtils {
 		/**
 		 * @return The property HashMap for this holder
 		 */
-		public HashMap<String, Object> getProperties() {
+		public Map<String, Object> getProperties() {
 			return properties;
 		}
 		
