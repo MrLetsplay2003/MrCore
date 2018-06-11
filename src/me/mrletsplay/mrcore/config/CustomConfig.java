@@ -615,17 +615,21 @@ public class CustomConfig {
 		
 		boolean tmpBool = false;
 		
-		if(tmpBool = formattedLine.startsWith(customConfigVersionString) || formattedLine.startsWith(customConfigVersionString.trim())){
+		if((tmpBool = formattedLine.startsWith(customConfigVersionString)) || formattedLine.startsWith(customConfigVersionString.trim())){
 			return new ParsedLine(line, indents, null, LineType.CUSTOMCONFIG_VERSION, new ParsedValue(ValueType.DEFAULT,
 					formattedLine.substring(tmpBool?customConfigVersionString.length():customConfigVersionString.trim().length())));
 		}
 		
-		if(tmpBool = formattedLine.startsWith(commentString) || formattedLine.startsWith(commentString.trim())){
+		tmpBool = false;
+		
+		if((tmpBool = formattedLine.startsWith(commentString)) || formattedLine.startsWith(commentString.trim())){
 			return new ParsedLine(line, indents, null, LineType.COMMENT, new ParsedValue(ValueType.DEFAULT,
 					formattedLine.substring(tmpBool?commentString.length():commentString.trim().length())));
 		}
 		
-		if(tmpBool = formattedLine.startsWith(headerCommentString) || formattedLine.startsWith(headerCommentString.trim())) {
+		tmpBool = false;
+		
+		if((tmpBool = formattedLine.startsWith(headerCommentString)) || formattedLine.startsWith(headerCommentString.trim())) {
 			return new ParsedLine(line, indents, null, LineType.COMMENT, new ParsedValue(ValueType.DEFAULT,
 					formattedLine.substring(tmpBool?headerCommentString.length():headerCommentString.trim().length())));
 		}
