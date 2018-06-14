@@ -302,7 +302,7 @@ public class GUIUtils {
 	
 	public static abstract class ItemSupplier<T> {
 		
-		public abstract List<T> getItems();
+		public abstract List<T> getItems(GUIBuildEvent event);
 		
 		public abstract GUIElement toGUIElement(GUIBuildEvent event, T item);
 		
@@ -839,7 +839,7 @@ public class GUIUtils {
 			GUIBuildEvent event = new GUIBuildEvent(holder, p, base);
 			
 			ItemSupplier<T> supp = builder.supplier;
-			List<T> items = supp.getItems();
+			List<T> items = supp.getItems(event);
 			
 			List<GUIElement> elements = items.stream().map(i -> supp.toGUIElement(event, i)).collect(Collectors.toList());
 			Map<Integer, GUIElement> elSlots = new HashMap<>();
