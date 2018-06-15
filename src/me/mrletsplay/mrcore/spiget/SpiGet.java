@@ -20,7 +20,7 @@ public class SpiGet {
 	public static final String API_BASE_URL = "https://api.spiget.org/v2/";
 	
 	public static List<SpiGetResource.Search> searchResource(String query) {
-		return new JSONArray(makeRequest(API_BASE_URL + "search/resources/" + urlEncode(query))).stream()
+		return new JSONArray(makeRequest(API_BASE_URL + "search/resources/" + urlEncode(query) + "?size=1000&field=name")).stream()
 			.map(res -> new SpiGetResource.Search((JSONObject) res))
 			.collect(Collectors.toList());
 	}
