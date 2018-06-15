@@ -1,6 +1,7 @@
 package me.mrletsplay.mrcore.spiget;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -19,13 +20,13 @@ public class SpiGet {
 	public static final String API_BASE_URL = "https://api.spiget.org/v2/";
 	
 	public static List<SpiGetResource.Search> searchResource(String query) {
-		return new JSONArray(makeRequest(API_BASE_URL + "/search/resources/" + urlEncode(query))).stream()
-				.map(res -> new SpiGetResource.Search((JSONObject) res))
-				.collect(Collectors.toList());
+		return new JSONArray(makeRequest(API_BASE_URL + "search/resources/" + urlEncode(query))).stream()
+			.map(res -> new SpiGetResource.Search((JSONObject) res))
+			.collect(Collectors.toList());
 	}
 	
 	public static SpiGetResource getResource(int resourceID) {
-		return new SpiGetResource(new JSONObject(makeRequest(API_BASE_URL + "/resources/" + resourceID)));
+		return new SpiGetResource(new JSONObject(makeRequest(API_BASE_URL + "resources/" + resourceID)));
 	}
 	
 	protected static String urlEncode(String str) {
@@ -47,6 +48,8 @@ public class SpiGet {
 			}
 			String response = new String(out.toByteArray());
 			return response;
+		} catch (FileNotFoundException e) { // HTTP 404
+			return null;
 		} catch (IOException e) {
 			throw new FriendlyException(e);
 		}

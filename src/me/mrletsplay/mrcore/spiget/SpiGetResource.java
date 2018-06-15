@@ -3,6 +3,7 @@ package me.mrletsplay.mrcore.spiget;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,9 +40,9 @@ public class SpiGetResource {
 		fileSize = file.getDouble("size");
 		fileSizeUnit = file.getString("sizeUnit");
 		likes = spigetResponse.getInt("likes");
-		testedVersions = spigetResponse.getJSONArray("testedVersions").stream().map(o -> SpiGetMinecraftVersion.getByName((String)o)).collect(Collectors.toList());
+		testedVersions = spigetResponse.has("testedVersions") ? spigetResponse.getJSONArray("testedVersions").stream().map(o -> SpiGetMinecraftVersion.getByName((String)o)).collect(Collectors.toList()) : new ArrayList<>();
 		name = spigetResponse.getString("name");
-		tagLine = spigetResponse.getString("tag");
+		tagLine = spigetResponse.has("tag") ? spigetResponse.getString("tag") : null;
 		JSONObject icon = spigetResponse.getJSONObject("icon");
 		iconURL = icon.getString("url");
 		byte[] imgData = Base64.getDecoder().decode(icon.getString("data"));
@@ -53,12 +54,12 @@ public class SpiGetResource {
 		releaseDate = spigetResponse.getLong("releaseDate");
 		lastUpdateDate = spigetResponse.getLong("updateDate");
 		downloads = spigetResponse.getInt("downloads");
-		premium = spigetResponse.getBoolean("premium");
-		price = spigetResponse.getDouble("price");
-		priceCurrency = spigetResponse.getString("currency");
-		supportedLanguages = spigetResponse.getString("supportedLanguages");
+		premium = spigetResponse.has("premium") ? spigetResponse.getBoolean("premium") : false;
+		price = spigetResponse.has("price") ? spigetResponse.getDouble("price") : 0;
+		priceCurrency = spigetResponse.has("currency") ? spigetResponse.getString("currency") : null;
+		supportedLanguages = spigetResponse.has("supportedLanguages") ? spigetResponse.getString("supportedLanguages") : null;
 		id = spigetResponse.getInt("id");
-		versions = new JSONArray(SpiGet.API_BASE_URL + "/resources/" + id + "/versions").stream()
+		versions = new JSONArray(SpiGet.makeRequest(SpiGet.API_BASE_URL + "/resources/" + id + "/versions")).stream()
 					.map(r -> new SpiGetResourceVersion((JSONObject) r))
 					.collect(Collectors.toList());
 	}
