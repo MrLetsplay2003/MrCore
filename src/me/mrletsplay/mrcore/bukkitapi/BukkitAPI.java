@@ -1,4 +1,4 @@
-package me.mrletsplay.mrcore.spiget;
+package me.mrletsplay.mrcore.bukkitapi;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -14,18 +14,22 @@ import me.mrletsplay.mrcore.misc.JSON.JSONArray;
 import me.mrletsplay.mrcore.misc.JSON.JSONObject;
 import me.mrletsplay.mrcore.misc.OtherTools.FriendlyException;
 
-public class SpiGet {
-
-	public static final String API_BASE_URL = "https://api.spiget.org/v2/";
+public class BukkitAPI {
 	
-	public static List<SpiGetResource.Search> searchResource(String query) {
-		return new JSONArray(makeRequest(API_BASE_URL + "/search/resources/" + urlEncode(query))).stream()
-				.map(res -> new SpiGetResource.Search((JSONObject) res))
+	private static final String
+		PROJECTS_URL = "https://api.curseforge.com/servermods/projects?search=",
+		FILES_URL = "https://api.curseforge.com/servermods/files?projectIds=";
+
+	public static List<BukkitResource> searchResource(String query) {
+		return new JSONArray(makeRequest(PROJECTS_URL + urlEncode(query))).stream()
+				.map(r -> new BukkitResource((JSONObject) r))
 				.collect(Collectors.toList());
 	}
 	
-	public static SpiGetResource getResource(int resourceID) {
-		return new SpiGetResource(new JSONObject(makeRequest(API_BASE_URL + "/resources/" + resourceID)));
+	public static BukkitFile getBukkitFile(int projectId) {
+		return new JSONArray(makeRequest(FILES_URL + projectId)).stream()
+				.map(r -> new BukkitFile((JSONObject) r))
+				.collect(Collectors.toList()).get(0);
 	}
 	
 	private static String urlEncode(String str) {

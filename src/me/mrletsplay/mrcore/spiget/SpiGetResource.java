@@ -138,4 +138,33 @@ public class SpiGetResource {
 		return external;
 	}
 	
+	public static class Search {
+		
+		private String name, tagLine;
+		private int id;
+		
+		public Search(JSONObject spigetResponse) {
+			this.name = spigetResponse.getString("name");
+			this.tagLine = spigetResponse.getString("tag");
+			this.id = spigetResponse.getInt("id");
+		}
+		
+		public String getName() {
+			return name;
+		}
+		
+		public String getTagLine() {
+			return tagLine;
+		}
+		
+		public int getID() {
+			return id;
+		}
+		
+		public SpiGetResource loadResource() {
+			return SpiGet.getResource(id);
+		}
+		
+	}
+	
 }
