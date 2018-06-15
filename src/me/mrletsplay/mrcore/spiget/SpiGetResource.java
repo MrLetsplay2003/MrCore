@@ -59,7 +59,8 @@ public class SpiGetResource {
 		priceCurrency = spigetResponse.has("currency") ? spigetResponse.getString("currency") : null;
 		supportedLanguages = spigetResponse.has("supportedLanguages") ? spigetResponse.getString("supportedLanguages") : null;
 		id = spigetResponse.getInt("id");
-		versions = new JSONArray(SpiGet.makeRequest(SpiGet.API_BASE_URL + "/resources/" + id + "/versions")).stream()
+		latestVersionID = spigetResponse.getJSONObject("version").getInt("id");
+		versions = new JSONArray(SpiGet.makeRequest(SpiGet.API_BASE_URL + "resources/" + id + "/versions?size=1000")).stream()
 					.map(r -> new SpiGetResourceVersion((JSONObject) r))
 					.collect(Collectors.toList());
 	}
