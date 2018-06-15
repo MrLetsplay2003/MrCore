@@ -48,7 +48,7 @@ public class HttpUtils {
 	 * @throws IOException If an IO error occurs while making the request
 	 */
 	public static InputStream httpGet(URL url, String... params) throws IOException {
-		URL url2 = new URL(url.toString()+"?"+Arrays.stream(params).collect(Collectors.joining("&")));
+		URL url2 = new URL(url.toString()+(params.length == 0 ? "" : "?"+Arrays.stream(params).collect(Collectors.joining("&"))));
 		InputStream in = url2.openStream();
 		return in;
 	}

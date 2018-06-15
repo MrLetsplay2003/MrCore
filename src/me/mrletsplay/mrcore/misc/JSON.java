@@ -16,11 +16,15 @@ public class JSON {
 		}
 		
 		public JSONObject(String source) {
-			properties = ((JSONObject) JSONParser.parse(source)).properties;
+			if(source != null) properties = ((JSONObject) JSONParser.parse(source)).properties;
 		}
 		
 		public void set(String key, Object value) {
 			properties.put(key, value);
+		}
+		
+		public boolean has(String key) {
+			return properties.containsKey(key);
 		}
 		
 		public Object get(String key) {
@@ -80,7 +84,7 @@ public class JSON {
 		}
 		
 		public JSONArray(String source) {
-			super((JSONArray) JSONParser.parse(source));
+			super(source != null ? (JSONArray) JSONParser.parse(source) : new ArrayList<>());
 		}
 		
 		public String getString(int index) {
@@ -174,6 +178,7 @@ public class JSON {
 	public static class JSONParser {
 		
 		public static Object parse(String source) {
+			if(source == null) return null;
 			return readGeneric(new CharReader(source));
 		}
 		
