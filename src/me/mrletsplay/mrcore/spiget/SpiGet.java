@@ -28,7 +28,7 @@ public class SpiGet {
 		return new SpiGetResource(new JSONObject(makeRequest(API_BASE_URL + "/resources/" + resourceID)));
 	}
 	
-	private static String urlEncode(String str) {
+	protected static String urlEncode(String str) {
 		try {
 			return URLEncoder.encode(str, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
@@ -36,7 +36,7 @@ public class SpiGet {
 		}
 	}
 	
-	private static String makeRequest(String url) {
+	protected static String makeRequest(String url) {
 		try {
 			InputStream stream = HttpUtils.httpGet(new URL(url));
 			byte[] buf = new byte[4096];

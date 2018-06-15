@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 
+import me.mrletsplay.mrcore.misc.JSON.JSONArray;
 import me.mrletsplay.mrcore.misc.JSON.JSONObject;
 import me.mrletsplay.mrcore.misc.OtherTools.FriendlyException;
 
@@ -25,9 +26,10 @@ public class SpiGetResource {
 	private BufferedImage icon;
 	private String iconURL;
 	private long releaseDate, lastUpdateDate;
-	private int downloads;
+	private int downloads, latestVersionID;
 	private boolean premium;
 	private String supportedLanguages;
+	private List<SpiGetResourceVersion> versions;
 	
 	public SpiGetResource(JSONObject spigetResponse) {
 		description = new String(Base64.getDecoder().decode(spigetResponse.getString("description")));
@@ -56,6 +58,9 @@ public class SpiGetResource {
 		priceCurrency = spigetResponse.getString("currency");
 		supportedLanguages = spigetResponse.getString("supportedLanguages");
 		id = spigetResponse.getInt("id");
+		versions = new JSONArray(SpiGet.API_BASE_URL + "/resources/" + id + "/versions").stream()
+					.map(r -> new SpiGetResourceVersion((JSONObject) r))
+					.collect(Collectors.toList());
 	}
 	
 	public String getName() {
@@ -136,6 +141,18 @@ public class SpiGetResource {
 	
 	public boolean isFileExternal() {
 		return external;
+	}
+	
+	public List<SpiGetResourceVersion> getVersions() {
+		return versions;
+	}
+	
+	public int getLatestVersionID() {
+		return latestVersionID;
+	}
+	
+	public SpiGetResourceVersion getLatestVersion() {
+		return getVersions().stream().filter(v -> v.getID() == latestVersionID).findFirst().orElse(null);
 	}
 	
 	public static class Search {
