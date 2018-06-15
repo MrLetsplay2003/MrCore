@@ -767,6 +767,20 @@ public class GUIUtils {
 			}
 		}
 		
+		public void closeAllInstances() {
+			for(Player player : Bukkit.getOnlinePlayers()) closeInstance(player);
+		}
+		
+		public void closeInstance(Player player) {
+			if(player.getOpenInventory() != null && player.getOpenInventory().getTopInventory() != null) {
+				Inventory oldInv = player.getOpenInventory().getTopInventory();
+				GUIHolder holder = GUIUtils.getGUIHolder(oldInv);
+				if(holder != null && holder.gui.equals(this)) {
+					player.closeInventory();
+				}
+			}
+		}
+		
 		protected void openNewInstance(Player player, Inventory oldInv, GUIHolder holder) {
 			Inventory newInv = getForPlayer(player, holder.getProperties());
 			GUIHolder newHolder = getGUIHolder(newInv);
