@@ -60,7 +60,7 @@ public class SpiGetResource {
 		supportedLanguages = spigetResponse.has("supportedLanguages") ? spigetResponse.getString("supportedLanguages") : null;
 		id = spigetResponse.getInt("id");
 		latestVersionID = spigetResponse.getJSONObject("version").getInt("id");
-		versions = new JSONArray(SpiGet.makeRequest(SpiGet.API_BASE_URL + "resources/" + id + "/versions?size=1000")).stream()
+		versions = new JSONArray(SpiGet.makeRequest(SpiGet.API_BASE_URL + "resources/" + id + "/versions?size=1000&sort=-id")).stream()
 					.map(r -> new SpiGetResourceVersion((JSONObject) r))
 					.collect(Collectors.toList());
 	}
