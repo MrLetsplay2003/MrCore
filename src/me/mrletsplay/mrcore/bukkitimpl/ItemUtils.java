@@ -27,7 +27,7 @@ public class ItemUtils {
 		me.setDisplayName(name);
 		List<String> s = new ArrayList<>();
 		for(String l:lore){
-			s.add(l);
+			if(!l.isEmpty()) s.add(l);
 		}
 		me.setLore(s);
 		i.setItemMeta(me);
@@ -40,7 +40,7 @@ public class ItemUtils {
 		me.setDisplayName(name);
 		List<String> s = new ArrayList<>();
 		for(String l:lore){
-			s.add(l);
+			if(!l.isEmpty()) s.add(l);
 		}
 		me.setLore(s);
 		i.setItemMeta(me);
@@ -53,7 +53,7 @@ public class ItemUtils {
 		me.setDisplayName(name);
 		List<String> s = new ArrayList<>();
 		for(String l:lore){
-			s.add(l);
+			if(!l.isEmpty()) s.add(l);
 		}
 		me.setLore(s);
 		i.setItemMeta(me);
@@ -66,7 +66,7 @@ public class ItemUtils {
 		me.setDisplayName(name);
 		List<String> s = new ArrayList<>();
 		for(String l:lore){
-			s.add(l);
+			if(!l.isEmpty()) s.add(l);
 		}
 		me.setLore(s);
 		i.setItemMeta(me);

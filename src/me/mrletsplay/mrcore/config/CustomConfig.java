@@ -651,10 +651,12 @@ public class CustomConfig {
 			}else{
 				return new ParsedLine(line, indents, p[0], LineType.PROPERTY, new ParsedValue(ValueType.DEFAULT, p[1]));
 			}
+		}else if(formattedLine.endsWith(splString.trim())) {
+			String str = formattedLine.trim();
+			return new ParsedLine(line, indents, str.substring(0, str.length()-1), LineType.LIST_START, null);
 		}
 		
 		if(formattedLine.equals(objectEndString)) return new ParsedLine(line, indents, null, LineType.OBJECT_END, null);
-			
 		
 		throw new InvalidConfigException("Invalid property \""+formattedLine+"\"",line);
 	}
@@ -1093,7 +1095,7 @@ public class CustomConfig {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public List<Map<String, Object>> getMapList(String key) {
 		List<Map> maps = getGenericList(key, Map.class);
-		return maps.stream().map(e -> (Map<String,Object>)e).collect(Collectors.toList());
+		return maps == null ? null : maps.stream().map(e -> (Map<String,Object>)e).collect(Collectors.toList());
 	}
 
 	/**
@@ -1174,12 +1176,13 @@ public class CustomConfig {
 	
 	@SuppressWarnings("unchecked")
 	public <T> T castGeneric(Object obj, Class<T> clazz) {
+		if(clazz.isInstance(obj)) return (T) obj;
 		if(clazz.equals(Object.class)) return (T) obj;
 		if(clazz.equals(Map.class)) return (T) obj;
 		if(clazz.equals(List.class)) return (T) obj;
 		if(clazz.equals(ConfigSection.class)) return (T) obj;
-		if(!(obj instanceof String)) throw new InvalidTypeException("Unsupported type: "+clazz.getName()); 
-		String val = (String) obj;
+		if(!(obj instanceof String) && !(obj instanceof Number)) throw new InvalidTypeException("Unsupported type: "+clazz.getName()); 
+		String val = obj.toString();
 		if(clazz.equals(String.class)) return (T) val;
 		if(clazz.equals(Boolean.class)) return (T) Boolean.valueOf(val);
 		if(clazz.equals(Integer.class)) return (T) Integer.valueOf(val);
@@ -1557,7 +1560,6 @@ public class CustomConfig {
 		
 		@SuppressWarnings("unchecked")
 		public void set(String key, Property property) {
-			System.out.println(property.type);
 			String[] spl = key.split("\\.");
 			if(spl.length > 1) {
 				ConfigSection sub = getOrCreateSubsection(spl[0]);
@@ -1571,7 +1573,6 @@ public class CustomConfig {
 						Map<String, Object> map = (Map<String, Object>) property.value;
 						ConfigSection cfg = ConfigSection.ofMap(config, map);
 						subsections.put(key, cfg);
-						System.out.println(subsections);
 //						map.entrySet().forEach(en -> sub.set(en.getKey(), config.formatter.formatObject(en.getValue()).toProperty()));
 //						subsections.put(key, property.value);
 					}else {
@@ -1764,7 +1765,9 @@ public class CustomConfig {
 		
 		public Map<String, Object> toMap() {
 			Map<String, Object> map = new HashMap<>();
-			map.putAll(properties);
+			map.putAll(properties.entrySet().stream()
+					.map(en -> new AbstractMap.SimpleEntry<>(en.getKey(), en.getValue().getValue()))
+					.collect(Collectors.toMap(en -> en.getKey(), en -> en.getValue())));
 			subsections.entrySet().forEach(e -> map.put(e.getKey(), e.getValue().toMap()));
 			return map;
 		}

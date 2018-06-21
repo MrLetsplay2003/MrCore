@@ -72,7 +72,7 @@ public class ConfigExpansions {
 				List<Map<String, Object>> list = getMapList(key);
 				ObjectMapper<T> mapper = getMapper(mappingClass);
 				if(mapper == null) throw new InvalidTypeException("No mapper defined for "+mappingClass.getName());
-				return list.stream().map(e -> mapper.constructObject(e)).collect(Collectors.toList());
+				return list == null ? null : list.stream().map(e -> mapper.constructObject(e)).collect(Collectors.toList());
 			} catch(Exception e) {
 				throw new InvalidTypeException(key, "Failed to parse into "+mappingClass.getName(), e);
 			}

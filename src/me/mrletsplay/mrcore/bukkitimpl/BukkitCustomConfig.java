@@ -99,7 +99,7 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 					if(m instanceof SkullMeta) {
 						SkullMeta sM = (SkullMeta) m;
 						if(sM.hasOwner()) {
-							// Using SkullMeta#getOwner for backwards compatability
+							// Using SkullMeta#getOwner for backwards compatibility
 							map.put("skull-owner", sM.getOwner());
 						}else {
 							String texture = getTexture(sM);
@@ -130,7 +130,6 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 				enchs.forEach((en, lvl) -> m.addEnchant(Enchantment.getByName(en), lvl, true));
 				List<String> flags = (List<String>) map.getOrDefault("flags", new ArrayList<>());
 				flags.forEach(f -> m.addItemFlags(ItemFlag.valueOf(f)));
-				
 				if(requireKeys(map, "skull-owner")) {
 					SkullMeta sM = (SkullMeta) m;
 					// Using SkullMeta#setOwner for backwards compatability
