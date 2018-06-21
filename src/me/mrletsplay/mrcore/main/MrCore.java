@@ -12,13 +12,15 @@ public class MrCore {
 	 * - Chat GUIs (via commands) [X]
 	 * - JSON [X]
 	 * - MySQL
-	 * - Multi-Plugin ("Modules")
-	 * - Consumer<GUISomethingEvent>
+	 * - Multi-Plugin ("Modules") [X]
+	 * - Consumer<GUISomethingEvent> [X]
 	 * - GUIBuildAction
 	 * - Tab complete
 	 * - Better placeholders
 	 * - Animated GUIs
-	 * - Maven plugin
+	 * - Maven dep plugin
+	 * - HTTP
+	 * - "Popup dialogs" for GUIs
 	 * 
 	 * shift click (gui)
 	 */
