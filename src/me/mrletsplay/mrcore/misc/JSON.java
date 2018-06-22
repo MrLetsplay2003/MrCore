@@ -7,118 +7,245 @@ import java.util.stream.Collectors;
 
 public class JSON {
 	
+	/**
+	 * Implementation of a JSON object according to <a href="http://www.json.org/">The JSON Data Interchange Standard</a>
+	 * @author MrLetsplay2003
+	 */
 	public static class JSONObject {
 		
 		private HashMap<String, Object> properties;
 		
+		/**
+		 * Creates an empty JSONObject
+		 */
 		public JSONObject() {
 			properties = new HashMap<>();
 		}
 		
+		/**
+		 * Creates a JSON object from the given source string<br>
+		 * The string has to be a valid JSON object
+		 * @param source The source string to read from
+		 * @throws JSONParseException If a parsing error occurs
+		 * @throws ClassCastException If the given string does not represent a JSON object
+		 */
 		public JSONObject(String source) {
 			if(source != null) properties = ((JSONObject) JSONParser.parse(source)).properties;
 		}
 		
+		/**
+		 * Sets the given key to a value<br>
+		 * Already set properties will be overridden<br>
+		 * This method only allows for Strings, Numbers, other JSON objects or JSON arrays to be set<br>
+		 * If another type of value is set, the implementation will throw an error when calling {@link #toString()}
+		 * @param key The key of the property
+		 * @param value The value to set it to
+		 */
 		public void set(String key, Object value) {
 			properties.put(key, value);
 		}
 		
+		/**
+		 * Checks whether a specific property exists within this JSON object
+		 * @param key The key of the property
+		 * @return true if the given property exists, false otherwise
+		 */
 		public boolean has(String key) {
 			return properties.containsKey(key);
 		}
 		
+		/**
+		 * Gets a property from this JSON object<br>
+		 * If the given key can't be found, a {@link JSONException} is thrown<br>
+		 * <br>
+		 * The get[type] methods return their type respectively<br>
+		 * If a type can not be converted, a {@link ClassCastException} is thrown
+		 * @param key The key of the property
+		 * @return The value of the property
+		 * @throws JSONException If the given key is not found
+		 */
 		public Object get(String key) {
 			if(!properties.containsKey(key)) throw new JSONException("Object doesn't have the property \""+key+"\"");
 			return properties.get(key);
 		}
 		
+		/**
+		 * @see #get(String)
+		 */
 		public String getString(String key) {
 			return (String) get(key);
 		}
-		
+
+		/**
+		 * @see #get(String)
+		 */
 		public Boolean getBoolean(String key) {
 			return (Boolean) get(key);
 		}
-		
+
+		/**
+		 * @see #get(String)
+		 */
 		public Number getNumber(String key) {
 			return (Number) get(key);
 		}
-		
+
+		/**
+		 * @see #get(String)
+		 */
 		public int getInt(String key) {
 			return getNumber(key).intValue();
 		}
-		
+
+		/**
+		 * @see #get(String)
+		 */
 		public long getLong(String key) {
 			return getNumber(key).longValue();
 		}
-		
+
+		/**
+		 * @see #get(String)
+		 */
 		public double getDouble(String key) {
 			return getNumber(key).doubleValue();
 		}
-		
+
+		/**
+		 * @see #get(String)
+		 */
 		public JSONObject getJSONObject(String key) {
 			return (JSONObject) get(key);
 		}
-		
+
+		/**
+		 * @see #get(String)
+		 */
 		public JSONArray getJSONArray(String key) {
 			return (JSONArray) get(key);
 		}
 		
+		/**
+		 * Converts this JSON object into a JSON string according to <a href="http://www.json.org/">The JSON Data Interchange Standard</a>
+		 * @throws JSONException If a conversion error occurs (e.g. a property has an invalid type)
+		 */
 		@Override
 		public String toString() {
 			return JSONFormatter.formatObject(this).toString();
 		}
 		
 	}
-	
+
+	/**
+	 * Implementation of a JSON array according to <a href="http://www.json.org/">The JSON Data Interchange Standard</a><br>
+	 * This also extends the ArrayList class to provide iterator/stream support
+	 * @author MrLetsplay2003
+	 */
 	public static class JSONArray extends ArrayList<Object> {
 
 		private static final long serialVersionUID = 7419047721431768026L;
 
+		/**
+		 * Creates an empty JSON array
+		 */
 		public JSONArray() {
 			super();
 		}
 
+		/**
+		 * Creates a JSON array from the given collection
+		 * @param collection The collection to create from
+		 */
 		public JSONArray(Collection<?> collection) {
 			super(collection);
 		}
-		
+
+		/**
+		 * Creates a JSON array from the given source string<br>
+		 * The string has to be a valid JSON array
+		 * @param source The source string to read from
+		 * @throws JSONParseException If a parsing error occurs
+		 * @throws ClassCastException If the given string does not represent a JSON array
+		 */
 		public JSONArray(String source) {
 			super(source != null ? (JSONArray) JSONParser.parse(source) : new ArrayList<>());
 		}
+
+		/**
+		 * Gets an element from this JSON array<br>
+		 * If the given index can't be found, an {@link IndexOutOfBoundsException} is thrown as defined by {@link ArrayList#get(int)}<br>
+		 * <br>
+		 * The get[type] methods return their type respectively<br>
+		 * If a type can not be converted, a {@link ClassCastException} is thrown
+		 * @param index The index of the element
+		 * @return The value of the property
+		 * @throws IndexOutOfBoundsException as defined by {@link ArrayList#get(int)}
+		 */
+		@Override
+		public Object get(int index) {
+			return super.get(index);
+		}
 		
+		/**
+		 * See {@link #get(int)}
+		 */
 		public String getString(int index) {
 			return (String) get(index);
 		}
-		
+
+		/**
+		 * See {@link #get(int)}
+		 */
 		public Boolean getBoolean(int index) {
 			return (Boolean) get(index);
 		}
-		
+
+		/**
+		 * See {@link #get(int)}
+		 */
 		public Number getNumber(int index) {
 			return (Number) get(index);
 		}
-		
+
+		/**
+		 * See {@link #get(int)}
+		 */
 		public int getInt(int index) {
 			return getNumber(index).intValue();
 		}
-		
+
+		/**
+		 * See {@link #get(int)}
+		 */
 		public long getLong(int index) {
 			return getNumber(index).longValue();
 		}
-		
+
+		/**
+		 * See {@link #get(int)}
+		 */
 		public double getDouble(int index) {
 			return getNumber(index).doubleValue();
 		}
-		
+
+		/**
+		 * See {@link #get(int)}
+		 */
 		public JSONObject getJSONObject(int index) {
 			return (JSONObject) get(index);
 		}
-		
+
+		/**
+		 * See {@link #get(int)}
+		 */
 		public JSONArray getJSONArray(int index) {
 			return (JSONArray) get(index);
 		}
-		
+
+		/**
+		 * Converts this JSON object into a JSON string according to <a href="http://www.json.org/">The JSON Data Interchange Standard</a>
+		 * @throws JSONException If a conversion error occurs (e.g. a property has an invalid type)
+		 */
 		@Override
 		public String toString() {
 			return JSONFormatter.formatArray(this).toString();
@@ -126,7 +253,7 @@ public class JSON {
 		
 	}
 	
-	public static class CharReader {
+	private static class CharReader {
 		
 		private int currentIndex;
 		private String string;
@@ -136,9 +263,9 @@ public class JSON {
 			this.currentIndex = 0;
 		}
 		
-		public char current() {
-			return string.charAt(currentIndex);
-		}
+//		public char current() {
+//			return string.charAt(currentIndex);
+//		}
 		
 		public char next() {
 			if(currentIndex == string.length()) return '\0'; //null char on eof
@@ -157,11 +284,11 @@ public class JSON {
 			return c;
 		}
 		
-		public CharReader skip(int num) {
-			currentIndex += num;
-			if(currentIndex >= string.length()) throw new RuntimeException();
-			return this;
-		}
+//		public CharReader skip(int num) {
+//			currentIndex += num;
+//			if(currentIndex >= string.length()) throw new RuntimeException();
+//			return this;
+//		}
 		
 		public CharReader revert(int num) {
 			currentIndex -= num;
@@ -175,8 +302,25 @@ public class JSON {
 		
 	}
 	
+	/**
+	 * Provides methods for parsing JSON strings into objects
+	 * @author MrLetsplay2003
+	 */
 	public static class JSONParser {
 		
+		/**
+		 * Tries to parse the string into a JSON generic value.<br>
+		 * These include:<br>
+		 * - JSON objects<br>
+		 * - JSON arrays<br>
+		 * - null<br>
+		 * - Booleans<br>
+		 * - Numbers<br>
+		 * - Strings
+		 * @param source The string to parse
+		 * @return An object of any of the types mentioned above
+		 * @throws JSONParseException If a parsing error occurs
+		 */
 		public static Object parse(String source) {
 			if(source == null) return null;
 			return readGeneric(new CharReader(source));
@@ -338,8 +482,25 @@ public class JSON {
 		
 	}
 	
+	/**
+	 * Provides methods for formatting objects into JSON strings
+	 * @author MrLetsplay2003
+	 */
 	public static class JSONFormatter {
-		
+
+		/**
+		 * Tries to format the object into a JSON strings.<br>
+		 * Allowed types are:<br>
+		 * - JSON objects<br>
+		 * - JSON arrays<br>
+		 * - null<br>
+		 * - Booleans<br>
+		 * - Numbers<br>
+		 * - Strings
+		 * @param object The object to format
+		 * @return A string representing that object
+		 * @throws JSONFormatException If a formatting error occurs
+		 */
 		public static String formatObject(Object object) {
 			return formatGeneric(object).toString();
 		}
@@ -398,6 +559,11 @@ public class JSON {
 			}
 		}
 		
+		/**
+		 * Escapes the given string into a JSON-compatible format
+		 * @param string The string to format
+		 * @return The escaped string
+		 */
 		public static String escapeJSON(String string) {
 			return escapeString(string).toString();
 		}
