@@ -1722,7 +1722,7 @@ public class CustomConfig {
 		}
 		
 		public String saveToString(List<ConfigSaveProperty> props, int indents) {
-			String lineSeparator = System.getProperty("line.separator");
+			String lineSeparator = ConfigFormatter.newLine();
 			List<String> section = saveToLines(props, indents);
 			return section.stream().collect(Collectors.joining(lineSeparator));
 		}

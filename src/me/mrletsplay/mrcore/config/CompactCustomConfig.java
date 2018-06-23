@@ -122,6 +122,18 @@ public class CompactCustomConfig extends CustomConfig {
 	}
 	
 	@Override
+	public CompactCustomConfig loadConfig() throws IOException {
+		super.loadConfig();
+		return this;
+	}
+	
+	@Override
+	public CompactCustomConfig loadConfigSafely() {
+		super.loadConfigSafely();
+		return this;
+	}
+	
+	@Override
 	public CustomConfig loadConfig(InputStream oIn) throws IOException {
 		DataInputStream in = new DataInputStream(oIn);
 		try {
