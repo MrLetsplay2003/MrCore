@@ -1,8 +1,12 @@
 package me.mrletsplay.mrcore.bukkitimpl;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -18,6 +22,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -40,6 +45,24 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 		super(configURL, defaultSaveProperties);
 		setFormatter(new BukkitConfigFormatter(this));
 		registerMappers();
+	}
+	
+	@Override
+	public BukkitCustomConfig loadConfig() throws IOException {
+		super.loadConfig();
+		return this;
+	}
+	
+	@Override
+	public BukkitCustomConfig loadConfigSafely() {
+		super.loadConfigSafely();
+		return this;
+	}
+	
+	@Override
+	public BukkitCustomConfig loadConfig(InputStream in) throws IOException {
+		super.loadConfig(in);
+		return this;
 	}
 	
 	private void registerMappers() {
@@ -153,6 +176,48 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 				
 				it.setItemMeta(m);
 				return it;
+			}
+			
+		});
+		
+		// Registers an object mapper for ConfigurationSerializable with priority -100 to first use other mappers (if available)
+		registerMapper(new ObjectMapper<ConfigurationSerializable>(-100, ConfigurationSerializable.class) {
+
+			@Override
+			public Map<String, Object> mapObject(ConfigurationSerializable object) {
+				Map<String, Object> map = new HashMap<>();
+				map.put("serializable-class", object.getClass().getName());
+				map.put("serializable-data", object.serialize());
+				return map;
+			}
+
+			@Override
+			public ConfigurationSerializable constructObject(Map<String, Object> map) {
+				if(!requireKeys(map, "serializable-class", "serializable-data")) return null;
+				try {
+					Class<?> clazz = Class.forName((String) map.get("serializable-class"));
+					try {
+						Method deserialize = clazz.getDeclaredMethod("deserialize", Map.class);
+						deserialize.setAccessible(true);
+						return (ConfigurationSerializable) deserialize.invoke(null, map);
+					} catch (Exception e) {
+						try {
+							Method deserialize = clazz.getDeclaredMethod("valueOf", Map.class);
+							deserialize.setAccessible(true);
+							return (ConfigurationSerializable) deserialize.invoke(null, map);
+						} catch (Exception e1) {
+							try {
+								Constructor<?> constr = clazz.getDeclaredConstructor(Map.class);
+								constr.setAccessible(true);
+								return (ConfigurationSerializable) constr.newInstance(map);
+							} catch (Exception e2) {
+								throw new FriendlyException(e2);
+							}
+						}
+					}
+				} catch (ClassNotFoundException e) {
+					throw new FriendlyException(e);
+				}
 			}
 			
 		});

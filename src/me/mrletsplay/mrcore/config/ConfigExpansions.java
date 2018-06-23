@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -44,7 +45,10 @@ public class ConfigExpansions {
 		
 		@SuppressWarnings("unchecked")
 		public <T> ObjectMapper<T> getMapper(Class<T> mappingClass) {
-			return (ObjectMapper<T>) mappers.stream().filter(m -> m.mappingClass.equals(mappingClass)).findFirst().orElse(null);
+			return (ObjectMapper<T>) mappers.stream()
+					.filter(m -> m.mappingClass.equals(mappingClass))
+					.sorted(Comparator.comparingInt((ObjectMapper<?> m) -> m.getPriority()).reversed())
+					.findFirst().orElse(null);
 		}
 		
 		public <T> T getMappable(String key, Class<T> mappingClass) {
@@ -102,13 +106,22 @@ public class ConfigExpansions {
 			
 			public Class<T> mappingClass;
 			public ExpandableCustomConfig config;
+			public int priority;
 			
 			public ObjectMapper(Class<T> clazz) {
 				this.mappingClass = clazz;
 			}
 			
+			public ObjectMapper(int priority, Class<T> clazz) {
+				this.mappingClass = clazz;
+			}
+			
 			protected void init(ExpandableCustomConfig config) {
 				this.config = config;
+			}
+			
+			public int getPriority() {
+				return priority;
 			}
 			
 			public ExpandableCustomConfig getConfig() {
