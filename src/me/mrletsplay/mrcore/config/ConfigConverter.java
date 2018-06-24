@@ -68,7 +68,7 @@ public class ConfigConverter {
 				throw new ConfigConversionException("Failed to convert config: "+obj.getString("error"));
 			}
 		}catch(IOException e) {
-			throw new ConfigConversionException("Failed to convert config", e);
+			throw new ConfigConversionException("Failed to convert config: An IO error occured", e);
 		}
 	}
 	
@@ -97,7 +97,7 @@ public class ConfigConverter {
 				throw new ConfigConversionException("Failed to convert config: "+obj.getString("error"));
 			}
 		}catch(IOException e) {
-			throw new ConfigConversionException("Failed to convert config", e);
+			throw new ConfigConversionException("Failed to convert config: An IO error occured", e);
 		}
 	}
 	
@@ -108,6 +108,7 @@ public class ConfigConverter {
 	public static enum ConfigVersion {
 		
 		v1_0("1.0"),
+		v1_1("1.1"),
 		v1_0_compact("1.0_compact");
 		
 		public final String name;
