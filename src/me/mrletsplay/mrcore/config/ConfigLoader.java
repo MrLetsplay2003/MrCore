@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.stream.Collectors;
 
+import me.mrletsplay.mrcore.bukkitimpl.BukkitCustomConfig;
 import me.mrletsplay.mrcore.config.ConfigConverter.ConfigVersion;
 import me.mrletsplay.mrcore.config.CustomConfig.ConfigSaveProperty;
 import me.mrletsplay.mrcore.config.CustomConfig.InvalidConfigException;
@@ -33,6 +34,28 @@ public class ConfigLoader {
 						Files.readAllLines(configFile.toPath()).stream().collect(Collectors.joining(System.getProperty("line.separator"))),
 						cc,
 						v);
+			} catch (IOException e1) {
+				throw new InvalidConfigException("Failed to load config from file", -1);
+			}
+		}
+	}
+
+	/**
+	 * See {@link #loadConfig(File, ConfigSaveProperty...)}
+	 */
+	public static BukkitCustomConfig loadBukkitConfig(File configFile, ConfigSaveProperty... defaultSaveProperties) {
+		BukkitCustomConfig cc = new BukkitCustomConfig(configFile, defaultSaveProperties);
+		try {
+			cc.loadConfigSafely();
+			return cc;
+		}catch(InvalidConfigVersionException e) {
+			try {
+				ConfigVersion v = ConfigVersion.getByName(e.getVersion());
+				if(v == null) throw new InvalidConfigVersionException("Invalid version: "+e.getVersion(), null);
+				return (BukkitCustomConfig) new BukkitCustomConfig(configFile).loadDefault(ConfigConverter.convertToLatestVersion(
+						Files.readAllLines(configFile.toPath()).stream().collect(Collectors.joining(System.getProperty("line.separator"))),
+						cc,
+						v) , true);
 			} catch (IOException e1) {
 				throw new InvalidConfigException("Failed to load config from file", -1);
 			}
