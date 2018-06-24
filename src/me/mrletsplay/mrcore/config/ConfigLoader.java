@@ -46,8 +46,7 @@ public class ConfigLoader {
 	public static BukkitCustomConfig loadBukkitConfig(File configFile, ConfigSaveProperty... defaultSaveProperties) {
 		BukkitCustomConfig cc = new BukkitCustomConfig(configFile, defaultSaveProperties);
 		try {
-			cc.loadConfigSafely();
-			return cc;
+			return cc.loadConfigSafely();
 		}catch(InvalidConfigVersionException e) {
 			try {
 				ConfigVersion v = ConfigVersion.getByName(e.getVersion());

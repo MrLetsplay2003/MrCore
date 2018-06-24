@@ -15,6 +15,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -31,6 +32,7 @@ public class GUIUtils {
 		private boolean isCustomType;
 		private Map<Integer, GUIElement> elements;
 		private GUIDragDropListener dragDrop;
+		private GUIClosedListener closed;
 		private GUIAction action;
 		private Map<String, Object> properties = new HashMap<>();
 		GUIBuildAction buildAction;
@@ -79,23 +81,6 @@ public class GUIUtils {
 			return this;
 		}
 		
-//		/**
-//		 * Convenience version of {@link #addElement(int, GUIElement)}
-//		 * @param slot The slot to add the element to
-//		 * @param e The element to add
-//		 * @return This GUIBuilder instance
-//		 */
-//		public GUIBuilder addElement(int slot, Function<GUIBuildEvent, ItemStack> e) {
-//			elements.put(slot, new GUIElement() {
-//				
-//				@Override
-//				public ItemStack getItem(GUIBuildEvent event) {
-//					return e.apply(event);
-//				}
-//			});
-//			return this;
-//		}
-		
 		/**
 		 * Sets the {@link GUIAction} listener for this GUI<br>
 		 * If there's already a listener registered, it will be overridden
@@ -115,6 +100,17 @@ public class GUIUtils {
 		 */
 		public GUIBuilder setDragDropListener(GUIDragDropListener dragDrop) {
 			this.dragDrop = dragDrop;
+			return this;
+		}
+		
+		/**
+		 * Sets the {@link GUIClosedListener} for this GUI<br>
+		 * If there's already a listener registered, it will be overridden
+		 * @param closed The listener to use
+		 * @return This GUIBuilder instance
+		 */
+		public GUIBuilder setClosedListener(GUIClosedListener closed) {
+			this.closed = closed;
 			return this;
 		}
 		
@@ -230,12 +226,6 @@ public class GUIUtils {
 			return this;
 		}
 		
-//		@Override
-//		public GUIBuilderMultiPage<T> addElement(int slot, Function<GUIBuildEvent, ItemStack> e) {
-//			super.addElement(slot, e);
-//			return this;
-//		}
-		
 		@Override
 		public GUIBuilderMultiPage<T> setActionListener(GUIAction a) {
 			super.setActionListener(a);
@@ -324,22 +314,6 @@ public class GUIUtils {
 			return this;
 		}
 		
-//		/**
-//		 * Convenience version of {@link #setAction(GUIElementAction)}
-//		 * @param a The action to be called
-//		 * @return This GUIElement instance
-//		 */
-//		public GUIElement setAction(Consumer<GUIElementActionEvent> a) {
-//			this.action = new GUIElementAction() {
-//				
-//				@Override
-//				public void onAction(GUIElementActionEvent event) {
-//					a.accept(event);
-//				}
-//			};
-//			return this;
-//		}
-		
 	}
 	
 	public static class StaticGUIElement extends GUIElement{
@@ -360,12 +334,6 @@ public class GUIUtils {
 			super.setAction(a);
 			return this;
 		}
-		
-//		@Override
-//		public StaticGUIElement setAction(Consumer<GUIElementActionEvent> a) {
-//			super.setAction(a);
-//			return this;
-//		}
 		
 	}
 
@@ -446,6 +414,13 @@ public class GUIUtils {
 	public static interface GUIDragDropListener {
 		
 		public void onDragDrop(GUIDragDropEvent event);
+		
+	}
+	
+	@FunctionalInterface
+	public static interface GUIClosedListener {
+		
+		public void onClosed(GUIClosedEvent event);
 		
 	}
 	
@@ -611,6 +586,41 @@ public class GUIUtils {
 		
 		public GUI getGUI() {
 			return holder.gui;
+		}
+		
+	}
+	
+	public static class GUIClosedEvent {
+		
+		private GUIHolder holder;
+		private Player player;
+		private Inventory inv;
+		private boolean cancelled;
+		
+		public GUIClosedEvent(GUIHolder holder, Player player, Inventory inv) {
+			this.holder = holder;
+			this.player = player;
+			this.inv = inv;
+		}
+		
+		public GUIHolder getHolder() {
+			return holder;
+		}
+		
+		public Player getPlayer() {
+			return player;
+		}
+		
+		public Inventory getInventory() {
+			return inv;
+		}
+		
+		public boolean isCancelled() {
+			return cancelled;
+		}
+		
+		public void setCancelled(boolean cancelled) {
+			this.cancelled = cancelled;
 		}
 		
 	}
@@ -986,6 +996,21 @@ public class GUIUtils {
 					}else {
 						e.setCancelled(true);
 					}
+				}
+			}
+		}
+		
+		@EventHandler
+		public void onInvClose(InventoryCloseEvent e) {
+			Inventory inv = e.getInventory();
+			Player player = (Player) e.getPlayer();
+			if(inv.getHolder() instanceof GUIHolder) {
+				GUIHolder holder = (GUIHolder) inv.getHolder();
+				GUI gui = holder.gui;
+				if(gui.builder.closed != null) {
+					GUIClosedEvent ev = new GUIClosedEvent(holder, player, inv);
+					gui.builder.closed.onClosed(ev);
+					if(ev.isCancelled()) player.openInventory(inv);
 				}
 			}
 		}
