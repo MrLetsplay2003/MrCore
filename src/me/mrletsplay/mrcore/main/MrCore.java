@@ -25,7 +25,7 @@ public class MrCore {
 	 * shift click (gui)
 	 */
 	
-	private static final String VERSION = "1.9.5";
+	private static final String VERSION = "1.9.6";
 	
 	public static String getVersion() {
 		return VERSION;
