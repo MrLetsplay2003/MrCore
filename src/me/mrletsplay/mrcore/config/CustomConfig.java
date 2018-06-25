@@ -436,7 +436,7 @@ public class CustomConfig {
 					break;
 				case PROPERTY:
 					if(tmpComment != null) {
-						setComment(line.getKey(), tmpComment.stream().collect(Collectors.joining("\n")));
+						section.setComment(line.getKey(), tmpComment.stream().collect(Collectors.joining("\n")));
 						tmpComment = null;
 					}
 					section.set(line.getKey(), formatter.formatObject(loadValue(line.value, reader)).toProperty());
