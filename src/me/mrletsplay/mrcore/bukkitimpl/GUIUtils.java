@@ -1010,7 +1010,11 @@ public class GUIUtils {
 				if(gui.builder.closed != null) {
 					GUIClosedEvent ev = new GUIClosedEvent(holder, player, inv);
 					gui.builder.closed.onClosed(ev);
-					if(ev.isCancelled()) player.openInventory(inv);
+					if(ev.isCancelled()) {
+						Bukkit.getScheduler().runTaskLater(MrCorePlugin.pl, () -> {
+							player.openInventory(inv);
+						}, 1);
+					}
 				}
 			}
 		}
