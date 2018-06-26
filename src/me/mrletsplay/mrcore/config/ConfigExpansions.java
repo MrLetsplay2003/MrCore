@@ -120,6 +120,10 @@ public class ConfigExpansions {
 				this.config = config;
 			}
 			
+			public Class<T> getMappingClass() {
+				return mappingClass;
+			}
+			
 			public int getPriority() {
 				return priority;
 			}

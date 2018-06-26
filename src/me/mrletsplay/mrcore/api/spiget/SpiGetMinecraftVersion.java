@@ -1,4 +1,4 @@
-package me.mrletsplay.mrcore.spiget;
+package me.mrletsplay.mrcore.api.spiget;
 
 import java.util.Arrays;
 

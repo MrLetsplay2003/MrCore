@@ -1,4 +1,4 @@
-package me.mrletsplay.mrcore.bukkitapi;
+package me.mrletsplay.mrcore.api.bukkit;
 
 import me.mrletsplay.mrcore.misc.JSON.JSONObject;
 

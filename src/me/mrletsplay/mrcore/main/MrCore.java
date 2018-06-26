@@ -21,6 +21,7 @@ public class MrCore {
 	 * - Maven dep plugin
 	 * - HTTP
 	 * - "Popup dialogs" for GUIs
+	 * - CompressedInput/-OutputStream
 	 * 
 	 * shift click (gui)
 	 */

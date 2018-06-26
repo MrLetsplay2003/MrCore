@@ -1,7 +1,6 @@
-package me.mrletsplay.mrcore.spiget;
+package me.mrletsplay.mrcore.api.bukkit;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -15,21 +14,25 @@ import me.mrletsplay.mrcore.misc.JSON.JSONArray;
 import me.mrletsplay.mrcore.misc.JSON.JSONObject;
 import me.mrletsplay.mrcore.misc.OtherTools.FriendlyException;
 
-public class SpiGet {
+public class BukkitAPI {
+	
+	private static final String
+		PROJECTS_URL = "https://api.curseforge.com/servermods/projects?search=",
+		FILES_URL = "https://api.curseforge.com/servermods/files?projectIds=";
 
-	public static final String API_BASE_URL = "https://api.spiget.org/v2/";
-	
-	public static List<SpiGetResource.Search> searchResource(String query) {
-		return new JSONArray(makeRequest(API_BASE_URL + "search/resources/" + urlEncode(query) + "?size=1000&field=name")).stream()
-			.map(res -> new SpiGetResource.Search((JSONObject) res))
-			.collect(Collectors.toList());
+	public static List<BukkitResource> searchResource(String query) {
+		return new JSONArray(makeRequest(PROJECTS_URL + urlEncode(query))).stream()
+				.map(r -> new BukkitResource((JSONObject) r))
+				.collect(Collectors.toList());
 	}
 	
-	public static SpiGetResource getResource(int resourceID) {
-		return new SpiGetResource(new JSONObject(makeRequest(API_BASE_URL + "resources/" + resourceID)));
+	public static BukkitFile getBukkitFile(int projectId) {
+		return new JSONArray(makeRequest(FILES_URL + projectId)).stream()
+				.map(r -> new BukkitFile((JSONObject) r))
+				.collect(Collectors.toList()).get(0);
 	}
 	
-	protected static String urlEncode(String str) {
+	private static String urlEncode(String str) {
 		try {
 			return URLEncoder.encode(str, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
@@ -37,7 +40,7 @@ public class SpiGet {
 		}
 	}
 	
-	protected static String makeRequest(String url) {
+	private static String makeRequest(String url) {
 		try {
 			InputStream stream = HttpUtils.httpGet(new URL(url));
 			byte[] buf = new byte[4096];
@@ -48,8 +51,6 @@ public class SpiGet {
 			}
 			String response = new String(out.toByteArray());
 			return response;
-		} catch (FileNotFoundException e) { // HTTP 404
-			return null;
 		} catch (IOException e) {
 			throw new FriendlyException(e);
 		}
