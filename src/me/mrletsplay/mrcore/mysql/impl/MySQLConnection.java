@@ -1,5 +1,6 @@
 package me.mrletsplay.mrcore.mysql.impl;
 
+import me.mrletsplay.mrcore.mysql.impl.statement.PreparedStatement;
 import me.mrletsplay.mrcore.mysql.protocol.MySQLServerConnection;
 
 public class MySQLConnection {
@@ -16,6 +17,10 @@ public class MySQLConnection {
 	
 	public ResultSet query(String query) {
 		return serverConnection.query(query);
+	}
+	
+	public PreparedStatement prepareStatement(String query) {
+		return serverConnection.prepareStatement(query);
 	}
 	
 	public void disconnect() {
