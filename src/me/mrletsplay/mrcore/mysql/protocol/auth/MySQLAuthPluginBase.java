@@ -12,4 +12,6 @@ public interface MySQLAuthPluginBase {
 
 	public MySQLAuthPlugin getType();
 	
+	public String getName();
+	
 }

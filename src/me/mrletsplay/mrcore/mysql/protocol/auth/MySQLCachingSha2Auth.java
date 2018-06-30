@@ -149,4 +149,9 @@ public class MySQLCachingSha2Auth implements MySQLAuthPluginBase {
 		return MySQLAuthPlugin.CACHING_SHA2_PASSWORD;
 	}
 
+	@Override
+	public String getName() {
+		return "caching_sha2_password";
+	}
+
 }

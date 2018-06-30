@@ -28,7 +28,8 @@ public class MySQLResultSetPacket implements MySQLTextPacket {
 		resultSetRows = new ArrayList<>();
 		while(con.hasData()) {
 			RawPacket raw = con.readPacket();
-			if(raw.getServerPacketType().equals(MySQLServerPacketType.OK)) break; // No more rows
+//			if(raw.getServerPacketType().equals(MySQLServerPacketType.OK)) break; // No more rows
+			if(raw.getServerPacketType().equals(MySQLServerPacketType.OK)) continue;
 			resultSetRows.add(raw.parseTextPacket(con, MySQLResultSetRowPacket.class, command));
 		}
 	}
