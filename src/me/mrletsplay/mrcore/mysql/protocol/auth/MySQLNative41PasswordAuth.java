@@ -40,4 +40,9 @@ public class MySQLNative41PasswordAuth implements MySQLAuthPluginBase {
 		return MySQLAuthPlugin.MYSQL_NATIVE_PASSWORD;
 	}
 
+	@Override
+	public String getName() {
+		return "mysql_native_password";
+	}
+
 }
