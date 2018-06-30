@@ -311,6 +311,17 @@ public class MySQLServerConnection {
 		}
 	}
 	
+	public void closeStatement(PreparedStatement statement) {
+		try {
+			ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+			MySQLWriter w = new MySQLWriter(bOut);
+			w.write(MySQLCommand.COM_STMT_CLOSE);
+			w.writeFixedLengthInteger(4, statement.getID());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 	public void selectSchema(String schemaName) {
 		try {
 			ByteArrayOutputStream bOut = new ByteArrayOutputStream();

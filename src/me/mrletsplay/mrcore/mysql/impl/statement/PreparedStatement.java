@@ -37,4 +37,8 @@ public class PreparedStatement {
 		return definingPacket.getConnection().executeStatement(this);
 	}
 	
+	public void close() {
+		definingPacket.getConnection().closeStatement(this);
+	}
+	
 }

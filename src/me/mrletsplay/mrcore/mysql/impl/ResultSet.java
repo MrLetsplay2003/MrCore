@@ -49,6 +49,10 @@ public class ResultSet {
 		return rows;
 	}
 	
+	public boolean isEmpty() {
+		return rows.length == 0;
+	}
+	
 	@Override
 	public String toString() {
 		return Arrays.stream(rows).map(r -> r.toString()).collect(Collectors.joining("\n"));

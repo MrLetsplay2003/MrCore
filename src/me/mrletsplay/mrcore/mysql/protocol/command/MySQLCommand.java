@@ -25,6 +25,7 @@ public class MySQLCommand {
 			COM_DAEMON = 0x1d,
 			
 			COM_STMT_PREPARE = 0x16,
-			COM_STMT_EXECUTE = 0x17;
+			COM_STMT_EXECUTE = 0x17,
+			COM_STMT_CLOSE = 0x19;
 	
 }
