@@ -58,7 +58,6 @@ public class MySQLServerConnection {
 	private byte[] authPluginData;
 	private FlagCompound serverCapabilityFlags, clientCapabilityFlags, commonCapabilityFlags;
 	private byte charSet;
-//	private FlagCompound statusFlags;
 	private MySQLString authPluginName;
 	private String username, database;
 	private MySQLAuthPluginBase authPlugin;
@@ -88,7 +87,6 @@ public class MySQLServerConnection {
 			serverCapabilityFlags = new FlagCompound((short) hReader.readFixedLengthInteger(2));
 			if(hReader.hasMore()) {
 				charSet = (byte) hReader.read();
-//				statusFlags = new FlagCompound((short) hReader.readFixedLengthInteger(2));
 				hReader.read(2); // Status flags
 				serverCapabilityFlags.setCompound(serverCapabilityFlags.getCompound() | (hReader.readFixedLengthInteger(2) << 16));
 				byte authLength = (byte) hReader.read(); // No check for capability flag
@@ -135,7 +133,7 @@ public class MySQLServerConnection {
 		}
 		
 		if(commonCapabilityFlags.hasFlag(MySQLCapabilityFlag.CLIENT_PLUGIN_AUTH)) {
-			writer.writeNullTerminatedString(new MySQLString("caching_sha2_password"));
+			writer.writeNullTerminatedString(new MySQLString(authPlugin.getName()));
 		}
 		if(commonCapabilityFlags.hasFlag(MySQLCapabilityFlag.CLIENT_CONNECT_ATTRS)) {
 			// Keys, values etc.
@@ -252,7 +250,10 @@ public class MySQLServerConnection {
 			w.writeString(new MySQLString(query));
 			sendPacket(RawPacket.of(bOut.toByteArray()));
 			RawPacket raw = readPacket();
-			if(raw.getServerPacketType().equals(MySQLServerPacketType.OK)) return null; // No further data
+			if(raw.getServerPacketType().equals(MySQLServerPacketType.OK)) {
+				newLifecycle();
+				return null; // No further data
+			}
 			if(raw.getServerPacketType().equals(MySQLServerPacketType.ERR)) throw new RuntimeException(((MySQLERRPacket) raw.parseServerPacket(this)).getErrorMessage().toString()); // No further data
 			MySQLResultSetPacket packet = raw.parseTextPacket(this, MySQLResultSetPacket.class, MySQLCommand.COM_QUERY);
 			newLifecycle();
