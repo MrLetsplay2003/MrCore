@@ -31,11 +31,9 @@ public class MySQLPrepareStatementResponsePacket implements MySQLTextPacket {
 		for(int i = 0; i < paramCount; i++) {
 			paramDefinitions.add(con.readPacket().parseTextPacket(con, MySQLColumnDefinition41Packet.class, command));
 		}
-		System.out.println(paramDefinitions);
 		for(int i = 0; i < columnCount; i++) {
 			columnDefinitions.add(con.readPacket().parseTextPacket(con, MySQLColumnDefinition41Packet.class, command));
 		}
-		System.out.println(columnDefinitions.get(0).getName());
 	}
 	
 	@Override

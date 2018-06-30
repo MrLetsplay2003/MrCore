@@ -1,7 +1,5 @@
 package me.mrletsplay.mrcore.mysql.impl.statement;
 
-import org.omg.CORBA.DefinitionKind;
-
 import me.mrletsplay.mrcore.mysql.impl.ResultSet;
 import me.mrletsplay.mrcore.mysql.protocol.packet.text.MySQLPrepareStatementResponsePacket;
 
