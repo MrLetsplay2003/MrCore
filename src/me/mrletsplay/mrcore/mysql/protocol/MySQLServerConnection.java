@@ -6,9 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Arrays;
-
-import javax.naming.spi.DirStateFactory.Result;
 
 import me.mrletsplay.mrcore.mysql.impl.ResultSet;
 import me.mrletsplay.mrcore.mysql.impl.statement.PreparedStatement;
@@ -304,27 +301,11 @@ public class MySQLServerConnection {
 				for(StatementParameter p : statement.getParameters()) {
 					if(p.getValue() != null) w.writeLengthEncodedString(p.getFormattedValue());
 				}
-				
-//				for(StatementParameter p : statement.getParameters()) {
-//					w.write(p.getDataType().getSQLIdentifier());
-//					w.write(0x80); // Flag byte
-//					if(p.getValue() != null) w.write(p.getFormattedValue().getBytes());
-//				}
-//				for(StatementParameter p : statement.getParameters()) {
-//					if(p.getValue() == null) continue;
-//					w.write(p.getDataType().getSQLIdentifier());
-//					w.write(0x80); // Flag byte
-//					w.write(p.getFormattedValue().getBytes());
-//				}
 			}
-			System.out.println(bOut.toString());
 			sendPacket(RawPacket.of(bOut.toByteArray()));
 			MySQLResultSetBinaryPacket raw = readPacket().parseBinaryPacket(this, MySQLResultSetBinaryPacket.class, MySQLCommand.COM_STMT_EXECUTE);
-			System.out.println(raw.getResultSetRows());
-			System.out.println(Arrays.toString(raw.getPayload()));
-			System.out.println(new String(raw.getPayload()));
 			newLifecycle();
-			return null;
+			return new ResultSet(raw);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

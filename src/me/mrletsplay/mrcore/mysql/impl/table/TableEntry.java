@@ -6,25 +6,29 @@ import me.mrletsplay.mrcore.mysql.protocol.type.MySQLString;
 public class TableEntry {
 
 	private MySQLDataType<?> type;
-	private MySQLString raw;
 	private Object parsed;
 	
 	public TableEntry(MySQLDataType<?> type, MySQLString raw) {
 		this.type = type;
-		this.raw = raw;
 		this.parsed = type.parse(raw);
+	}
+	
+	public TableEntry(MySQLDataType<?> type, Object parsed) {
+		this.type = type;
+		this.parsed = parsed;
 	}
 	
 	public MySQLDataType<?> getType() {
 		return type;
 	}
 	
-	public MySQLString getRaw() {
-		return raw;
+	public Object getValue() {
+		return parsed;
 	}
 	
-	public Object getParsed() {
-		return parsed;
+	@Override
+	public String toString() {
+		return parsed == null ? "null" : parsed.toString();
 	}
 	
 }

@@ -1,5 +1,9 @@
 package me.mrletsplay.mrcore.mysql.impl.table;
 
+import java.util.Arrays;
+
+import me.mrletsplay.mrcore.mysql.protocol.packet.MySQLBasePacket;
+import me.mrletsplay.mrcore.mysql.protocol.packet.binary.MySQLResultSetRowBinaryPacket;
 import me.mrletsplay.mrcore.mysql.protocol.packet.text.MySQLResultSetRowPacket;
 import me.mrletsplay.mrcore.mysql.protocol.type.MySQLDataType;
 
@@ -8,9 +12,18 @@ public class TableRow {
 	private TableColumn[] columns;
 	private TableEntry[] entries;
 	
-	private MySQLResultSetRowPacket definingPacket;
+	private MySQLBasePacket definingPacket;
 	
 	public TableRow(TableColumn[] columns, MySQLResultSetRowPacket fromPacket) {
+		this.columns = columns;
+		this.definingPacket = fromPacket;
+		entries = new TableEntry[columns.length];
+		for(int i = 0; i < columns.length; i++) {
+			entries[i] = new TableEntry(columns[i].getColumnType(), fromPacket.getEncodedData().get(i));
+		}
+	}
+	
+	public TableRow(TableColumn[] columns, MySQLResultSetRowBinaryPacket fromPacket) {
 		this.columns = columns;
 		this.definingPacket = fromPacket;
 		entries = new TableEntry[columns.length];
@@ -51,8 +64,13 @@ public class TableRow {
 		throw new RuntimeException("Invalid column \"" + columnName + "\" specified");
 	}
 	
-	public MySQLResultSetRowPacket getDefiningPacket() {
+	public MySQLBasePacket getDefiningPacket() {
 		return definingPacket;
+	}
+	
+	@Override
+	public String toString() {
+		return Arrays.toString(entries);
 	}
 	
 }
