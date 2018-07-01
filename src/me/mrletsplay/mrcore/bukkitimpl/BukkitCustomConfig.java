@@ -71,7 +71,7 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 			@Override
 			public Map<String, Object> mapObject(Location loc) {
 				HashMap<String, Object> map = new HashMap<>();
-				map.put("world", loc.getWorld().getName());
+				map.put("world", loc.getWorld() != null ? loc.getWorld().getName() : null);
 				map.put("x", loc.getX());
 				map.put("y", loc.getY());
 				map.put("z", loc.getZ());

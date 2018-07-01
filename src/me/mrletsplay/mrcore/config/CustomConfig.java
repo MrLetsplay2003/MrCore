@@ -703,7 +703,7 @@ public class CustomConfig {
 	 * @param save Whether this config should be saved
 	 * @param props The saveProperties to be used when saving the config (See {@link #saveConfig(List)})
 	 */
-	public void set(String key, Object val, boolean save, List<ConfigSaveProperty> props) { // TODO
+	public void set(String key, Object val, boolean save, List<ConfigSaveProperty> props) { //TODO
 		FormattedProperty fProp = formatter.formatObject(val);
 		parentSection.set(key, fProp.toProperty());
 		if(save) try {
