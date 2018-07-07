@@ -23,6 +23,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import me.mrletsplay.mrcore.misc.Complex;
+import me.mrletsplay.mrcore.misc.Complex.ComplexList;
+import me.mrletsplay.mrcore.misc.Complex.ComplexMap;
+import me.mrletsplay.mrcore.misc.Complex.ComplexValue;
+
 /**
  * - This is a config format based on two HashMaps, one for the properties and one for the comments<br>
  * - The file formatting is based on YAML, but is easier to read/edit for humans as it supports UTF-8 encoding, so you don't need to escape special characters<br>
@@ -1111,12 +1116,6 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public Map<String, Object> getMap(String key, Map<String, Object> defaultVal, boolean applyDefault) {
-//		Property p = parentSection.get(key);
-//		if(p!=null && p.getType().equals(PropertyType.MAP)) {
-//			return (Map<String, Object>) p.getValue();
-//		}
-//		if(applyDefault) set(key, defaultVal, false);
-//		return defaultVal;
 		return getGenericMap(key, Object.class, defaultVal, applyDefault);
 	}
 	
@@ -1141,7 +1140,7 @@ public class CustomConfig {
 	public <T> List<T> getGenericList(String key, Class<T> clazz) {
 		Property prop = parentSection.get(key);
 		if(prop == null) return null;
-		if(!prop.type.equals(PropertyType.LIST)) throw new InvalidTypeException(key, "Invalid property type"+prop.type);
+		if(!prop.type.equals(PropertyType.LIST)) throw new InvalidTypeException(key, "Invalid property type "+prop.type);
 		try {
 			return castGenericList((List<?>) prop.value, clazz);
 		}catch(Exception e) {
@@ -1159,7 +1158,6 @@ public class CustomConfig {
 	public <T> Map<String, T> getGenericMap(String key, Class<T> clazz) {
 		ConfigSection sec = parentSection.getSubsection(key);
 		if(sec == null) return null;
-//		if(!prop.type.equals(PropertyType.MAP)) throw new InvalidTypeException(key, "Invalid property type"+prop.type);
 		try {
 			return castGenericMap(sec.toMap(), clazz);
 		}catch(Exception e) {
@@ -1172,6 +1170,88 @@ public class CustomConfig {
 		if(obj != null) return obj;
 		if(applyDefault) set(key, defaultVal);
 		return defaultVal;
+	}
+	
+	public <T> T getComplex(String key, Complex<T> complex) {
+		return getComplex(key, complex, null, false);
+	}
+	
+	public <T> T getComplex(String key, Complex<T> complex, T defaultVal, boolean applyDefault) {
+		try {
+			if(complex instanceof ComplexMap) {
+				Map<?,?> o = getMap(key);
+				if(o == null) {
+					if(applyDefault) set(key, defaultVal);
+					return defaultVal;
+				}
+				return castComplex(o, complex);
+			}else {
+				Object o = get(key);
+				if(o == null) {
+					if(applyDefault) set(key, defaultVal);
+					return defaultVal;
+				}
+				return castComplex(o, complex);
+			}
+		}catch(Exception e) {
+			throw new InvalidTypeException(key, "Failed to cast (complex) type", e);
+		}
+	}
+	
+	public <T> List<T> getComplexList(String key, ComplexList<T> complex) {
+		return getComplexList(key, complex, new ArrayList<>(), false);
+	}
+	
+	public <T> List<T> getComplexList(String key, ComplexList<T> complex, List<T> defaultVal, boolean applyDefault) {
+		Property prop = parentSection.get(key);
+		if(prop == null) {
+			if(applyDefault) set(key, defaultVal);
+			return defaultVal;
+		}
+		if(!prop.type.equals(PropertyType.LIST)) throw new InvalidTypeException(key, "Invalid property type "+prop.type);
+		try {
+			return castComplexList((List<?>) prop.value, complex);
+		}catch(Exception e) {
+			throw new InvalidTypeException(key, "Failed to cast type", e);
+		}
+	}
+	
+	public <V> Map<String, V> getComplexMap(String key, ComplexMap<String, V> complex) {
+		return getComplexMap(key, complex, new HashMap<>(), false);
+	}
+	
+	public <V> Map<String, V> getComplexMap(String key, ComplexMap<String, V> complex, Map<String, V> defaultVal, boolean applyDefault) {
+		ConfigSection sec = parentSection.getSubsection(key);
+		if(sec == null) {
+			if(applyDefault) set(key, defaultVal);
+			return defaultVal;
+		}
+		try {
+			return castComplexMap(sec.toMap(), complex);
+		}catch(Exception e) {
+			throw new InvalidTypeException(key, "Failed to cast type", e);
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T> T castComplex(Object o, Complex<T> complex) {
+		if(complex instanceof ComplexValue) {
+			return castGeneric(o, ((ComplexValue<T>) complex).getTypeClass());
+		}else if(complex instanceof ComplexList) {
+			return (T) castComplexList((List<?>) o, (ComplexList<?>) complex);
+		}else if(complex instanceof ComplexMap) {
+			return (T) castComplexMap((Map<String, ?>) o, (ComplexMap<String, ?>) complex);
+		}else {
+			throw new UnsupportedOperationException("Unknown implementation of Complex<T>: " + complex.getClass());
+		}
+	}
+	
+	public <T> List<T> castComplexList(List<?> list, ComplexList<T> complex) {
+		return list.stream().map(o -> castComplex(o, complex.getType())).collect(Collectors.toList());
+	}
+	
+	public <V> Map<String, V> castComplexMap(Map<String, ?> map, ComplexMap<String, V> complex) {
+		return map.entrySet().stream().collect(Collectors.toMap(en -> en.getKey(), en -> castComplex(en.getValue(), complex.getValueType())));
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -1201,8 +1281,7 @@ public class CustomConfig {
 	
 	public <T> Map<String, T> castGenericMap(Map<String, ?> map, Class<T> clazz) {
 		return map.entrySet().stream()
-				.map(e -> new AbstractMap.SimpleEntry<>(e.getKey(), castGeneric(e.getValue(), clazz)))
-				.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+				.collect(Collectors.toMap(e -> e.getKey(), e -> castGeneric(e.getValue(), clazz)));
 	}
 
 	/**
