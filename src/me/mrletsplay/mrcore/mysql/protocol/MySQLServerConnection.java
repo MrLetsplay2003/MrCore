@@ -10,6 +10,7 @@ import java.net.Socket;
 import me.mrletsplay.mrcore.mysql.impl.ResultSet;
 import me.mrletsplay.mrcore.mysql.impl.statement.PreparedStatement;
 import me.mrletsplay.mrcore.mysql.impl.statement.StatementParameter;
+import me.mrletsplay.mrcore.mysql.impl.table.TableColumn;
 import me.mrletsplay.mrcore.mysql.protocol.auth.MySQLAuthPlugin;
 import me.mrletsplay.mrcore.mysql.protocol.auth.MySQLAuthPluginBase;
 import me.mrletsplay.mrcore.mysql.protocol.command.MySQLCommand;
@@ -321,6 +322,10 @@ public class MySQLServerConnection {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	public void createSimpleTable(String name, TableColumn... columns) {
+		
 	}
 	
 	public void selectSchema(String schemaName) {
