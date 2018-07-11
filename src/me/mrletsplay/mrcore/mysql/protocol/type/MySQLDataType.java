@@ -7,6 +7,7 @@ import me.mrletsplay.mrcore.mysql.protocol.io.MySQLReader;
 
 public class MySQLDataType<T> {
 
+	private String name;
 	private byte identifier;
 	private Class<T> javaType;
 	private Function<MySQLString, T> parsingFunction;
@@ -21,7 +22,8 @@ public class MySQLDataType<T> {
 //		MySQLDataTypes.DEFAULT_TYPES.add(this);
 //	}
 	
-	public MySQLDataType(int identifier, Class<T> javaType, Function<MySQLString, T> parsingFunction, Function<T, String> formattingFunction, UnsafeFunction<MySQLReader, T> readingFunction) {
+	public MySQLDataType(String name, int identifier, Class<T> javaType, Function<MySQLString, T> parsingFunction, Function<T, String> formattingFunction, UnsafeFunction<MySQLReader, T> readingFunction) {
+		this.name = name;
 		this.identifier = (byte) identifier;
 		this.javaType = javaType;
 		this.parsingFunction = parsingFunction;
@@ -30,8 +32,12 @@ public class MySQLDataType<T> {
 		MySQLDataTypes.DEFAULT_TYPES.add(this);
 	}
 	
-	public MySQLDataType(int identifier, Class<T> javaType, Function<MySQLString, T> parsingFunction, Function<T, String> formattingFunction) {
-		this(identifier, javaType, parsingFunction, formattingFunction, null);
+	public MySQLDataType(String name, int identifier, Class<T> javaType, Function<MySQLString, T> parsingFunction, Function<T, String> formattingFunction) {
+		this(name, identifier, javaType, parsingFunction, formattingFunction, null);
+	}
+	
+	public String getName() {
+		return name;
 	}
 	
 	public byte getSQLIdentifier() {
