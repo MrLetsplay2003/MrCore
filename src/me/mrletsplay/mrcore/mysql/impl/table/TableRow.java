@@ -2,6 +2,7 @@ package me.mrletsplay.mrcore.mysql.impl.table;
 
 import java.util.Arrays;
 
+import me.mrletsplay.mrcore.mysql.impl.ResultSet;
 import me.mrletsplay.mrcore.mysql.protocol.packet.MySQLBasePacket;
 import me.mrletsplay.mrcore.mysql.protocol.packet.binary.MySQLResultSetRowBinaryPacket;
 import me.mrletsplay.mrcore.mysql.protocol.packet.text.MySQLResultSetRowPacket;
@@ -9,26 +10,26 @@ import me.mrletsplay.mrcore.mysql.protocol.type.MySQLDataType;
 
 public class TableRow {
 
-	private TableColumn[] columns;
+	private ResultSet resultSet;
 	private TableEntry[] entries;
 	
 	private MySQLBasePacket definingPacket;
 	
-	public TableRow(TableColumn[] columns, MySQLResultSetRowPacket fromPacket) {
-		this.columns = columns;
+	public TableRow(ResultSet resultSet, MySQLResultSetRowPacket fromPacket) {
+		this.resultSet = resultSet;
 		this.definingPacket = fromPacket;
-		entries = new TableEntry[columns.length];
-		for(int i = 0; i < columns.length; i++) {
-			entries[i] = new TableEntry(columns[i].getColumnType(), fromPacket.getEncodedData().get(i));
+		entries = new TableEntry[resultSet.getColumns().length];
+		for(int i = 0; i < resultSet.getColumns().length; i++) {
+			entries[i] = new TableEntry(resultSet.getColumn(i).getDefinition().getColumnType(), fromPacket.getEncodedData().get(i));
 		}
 	}
 	
-	public TableRow(TableColumn[] columns, MySQLResultSetRowBinaryPacket fromPacket) {
-		this.columns = columns;
+	public TableRow(ResultSet resultSet, MySQLResultSetRowBinaryPacket fromPacket) {
+		this.resultSet = resultSet;
 		this.definingPacket = fromPacket;
-		entries = new TableEntry[columns.length];
-		for(int i = 0; i < columns.length; i++) {
-			entries[i] = new TableEntry(columns[i].getColumnType(), fromPacket.getEncodedData().get(i));
+		entries = new TableEntry[resultSet.getColumns().length];
+		for(int i = 0; i < resultSet.getColumns().length; i++) {
+			entries[i] = new TableEntry(resultSet.getColumn(i).getDefinition().getColumnType(), fromPacket.getEncodedData().get(i));
 		}
 	}
 	
@@ -41,8 +42,8 @@ public class TableRow {
 	}
 	
 	public TableEntry getEntry(String columnName) {
-		for(int i = 0; i < columns.length; i++) {
-			if(columns[i].getPhysicalName().toString().equals(columnName)) {
+		for(int i = 0; i < resultSet.getColumns().length; i++) {
+			if(resultSet.getColumn(i).getDefinition().getPhysicalName().toString().equals(columnName)) {
 				return entries[i];
 			}
 		}
@@ -50,14 +51,14 @@ public class TableRow {
 	}
 	
 	public <T> T getEntry(int index, MySQLDataType<T> type) {
-		if(!columns[index].getColumnType().equals(type)) throw new RuntimeException("Invalid type");
+		if(!resultSet.getColumn(index).getDefinition().getColumnType().equals(type)) throw new RuntimeException("Invalid type");
 		return type.getJavaType().cast(entries[index]);
 	}
 	
 	public <T> T getEntry(String columnName, MySQLDataType<T> type) {
-		for(int i = 0; i < columns.length; i++) {
-			if(columns[i].getPhysicalName().toString().equals(columnName)) {
-				if(!columns[i].getColumnType().equals(type)) throw new RuntimeException("Invalid type");
+		for(int i = 0; i < resultSet.getColumns().length; i++) {
+			if(resultSet.getColumn(i).getDefinition().getPhysicalName().toString().equals(columnName)) {
+				if(!resultSet.getColumn(i).getDefinition().getColumnType().equals(type)) throw new RuntimeException("Invalid type");
 				return type.getJavaType().cast(entries[i]);
 			}
 		}
