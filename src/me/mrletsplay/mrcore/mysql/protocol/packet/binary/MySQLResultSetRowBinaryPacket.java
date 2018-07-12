@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.mrletsplay.mrcore.mysql.impl.table.TableColumn;
+import me.mrletsplay.mrcore.mysql.impl.table.ColumnDefinition;
 import me.mrletsplay.mrcore.mysql.protocol.MySQLServerConnection;
 import me.mrletsplay.mrcore.mysql.protocol.io.MySQLReader;
 import me.mrletsplay.mrcore.mysql.protocol.misc.NullBitmap;
@@ -15,7 +15,7 @@ public class MySQLResultSetRowBinaryPacket implements MySQLBinaryPacket {
 	private byte[] payload;
 	private List<Object> encodedData;
 	
-	public MySQLResultSetRowBinaryPacket(MySQLServerConnection con, byte[] payload, int command, TableColumn[] columns) throws IOException {
+	public MySQLResultSetRowBinaryPacket(MySQLServerConnection con, byte[] payload, int command, ColumnDefinition[] columns) throws IOException {
 		this.payload = payload;
 		MySQLReader r = new MySQLReader(new ByteArrayInputStream(payload));
 		r.read(); // Packet header

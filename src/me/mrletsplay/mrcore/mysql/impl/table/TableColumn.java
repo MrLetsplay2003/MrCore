@@ -1,68 +1,42 @@
 package me.mrletsplay.mrcore.mysql.impl.table;
 
-import me.mrletsplay.mrcore.mysql.protocol.packet.text.MySQLColumnDefinition41Packet;
+import me.mrletsplay.mrcore.mysql.impl.ResultSet;
 import me.mrletsplay.mrcore.mysql.protocol.type.MySQLDataType;
-import me.mrletsplay.mrcore.mysql.protocol.type.MySQLDataTypes;
-import me.mrletsplay.mrcore.mysql.protocol.type.MySQLString;
 
 public class TableColumn {
 
-	private MySQLString
-		schema,
-		table,
-		orgTable,
-		name,
-		orgName;
+	private ResultSet resultSet;
 	
-	private short
-		charSet;
+	private ColumnDefinition definition;
+	private int columnIndex;
 	
-	private MySQLDataType<?>
-		columnType;
-	
-	private MySQLColumnDefinition41Packet definingPacket;
-	
-	public TableColumn(MySQLColumnDefinition41Packet fromPacket) {
-		this.definingPacket = fromPacket;
-		this.schema = fromPacket.getSchema();
-		this.table = fromPacket.getTable();
-		this.orgTable = fromPacket.getOrgTable();
-		this.name = fromPacket.getName();
-		this.orgName = fromPacket.getOrgName();
-		this.charSet = fromPacket.getCharSet();
-		this.columnType = MySQLDataTypes.getTypeById(fromPacket.getColumnType());
+	public TableColumn(ResultSet resultSet, ColumnDefinition definition, int columnIndex) {
+		this.resultSet = resultSet;
+		this.definition = definition;
+		this.columnIndex = columnIndex;
 	}
 	
-	public MySQLString getSchema() {
-		return schema;
+	public ResultSet getResultSet() {
+		return resultSet;
 	}
 	
-	public MySQLString getVirtualTableName() {
-		return table;
+	public ColumnDefinition getDefinition() {
+		return definition;
 	}
 	
-	public MySQLString getPhysicalTableName() {
-		return orgTable;
+	public TableEntry[] getEntries() {
+		TableEntry[] entries = new TableEntry[resultSet.getRows().length];
+		for(int i = 0; i < resultSet.getRows().length; i++) entries[i] = resultSet.getRows()[i].getEntry(columnIndex);
+		return entries;
 	}
 	
-	public MySQLString getVirtualName() {
-		return name;
+	public TableEntry getEntry(int index) {
+		return resultSet.getRows()[index].getEntry(columnIndex);
 	}
 	
-	public MySQLString getPhysicalName() {
-		return orgName;
-	}
-	
-	public short getCharSet() {
-		return charSet;
-	}
-	
-	public MySQLDataType<?> getColumnType() {
-		return columnType;
-	}
-	
-	public MySQLColumnDefinition41Packet getDefiningPacket() {
-		return definingPacket;
+	public <T> T getEntry(int index, MySQLDataType<T> type) {
+		if(!definition.getColumnType().equals(type)) throw new RuntimeException("Invalid type");
+		return type.getJavaType().cast(getEntry(index));
 	}
 	
 }

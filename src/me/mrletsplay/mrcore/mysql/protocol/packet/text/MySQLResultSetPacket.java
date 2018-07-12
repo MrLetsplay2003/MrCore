@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.mrletsplay.mrcore.mysql.impl.table.ColumnDefinition;
 import me.mrletsplay.mrcore.mysql.protocol.MySQLServerConnection;
 import me.mrletsplay.mrcore.mysql.protocol.io.MySQLReader;
 import me.mrletsplay.mrcore.mysql.protocol.io.RawPacket;
@@ -14,23 +15,24 @@ public class MySQLResultSetPacket implements MySQLTextPacket {
 
 	private byte[] payload;
 	private int columnCount;
-	private List<MySQLColumnDefinition41Packet> columnDefinitions;
-	private List<MySQLResultSetRowPacket> resultSetRows;
+	private ColumnDefinition[] columnDefinitions;
+	private List<MySQLColumnDefinition41Packet> columnDefinitionPackets;
+	private List<MySQLResultSetRowPacket> resultSetRowPackets;
 	
 	public MySQLResultSetPacket(MySQLServerConnection con, byte[] payload, int command) throws IOException {
 		this.payload = payload;
 		MySQLReader r = new MySQLReader(new ByteArrayInputStream(payload));
 		columnCount = (int) r.readLengthEncodedInteger();
-		columnDefinitions = new ArrayList<>();
+		columnDefinitionPackets = new ArrayList<>();
 		for(int i = 0; i < columnCount; i++) {
-			columnDefinitions.add(con.readPacket().parseTextPacket(con, MySQLColumnDefinition41Packet.class, command));
+			columnDefinitionPackets.add(con.readPacket().parseTextPacket(con, MySQLColumnDefinition41Packet.class, command));
 		}
-		resultSetRows = new ArrayList<>();
+		columnDefinitions = columnDefinitionPackets.stream().map(col -> new ColumnDefinition(col)).toArray(ColumnDefinition[]::new);
+		resultSetRowPackets = new ArrayList<>();
 		while(con.hasData()) {
 			RawPacket raw = con.readPacket();
-//			if(raw.getServerPacketType().equals(MySQLServerPacketType.OK)) break; // No more rows
 			if(raw.getServerPacketType().equals(MySQLServerPacketType.OK)) continue;
-			resultSetRows.add(raw.parseTextPacket(con, MySQLResultSetRowPacket.class, command));
+			resultSetRowPackets.add(raw.parseTextPacket(con, MySQLResultSetRowPacket.class, command));
 		}
 	}
 	
@@ -43,12 +45,16 @@ public class MySQLResultSetPacket implements MySQLTextPacket {
 		return columnCount;
 	}
 	
-	public List<MySQLColumnDefinition41Packet> getColumnDefinitions() {
+	public ColumnDefinition[] getColumnDefinitions() {
 		return columnDefinitions;
 	}
 	
-	public List<MySQLResultSetRowPacket> getResultSetRows() {
-		return resultSetRows;
+	public List<MySQLColumnDefinition41Packet> getColumnDefinitionPackets() {
+		return columnDefinitionPackets;
+	}
+	
+	public List<MySQLResultSetRowPacket> getResultSetRowPackets() {
+		return resultSetRowPackets;
 	}
 	
 }
