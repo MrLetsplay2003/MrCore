@@ -70,6 +70,11 @@ public class MySQLDataType<T> {
 		}
 	}
 	
+	@Override
+	public boolean equals(Object o) {
+		return (o instanceof MySQLDataType<?>) && ((MySQLDataType<?>) o).getSQLIdentifier() == identifier;
+	}
+	
 	@FunctionalInterface
 	public static interface UnsafeFunction<I, O> {
 		
