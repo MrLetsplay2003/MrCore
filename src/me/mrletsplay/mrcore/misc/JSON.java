@@ -11,15 +11,17 @@ public class JSON {
 	 * Implementation of a JSON object according to <a href="http://www.json.org/">The JSON Data Interchange Standard</a>
 	 * @author MrLetsplay2003
 	 */
-	public static class JSONObject {
+	public static class JSONObject extends HashMap<String, Object> {
 		
-		private HashMap<String, Object> properties;
+		private static final long serialVersionUID = -7624968898431467371L;
+		
+//		private HashMap<String, Object> properties;
 		
 		/**
 		 * Creates an empty JSONObject
 		 */
 		public JSONObject() {
-			properties = new HashMap<>();
+			super();
 		}
 		
 		/**
@@ -30,7 +32,16 @@ public class JSON {
 		 * @throws ClassCastException If the given string does not represent a JSON object
 		 */
 		public JSONObject(String source) {
-			if(source != null) properties = ((JSONObject) JSONParser.parse(source)).properties;
+			this((JSONObject) JSONParser.parse(source));
+		}
+		
+		/**
+		 * Creates a JSON object which has identical properties to the JSONObject parameter<br>
+		 * Giving null as a parameter will result in an empty JSONObject, no exception will be thrown
+		 * @param fromObject The JSONObject to copy
+		 */
+		public JSONObject(JSONObject fromObject) {
+			super(fromObject != null ? fromObject : new HashMap<>());
 		}
 		
 		/**
@@ -42,7 +53,7 @@ public class JSON {
 		 * @param value The value to set it to
 		 */
 		public void set(String key, Object value) {
-			properties.put(key, value);
+			put(key, value);
 		}
 		
 		/**
@@ -51,7 +62,7 @@ public class JSON {
 		 * @return true if the given property exists, false otherwise
 		 */
 		public boolean has(String key) {
-			return properties.containsKey(key);
+			return containsKey(key);
 		}
 		
 		/**
@@ -65,8 +76,8 @@ public class JSON {
 		 * @throws JSONException If the given key is not found
 		 */
 		public Object get(String key) {
-			if(!properties.containsKey(key)) throw new JSONException("Object doesn't have the property \""+key+"\"");
-			return properties.get(key);
+			if(!containsKey(key)) throw new JSONException("Object doesn't have the property \""+key+"\"");
+			return get(key);
 		}
 		
 		/**
@@ -339,7 +350,7 @@ public class JSON {
 					case '}':
 						return obj;
 					case '"':
-						if(!hasComma && !obj.properties.isEmpty()) throw new JSONParseException("Missing comma separator", reader.currentIndex);
+						if(!hasComma && !obj.isEmpty()) throw new JSONParseException("Missing comma separator", reader.currentIndex);
 						String key = readString(reader);
 						if(reader.nextIgnoreWhitespaces() != ':') throw new JSONParseException("Invalid name/value pair", reader.currentIndex);
 						obj.set(key, readGeneric(reader));
@@ -507,7 +518,7 @@ public class JSON {
 		
 		private static CharSequence formatObject(JSONObject object) {
 			StringBuilder builder = new StringBuilder("{");
-			builder.append(object.properties.entrySet().stream()
+			builder.append(object.entrySet().stream()
 				.map(en -> new StringBuilder()
 						.append("\"")
 						.append(escapeString(en.getKey()))
