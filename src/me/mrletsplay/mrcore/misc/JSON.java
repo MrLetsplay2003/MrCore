@@ -77,7 +77,7 @@ public class JSON {
 		 */
 		public Object get(String key) {
 			if(!containsKey(key)) throw new JSONException("Object doesn't have the property \""+key+"\"");
-			return get(key);
+			return super.get(key);
 		}
 		
 		/**
