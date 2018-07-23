@@ -30,10 +30,12 @@ public class ConfigLoader {
 			try {
 				ConfigVersion v = ConfigVersion.getByName(e.getVersion());
 				if(v == null) throw new InvalidConfigVersionException("Invalid version: "+e.getVersion(), null);
-				return ConfigConverter.convertToLatestVersion(
+				CustomConfig cfg = ConfigConverter.convertToLatestVersion(
 						Files.readAllLines(configFile.toPath()).stream().collect(Collectors.joining(System.getProperty("line.separator"))),
 						cc,
 						v);
+				cfg.saveConfigSafely();
+				return cfg;
 			} catch (IOException e1) {
 				throw new InvalidConfigException("Failed to load config from file", -1);
 			}
@@ -51,10 +53,12 @@ public class ConfigLoader {
 			try {
 				ConfigVersion v = ConfigVersion.getByName(e.getVersion());
 				if(v == null) throw new InvalidConfigVersionException("Invalid version: "+e.getVersion(), null);
-				return (BukkitCustomConfig) new BukkitCustomConfig(configFile).loadDefault(ConfigConverter.convertToLatestVersion(
+				BukkitCustomConfig cfg = (BukkitCustomConfig) new BukkitCustomConfig(configFile).loadDefault(ConfigConverter.convertToLatestVersion(
 						Files.readAllLines(configFile.toPath()).stream().collect(Collectors.joining(System.getProperty("line.separator"))),
 						cc,
 						v) , true);
+				cfg.saveConfigSafely();
+				return cfg;
 			} catch (IOException e1) {
 				throw new InvalidConfigException("Failed to load config from file", -1);
 			}
