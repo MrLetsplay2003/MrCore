@@ -149,6 +149,15 @@ public class ConfigExpansions {
 				return getConfig().castGeneric(o, clazz);
 			}
 			
+			public <G> List<G> castGenericList(Object o, Class<G> clazz) {
+				return getConfig().castGenericList(castGeneric(o, List.class), clazz);
+			}
+			
+			@SuppressWarnings("unchecked")
+			public <G> Map<String, G> castGenericMap(Object o, Class<G> clazz) {
+				return getConfig().castGenericMap(castGeneric(o, Map.class), clazz);
+			}
+			
 			public abstract Map<String, Object> mapObject(T object);
 			
 			public abstract T constructObject(Map<String, Object> map);

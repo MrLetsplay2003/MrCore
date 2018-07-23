@@ -2,6 +2,7 @@ package me.mrletsplay.mrcore.misc;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
@@ -14,8 +15,6 @@ public class JSON {
 	public static class JSONObject extends HashMap<String, Object> {
 		
 		private static final long serialVersionUID = -7624968898431467371L;
-		
-//		private HashMap<String, Object> properties;
 		
 		/**
 		 * Creates an empty JSONObject
@@ -142,7 +141,15 @@ public class JSON {
 		 */
 		@Override
 		public String toString() {
-			return JSONFormatter.formatObject(this).toString();
+			return JSONFormatter.formatObject(this, false).toString();
+		}
+		
+		/**
+		 * A more human-readable form of {@link #toString()}
+		 * @throws JSONException If a conversion error occurs (e.g. a property has an invalid type)
+		 */
+		public String toFancyString() {
+			return JSONFormatter.formatObject(this, true).toString();
 		}
 		
 	}
@@ -259,7 +266,15 @@ public class JSON {
 		 */
 		@Override
 		public String toString() {
-			return JSONFormatter.formatArray(this).toString();
+			return JSONFormatter.formatArray(this, 0, false).toString();
+		}
+		
+		/**
+		 * A more human-readable form of {@link #toString()}
+		 * @throws JSONException If a conversion error occurs (e.g. a property has an invalid type)
+		 */
+		public String toFancyString() {
+			return JSONFormatter.formatArray(this, 0, true).toString();
 		}
 		
 	}
@@ -509,40 +524,46 @@ public class JSON {
 		 * - Numbers<br>
 		 * - Strings
 		 * @param object The object to format
+		 * @param fancy Whether this should return the string in a more human-readable form
 		 * @return A string representing that object
 		 * @throws JSONFormatException If a formatting error occurs
 		 */
-		public static String formatObject(Object object) {
-			return formatGeneric(object).toString();
+		public static String formatObject(Object object, boolean fancy) {
+			return formatGeneric(object, 0, fancy).toString();
 		}
 		
-		private static CharSequence formatObject(JSONObject object) {
-			StringBuilder builder = new StringBuilder("{");
+		private static CharSequence formatObject(JSONObject object, int indents, boolean fancy) {
+			StringBuilder builder = new StringBuilder("{").append(fancy ? "\n" : "").append(fancy ? space(indents + 1) : "");
 			builder.append(object.entrySet().stream()
 				.map(en -> new StringBuilder()
 						.append("\"")
 						.append(escapeString(en.getKey()))
 						.append("\"")
 						.append(":")
-						.append(formatGeneric(en.getValue())))
-				.collect(Collectors.joining(",")));
-			return builder.append("}");
+						.append(fancy ? " " : "")
+						.append(formatGeneric(en.getValue(), indents + 1, fancy)))
+				.collect(Collectors.joining(new StringBuilder(",").append(fancy ? "\n" : "").append(fancy ? space(indents + 1) : ""))));
+			return builder.append(fancy ? "\n" : "").append(fancy ? space(indents) : "").append("}");
 		}
 		
-		private static CharSequence formatArray(JSONArray array) {
-			StringBuilder builder = new StringBuilder("[");
+		private static CharSequence formatArray(JSONArray array, int indents, boolean fancy) {
+			StringBuilder builder = new StringBuilder("[").append(fancy ? "\n" : "").append(fancy ? space(indents + 1) : "");
 			builder.append(array.stream()
-				.map(en -> formatGeneric(en))
-				.collect(Collectors.joining(",")));
-			return builder.append("]");
+				.map(en -> formatGeneric(en, indents + 1, fancy))
+				.collect(Collectors.joining(new StringBuilder(",").append(fancy ? " " : ""))));
+			return builder.append(fancy ? "\n" : "").append(fancy ? space(indents) : "").append("]");
 		}
 		
-		private static CharSequence formatGeneric(Object object) {
+		private static String space(int len){
+			return String.join("", Collections.nCopies(len * 4, " "));
+		}
+		
+		private static CharSequence formatGeneric(Object object, int indents, boolean fancy) {
 			if(object == null) return "null";
 			if(object instanceof Number || object instanceof Boolean) return object.toString();
 			if(object instanceof String) return new StringBuilder("\"").append(escapeString((String)object)).append("\"");
-			if(object instanceof JSONObject) return formatObject((JSONObject) object);
-			if(object instanceof JSONArray) return formatArray((JSONArray) object);
+			if(object instanceof JSONObject) return formatObject((JSONObject) object, indents, fancy);
+			if(object instanceof JSONArray) return formatArray((JSONArray) object, indents, fancy);
 			throw new JSONFormatException("Cannot format object of type "+object.getClass().getName());
 		}
 		
