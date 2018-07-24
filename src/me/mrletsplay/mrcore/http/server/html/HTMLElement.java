@@ -5,7 +5,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import me.mrletsplay.mrcore.http.server.css.CSSStyleElement;
+import me.mrletsplay.mrcore.http.server.html.HTMLDocument.HttpSiteAccessedEvent;
 import me.mrletsplay.mrcore.http.server.js.JSFunction;
+import me.mrletsplay.mrcore.misc.Condition;
 
 public class HTMLElement {
 
@@ -14,6 +16,7 @@ public class HTMLElement {
 	private List<HTMLElement> children;
 	private HTMLElement parent;
 	private CSSStyleElement css;
+	private Condition<HttpSiteAccessedEvent> condition;
 	
 	private OnHover onHover;
 	private OnClicked onClicked;
@@ -52,6 +55,11 @@ public class HTMLElement {
 		return this;
 	}
 	
+	public HTMLElement condition(Condition<HttpSiteAccessedEvent> condition) {
+		this.condition = condition;
+		return this;
+	}
+	
 	public String getID() {
 		return id;
 	}
@@ -62,6 +70,10 @@ public class HTMLElement {
 	
 	public String getContent() {
 		return content;
+	}
+	
+	public Condition<HttpSiteAccessedEvent> getCondition() {
+		return condition;
 	}
 	
 	public HTMLElement addChild(HTMLElement child) {

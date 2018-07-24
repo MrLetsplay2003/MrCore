@@ -117,7 +117,12 @@ public class HttpServer {
 						addConnection(hcon);
 						con = hcon.getConnections().get(0);
 					}
-					hcon.handleRequest(clientHeader, con);
+					try {
+						hcon.handleRequest(clientHeader, con);
+					}catch(Exception e) {
+						e.printStackTrace();
+						continue;
+					}
 				}
 				socket.close();
 			}catch(IOException e) {
@@ -141,9 +146,9 @@ public class HttpServer {
 		return listeningThread != null && listeningThread.isAlive();
 	}
 	
-	protected HTMLBuiltDocument lookupURL(ParsedURL url, HttpConnection connection) {
-		if(!pages.containsKey(url.getPath())) return page404.build(HttpConstants.HTML_404_REQUESTED_URL, url.getPath());
-		return pages.get(url.getPath()).build();
+	protected HTMLBuiltDocument lookupURL(ParsedURL url, HttpConnectionInstance connectionInstance) {
+		if(!pages.containsKey(url.getPath())) return page404.build(connectionInstance, HttpConstants.HTML_404_REQUESTED_URL, url.getPath());
+		return pages.get(url.getPath()).build(connectionInstance);
 	}
 	
 	public static class ClientHeader {

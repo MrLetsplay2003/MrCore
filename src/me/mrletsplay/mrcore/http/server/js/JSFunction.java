@@ -3,6 +3,7 @@ package me.mrletsplay.mrcore.http.server.js;
 import java.util.function.Consumer;
 
 import me.mrletsplay.mrcore.http.server.HttpConnection;
+import me.mrletsplay.mrcore.http.server.HttpConnectionInstance;
 import me.mrletsplay.mrcore.http.server.HttpServer;
 import me.mrletsplay.mrcore.http.server.html.HTMLDocument.HTMLBuiltDocument;
 
@@ -30,12 +31,12 @@ public class JSFunction {
 	public static class JSFunctionInvokedEvent {
 		
 		private HttpServer server;
-		private HttpConnection connection;
+		private HttpConnectionInstance connectionInstance;
 		private HTMLBuiltDocument context;
 		
-		public JSFunctionInvokedEvent(HttpServer server, HttpConnection connection, HTMLBuiltDocument context) {
+		public JSFunctionInvokedEvent(HttpServer server, HttpConnectionInstance connectionInstance, HTMLBuiltDocument context) {
 			this.server = server;
-			this.connection = connection;
+			this.connectionInstance = connectionInstance;
 			this.context = context;
 		}
 		
@@ -43,8 +44,12 @@ public class JSFunction {
 			return server;
 		}
 		
+		public HttpConnectionInstance getConnectionInstance() {
+			return connectionInstance;
+		}
+		
 		public HttpConnection getConnection() {
-			return connection;
+			return connectionInstance.getConnection();
 		}
 		
 		public HTMLBuiltDocument getContext() {

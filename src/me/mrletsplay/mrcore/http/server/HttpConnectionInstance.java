@@ -14,9 +14,11 @@ public class HttpConnectionInstance {
 	InputStream in;
 	OutputStream out;
 	private Thread connectionThread;
+	private HttpConnection connection;
 //	HTMLBuiltDocument lastServedPage;
 	
 	public HttpConnectionInstance(HttpConnection connection, Socket s) throws IOException {
+		this.connection = connection;
 		this.socket = s;
 		this.in = s.getInputStream();
 		this.out = s.getOutputStream();
@@ -34,7 +36,7 @@ public class HttpConnectionInstance {
 					ClientHeader header = new ClientHeader(new String(b));
 					try {
 						connection.handleRequest(header, this);
-					}catch(IOException e) {
+					}catch(Exception e) {
 						e.printStackTrace();
 						continue;
 					}
@@ -47,6 +49,10 @@ public class HttpConnectionInstance {
 			connection.removeConnection(this);
 		});
 		connectionThread.start();
+	}
+	
+	public HttpConnection getConnection() {
+		return connection;
 	}
 	
 	public void close() {

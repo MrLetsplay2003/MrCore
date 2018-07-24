@@ -47,27 +47,28 @@ public class HttpConnection {
 			String iName = parsedUrl.getPath().substring("/_internals/".length());
 			if(iName.equals("callback")) {
 				if(lastServedPage == null) {
-					writePage(HttpConstants.HTML_INTERNALS_ERROR_PAGE.build(), connection);
+					writePage(HttpConstants.HTML_INTERNALS_ERROR_PAGE.build(connection), connection);
 					return;
 				}
 				JSFunction parsedF = lastServedPage.getScript().getFunction(parsedUrl.getGetParameters().get("function_name"));
 				if(parsedF != null && parsedF instanceof JSFunctionCallable) {
-					((JSFunctionCallable) parsedF).invoke(new JSFunctionInvokedEvent(server, this, lastServedPage));
+					((JSFunctionCallable) parsedF).invoke(new JSFunctionInvokedEvent(server, connection, lastServedPage));
 				}
 				writeEmpty(connection);
 			}else if(iName.equals("callback_consuming")) {
 				if(lastServedPage == null) {
-					writePage(HttpConstants.HTML_INTERNALS_ERROR_PAGE.build(), connection);
+					writePage(HttpConstants.HTML_INTERNALS_ERROR_PAGE.build(connection), connection);
 					return;
 				}
 				try {
 					JSFunction parsedF = lastServedPage.getScript().getFunction(parsedUrl.getGetParameters().get("function_name"));
 					if(parsedF != null && parsedF instanceof JSFunctionConsumingCallable) {
-						((JSFunctionConsumingCallable) parsedF).invoke(new JSFunctionInvokedEvent(server, this, lastServedPage), new JSONObject(parsedUrl.getGetParameters().get("function_data")));
+						((JSFunctionConsumingCallable) parsedF).invoke(new JSFunctionInvokedEvent(server, connection, lastServedPage), new JSONObject(parsedUrl.getGetParameters().get("function_data")));
 					}
 					writeEmpty(connection);
 				}catch(Exception e) {
-					writePage(HttpConstants.HTML_INTERNALS_ERROR_PAGE.build(), connection);
+					e.printStackTrace();
+					writePage(HttpConstants.HTML_INTERNALS_ERROR_PAGE.build(connection), connection);
 				}
 			}else if(iName.equals("poll")) {
 				JSONArray arr = new JSONArray();
@@ -84,21 +85,21 @@ public class HttpConnection {
 				try {
 					InputStream in = Main.class.getResourceAsStream("/img/"+imgName);
 					if(in == null) {
-						writePage(new HTMLDocument(HttpStatusCode.NOT_FOUND_404).build(), connection);
+						writePage(new HTMLDocument(HttpStatusCode.NOT_FOUND_404).build(connection), connection);
 						return;
 					}
 					BufferedImage img = ImageIO.read(in);
 					writeImage(img, connection);
 				}catch(IOException e) {
 					e.printStackTrace();
-					writePage(new HTMLDocument(HttpStatusCode.INTERNAL_ERROR_500).build(), connection);
+					writePage(new HTMLDocument(HttpStatusCode.INTERNAL_ERROR_500).build(connection), connection);
 				}
 			}else {
-				writePage(HttpConstants.HTML_INTERNALS_404_PAGE.build(), connection);
+				writePage(HttpConstants.HTML_INTERNALS_404_PAGE.build(connection), connection);
 			}
 			return;
 		}
-		HTMLBuiltDocument doc = server.lookupURL(parsedUrl, this);
+		HTMLBuiltDocument doc = server.lookupURL(parsedUrl, connection);
 		if(doc != null) {
 			lastServedPage = doc;
 			writePage(doc, connection);

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import me.mrletsplay.mrcore.http.server.HttpClientPoll;
@@ -39,6 +40,7 @@ public class Webinterface {
 		
 		server.addPage("/", home);
 		server.addPage("/register", initRegister());
+		server.addPage("/login", initLogin());
 		server.start();
 	}
 	
@@ -55,6 +57,18 @@ public class Webinterface {
 		return acc;
 	}
 	
+	public static boolean isLoggedIn(HttpConnection con) {
+		return loggedInSessions.containsKey(con.getSessionID());
+	}
+	
+	public static boolean isLoggedIn(String sessionID) {
+		return loggedInSessions.containsKey(sessionID);
+	}
+	
+	public static boolean isLoggedIn(WebinterfaceAccount acc) {
+		return loggedInSessions.containsValue(acc);
+	}
+	
 	public static void stop() {
 		server.stop();
 	}
@@ -68,9 +82,19 @@ public class Webinterface {
 			.addProperty("top", "0")
 			.addProperty("left", "0")
 			.addProperty("width", "100%")
-			.addProperty("height", "75px")
-			.addProperty("opacity", "0.7")
+			.addProperty("height", "65px")
+			.addProperty("opacity", "1")
 			.addProperty("background-color", "hsl(0, 0%, 20%)");
+		
+		style.get("a:link")
+			.addProperty("text-decoration", "none")
+			.addProperty("color", "white");
+		style.get("a:active")
+			.addProperty("text-decoration", "none")
+			.addProperty("color", "white");
+		style.get("a:visited")
+			.addProperty("text-decoration", "none")
+			.addProperty("color", "white");
 		
 		HTMLElement leftContent = HTMLElement.div().setID("left-content");
 		
@@ -98,24 +122,7 @@ public class Webinterface {
 			.addProperty("right", "5%")
 			.addProperty("height", "96%");
 		
-//		HTMLElement nameContainer = HTMLElement.a(Var.NAME, "/").setID("name-container");
-//		
-//		nameContainer.css()
-//			.addProperty("position", "absolute")
-//			.addProperty("top", "0")
-//			.addProperty("left", "65px")
-//			.addProperty("width", "calc(100% - 65px)")
-//			.addProperty("height", "100%")
-//			.addProperty("display", "inline-flex")
-//			.addProperty("justify-content", "center")
-//			.addProperty("align-items", "center")
-//			.addProperty("font-family", "'Ek Mukta'")
-//			.addProperty("color", "white")
-//			.addProperty("font-size", "30px")
-//			.addProperty("font-weight", "bold");
-		
 		leftContent.addChild(img);
-//		leftContent.addChild(nameContainer);
 		
 		HTMLElement rightContent = HTMLElement.div().setID("right-content");
 		
@@ -126,17 +133,10 @@ public class Webinterface {
 			.addProperty("height", "100%")
 			.addProperty("width", "25%")
 			.addProperty("text-align", "center");
-	
-//		style.getElement("right-content:before")
-//			.addProperty("content", "\"\"")
-//			.addProperty("background", "white")
-//			.addProperty("position", "absolute")
-//			.addProperty("top", "5%")
-//			.addProperty("left", "0")
-//			.addProperty("height", "90%")
-//			.addProperty("width", "2px");
 		
-		HTMLElement login = HTMLElement.a("Login").setID("login");
+		HTMLElement login = HTMLElement.a("Login", "/login").setID("login").condition(event -> {
+			return !isLoggedIn(event.getConnection());
+		});
 		
 		login.css()
 			.addProperty("height", "100%")
@@ -145,10 +145,12 @@ public class Webinterface {
 			.addProperty("align-items", "center")
 			.addProperty("font-family", "'Ek Mukta'")
 			.addProperty("color", "white")
-			.addProperty("font-size", "30px")
+			.addProperty("font-size", "20px")
 			.addProperty("margin-right", "5%");
 		
-		HTMLElement register = HTMLElement.a("Register", "/register").setID("register");
+		HTMLElement register = HTMLElement.a("Register", "/register").setID("register").condition(event -> {
+			return !isLoggedIn(event.getConnection());
+		});
 		
 		register.css()
 			.addProperty("height", "100%")
@@ -157,7 +159,7 @@ public class Webinterface {
 			.addProperty("align-items", "center")
 			.addProperty("font-family", "'Ek Mukta'")
 			.addProperty("color", "white")
-			.addProperty("font-size", "30px")
+			.addProperty("font-size", "20px")
 			.addProperty("margin-left", "5%");
 		
 		rightContent.addChild(login);
@@ -187,16 +189,13 @@ public class Webinterface {
 		CSSStyleElement e = new CSSStyleElement()
 			.addProperty("width", "40%");
 		
-		middleContent.addChild(HTMLElement.a("", "/lol").addChild(HTMLElement.img(Var.DEMO_ICON).css(e).onHover(hover).onClicked(click)));
-		middleContent.addChild(HTMLElement.a("", "/lol").addChild(HTMLElement.img(Var.DEMO_ICON).css(e).onHover(hover).onClicked(click)));
-		middleContent.addChild(HTMLElement.a("", "/lol").addChild(HTMLElement.img(Var.DEMO_ICON).css(e).onHover(hover).onClicked(click)));
-		middleContent.addChild(HTMLElement.a("", "/lol").addChild(HTMLElement.img(Var.DEMO_ICON).css(e).onHover(hover).onClicked(click)));
-		middleContent.addChild(HTMLElement.a("", "/lol").addChild(HTMLElement.img(Var.DEMO_ICON).css(e).onHover(hover).onClicked(click)));
+		middleContent.addChild(HTMLElement.a("", "/").addChild(HTMLElement.img(Var.HOME_ICON).css(e).onHover(hover).onClicked(click)));
+		middleContent.addChild(HTMLElement.a("", "/lol").addChild(HTMLElement.img(Var.DOCUMENTATION_ICON).css(e).onHover(hover).onClicked(click)));
+		middleContent.addChild(HTMLElement.a("", "/lol").addChild(HTMLElement.img(Var.USERS_ICON).css(e).onHover(hover).onClicked(click)));
 		
 		style.get("#middle-content > a > img")
 			.addProperty("height", "90%")
-			.addProperty("margin-left", "5px")
-			.addProperty("margin-right", "5px");
+			.addProperty("margin-left", "10px");
 		
 		headerDiv.addChild(leftContent);
 		headerDiv.addChild(middleContent);
@@ -228,8 +227,69 @@ public class Webinterface {
 			.addProperty("left", "0")
 			.addProperty("width", "100%")
 			.addProperty("height", "calc(100% - 65px)")
-			.addProperty("background-color", "hsl(0, 0%, 20%)");
+			.addProperty("background-color", "white")
+			.addProperty("overflow", "hidden");
 		
+		HTMLElement about = HTMLElement.div().setID("about-container");
+		
+		about.css()
+			.addProperty("position", "absolute")
+			.addProperty("width", "100%")
+			.addProperty("height", "30%")
+			.addProperty("left", "0")
+			.addProperty("top", "25%")
+			.addProperty("color", "white")
+			.addProperty("text-align", "center")
+			.addProperty("font-size", "20px");
+		
+		HTMLElement aboutTextHeader = HTMLElement.a("About testname");
+		
+		aboutTextHeader.css()
+			.addProperty("font-size", "35px")
+			.addProperty("text-decoration", "underline")
+			.addProperty("font-weight", "bold");
+		
+		HTMLElement aboutText = HTMLElement.a("</br></br>A very nice schlong dong text.</br>"
+											+ "Made with <3 by the SchlongDong GmbH.</br>"
+											+ "Da is ja da Günther und der Heinz Dieter</br>"
+											+ "Dieser Text muss vier Zeilen haben.");
+		
+		about.addChild(aboutTextHeader);
+		about.addChild(aboutText);
+		
+		HTMLElement buttonBox = HTMLElement.div().setID("button-box");
+		
+		buttonBox.css()
+			.addProperty("position", "absolute")
+			.addProperty("width", "100%")
+			.addProperty("height", "5%")
+			.addProperty("top", "55%")
+			.addProperty("display", "inline-flex")
+			.addProperty("justify-content", "center")
+			.addProperty("align-items", "center");
+		
+		HTMLElement tryButton = HTMLElement.button("Try it out");
+		
+		tryButton.css()
+			.addProperty("position", "absolute")
+			.addProperty("width", "10%;")
+			.addProperty("height", "100%")
+			.addProperty("border", "2px solid white")
+			.addProperty("border-radius", "3px")
+			.addProperty("background-color", "transparent")
+			.addProperty("color", "white")
+			.addProperty("font-size", "18px")
+			.addProperty("opacity", "0.6");
+		
+		tryButton.onHover().css()
+			.addProperty("background-color", "hsl(0, 0%, 20%)")
+			.addProperty("cursor", "pointer")
+			.addProperty("opacity", "1");
+		
+		buttonBox.addChild(tryButton);
+		
+		pageContentDiv.addChild(about);
+		pageContentDiv.addChild(buttonBox);
 		div.addChild(addHeader(home));
 		pageContentDiv.addChild(HTMLElement.img(Var.HEAD_IMG));
 		div.addChild(pageContentDiv);
@@ -311,6 +371,35 @@ public class Webinterface {
 			.addProperty("padding-left", "10px")
 			.addProperty("font-size", "30px");
 		
+		HTMLElement awaitingDiv = HTMLElement.div();
+		
+		awaitingDiv.css()
+			.addProperty("position", "absolute")
+			.addProperty("width", "40%")
+			.addProperty("height", "50%")
+			.addProperty("right", "8%")
+			.addProperty("text-align", "left")
+			.addProperty("color", "white")
+			.addProperty("top", "25%")
+			.addProperty("display", "none");
+		
+		HTMLElement awaitingHead = HTMLElement.a("Awaiting confirmation...");
+		
+		awaitingHead.css()
+			.addProperty("font-size", "30px")
+			.addProperty("font-weight", "bold");
+		
+		HTMLElement awaitingText = HTMLElement.a("</br></br>Go into your minecraft client and click</br>on the message we have send to you.");
+		
+		awaitingText.css()
+			.addProperty("position", "absolute")
+			.addProperty("top", "7%")
+			.addProperty("left", "20px")
+			.addProperty("font-size", "20px");
+		
+		awaitingDiv.addChild(awaitingHead);
+		awaitingDiv.addChild(awaitingText);
+		
 		HTMLElement confirm = HTMLElement.button("Confirm");
 		
 		confirm.css()
@@ -370,10 +459,129 @@ public class Webinterface {
 		div.addChild(pass);
 		div.addChild(passConf);
 		div.addChild(confirm);
+		div.addChild(awaitingDiv);
 		
 		registerPage.addElement(div);
 		
 		return registerPage;
+	}
+	
+	private static HTMLDocument initLogin() {
+		HTMLDocument loginPage = new HTMLDocument();
+		CSSStylesheet style = loginPage.getStyle();
+		
+		style.getType("body")
+			.addProperty("background-color", "#ecf0f5");
+		
+		style.get("a:link")
+			.addProperty("text-decoration", "none")
+			.addProperty("color", "white");
+		style.get("a:active")
+			.addProperty("text-decoration", "none")
+			.addProperty("color", "white");
+		style.get("a:visited")
+			.addProperty("text-decoration", "none")
+			.addProperty("color", "white");
+		
+		HTMLElement div = HTMLElement.div();
+		
+		div.css()
+			.addProperty("position", "absolute")
+			.addProperty("top", "0")
+			.addProperty("left", "0")
+			.addProperty("width", "100%")
+			.addProperty("height", "100%")
+			.addProperty("background-color", "hsl(0, 0%, 20%)")
+			.addProperty("overflow", "hidden");
+		
+		HTMLElement name = HTMLElement.inputText("Minecraft Name").setID("name-field");
+
+		name.css()
+			.addProperty("position", "absolute")
+			.addProperty("top", "30%")
+			.addProperty("left", "10%")
+			.addProperty("width", "30%")
+			.addProperty("height", "7%")
+			.addProperty("border", "1px solid lightgray")
+			.addProperty("color", "black")
+			.addProperty("font-family", "'Ek Mukta'")
+			.addProperty("background-color", "#fafafa")
+			.addProperty("padding-left", "10px")
+			.addProperty("font-size", "30px");
+		
+		HTMLElement pass = HTMLElement.inputPassword("Password").setID("password-field");
+
+		pass.css()
+			.addProperty("position", "absolute")
+			.addProperty("top", "45%")
+			.addProperty("left", "10%")
+			.addProperty("width", "30%")
+			.addProperty("height", "7%")
+			.addProperty("border", "1px solid lightgray")
+			.addProperty("color", "black")
+			.addProperty("font-family", "'Ek Mukta'")
+			.addProperty("background-color", "#fafafa")
+			.addProperty("padding-left", "10px")
+			.addProperty("font-size", "30px");
+		
+		HTMLElement confirm = HTMLElement.button("Confirm");
+		
+		confirm.css()
+			.addProperty("position", "absolute")
+			.addProperty("top", "65%")
+			.addProperty("left", "10%")
+			.addProperty("width", "30%")
+			.addProperty("height", "7%")
+			.addProperty("background-color", "#57bc54")
+			.addProperty("border", "none")
+			.addProperty("color", "white")
+			.addProperty("font-family", "'Ek Mukta'")
+			.addProperty("font-size", "25px")
+			.addProperty("border-radius", "4px")
+			.addProperty("padding-left", "10px")
+			.addProperty("box-shadow", "2px 4px 10px rgba(0,0,0,0.1)");
+		
+		confirm.onClicked()
+			.function(new JSFunctionConsumingCallable() {
+				
+				@SuppressWarnings("deprecation")
+				@Override
+				public void invoke(JSFunctionInvokedEvent event, JSONObject params) {
+					if(!requireParams(params, "name", "password")) {
+						event.getConnection().addPoll(HttpClientPoll.alert("Name and password are required"));
+						return;
+					}
+					OfflinePlayer player = Bukkit.getOfflinePlayer(params.getString("name"));
+					WebinterfaceAccount acc = WebinterfaceDataManager.getByMinecraftPlayer(player);
+					if(acc == null) {
+						event.getConnection().addPoll(HttpClientPoll.alert("Player isn't registered"));
+						return;
+					}
+					if(!acc.matchesPassword(params.getString("password"))) {
+						event.getConnection().addPoll(HttpClientPoll.alert("Invalid password"));
+						return;
+					}
+					event.getConnection().addPoll(HttpClientPoll.redirect("/"));
+					loggedInSessions.put(event.getConnection().getSessionID(), acc);
+				}
+				
+				@Override
+				public String getParamsMethod() {
+					return 
+							"let pw = $(\"#password-field\").val();" +
+							"return {name: $(\"#name-field\").val(), password: pw};";
+				}
+			});
+
+		div.addChild(addHeader(loginPage));
+		div.addChild(HTMLElement.img(Var.HEAD_IMG));
+		div.addChild(name);
+		div.addChild(pass);
+		div.addChild(confirm);
+		
+		loginPage.addElement(div);
+		
+		return loginPage;
 	}
 	
 }

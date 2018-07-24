@@ -32,4 +32,8 @@ public class WebinterfaceAccount {
 		return WebinterfaceDataManager.matchesPassword(this, password);
 	}
 	
+	public boolean isLoggedIn() {
+		return Webinterface.isLoggedIn(this);
+	}
+	
 }
