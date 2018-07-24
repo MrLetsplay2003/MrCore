@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import me.mrletsplay.mrcore.http.server.HttpConnection;
+import me.mrletsplay.mrcore.http.server.HttpConnectionInstance;
 import me.mrletsplay.mrcore.http.server.HttpStatusCode;
 import me.mrletsplay.mrcore.http.server.css.CSSStyleElement;
 import me.mrletsplay.mrcore.http.server.css.CSSStylesheet;
@@ -55,15 +57,16 @@ public class HTMLDocument {
 		return this;
 	}
 	
-	public HTMLBuiltDocument build(String... params) {
+	public HTMLBuiltDocument build(HttpConnectionInstance forInstance, String... params) {
 		JSScript script = baseScript.clone();
 		CSSStylesheet style = this.style.clone();
 		StringBuilder builder = new StringBuilder();
 		AtomicInteger uID = new AtomicInteger(0);
 		
 		StringBuilder body = new StringBuilder();
+		HttpSiteAccessedEvent event = new HttpSiteAccessedEvent(forInstance);
 		for(HTMLElement el : elements ) {
-			appendElement(body, script, style, el, uID, params);
+			appendElement(body, script, style, el, uID, event, params);
 		}
 		
 		builder.append("<head>");
@@ -84,7 +87,8 @@ public class HTMLDocument {
 		return new HTMLBuiltDocument(this, script, builder.toString());
 	}
 	
-	private void appendElement(StringBuilder builder, JSScript script, CSSStylesheet style, HTMLElement el, AtomicInteger uID, String... params) {
+	private void appendElement(StringBuilder builder, JSScript script, CSSStylesheet style, HTMLElement el, AtomicInteger uID, HttpSiteAccessedEvent event, String... params) {
+		if(event.getConnectionInstance() != null && el.getCondition() != null && !el.getCondition().apply(event)) return;
 		HTMLElement.OnHover onHover = el.onHover();
 		HTMLElement.OnClicked onClicked = el.onClicked();
 		if(el.getID() == null) el.setID("el_"+uID.get());
@@ -120,7 +124,7 @@ public class HTMLDocument {
 			content = content.replace(params[i], params[i+1]);
 		}
 		builder.append(content);
-		el.getChildren().forEach(c -> appendElement(builder, script, style, c, uID, params));
+		el.getChildren().forEach(c -> appendElement(builder, script, style, c, uID, event, params));
 		if(el.getType() != null) {
 			builder.append("</").append(el.getType()).append(">");
 		}
@@ -152,6 +156,24 @@ public class HTMLDocument {
 		
 		public String getHTMLCode() {
 			return htmlCode;
+		}
+		
+	}
+	
+	public static class HttpSiteAccessedEvent {
+		
+		private HttpConnectionInstance connectionInstance;
+		
+		public HttpSiteAccessedEvent(HttpConnectionInstance connectionInstance) {
+			this.connectionInstance = connectionInstance;
+		}
+		
+		public HttpConnectionInstance getConnectionInstance() {
+			return connectionInstance;
+		}
+		
+		public HttpConnection getConnection() {
+			return connectionInstance.getConnection();
 		}
 		
 	}

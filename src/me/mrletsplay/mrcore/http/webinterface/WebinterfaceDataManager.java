@@ -38,9 +38,9 @@ public class WebinterfaceDataManager {
 			
 			@Override
 			public WebinterfaceAccount constructObject(Map<String, Object> map) {
-				if(!requireKeys(map, "mc-uuid", "permissions")) return null;
+				if(!requireKeys(map, "mc-uuid")) return null;
 				UUID mcUUID = UUID.fromString((String) map.get("mc-uuid"));
-				List<String> perms = castGenericList(castGeneric(map.get("permissions"), List.class), String.class);
+				List<String> perms = map.containsKey("permissions") ? castGenericList(castGeneric(map.get("permissions"), List.class), String.class) : new ArrayList<>();
 				return new WebinterfaceAccount(mcUUID, perms);
 			}
 			
@@ -87,7 +87,11 @@ public class WebinterfaceDataManager {
 	}
 	
 	public static WebinterfaceAccount getByMinecraftPlayer(OfflinePlayer player) {
-		return accounts.stream().filter(a -> a.getMinecraftUUID().equals(player.getUniqueId())).findFirst().orElse(null);
+		return accounts.stream().filter(a -> {
+			System.out.println(a);
+			System.out.println(a.getMinecraftUUID());
+			return a.getMinecraftUUID().equals(player.getUniqueId());
+		}).findFirst().orElse(null);
 	}
 	
 	public static WebinterfaceAccount getByMinecraftUUID(UUID mcUUID) {
