@@ -88,6 +88,7 @@ public class HTMLDocument {
 	}
 	
 	private void appendElement(StringBuilder builder, JSScript script, CSSStylesheet style, HTMLElement el, AtomicInteger uID, HttpSiteAccessedEvent event, String... params) {
+//		System.out.println(el.getCondition() + "/" + el.getCondition() != null ? el.getCondition().apply(event) : "");
 		if(event.getConnectionInstance() != null && el.getCondition() != null && !el.getCondition().apply(event)) return;
 		HTMLElement.OnHover onHover = el.onHover();
 		HTMLElement.OnClicked onClicked = el.onClicked();
@@ -119,7 +120,7 @@ public class HTMLDocument {
 			}
 			builder.append(">");
 		}
-		String content = el.getContent();
+		String content = el.getContent(event);
 		for(int i = 0; i < params.length; i+=2) {
 			content = content.replace(params[i], params[i+1]);
 		}
