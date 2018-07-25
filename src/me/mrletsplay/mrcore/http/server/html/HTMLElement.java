@@ -3,6 +3,7 @@ package me.mrletsplay.mrcore.http.server.html;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 
 import me.mrletsplay.mrcore.http.server.css.CSSStyleElement;
 import me.mrletsplay.mrcore.http.server.html.HTMLDocument.HttpSiteAccessedEvent;
@@ -11,25 +12,50 @@ import me.mrletsplay.mrcore.misc.Condition;
 
 public class HTMLElement {
 
-	private String type, content, id;
+	private String type, id;
 	private List<String> classes;
 	private List<HTMLElement> children;
 	private HTMLElement parent;
 	private CSSStyleElement css;
 	private Condition<HttpSiteAccessedEvent> condition;
+	private Function<HttpSiteAccessedEvent, String> getContentMethod;
 	
 	private OnHover onHover;
 	private OnClicked onClicked;
 	
-	protected HTMLElement(String type, String content) {
+	protected HTMLElement(String type, Function<HttpSiteAccessedEvent, String> getContentMethod) {
 		this.type = type;
-		this.content = content;
+		this.getContentMethod = getContentMethod;
 		this.id = null;
 		this.classes = new ArrayList<>();
 		this.children = new ArrayList<>();
 		this.onClicked = new OnClicked();
 		this.onHover = new OnHover();
 		this.css = new CSSStyleElement();
+	}
+	
+	protected HTMLElement(String type, String content) {
+		this.type = type;
+		this.getContentMethod = (event) -> content;
+		this.id = null;
+		this.classes = new ArrayList<>();
+		this.children = new ArrayList<>();
+		this.onClicked = new OnClicked();
+		this.onHover = new OnHover();
+		this.css = new CSSStyleElement();
+	}
+	
+	protected HTMLElement(HTMLElement element) {
+		this.type = element.type;
+		this.id = element.id;
+		this.getContentMethod = element.getContentMethod;
+		this.classes = element.classes;
+		this.children = element.children;
+		this.onClicked = element.onClicked;
+		this.onHover = element.onHover;
+		this.css = element.css;
+		this.condition = element.condition;
+		this.parent = element.parent;
 	}
 	
 	public HTMLElement(String type) {
@@ -68,8 +94,8 @@ public class HTMLElement {
 		return type;
 	}
 	
-	public String getContent() {
-		return content;
+	public String getContent(HttpSiteAccessedEvent event) {
+		return getContentMethod.apply(event);
 	}
 	
 	public Condition<HttpSiteAccessedEvent> getCondition() {
@@ -189,6 +215,12 @@ public class HTMLElement {
 	
 	public static HTMLElement raw(String raw) {
 		return new HTMLElement(null, raw);
+	}
+	
+	public static HTMLElement dynamic(HTMLElement element, Function<HttpSiteAccessedEvent, String> getContentMethod) {
+		HTMLElement el =  new HTMLElement(element);
+		el.getContentMethod = getContentMethod;
+		return el;
 	}
 	
 	public static class OnHover {

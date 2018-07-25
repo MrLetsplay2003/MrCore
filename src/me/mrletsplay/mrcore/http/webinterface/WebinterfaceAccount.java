@@ -21,7 +21,7 @@ public class WebinterfaceAccount {
 	}
 	
 	public OfflinePlayer getMinecraftPlayer() {
-		return Bukkit.getPlayer(minecraftUUID);
+		return Bukkit.getOfflinePlayer(minecraftUUID);
 	}
 	
 	public List<String> getPermissions() {

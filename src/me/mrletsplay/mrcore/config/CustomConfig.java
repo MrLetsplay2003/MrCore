@@ -328,32 +328,6 @@ public class CustomConfig {
 		return this;
 	}
 	
-//	public Map<String, Object> loadMap(LineByLineReader reader) throws IOException {
-//		Map<String, Object> map = new HashMap<>();
-//		ParsedLine line;
-//		int stage = reader.getPreviousLine().getStage();
-//		outer: while((line = reader.readLine()) != null) {
-//			if(line.getStage() < stage) {
-//				reader.jumpBack();
-//				break;
-//			}
-//			switch(line.type) {
-//				case PROPERTY:
-//					map.put(line.key, loadValue(line.value, reader));
-//					break;
-//				case LIST_START:
-//					map.put(line.key, loadList(reader, line.getStage() + 1));
-//					break;
-////				case OBJECT_END:
-////					break outer;
-//				default:
-//					reader.jumpBack();
-//					break outer;
-//			}
-//		}
-//		return map;
-//	}
-	
 	public Object loadGenericObject(LineByLineReader reader) throws IOException {
 		int stage = reader.getPreviousLine().stage;
 		ParsedLine line = reader.readLine();
@@ -508,7 +482,6 @@ public class CustomConfig {
 	public Object loadValue(ParsedValue value, LineByLineReader reader) throws IOException {
 		switch(value.type) {
 			case DEFAULT:
-//				return value.getValue().toString().isEmpty() ? loadGenericObject(reader) : value.val;
 				return value.val;
 			case OBJECT_START:
 				return loadGenericObject(reader);
@@ -708,7 +681,7 @@ public class CustomConfig {
 	 * @param save Whether this config should be saved
 	 * @param props The saveProperties to be used when saving the config (See {@link #saveConfig(List)})
 	 */
-	public void set(String key, Object val, boolean save, List<ConfigSaveProperty> props) { //TODO
+	public void set(String key, Object val, boolean save, List<ConfigSaveProperty> props) {
 		FormattedProperty fProp = formatter.formatObject(val);
 		parentSection.set(key, fProp.toProperty());
 		if(save) try {
@@ -1648,12 +1621,9 @@ public class CustomConfig {
 					properties.remove(key);
 				}else {
 					if(property.type.equals(PropertyType.MAP)) {
-//						ConfigSection sub = getOrCreateSubsection(key);
 						Map<String, Object> map = (Map<String, Object>) property.value;
 						ConfigSection cfg = ConfigSection.ofMap(config, map);
 						subsections.put(key, cfg);
-//						map.entrySet().forEach(en -> sub.set(en.getKey(), config.formatter.formatObject(en.getValue()).toProperty()));
-//						subsections.put(key, property.value);
 					}else {
 						properties.put(key, property);
 					}
@@ -1885,10 +1855,6 @@ public class CustomConfig {
 
 		public abstract List<String> formatList(List<?> list, int indents);
 		
-//		public abstract List<String> formatMapFully(String key, Map<String, ?> map, int indents);
-		
-//		public abstract List<String> formatMap(Map<String, ?> map, int indents);
-		
 		public String space(int length) {
 			StringBuilder sb = new StringBuilder();
 			for(int i = 0; i < length; i++) sb.append(config.space);
@@ -1932,7 +1898,7 @@ public class CustomConfig {
 		public static FormattedProperty map(ConfigFormatter formatter, Map<String,?> map) {
 			return new FormattedProperty(PropertyType.MAP, map.entrySet().stream()
 					.map(en -> new AbstractMap.SimpleEntry<>(en.getKey(), formatter.formatObject(en.getValue()).toProperty().getValue()))
-					.filter(en -> en.getValue() != null) //TODO: Wtf?
+					.filter(en -> en.getValue() != null)
 					.collect(Collectors.toMap(en -> en.getKey(), en -> en.getValue())));
 		}
 		
@@ -1997,25 +1963,19 @@ public class CustomConfig {
 						break;
 					case LIST:
 						b.append(getConfig().objectStartString);
-//						b.append(getConfig().splString);
-//						b.append(getConfig().entryString);
 						lines.add(b.toString());
 						b = new StringBuilder();
 						lines.addAll(formatList((List<?>) prop.val, indents + 1));
 						lines.add(new StringBuilder(space).append(getConfig().objectEndString).toString());
 						break;
 					case MAP:
-//						b.append(getConfig().splString);
 						b.append(getConfig().objectStartString);
-//						b.append(getConfig().objectStartString).append(newLine());
 						lines.add(b.toString());
 						b = new StringBuilder();
-//						lines.addAll(formatMap((Map<String, ?>) prop.val, indents + 1));
 						lines.addAll(ConfigSection.ofMap(getConfig(), (Map<String, Object>) prop.val).saveToLines(getConfig().defaultSaveProps, indents + 1));
 						lines.add(new StringBuilder(space).append(getConfig().objectEndString).toString());
 						break;
 				}
-//				b.append(newLine());
 				lines.add(b.toString());
 			}
 			return lines;
@@ -2028,28 +1988,8 @@ public class CustomConfig {
 						.append(key)
 						.append(getConfig().splString)
 						.append(val!=null?escapeString(val.toString()):"")
-//						.append(newLine())
 					.toString());
 		}
-
-//		@Override
-//		public List<String> formatMapFully(String key, Map<String,?> map, int indents) {
-//			List<String> lines = new ArrayList<>();
-//			lines.addAll(formatValue(key, getConfig().objectStartString, indents));
-//			lines.addAll(formatMap(map, indents + 1));
-//			lines.add(new StringBuilder().append(space(indents)).append(getConfig().objectEndString).append(newLine()).toString());
-//			return lines;
-//		}
-		
-//		@Override
-//		public List<String> formatMap(Map<String, ?> map, int indents) {
-//			List<String> lines = new ArrayList<>();
-//			for(Map.Entry<String,?> en : map.entrySet()) {
-//				FormattedProperty prop = formatObject(en.getValue());
-//				lines.addAll(formatProperty((String) en.getKey(), prop, indents));
-//			}
-//			return lines;
-//		}
 
 		@Override
 		public List<String> formatProperty(String key, FormattedProperty prop, int indents) {
@@ -2062,9 +2002,6 @@ public class CustomConfig {
 				case LIST:
 					formatListFully(key, (List<?>) p.value, indents).forEach(lines::add);
 					break;
-//				case MAP:
-//					formatMapFully(key, (Map<String,?>) p.value, indents).forEach(lines::add);
-//					break;
 				default:
 					break;
 			}

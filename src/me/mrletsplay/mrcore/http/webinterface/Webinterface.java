@@ -69,6 +69,10 @@ public class Webinterface {
 		return loggedInSessions.containsValue(acc);
 	}
 	
+	public static WebinterfaceAccount getLoggedInAccount(HttpConnection con) {
+		return loggedInSessions.get(con.getSessionID());
+	}
+	
 	public static void stop() {
 		server.stop();
 	}
@@ -162,8 +166,43 @@ public class Webinterface {
 			.addProperty("font-size", "20px")
 			.addProperty("margin-left", "5%");
 		
+		HTMLElement name = HTMLElement.dynamic(HTMLElement.a(null), event -> {
+			return Webinterface
+					.getLoggedInAccount(event.getConnection())
+					.getMinecraftPlayer()
+					.getName();
+		}).setID("name").condition(event -> {
+			return isLoggedIn(event.getConnection());
+		});
+		
+		name.css()
+			.addProperty("height", "100%")
+			.addProperty("display", "inline-flex")
+			.addProperty("justify-content", "center")
+			.addProperty("align-items", "center")
+			.addProperty("font-family", "'Ek Mukta'")
+			.addProperty("color", "white")
+			.addProperty("font-size", "20px")
+			.addProperty("margin-left", "5%");
+		
+		HTMLElement logout = HTMLElement.a("Logout", "/logout").setID("logout").condition(event -> {
+			return isLoggedIn(event.getConnection());
+		});
+		
+		logout.css()
+			.addProperty("height", "100%")
+			.addProperty("display", "inline-flex")
+			.addProperty("justify-content", "center")
+			.addProperty("align-items", "center")
+			.addProperty("font-family", "'Ek Mukta'")
+			.addProperty("color", "white")
+			.addProperty("font-size", "20px")
+			.addProperty("margin-left", "5%");
+		
 		rightContent.addChild(login);
 		rightContent.addChild(register);
+		rightContent.addChild(name);
+		rightContent.addChild(logout);
 		
 		HTMLElement middleContent = HTMLElement.div().setID("middle-content");
 		
