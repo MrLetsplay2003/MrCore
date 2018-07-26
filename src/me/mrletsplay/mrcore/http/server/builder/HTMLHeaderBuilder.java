@@ -10,16 +10,16 @@ import me.mrletsplay.mrcore.http.server.css.CSSStylesheet;
 import me.mrletsplay.mrcore.http.server.html.HTMLDocument;
 import me.mrletsplay.mrcore.http.server.html.HTMLElement;
 
-public class HtmlHeaderBuilder {
+public class HTMLHeaderBuilder {
 	
 	private HtmlHeaderImage headerImage;
 	private List<NavbarElement> links;
 	
-	public HtmlHeaderBuilder() {
+	public HTMLHeaderBuilder() {
 		this.links = new ArrayList<>();
 	}
 	
-	public HtmlHeaderBuilder addNavbarLink(String name, String link) {
+	public HTMLHeaderBuilder addNavbarLink(String name, String link) {
 		links.add(new LinkNavbarElement(name, link));
 		return this;
 	}
@@ -155,12 +155,12 @@ public class HtmlHeaderBuilder {
 	@SuppressWarnings("unused")
 	public class HtmlHeaderImage {
 		
-		private HtmlHeaderBuilder builder;
+		private HTMLHeaderBuilder builder;
 		private Position pos;
 		private BufferedImage image;
 		private int xOffset, yOffset, width, height;
 		
-		public HtmlHeaderImage(HtmlHeaderBuilder builder, BufferedImage image, Position pos) {
+		public HtmlHeaderImage(HTMLHeaderBuilder builder, BufferedImage image, Position pos) {
 			this.builder = builder;
 			this.image = image;
 			this.pos = pos;
@@ -216,7 +216,7 @@ public class HtmlHeaderBuilder {
 			return this;
 		}
 		
-		public HtmlHeaderBuilder done() {
+		public HTMLHeaderBuilder done() {
 			return builder;
 		}
 		
@@ -250,9 +250,9 @@ public class HtmlHeaderBuilder {
 	public class NavbarDropdown extends NavbarElement {
 
 		private Map<String, String> dropdownElements;
-		private HtmlHeaderBuilder builder;
+		private HTMLHeaderBuilder builder;
 		
-		public NavbarDropdown(HtmlHeaderBuilder builder, String name) {
+		public NavbarDropdown(HTMLHeaderBuilder builder, String name) {
 			super(name);
 			this.builder = builder;
 			this.dropdownElements = new LinkedHashMap<>();
@@ -263,7 +263,7 @@ public class HtmlHeaderBuilder {
 			return this;
 		}
 		
-		public HtmlHeaderBuilder done() {
+		public HTMLHeaderBuilder done() {
 			return builder;
 		}
 		

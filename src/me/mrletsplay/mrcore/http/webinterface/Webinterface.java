@@ -41,6 +41,7 @@ public class Webinterface {
 		server.addPage("/", home);
 		server.addPage("/register", initRegister());
 		server.addPage("/login", initLogin());
+		server.addPage("/logout", initLogout());
 		server.start();
 	}
 	
@@ -75,6 +76,48 @@ public class Webinterface {
 	
 	public static void stop() {
 		server.stop();
+	}
+	
+	private static HTMLElement addLoading(HTMLDocument doc) {
+		HTMLElement loadingDiv = HTMLElement.div().setID("loading-div");
+		
+		loadingDiv.css()
+			.addProperty("position", "absolute")
+			.addProperty("top", "0")
+			.addProperty("left", "0")
+			.addProperty("width", "100%")
+			.addProperty("height", "100%")
+			.addProperty("z-index", "100")
+			.addProperty("background-color", "rgb(50, 50, 50)")
+			.addProperty("display", "inline-flex")
+			.addProperty("align-items", "center")
+			.addProperty("justify-content", "center");
+		
+		doc.addElement(HTMLElement.script(
+					"if(document.readyState === 'complete') {" + 
+					"	document.getElementById(\"loading-div\").style.display = \"none\";" + 
+					"}else{" + 
+					"	var interval = setInterval(function() {" + 
+					"		if(document.readyState === 'complete') {" + 
+					"			clearInterval(interval);" + 
+					"			$(\"#loading-div\").delay(1000).animate({" + 
+					"				opacity: 0" + 
+					"			}, 1000, function() {" +
+					"				$(\"#loading-div\").hide();" +
+					"			});" + 
+					"		}" + 
+					"	}, 100);" + 
+					"}"
+				));
+		
+		HTMLElement loadingGif = HTMLElement.img("https://upload.wikimedia.org/wikipedia/commons/7/7a/Ajax_loader_metal_512.gif");
+		
+		loadingGif.css()
+			.addProperty("width", "100px");
+		
+		loadingDiv.addChild(loadingGif);
+		
+		return loadingDiv;
 	}
 	
 	private static HTMLElement addHeader(HTMLDocument doc) {
@@ -333,6 +376,8 @@ public class Webinterface {
 		pageContentDiv.addChild(HTMLElement.img(Var.HEAD_IMG));
 		div.addChild(pageContentDiv);
 		
+		home.addElement(addLoading(home));
+		
 		home.addElement(div);
 		return home;
 	}
@@ -500,6 +545,8 @@ public class Webinterface {
 		div.addChild(confirm);
 		div.addChild(awaitingDiv);
 		
+		registerPage.addElement(addLoading(registerPage));
+		
 		registerPage.addElement(div);
 		
 		return registerPage;
@@ -618,9 +665,22 @@ public class Webinterface {
 		div.addChild(pass);
 		div.addChild(confirm);
 		
+		loginPage.addElement(addLoading(loginPage));
+		
 		loginPage.addElement(div);
 		
 		return loginPage;
+	}
+	
+	private static HTMLDocument initLogout() {
+		HTMLDocument logoutPage = new HTMLDocument();
+		
+		logoutPage.addBuildAction(event -> {
+			loggedInSessions.remove(event.getConnection().getSessionID());
+			event.getConnection().addPoll(HttpClientPoll.redirect("/"));
+		});
+		
+		return logoutPage;
 	}
 	
 }
