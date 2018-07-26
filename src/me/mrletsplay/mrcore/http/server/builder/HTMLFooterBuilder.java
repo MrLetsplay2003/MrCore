@@ -7,15 +7,15 @@ import me.mrletsplay.mrcore.http.server.css.CSSStylesheet;
 import me.mrletsplay.mrcore.http.server.html.HTMLDocument;
 import me.mrletsplay.mrcore.http.server.html.HTMLElement;
 
-public class HtmlFooterBuilder {
+public class HTMLFooterBuilder {
 	
 	List<FooterElement> links;
 	
-	public HtmlFooterBuilder() {
+	public HTMLFooterBuilder() {
 		this.links = new ArrayList<>();
 	}
 	
-	public HtmlFooterBuilder addFooterLink(String name, String link) {
+	public HTMLFooterBuilder addFooterLink(String name, String link) {
 		links.add(new LinkFooterElement(name, link));
 		return this;
 	}

@@ -213,6 +213,14 @@ public class HTMLElement {
 		return new HTMLElement("button", text);
 	}
 	
+	public static HTMLElement script(JSFunction js) {
+		return new HTMLElement("script", js.asString());
+	}
+	
+	public static HTMLElement script(String js) {
+		return new HTMLElement("script", js);
+	}
+	
 	public static HTMLElement raw(String raw) {
 		return new HTMLElement(null, raw);
 	}

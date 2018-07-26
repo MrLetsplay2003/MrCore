@@ -7,10 +7,9 @@ import me.mrletsplay.mrcore.http.server.HttpConnectionInstance;
 import me.mrletsplay.mrcore.http.server.HttpServer;
 import me.mrletsplay.mrcore.http.server.html.HTMLDocument.HTMLBuiltDocument;
 
-public class JSFunction {
+public abstract class JSFunction {
 	
 	private String name;
-	private String innerJS;
 	
 	public void setName(String name) {
 		this.name = name;
@@ -20,13 +19,7 @@ public class JSFunction {
 		return name;
 	}
 	
-	public String asString() {
-		return innerJS;
-	}
-	
-//	public JSParsedFunction build(JSScript context) {
-//		return new JSParsedFunction(context, this);
-//	}
+	public abstract String asString();
 	
 	public static class JSFunctionInvokedEvent {
 		
@@ -58,20 +51,9 @@ public class JSFunction {
 		
 	}
 	
-	public static JSFunction basic(String name, String innerJS) {
-		return new JSFunction() {
-			
-			@Override
-			public String getName() {
-				return name;
-			}
-			
-			@Override
-			public String asString() {
-				return innerJS;
-			}
-		};
-	}
+//	public static JSFunction basic(String name, String innerJS) {
+//		return new JSFunction(name, innerJS);
+//	}
 	
 	public static JSFunctionCallable callable(Consumer<JSFunctionInvokedEvent> callableFunction) {
 		return new JSFunctionCallable(callableFunction);
@@ -79,6 +61,10 @@ public class JSFunction {
 	
 	public static JSFunctionConsumingCallable consumingCallable(JSFunctionConsumingCallable consumingCallableFunction) {
 		return consumingCallableFunction;
+	}
+	
+	public static JSFunctionRaw raw(String js) {
+		return new JSFunctionRaw(js);
 	}
 	
 }

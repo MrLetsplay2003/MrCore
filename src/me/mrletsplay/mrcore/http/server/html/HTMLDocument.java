@@ -3,6 +3,7 @@ package me.mrletsplay.mrcore.http.server.html;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import me.mrletsplay.mrcore.http.server.HttpConnection;
@@ -18,6 +19,7 @@ public class HTMLDocument {
 	private List<HTMLElement> elements;
 	private JSScript baseScript;
 	private CSSStylesheet style;
+	private List<Consumer<HttpSiteAccessedEvent>> buildActions;
 	
 	public HTMLDocument() {
 		this(HttpStatusCode.OKAY_200);
@@ -28,10 +30,15 @@ public class HTMLDocument {
 		this.elements = new ArrayList<>();
 		this.baseScript = new JSScript();
 		this.style = new CSSStylesheet();
+		this.buildActions = new ArrayList<>();
 	}
 	
 	public void addElement(HTMLElement element) {
 		elements.add(element);
+	}
+	
+	public void addBuildAction(Consumer<HttpSiteAccessedEvent> function) {
+		buildActions.add(function);
 	}
 	
 	public CSSStylesheet getStyle() {
@@ -44,6 +51,10 @@ public class HTMLDocument {
 	
 	public List<HTMLElement> getElements() {
 		return elements;
+	}
+	
+	public List<Consumer<HttpSiteAccessedEvent>> getBuildActions() {
+		return buildActions;
 	}
 	
 	public HttpStatusCode getStatusCode() {
@@ -84,6 +95,8 @@ public class HTMLDocument {
 		builder.append(script.asString());
 		builder.append("</script>");
 		builder.append("</body>");
+		
+		buildActions.forEach(a -> a.accept(event));
 		return new HTMLBuiltDocument(this, script, builder.toString());
 	}
 	
