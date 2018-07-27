@@ -11,7 +11,6 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import me.mrletsplay.mrcore._test.Main;
 import me.mrletsplay.mrcore.http.server.HttpServer.ClientHeader;
 import me.mrletsplay.mrcore.http.server.html.HTMLDocument;
 import me.mrletsplay.mrcore.http.server.html.HTMLDocument.HTMLBuiltDocument;
@@ -19,6 +18,7 @@ import me.mrletsplay.mrcore.http.server.js.JSFunction;
 import me.mrletsplay.mrcore.http.server.js.JSFunction.JSFunctionInvokedEvent;
 import me.mrletsplay.mrcore.http.server.js.JSFunctionCallable;
 import me.mrletsplay.mrcore.http.server.js.JSFunctionConsumingCallable;
+import me.mrletsplay.mrcore.main.MrCore;
 import me.mrletsplay.mrcore.misc.JSON.JSONArray;
 import me.mrletsplay.mrcore.misc.JSON.JSONObject;
 
@@ -83,7 +83,7 @@ public class HttpConnection {
 			}else if(iName.startsWith("img/")) {
 				String imgName = iName.substring("img/".length());
 				try {
-					InputStream in = Main.class.getResourceAsStream("/img/"+imgName);
+					InputStream in = MrCore.class.getResourceAsStream("/img/"+imgName);
 					if(in == null) {
 						writePage(new HTMLDocument(HttpStatusCode.NOT_FOUND_404).build(connection), connection);
 						return;
