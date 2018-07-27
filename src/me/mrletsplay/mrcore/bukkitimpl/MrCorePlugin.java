@@ -11,9 +11,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import me.mrletsplay.mrcore.bukkitimpl.ChatUI.UIListener;
 import me.mrletsplay.mrcore.bukkitimpl.GUIUtils.GUIListener;
+import me.mrletsplay.mrcore.config.ConfigLoader;
 import me.mrletsplay.mrcore.config.CustomConfig;
 import me.mrletsplay.mrcore.http.server.HttpConnection;
 import me.mrletsplay.mrcore.http.webinterface.Webinterface;
+import me.mrletsplay.mrcore.http.webinterface.WebinterfaceDataManager;
 import me.mrletsplay.mrcore.main.MrCore;
 
 public class MrCorePlugin extends JavaPlugin{
@@ -27,8 +29,9 @@ public class MrCorePlugin extends JavaPlugin{
 		MaterialLookup.loadAll();
 		Bukkit.getPluginManager().registerEvents(new GUIListener(), this);
 		getCommand("mrcoreui").setExecutor(new UIListener());
-		Webinterface.start();
-		config = new CustomConfig(new File(getDataFolder(), "config.yml")).loadConfigSafely();
+		config = ConfigLoader.loadConfig(new File(getDataFolder(), "config.yml"));
+		WebinterfaceDataManager.init();
+		if(WebinterfaceDataManager.isWebinterfaceEnabled()) Webinterface.start();
 		if(config.getBoolean("versioning.check-update", true, true)) {
 			String version = config.getString("versioning.version-to-use", "latest", true);
 			MrCoreUpdateChecker.checkForUpdate(version);

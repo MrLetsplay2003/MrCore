@@ -3,11 +3,13 @@ package me.mrletsplay.mrcore.http.server;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.Socket;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 
@@ -42,7 +44,7 @@ public class HttpConnection {
 	
 	public void handleRequest(ClientHeader clientHeader, HttpConnectionInstance connection) throws IOException {
 		ParsedURL parsedUrl = ParsedURL.parse(clientHeader.getRequestedURL());
-//		System.out.println(parsedUrl.getPath());
+		System.out.println(parsedUrl.getPath());
 		if(parsedUrl.getPath().startsWith("/_internals/")) {
 			String iName = parsedUrl.getPath().substring("/_internals/".length());
 			if(iName.equals("callback")) {
@@ -82,13 +84,17 @@ public class HttpConnection {
 				writeRaw(arr.toString(), "text/html", connection);
 			}else if(iName.startsWith("img/")) {
 				String imgName = iName.substring("img/".length());
+				System.out.println(imgName);
 				try {
-					InputStream in = MrCore.class.getResourceAsStream("/img/"+imgName);
-					if(in == null) {
+					URL u = MrCore.class.getResource("/img/"+imgName);
+					if(u == null) {
+						System.out.println("404");
 						writePage(new HTMLDocument(HttpStatusCode.NOT_FOUND_404).build(connection), connection);
 						return;
 					}
-					BufferedImage img = ImageIO.read(in);
+					URLConnection con = u.openConnection();
+					con.setUseCaches(false);
+					BufferedImage img = ImageIO.read(con.getInputStream());
 					writeImage(img, connection);
 				}catch(IOException e) {
 					e.printStackTrace();
@@ -108,27 +114,43 @@ public class HttpConnection {
 	
 	private void writePage(HTMLBuiltDocument doc, HttpConnectionInstance instance) throws IOException {
 		String resp = doc.getHTMLCode();
-		Date date = new Date();
-		String start = "HTTP/1.1 " + doc.getStatusCode().toString() + "\r\n";
-		String header = "Date: " + date.toString() + "\r\n";
-		header+= "Content-Type: text/html\r\n";
-		header+= "Content-length: " + resp.length() + "\r\n";
-		header+= "Set-Cookie: mrcore_sessid=" + sessID + "\r\n";
-		header+= "\r\n";
+		String start, header;
+		if(doc.getBase().getRedirect() == null) {
+			Date date = new Date();
+			start = "HTTP/1.1 " + doc.getStatusCode().toString() + "\r\n";
+			header = "Date: " + date.toString() + "\r\n";
+			header += "Content-Type: text/html\r\n";
+			header += "Content-length: " + resp.length() + "\r\n";
+			header += "Set-Cookie: mrcore_sessid=" + sessID + "\r\n";
+			for(Map.Entry<String, String> en : doc.getBase().getHeaderProperties().entrySet()) {
+				header += en.getKey() + ": " + en.getValue() + "\r\n";
+			}
+			header += "\r\n";
+		}else {
+			Date date = new Date();
+			start = "HTTP/1.1 " + HttpStatusCode.SEE_OTHER_303.toString() + "\r\n";
+			header = "Date: " + date.toString() + "\r\n";
+			header += "Set-Cookie: mrcore_sessid=" + sessID + "\r\n";
+			header += "Location: " + doc.getBase().getRedirect() + "\r\n";
+			for(Map.Entry<String, String> en : doc.getBase().getHeaderProperties().entrySet()) {
+				header += en.getKey() + ": " + en.getValue() + "\r\n";
+			}
+			header += "\r\n";
+		}
 		instance.out.write((start + header + resp).getBytes());
 	}
 	
 	private void writeImage(BufferedImage img, HttpConnectionInstance instance) throws IOException {
 		Date date = new Date();
 		ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-		ImageIO.write(img, "PNG", bOut);
+		ImageIO.write(img, "png", bOut);
 		byte[] b = bOut.toByteArray();
 		String start = "HTTP/1.1 200 OK\r\n";
 		String header = "Date: " + date.toString() + "\r\n";
-		header+= "Content-Type: image/png\r\n";
-		header+= "Content-length: " + b.length + "\r\n";
-		header+= "Set-Cookie: mrcore_sessid=" + sessID + "\r\n";
-		header+= "\r\n";
+		header += "Content-Type: image/png\r\n";
+		header += "Content-length: " + b.length + "\r\n";
+		header += "Set-Cookie: mrcore_sessid=" + sessID + "\r\n";
+		header += "\r\n";
 		instance.out.write((start + header).getBytes());
 		instance.out.write(b);
 	}
@@ -137,10 +159,10 @@ public class HttpConnection {
 		Date date = new Date();
 		String start = "HTTP/1.1 200 OK\r\n";
 		String header = "Date: " + date.toString() + "\r\n";
-		header+= "Content-Type: " + dataType + "\r\n";
-		header+= "Content-length: " + raw.length() + "\r\n";
-		header+= "Set-Cookie: mrcore_sessid=" + sessID + "\r\n";
-		header+= "\r\n";
+		header += "Content-Type: " + dataType + "\r\n";
+		header += "Content-length: " + raw.length() + "\r\n";
+		header += "Set-Cookie: mrcore_sessid=" + sessID + "\r\n";
+		header += "\r\n";
 		instance.out.write((start + header + raw).getBytes());
 	}
 	
@@ -148,10 +170,10 @@ public class HttpConnection {
 		Date date = new Date();
 		String start = "HTTP/1.1 200 OK\r\n";
 		String header = "Date: " + date.toString() + "\r\n";
-		header+= "Content-Type: test/html\r\n";
-		header+= "Content-length: 0\r\n";
-		header+= "Set-Cookie: mrcore_sessid=" + sessID + "\r\n";
-		header+= "\r\n";
+		header += "Content-Type: test/html\r\n";
+		header += "Content-length: 0\r\n";
+		header += "Set-Cookie: mrcore_sessid=" + sessID + "\r\n";
+		header += "\r\n";
 		instance.out.write((start + header).getBytes());
 	}
 	
