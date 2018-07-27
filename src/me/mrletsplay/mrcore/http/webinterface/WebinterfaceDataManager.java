@@ -19,6 +19,7 @@ public class WebinterfaceDataManager {
 	
 	private static BukkitCustomConfig data, config;
 	
+	private static boolean enabled;
 	private static int port;
 	
 	private static List<WebinterfaceAccount> accounts;
@@ -50,6 +51,7 @@ public class WebinterfaceDataManager {
 		
 		config = ConfigLoader.loadBukkitConfig(new File(MrCorePlugin.getBaseFolder()+"/webinterface", "config.yml"));
 		
+		enabled = config.getBoolean("enable", false, true);
 		port = config.getInt("port", 9090, true);
 		
 		config.saveConfigSafely();
@@ -104,6 +106,10 @@ public class WebinterfaceDataManager {
 	
 	public static boolean matchesPassword(WebinterfaceAccount account, String password) {
 		return data.getString("passwords."+account.getMinecraftUUID()).equals(password);
+	}
+	
+	public static boolean isWebinterfaceEnabled() {
+		return enabled;
 	}
 	
 	public static int getWebinterfacePort() {

@@ -3,8 +3,6 @@ package me.mrletsplay.mrcore.http.webinterface;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import me.mrletsplay.mrcore.http.server.HttpClientPoll;
@@ -14,34 +12,24 @@ import me.mrletsplay.mrcore.http.server.css.CSSStyleElement;
 import me.mrletsplay.mrcore.http.server.css.CSSStylesheet;
 import me.mrletsplay.mrcore.http.server.html.HTMLDocument;
 import me.mrletsplay.mrcore.http.server.html.HTMLElement;
-import me.mrletsplay.mrcore.http.server.js.JSFunctionConsumingCallable;
 import me.mrletsplay.mrcore.misc.JSON.JSONObject;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 
 public class Webinterface {
 
 	private static HttpServer server;
-	private static Map<String, WebinterfaceAccount> loggedInSessions;
-	private static Map<String, JSONObject> awaitingConfirmation;
+	protected static Map<String, WebinterfaceAccount> loggedInSessions;
+	protected static Map<String, JSONObject> awaitingConfirmation;
 	
 	public static void start() {
-		WebinterfaceDataManager.init();
-		
 		loggedInSessions = new HashMap<>();
 		awaitingConfirmation = new HashMap<>();
 		
 		server = new HttpServer(WebinterfaceDataManager.getWebinterfacePort());
 		
-		HTMLDocument home = new HTMLDocument();
-		
-		home.appendDocument(initHome());
-		
-		server.addPage("/", home);
-		server.addPage("/register", initRegister());
-		server.addPage("/login", initLogin());
-		server.addPage("/logout", initLogout());
+		server.addPage("/", PageHome.getPage());
+		server.addPage("/register", PageRegister.getPage());
+		server.addPage("/login", PageLogin.getPage());
+		server.addPage("/logout", PageLogout.getPage());
 		server.start();
 	}
 	
@@ -75,10 +63,10 @@ public class Webinterface {
 	}
 	
 	public static void stop() {
-		server.stop();
+		if(server != null) server.stop();
 	}
 	
-	private static HTMLElement addLoading(HTMLDocument doc) {
+	protected static HTMLElement addLoading(HTMLDocument doc) {
 		HTMLElement loadingDiv = HTMLElement.div().setID("loading-div");
 		
 		loadingDiv.css()
@@ -100,9 +88,9 @@ public class Webinterface {
 					"	var interval = setInterval(function() {" + 
 					"		if(document.readyState === 'complete') {" + 
 					"			clearInterval(interval);" + 
-					"			$(\"#loading-div\").delay(1000).animate({" + 
+					"			$(\"#loading-div\").animate({" + 
 					"				opacity: 0" + 
-					"			}, 1000, function() {" +
+					"			}, 300, function() {" +
 					"				$(\"#loading-div\").hide();" +
 					"			});" + 
 					"		}" + 
@@ -120,7 +108,7 @@ public class Webinterface {
 		return loadingDiv;
 	}
 	
-	private static HTMLElement addHeader(HTMLDocument doc) {
+	protected static HTMLElement addHeader(HTMLDocument doc) {
 		CSSStylesheet style = doc.getStyle();
 		HTMLElement headerDiv = HTMLElement.div().setID("page-header");
 		
@@ -283,404 +271,6 @@ public class Webinterface {
 		headerDiv.addChild(middleContent);
 		headerDiv.addChild(rightContent);
 		return headerDiv;
-	}
-	
-	private static HTMLDocument initHome() {
-		HTMLDocument home = new HTMLDocument();
-		CSSStylesheet style = home.getStyle();
-		
-		style.get("a:link")
-			.addProperty("text-decoration", "none")
-			.addProperty("color", "white");
-		style.get("a:active")
-			.addProperty("text-decoration", "none")
-			.addProperty("color", "white");
-		style.get("a:visited")
-			.addProperty("text-decoration", "none")
-			.addProperty("color", "white");
-		
-		HTMLElement div = HTMLElement.div();
-		
-		HTMLElement pageContentDiv = HTMLElement.div().setID("page-content");
-		
-		pageContentDiv.css()
-			.addProperty("position", "absolute")
-			.addProperty("top", "65px")
-			.addProperty("left", "0")
-			.addProperty("width", "100%")
-			.addProperty("height", "calc(100% - 65px)")
-			.addProperty("background-color", "white")
-			.addProperty("overflow", "hidden");
-		
-		HTMLElement about = HTMLElement.div().setID("about-container");
-		
-		about.css()
-			.addProperty("position", "absolute")
-			.addProperty("width", "100%")
-			.addProperty("height", "30%")
-			.addProperty("left", "0")
-			.addProperty("top", "25%")
-			.addProperty("color", "white")
-			.addProperty("text-align", "center")
-			.addProperty("font-size", "20px");
-		
-		HTMLElement aboutTextHeader = HTMLElement.a("About testname");
-		
-		aboutTextHeader.css()
-			.addProperty("font-size", "35px")
-			.addProperty("text-decoration", "underline")
-			.addProperty("font-weight", "bold");
-		
-		HTMLElement aboutText = HTMLElement.a("</br></br>A very nice schlong dong text.</br>"
-											+ "Made with <3 by the SchlongDong GmbH.</br>"
-											+ "Da is ja da Günther und der Heinz Dieter</br>"
-											+ "Dieser Text muss vier Zeilen haben.");
-		
-		about.addChild(aboutTextHeader);
-		about.addChild(aboutText);
-		
-		HTMLElement buttonBox = HTMLElement.div().setID("button-box");
-		
-		buttonBox.css()
-			.addProperty("position", "absolute")
-			.addProperty("width", "100%")
-			.addProperty("height", "5%")
-			.addProperty("top", "55%")
-			.addProperty("display", "inline-flex")
-			.addProperty("justify-content", "center")
-			.addProperty("align-items", "center");
-		
-		HTMLElement tryButton = HTMLElement.button("Try it out");
-		
-		tryButton.css()
-			.addProperty("position", "absolute")
-			.addProperty("width", "10%;")
-			.addProperty("height", "100%")
-			.addProperty("border", "2px solid white")
-			.addProperty("border-radius", "3px")
-			.addProperty("background-color", "transparent")
-			.addProperty("color", "white")
-			.addProperty("font-size", "18px")
-			.addProperty("opacity", "0.6");
-		
-		tryButton.onHover().css()
-			.addProperty("background-color", "hsl(0, 0%, 20%)")
-			.addProperty("cursor", "pointer")
-			.addProperty("opacity", "1");
-		
-		buttonBox.addChild(tryButton);
-		
-		pageContentDiv.addChild(about);
-		pageContentDiv.addChild(buttonBox);
-		div.addChild(addHeader(home));
-		pageContentDiv.addChild(HTMLElement.img(Var.HEAD_IMG));
-		div.addChild(pageContentDiv);
-		
-		home.addElement(addLoading(home));
-		
-		home.addElement(div);
-		return home;
-	}
-	
-	private static HTMLDocument initRegister() {
-		HTMLDocument registerPage = new HTMLDocument();
-		CSSStylesheet style = registerPage.getStyle();
-		
-		style.getType("body")
-			.addProperty("background-color", "#ecf0f5");
-		
-		style.get("a:link")
-			.addProperty("text-decoration", "none")
-			.addProperty("color", "white");
-		style.get("a:active")
-			.addProperty("text-decoration", "none")
-			.addProperty("color", "white");
-		style.get("a:visited")
-			.addProperty("text-decoration", "none")
-			.addProperty("color", "white");
-		
-		HTMLElement div = HTMLElement.div();
-		
-		div.css()
-			.addProperty("position", "absolute")
-			.addProperty("top", "0")
-			.addProperty("left", "0")
-			.addProperty("width", "100%")
-			.addProperty("height", "100%")
-			.addProperty("background-color", "hsl(0, 0%, 20%)")
-			.addProperty("overflow", "hidden");
-		
-		HTMLElement name = HTMLElement.inputText("Minecraft Name").setID("name-field");
-
-		name.css()
-			.addProperty("position", "absolute")
-			.addProperty("top", "30%")
-			.addProperty("left", "10%")
-			.addProperty("width", "30%")
-			.addProperty("height", "7%")
-			.addProperty("border", "1px solid lightgray")
-			.addProperty("color", "black")
-			.addProperty("font-family", "'Ek Mukta'")
-			.addProperty("background-color", "#fafafa")
-			.addProperty("padding-left", "10px")
-			.addProperty("font-size", "30px");
-		
-		HTMLElement pass = HTMLElement.inputPassword("Password").setID("password-field");
-
-		pass.css()
-			.addProperty("position", "absolute")
-			.addProperty("top", "45%")
-			.addProperty("left", "10%")
-			.addProperty("width", "30%")
-			.addProperty("height", "7%")
-			.addProperty("border", "1px solid lightgray")
-			.addProperty("color", "black")
-			.addProperty("font-family", "'Ek Mukta'")
-			.addProperty("background-color", "#fafafa")
-			.addProperty("padding-left", "10px")
-			.addProperty("font-size", "30px");
-		
-		HTMLElement passConf = HTMLElement.inputPassword("Confirm Password").setID("password-confirm-field");
-
-		passConf.css()
-			.addProperty("position", "absolute")
-			.addProperty("top", "55%")
-			.addProperty("left", "10%")
-			.addProperty("width", "30%")
-			.addProperty("height", "7%")
-			.addProperty("border", "1px solid lightgray")
-			.addProperty("color", "black")
-			.addProperty("font-family", "'Ek Mukta'")
-			.addProperty("background-color", "#fafafa")
-			.addProperty("padding-left", "10px")
-			.addProperty("font-size", "30px");
-		
-		HTMLElement awaitingDiv = HTMLElement.div();
-		
-		awaitingDiv.css()
-			.addProperty("position", "absolute")
-			.addProperty("width", "40%")
-			.addProperty("height", "50%")
-			.addProperty("right", "8%")
-			.addProperty("text-align", "left")
-			.addProperty("color", "white")
-			.addProperty("top", "25%")
-			.addProperty("display", "none");
-		
-		HTMLElement awaitingHead = HTMLElement.a("Awaiting confirmation...");
-		
-		awaitingHead.css()
-			.addProperty("font-size", "30px")
-			.addProperty("font-weight", "bold");
-		
-		HTMLElement awaitingText = HTMLElement.a("</br></br>Go into your minecraft client and click</br>on the message we have send to you.");
-		
-		awaitingText.css()
-			.addProperty("position", "absolute")
-			.addProperty("top", "7%")
-			.addProperty("left", "20px")
-			.addProperty("font-size", "20px");
-		
-		awaitingDiv.addChild(awaitingHead);
-		awaitingDiv.addChild(awaitingText);
-		
-		HTMLElement confirm = HTMLElement.button("Confirm");
-		
-		confirm.css()
-			.addProperty("position", "absolute")
-			.addProperty("top", "65%")
-			.addProperty("left", "10%")
-			.addProperty("width", "30%")
-			.addProperty("height", "7%")
-			.addProperty("background-color", "#57bc54")
-			.addProperty("border", "none")
-			.addProperty("color", "white")
-			.addProperty("font-family", "'Ek Mukta'")
-			.addProperty("font-size", "25px")
-			.addProperty("border-radius", "4px")
-			.addProperty("padding-left", "10px")
-			.addProperty("box-shadow", "2px 4px 10px rgba(0,0,0,0.1)");
-		
-		confirm.onClicked()
-			.function(new JSFunctionConsumingCallable() {
-				
-				@Override
-				public void invoke(JSFunctionInvokedEvent event, JSONObject params) {
-					if(!requireParams(params, "name", "password")) {
-						event.getConnection().addPoll(HttpClientPoll.alert("Name and password are required"));
-						return;
-					}
-					Player player = Bukkit.getPlayer(params.getString("name"));
-					if(player == null) {
-						event.getConnection().addPoll(HttpClientPoll.alert("Player isn't online"));
-						return;
-					}
-					if(WebinterfaceDataManager.isRegistered(player)) {
-						event.getConnection().addPoll(HttpClientPoll.alert("Player already registered"));
-						return;
-					}
-					awaitingConfirmation.put(event.getConnection().getSessionID(), params);
-					event.getConnection().addPoll(HttpClientPoll.alert("Waiting for registration"));
-					player.spigot().sendMessage(new ComponentBuilder("Click here").color(ChatColor.GRAY).event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/mrcore web register-confirm " + event.getConnection().getSessionID())).create());
-				}
-				
-				@Override
-				public String getParamsMethod() {
-					return 
-							"let pw1 = $(\"#password-field\").val();" +
-							"let pw2 = $(\"#password-confirm-field\").val();" +
-							"if(pw1 != pw2)  {" +
-							"alert(\"Passwords don't match\");" +
-							"return null;" +
-							"}" +
-							"return {name: $(\"#name-field\").val(), password: pw1};";
-				}
-			});
-
-		div.addChild(addHeader(registerPage));
-		div.addChild(HTMLElement.img(Var.HEAD_IMG));
-		div.addChild(name);
-		div.addChild(pass);
-		div.addChild(passConf);
-		div.addChild(confirm);
-		div.addChild(awaitingDiv);
-		
-		registerPage.addElement(addLoading(registerPage));
-		
-		registerPage.addElement(div);
-		
-		return registerPage;
-	}
-	
-	private static HTMLDocument initLogin() {
-		HTMLDocument loginPage = new HTMLDocument();
-		CSSStylesheet style = loginPage.getStyle();
-		
-		style.getType("body")
-			.addProperty("background-color", "#ecf0f5");
-		
-		style.get("a:link")
-			.addProperty("text-decoration", "none")
-			.addProperty("color", "white");
-		style.get("a:active")
-			.addProperty("text-decoration", "none")
-			.addProperty("color", "white");
-		style.get("a:visited")
-			.addProperty("text-decoration", "none")
-			.addProperty("color", "white");
-		
-		HTMLElement div = HTMLElement.div();
-		
-		div.css()
-			.addProperty("position", "absolute")
-			.addProperty("top", "0")
-			.addProperty("left", "0")
-			.addProperty("width", "100%")
-			.addProperty("height", "100%")
-			.addProperty("background-color", "hsl(0, 0%, 20%)")
-			.addProperty("overflow", "hidden");
-		
-		HTMLElement name = HTMLElement.inputText("Minecraft Name").setID("name-field");
-
-		name.css()
-			.addProperty("position", "absolute")
-			.addProperty("top", "30%")
-			.addProperty("left", "10%")
-			.addProperty("width", "30%")
-			.addProperty("height", "7%")
-			.addProperty("border", "1px solid lightgray")
-			.addProperty("color", "black")
-			.addProperty("font-family", "'Ek Mukta'")
-			.addProperty("background-color", "#fafafa")
-			.addProperty("padding-left", "10px")
-			.addProperty("font-size", "30px");
-		
-		HTMLElement pass = HTMLElement.inputPassword("Password").setID("password-field");
-
-		pass.css()
-			.addProperty("position", "absolute")
-			.addProperty("top", "45%")
-			.addProperty("left", "10%")
-			.addProperty("width", "30%")
-			.addProperty("height", "7%")
-			.addProperty("border", "1px solid lightgray")
-			.addProperty("color", "black")
-			.addProperty("font-family", "'Ek Mukta'")
-			.addProperty("background-color", "#fafafa")
-			.addProperty("padding-left", "10px")
-			.addProperty("font-size", "30px");
-		
-		HTMLElement confirm = HTMLElement.button("Confirm");
-		
-		confirm.css()
-			.addProperty("position", "absolute")
-			.addProperty("top", "65%")
-			.addProperty("left", "10%")
-			.addProperty("width", "30%")
-			.addProperty("height", "7%")
-			.addProperty("background-color", "#57bc54")
-			.addProperty("border", "none")
-			.addProperty("color", "white")
-			.addProperty("font-family", "'Ek Mukta'")
-			.addProperty("font-size", "25px")
-			.addProperty("border-radius", "4px")
-			.addProperty("padding-left", "10px")
-			.addProperty("box-shadow", "2px 4px 10px rgba(0,0,0,0.1)");
-		
-		confirm.onClicked()
-			.function(new JSFunctionConsumingCallable() {
-				
-				@SuppressWarnings("deprecation")
-				@Override
-				public void invoke(JSFunctionInvokedEvent event, JSONObject params) {
-					if(!requireParams(params, "name", "password")) {
-						event.getConnection().addPoll(HttpClientPoll.alert("Name and password are required"));
-						return;
-					}
-					OfflinePlayer player = Bukkit.getOfflinePlayer(params.getString("name"));
-					WebinterfaceAccount acc = WebinterfaceDataManager.getByMinecraftPlayer(player);
-					if(acc == null) {
-						event.getConnection().addPoll(HttpClientPoll.alert("Player isn't registered"));
-						return;
-					}
-					if(!acc.matchesPassword(params.getString("password"))) {
-						event.getConnection().addPoll(HttpClientPoll.alert("Invalid password"));
-						return;
-					}
-					event.getConnection().addPoll(HttpClientPoll.redirect("/"));
-					loggedInSessions.put(event.getConnection().getSessionID(), acc);
-				}
-				
-				@Override
-				public String getParamsMethod() {
-					return 
-							"let pw = $(\"#password-field\").val();" +
-							"return {name: $(\"#name-field\").val(), password: pw};";
-				}
-			});
-
-		div.addChild(addHeader(loginPage));
-		div.addChild(HTMLElement.img(Var.HEAD_IMG));
-		div.addChild(name);
-		div.addChild(pass);
-		div.addChild(confirm);
-		
-		loginPage.addElement(addLoading(loginPage));
-		
-		loginPage.addElement(div);
-		
-		return loginPage;
-	}
-	
-	private static HTMLDocument initLogout() {
-		HTMLDocument logoutPage = new HTMLDocument();
-		
-		logoutPage.addBuildAction(event -> {
-			loggedInSessions.remove(event.getConnection().getSessionID());
-			event.getConnection().addPoll(HttpClientPoll.redirect("/"));
-		});
-		
-		return logoutPage;
 	}
 	
 }

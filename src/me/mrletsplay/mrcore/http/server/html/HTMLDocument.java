@@ -1,7 +1,9 @@
 package me.mrletsplay.mrcore.http.server.html;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -20,6 +22,8 @@ public class HTMLDocument {
 	private JSScript baseScript;
 	private CSSStylesheet style;
 	private List<Consumer<HttpSiteAccessedEvent>> buildActions;
+	private Map<String, String> headerProperties;
+	private String redirect;
 	
 	public HTMLDocument() {
 		this(HttpStatusCode.OKAY_200);
@@ -31,6 +35,7 @@ public class HTMLDocument {
 		this.baseScript = new JSScript();
 		this.style = new CSSStylesheet();
 		this.buildActions = new ArrayList<>();
+		this.headerProperties = new HashMap<>();
 	}
 	
 	public void addElement(HTMLElement element) {
@@ -61,43 +66,29 @@ public class HTMLDocument {
 		return statusCode;
 	}
 	
+	public Map<String, String> getHeaderProperties() {
+		return headerProperties;
+	}
+	
+	public String getRedirect() {
+		return redirect;
+	}
+	
+	public HTMLDocument addHeaderProperty(String key, String value) {
+		headerProperties.put(key, value);
+		return this;
+	}
+	
+	public HTMLDocument setRedirect(String url) {
+		redirect = url;
+		return this;
+	}
+	
 	public HTMLDocument appendDocument(HTMLDocument doc) {
 		elements.addAll(doc.elements);
 		style.appendStylesheet(doc.style);
 		baseScript.appendScript(doc.baseScript);
 		return this;
-	}
-	
-	public HTMLBuiltDocument build(HttpConnectionInstance forInstance, String... params) {
-		JSScript script = baseScript.clone();
-		CSSStylesheet style = this.style.clone();
-		StringBuilder builder = new StringBuilder();
-		AtomicInteger uID = new AtomicInteger(0);
-		
-		StringBuilder body = new StringBuilder();
-		HttpSiteAccessedEvent event = new HttpSiteAccessedEvent(forInstance);
-		for(HTMLElement el : elements ) {
-			appendElement(body, script, style, el, uID, event, params);
-		}
-		
-		builder.append("<head>");
-		builder.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"https://fonts.googleapis.com/css?family=Ek+Mukta\">");
-		builder.append("<style>");
-		builder.append(style.asString());
-		builder.append("</style>");
-		builder.append("</head>");
-		
-		builder.append("<body>");
-		builder.append(body);
-		builder.append("<script src=\"https://code.jquery.com/jquery-3.3.1.min.js\"></script>");
-		builder.append("<script src=\"https://graphite-official.com/api/mrcore/files/http_client_impl.js\"></script>");
-		builder.append("<script>");
-		builder.append(script.asString());
-		builder.append("</script>");
-		builder.append("</body>");
-		
-		buildActions.forEach(a -> a.accept(event));
-		return new HTMLBuiltDocument(this, script, builder.toString());
 	}
 	
 	private void appendElement(StringBuilder builder, JSScript script, CSSStylesheet style, HTMLElement el, AtomicInteger uID, HttpSiteAccessedEvent event, String... params) {
@@ -142,6 +133,38 @@ public class HTMLDocument {
 		if(el.getType() != null) {
 			builder.append("</").append(el.getType()).append(">");
 		}
+	}
+	
+	public HTMLBuiltDocument build(HttpConnectionInstance forInstance, String... params) {
+		JSScript script = baseScript.clone();
+		CSSStylesheet style = this.style.clone();
+		StringBuilder builder = new StringBuilder();
+		AtomicInteger uID = new AtomicInteger(0);
+		
+		StringBuilder body = new StringBuilder();
+		HttpSiteAccessedEvent event = new HttpSiteAccessedEvent(forInstance);
+		for(HTMLElement el : elements ) {
+			appendElement(body, script, style, el, uID, event, params);
+		}
+		
+		builder.append("<head>");
+		builder.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"https://fonts.googleapis.com/css?family=Ek+Mukta\">");
+		builder.append("<style>");
+		builder.append(style.asString());
+		builder.append("</style>");
+		builder.append("</head>");
+		
+		builder.append("<body>");
+		builder.append(body);
+		builder.append("<script src=\"https://code.jquery.com/jquery-3.3.1.min.js\"></script>");
+		builder.append("<script src=\"https://graphite-official.com/api/mrcore/files/http_client_impl.js\"></script>");
+		builder.append("<script>");
+		builder.append(script.asString());
+		builder.append("</script>");
+		builder.append("</body>");
+		
+		buildActions.forEach(a -> a.accept(event));
+		return new HTMLBuiltDocument(this, script, builder.toString());
 	}
 	
 	public static class HTMLBuiltDocument {

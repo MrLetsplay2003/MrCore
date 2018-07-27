@@ -4,7 +4,9 @@ public enum HttpStatusCode {
 
 	OKAY_200("200 OK"),
 	NOT_FOUND_404("404 Not Found"),
-	INTERNAL_ERROR_500("500 Internal Server Error");
+	INTERNAL_ERROR_500("500 Internal Server Error"),
+	MOVED_PERMANENTLY_301("301 Moved Permanently"),
+	SEE_OTHER_303("303 See Other");
 	
 	private final String http;
 	
