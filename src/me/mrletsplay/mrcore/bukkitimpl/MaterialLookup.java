@@ -16,7 +16,7 @@ import me.mrletsplay.mrcore.misc.JSON.JSONObject;
 
 public class MaterialLookup {
 	
-	private static final String ID_LOOKUP_LIST_LINK = "http://minecraft-ids.grahamedgecombe.com/items.json";
+	private static final String ID_LOOKUP_LIST_LINK = "https://minecraft-ids.grahamedgecombe.com/items.json";
 	
 	private static List<MaterialLookup> lookups;
 	
