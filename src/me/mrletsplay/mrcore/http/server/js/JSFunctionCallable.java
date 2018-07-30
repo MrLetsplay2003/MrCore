@@ -15,10 +15,10 @@ public class JSFunctionCallable extends JSFunction {
 	}
 	
 	@Override
-	public String asString() {
+	public String asString(String name) {
 		return
-				"function " + getName() + "() {" +
-				"functionCallback(\"" + getName() + "\")" +
+				"function " + name + "(self) {" +
+				"functionCallback(\"" + name + "\")" +
 				"}";
 	}
 	

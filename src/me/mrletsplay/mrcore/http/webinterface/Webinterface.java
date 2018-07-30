@@ -10,8 +10,13 @@ import org.bukkit.entity.Player;
 import me.mrletsplay.mrcore.http.server.HttpClientPoll;
 import me.mrletsplay.mrcore.http.server.HttpConnection;
 import me.mrletsplay.mrcore.http.server.HttpServer;
+import me.mrletsplay.mrcore.http.server.html.HTMLDocument;
+import me.mrletsplay.mrcore.http.server.html.HTMLElement;
 import me.mrletsplay.mrcore.http.webinterface.doc.PageDocs;
+import me.mrletsplay.mrcore.http.webinterface.impl.PluginTab;
+import me.mrletsplay.mrcore.http.webinterface.impl.PluginWebinterfaceImpl;
 import me.mrletsplay.mrcore.http.webinterface.plugins.PagePluginsBase;
+import me.mrletsplay.mrcore.http.webinterface.plugins.PagePluginsHome;
 import me.mrletsplay.mrcore.misc.JSON.JSONObject;
 
 public class Webinterface {
@@ -32,7 +37,7 @@ public class Webinterface {
 		server.addPage("/register", PageRegister.getPage());
 		server.addPage("/login", PageLogin.getPage());
 		server.addPage("/logout", PageLogout.getPage());
-		server.addPage("/plugins/home", PagePluginsBase.getPage());
+		server.addPage("/plugins/home", PagePluginsHome.getPage());
 		server.addPage("/docs", PageDocs.getPage());
 		
 		server.start();
@@ -53,6 +58,22 @@ public class Webinterface {
 	
 	public static void registerPluginPage(PluginWebinterfaceImpl page) {
 		pluginPages.add(page);
+		for(PluginTab tab : page.getTabs()) {
+			server.addPage("/plugins/" + page.getPlugin().getName() + "/" + tab.getName(), buildTab(tab));
+		}
+	}
+	
+	private static HTMLDocument buildTab(PluginTab tab) {
+		HTMLDocument doc = PagePluginsBase.getBase();
+		
+		doc.setName(tab.getTitle() != null ? tab.getTitle() : tab.getName());
+		doc.getStyle().appendStylesheet(tab.getCSS());
+		
+		HTMLElement el = doc.getElementByID("tab-content");
+		
+		el.copyInner(tab.getHTML());
+		
+		return doc;
 	}
 	
 	public static boolean isLoggedIn(HttpConnection con) {
@@ -69,6 +90,10 @@ public class Webinterface {
 	
 	public static WebinterfaceAccount getLoggedInAccount(HttpConnection con) {
 		return loggedInSessions.get(con.getSessionID());
+	}
+	
+	public static List<PluginWebinterfaceImpl> getPluginPages() {
+		return pluginPages;
 	}
 	
 	public static void stop() {

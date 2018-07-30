@@ -1,9 +1,11 @@
-package me.mrletsplay.mrcore.http.webinterface;
+package me.mrletsplay.mrcore.http.webinterface.impl;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.plugin.Plugin;
+
+import me.mrletsplay.mrcore.http.webinterface.Webinterface;
 
 public class PluginWebinterfaceImpl {
 
@@ -28,21 +30,7 @@ public class PluginWebinterfaceImpl {
 	}
 	
 	public void register() {
-		
-	}
-	
-	public static class PluginTab {
-		
-		private String name;
-		
-		public PluginTab(String name) {
-			this.name = name;
-		}
-		
-		public String getName() {
-			return name;
-		}
-		
+		Webinterface.registerPluginPage(this);
 	}
 	
 }

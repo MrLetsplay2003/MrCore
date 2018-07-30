@@ -97,7 +97,8 @@ public class PageLogin {
 				
 				@SuppressWarnings("deprecation")
 				@Override
-				public void invoke(JSFunctionInvokedEvent event, JSONObject params) {
+				public void invoke(JSFunctionConsumingInvokedEvent event) {
+					JSONObject params = event.getParameters();
 					if(!requireParams(params, "name", "password")) {
 						event.getConnection().addPoll(HttpClientPoll.alert("Name and password are required"));
 						return;

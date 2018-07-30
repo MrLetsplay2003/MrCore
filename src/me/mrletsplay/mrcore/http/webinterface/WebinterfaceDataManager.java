@@ -90,8 +90,6 @@ public class WebinterfaceDataManager {
 	
 	public static WebinterfaceAccount getByMinecraftPlayer(OfflinePlayer player) {
 		return accounts.stream().filter(a -> {
-			System.out.println(a);
-			System.out.println(a.getMinecraftUUID());
 			return a.getMinecraftUUID().equals(player.getUniqueId());
 		}).findFirst().orElse(null);
 	}

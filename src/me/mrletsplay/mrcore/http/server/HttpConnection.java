@@ -16,10 +16,12 @@ import javax.imageio.ImageIO;
 import me.mrletsplay.mrcore.http.server.HttpServer.ClientHeader;
 import me.mrletsplay.mrcore.http.server.html.HTMLDocument;
 import me.mrletsplay.mrcore.http.server.html.HTMLDocument.HTMLBuiltDocument;
+import me.mrletsplay.mrcore.http.server.js.JSBuiltFunction;
 import me.mrletsplay.mrcore.http.server.js.JSFunction;
 import me.mrletsplay.mrcore.http.server.js.JSFunction.JSFunctionInvokedEvent;
 import me.mrletsplay.mrcore.http.server.js.JSFunctionCallable;
 import me.mrletsplay.mrcore.http.server.js.JSFunctionConsumingCallable;
+import me.mrletsplay.mrcore.http.server.js.JSFunctionConsumingCallable.JSFunctionConsumingInvokedEvent;
 import me.mrletsplay.mrcore.main.MrCore;
 import me.mrletsplay.mrcore.misc.JSON.JSONArray;
 import me.mrletsplay.mrcore.misc.JSON.JSONObject;
@@ -42,7 +44,7 @@ public class HttpConnection {
 	
 	public void handleRequest(ClientHeader clientHeader, HttpConnectionInstance connection) throws IOException {
 		ParsedURL parsedUrl = ParsedURL.parse(clientHeader.getRequestedURL());
-		System.out.println(parsedUrl.getPath());
+		System.out.println(clientHeader.getRequestedURL() + " | " + parsedUrl.getPath());
 		if(parsedUrl.getPath().startsWith("/_internals/")) {
 			String iName = parsedUrl.getPath().substring("/_internals/".length());
 			if(iName.equals("callback")) {
@@ -50,7 +52,8 @@ public class HttpConnection {
 					writePage(HttpConstants.HTML_INTERNALS_ERROR_PAGE.build(connection, clientHeader, parsedUrl), connection);
 					return;
 				}
-				JSFunction parsedF = lastServedPage.getScript().getFunction(parsedUrl.getGetParameters().get("function_name"));
+				JSBuiltFunction builtParsedF = lastServedPage.getScript().getFunction(parsedUrl.getGetParameters().get("function_name"));
+				JSFunction parsedF = builtParsedF.getBase();
 				if(parsedF != null && parsedF instanceof JSFunctionCallable) {
 					((JSFunctionCallable) parsedF).invoke(new JSFunctionInvokedEvent(server, connection, lastServedPage));
 				}
@@ -61,9 +64,11 @@ public class HttpConnection {
 					return;
 				}
 				try {
-					JSFunction parsedF = lastServedPage.getScript().getFunction(parsedUrl.getGetParameters().get("function_name"));
+					JSBuiltFunction builtParsedF = lastServedPage.getScript().getFunction(parsedUrl.getGetParameters().get("function_name"));
+					JSFunction parsedF = builtParsedF.getBase();
 					if(parsedF != null && parsedF instanceof JSFunctionConsumingCallable) {
-						((JSFunctionConsumingCallable) parsedF).invoke(new JSFunctionInvokedEvent(server, connection, lastServedPage), new JSONObject(parsedUrl.getGetParameters().get("function_data")));
+						((JSFunctionConsumingCallable) parsedF)
+							.invoke(new JSFunctionConsumingInvokedEvent(server, connection, lastServedPage, new JSONObject(parsedUrl.getGetParameters().get("function_data"))));
 					}
 					writeEmpty(connection);
 				}catch(Exception e) {
@@ -82,11 +87,9 @@ public class HttpConnection {
 				writeRaw(arr.toString(), "text/html", connection);
 			}else if(iName.startsWith("img/")) {
 				String imgName = iName.substring("img/".length());
-				System.out.println(imgName);
 				try {
 					URL u = MrCore.class.getResource("/img/"+imgName);
 					if(u == null) {
-						System.out.println("404");
 						writePage(new HTMLDocument(HttpStatusCode.NOT_FOUND_404).build(connection, clientHeader, parsedUrl), connection);
 						return;
 					}

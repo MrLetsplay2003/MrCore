@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import me.mrletsplay.mrcore.http.server.css.CSSStyleElement;
 import me.mrletsplay.mrcore.http.server.html.HTMLDocument.HttpSiteAccessedEvent;
+import me.mrletsplay.mrcore.http.server.html.HTMLElementTextInput.TextInputType;
 import me.mrletsplay.mrcore.http.server.js.JSFunction;
 import me.mrletsplay.mrcore.misc.Condition;
 
@@ -19,6 +21,7 @@ public class HTMLElement {
 	private CSSStyleElement css;
 	private Condition<HttpSiteAccessedEvent> condition;
 	private Function<HttpSiteAccessedEvent, String> getContentMethod;
+	private Function<HttpSiteAccessedEvent, List<HTMLElement>> getChildrenMethod;
 	private int sortingIndex, contentSortingIndex;
 	
 	private OnHover onHover;
@@ -46,21 +49,58 @@ public class HTMLElement {
 		this.css = new CSSStyleElement();
 	}
 	
+	protected HTMLElement(HTMLElement parent, HTMLElement element) {
+		this.type = element.type;
+		this.id = element.id;
+		this.getContentMethod = element.getContentMethod;
+		this.getChildrenMethod = element.getChildrenMethod;
+		this.classes = new ArrayList<>(element.classes);
+		this.children = new ArrayList<>(element.children).stream().map(e -> new HTMLElement(this, e)).collect(Collectors.toList());
+		this.onClicked = element.onClicked.clone();
+		this.onHover = element.onHover.clone();
+		this.css = element.css.clone();
+		this.condition = element.condition;
+		this.parent = parent;
+		this.sortingIndex = element.sortingIndex;
+		this.contentSortingIndex = element.contentSortingIndex;
+	}
+	
 	protected HTMLElement(HTMLElement element) {
 		this.type = element.type;
 		this.id = element.id;
 		this.getContentMethod = element.getContentMethod;
-		this.classes = element.classes;
-		this.children = element.children;
-		this.onClicked = element.onClicked;
-		this.onHover = element.onHover;
-		this.css = element.css;
+		this.getChildrenMethod = element.getChildrenMethod;
+		this.classes = new ArrayList<>(element.classes);
+		this.children = new ArrayList<>(element.children).stream().map(e -> new HTMLElement(this, e)).collect(Collectors.toList());
+		this.onClicked = element.onClicked.clone();
+		this.onHover = element.onHover.clone();
+		this.css = element.css.clone();
 		this.condition = element.condition;
-		this.parent = element.parent;
+		this.parent = element.parent != null ? element.parent.clone() : null;
+		this.sortingIndex = element.sortingIndex;
+		this.contentSortingIndex = element.contentSortingIndex;
 	}
 	
 	public HTMLElement(String type) {
 		this(type, "");
+	}
+	
+	public void copyProperties(HTMLElement other) {
+		this.type = other.type;
+		this.id = other.id;
+		this.getContentMethod = other.getContentMethod;
+		this.classes = new ArrayList<>(other.classes);
+		this.children = new ArrayList<>(other.children);
+		this.onClicked = other.onClicked.clone();
+		this.onHover = other.onHover.clone();
+		this.css = other.css.clone();
+		this.condition = other.condition;
+		this.parent = other.parent;
+	}
+	
+	public void copyInner(HTMLElement other) {
+		this.getContentMethod = other.getContentMethod;
+		this.children = new ArrayList<>(other.children);
 	}
 	
 	public HTMLElement addClasses(String... classes) {
@@ -106,6 +146,11 @@ public class HTMLElement {
 		return id;
 	}
 	
+	public HTMLElement getElementByID(String id) {
+		if(id.equals(this.id)) return this;
+		return children.stream().map(c -> c.getElementByID(id)).filter(e -> e != null).findFirst().orElse(null);
+	}
+	
 	public String getType() {
 		return type;
 	}
@@ -139,6 +184,12 @@ public class HTMLElement {
 		return children;
 	}
 	
+	public List<HTMLElement> getAllChildren(HttpSiteAccessedEvent event) {
+		List<HTMLElement> ch = new ArrayList<>(children);
+		if(getChildrenMethod != null) ch.addAll(getChildrenMethod.apply(event));
+		return ch;
+	}
+	
 	public List<String> getClasses() {
 		return classes;
 	}
@@ -167,6 +218,10 @@ public class HTMLElement {
 	public HTMLElement onClicked(OnClicked onClicked) {
 		this.onClicked = onClicked;
 		return this;
+	}
+	
+	public HTMLElement clone() {
+		return new HTMLElement(this);
 	}
 	
 	public static HTMLElement h1(String h1) {
@@ -209,33 +264,37 @@ public class HTMLElement {
 		return new HTMLElement("div");
 	}
 	
+	public static HTMLElement div(String text) {
+		return new HTMLElement("div", text);
+	}
+	
 	public static HTMLElement img(String src) {
 		return new HTMLElement("img src=\"" + src + "\"");
 	}
 	
-	public static HTMLElement inputText() {
-		return new HTMLElement("input type=\"text\"");
+	public static HTMLElementTextInput inputText() {
+		return new HTMLElementTextInput(TextInputType.PLAIN);
 	}
 	
-	public static HTMLElement inputText(String placeholder) {
-		return new HTMLElement("input type=\"text\" placeholder=\""+placeholder+"\"");
+	public static HTMLElementTextInput inputText(String placeholder) {
+		return new HTMLElementTextInput(TextInputType.PLAIN, placeholder);
 	}
 	
-	public static HTMLElement inputPassword() {
-		return new HTMLElement("input type=\"password\"");
+	public static HTMLElementTextInput inputPassword() {
+		return new HTMLElementTextInput(TextInputType.PASSWORD);
 	}
 	
-	public static HTMLElement inputPassword(String placeholder) {
-		return new HTMLElement("input type=\"password\" placeholder=\""+placeholder+"\"");
+	public static HTMLElementTextInput inputPassword(String placeholder) {
+		return new HTMLElementTextInput(TextInputType.PASSWORD, placeholder);
 	}
 	
 	public static HTMLElement button(String text) {
 		return new HTMLElement("button", text);
 	}
 	
-	public static HTMLElement script(JSFunction js) {
-		return new HTMLElement("script", js.asString());
-	}
+//	public static HTMLElement script(JSFunction js) {
+//		return new HTMLElement("script", js.asString());
+//	}
 	
 	public static HTMLElement script(String js) {
 		return new HTMLElement("script", js);
@@ -248,6 +307,13 @@ public class HTMLElement {
 	public static HTMLElement dynamic(HTMLElement element, Function<HttpSiteAccessedEvent, String> getContentMethod) {
 		HTMLElement el =  new HTMLElement(element);
 		el.getContentMethod = getContentMethod;
+		return el;
+	}
+	
+	public static HTMLElement dynamic(HTMLElement element, Function<HttpSiteAccessedEvent, String> getContentMethod, Function<HttpSiteAccessedEvent, List<HTMLElement>> getChildrenMethod) {
+		HTMLElement el =  new HTMLElement(element);
+		el.getContentMethod = getContentMethod;
+		el.getChildrenMethod = getChildrenMethod;
 		return el;
 	}
 	
@@ -268,6 +334,11 @@ public class HTMLElement {
 			this.style = new CSSStyleElement();
 		}
 		
+		public OnHover(OnHover from) {
+			this.style = from.style;
+			this.function = from.function;
+		}
+		
 		public CSSStyleElement css() {
 			return style;
 		}
@@ -281,6 +352,10 @@ public class HTMLElement {
 			return function;
 		}
 		
+		public OnHover clone() {
+			return new OnHover(this);
+		}
+		
 	}
 	
 	public static class OnClicked {
@@ -290,6 +365,11 @@ public class HTMLElement {
 		
 		public OnClicked() {
 			this.style = new CSSStyleElement();
+		}
+		
+		public OnClicked(OnClicked from) {
+			this.style = from.style;
+			this.function = from.function;
 		}
 		
 		public CSSStyleElement css() {
@@ -303,6 +383,10 @@ public class HTMLElement {
 		
 		public JSFunction getFunction() {
 			return function;
+		}
+		
+		public OnClicked clone() {
+			return new OnClicked(this);
 		}
 		
 	}

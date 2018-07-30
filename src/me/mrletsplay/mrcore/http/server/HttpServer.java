@@ -36,8 +36,12 @@ public class HttpServer {
 		page404.addElement(HTMLElement.p("The URL " + HttpConstants.HTML_404_REQUESTED_URL + " could not be found on the server"));
 	}
 	
-	public void addPage(String url, HTMLDocument page) {
-		pages.put(url, page);
+	public void addPage(String path, HTMLDocument page) {
+		pages.put(path, page);
+	}
+	
+	public void removePage(String path) {
+		pages.remove(path);
 	}
 	
 	public void set404Page(HTMLDocument page404) {

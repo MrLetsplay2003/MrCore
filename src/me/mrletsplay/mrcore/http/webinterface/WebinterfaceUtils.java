@@ -219,7 +219,7 @@ public class WebinterfaceUtils {
 		
 		middleContent.addChild(HTMLElement.a("", "/").addChild(HTMLElement.img(WebinterfaceUtils.HOME_ICON).css(e).onHover(hover).onClicked(click)));
 		middleContent.addChild(HTMLElement.a("", "/docs").addChild(HTMLElement.img(WebinterfaceUtils.DOCUMENTATION_ICON).css(e).onHover(hover).onClicked(click)));
-		middleContent.addChild(HTMLElement.a("", "/users").addChild(HTMLElement.img(WebinterfaceUtils.USERS_ICON).css(e).onHover(hover).onClicked(click)));
+		middleContent.addChild(HTMLElement.a("", "/plugins/home").addChild(HTMLElement.img(WebinterfaceUtils.USERS_ICON).css(e).onHover(hover).onClicked(click)));
 		
 		style.get("#middle-content > a > img")
 			.addProperty("height", "90%")
