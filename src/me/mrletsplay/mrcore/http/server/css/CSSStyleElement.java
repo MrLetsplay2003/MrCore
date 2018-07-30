@@ -37,6 +37,12 @@ public class CSSStyleElement implements Cloneable {
 				.addProperty("height", height);
 	}
 	
+	public CSSStyleElement dimensions(String width, String height) {
+		return 
+				addProperty("width", width)
+				.addProperty("height", height);
+	}
+	
 	public void setProperties(Map<String, Function<HttpSiteAccessedEvent, String>> properties) {
 		this.properties = properties;
 	}

@@ -1,5 +1,8 @@
 package me.mrletsplay.mrcore.http.webinterface.plugins;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import me.mrletsplay.mrcore.http.server.HttpClientPoll;
 import me.mrletsplay.mrcore.http.server.css.CSSStylesheet;
 import me.mrletsplay.mrcore.http.server.html.HTMLDocument;
@@ -8,6 +11,8 @@ import me.mrletsplay.mrcore.http.server.js.JSFunction;
 import me.mrletsplay.mrcore.http.server.js.JSScript;
 import me.mrletsplay.mrcore.http.webinterface.Webinterface;
 import me.mrletsplay.mrcore.http.webinterface.WebinterfaceUtils;
+import me.mrletsplay.mrcore.http.webinterface.impl.PluginTab;
+import me.mrletsplay.mrcore.http.webinterface.impl.PluginWebinterfaceImpl;
 
 public class PagePluginsBase {
 
@@ -18,7 +23,7 @@ public class PagePluginsBase {
 		CSSStylesheet style = base.getStyle();
 		JSScript script = base.getBaseScript();
 		
-		script.appendFunction(JSFunction.raw(
+		script.addFunction(JSFunction.raw(
 					"function toggleDropdown(dd){" + 
 					"	var dropdownContent = dd.nextElementSibling;" + 
 					"	if (dropdownContent.style.display === \"block\") {" + 
@@ -29,7 +34,7 @@ public class PagePluginsBase {
 					"}"
 				));
 		
-		script.appendFunction(JSFunction.raw(
+		script.addFunction(JSFunction.raw(
 					"function redirect(url){\r\n" + 
 					"	window.location.href = \"/plugins/\"+url+window.location.search;" + 
 					"}"
@@ -68,6 +73,10 @@ public class PagePluginsBase {
 			.addProperty("font-size", "14px")
 			.addProperty("padding", "6px 8px 6px 10px")
 			.addProperty("text-align", "left")
+			.addProperty("display", "block")
+			.addProperty("width", "100%");
+		
+		style.getClass("tab-title")
 			.addProperty("margin-top", "10px");
 		
 		style.getClass("dropdown-container")
@@ -81,7 +90,36 @@ public class PagePluginsBase {
 		
 		HTMLElement div = HTMLElement.div().setID("page-content");
 		
-		HTMLElement sidebarNav = HTMLElement.div()
+		HTMLElement sidebarNav = HTMLElement.dynamic(HTMLElement.div(), event -> null, event -> {
+					List<HTMLElement> ch = new ArrayList<>();
+					for(PluginWebinterfaceImpl impl : Webinterface.getPluginPages()) {
+						HTMLElement drd = HTMLElement.button(impl.getPlugin().getName())
+								.addClass("dropdown-button")
+								.addChild(HTMLElement.i().addClasses("fa", "fa-caret-down").setSortingIndex(2))
+								.addChild(HTMLElement.img("https://graphite-official.com/webinterface/img/home.png"))
+								.setContentSortingIndex(1);
+						
+						drd.onClicked().function(JSFunction.raw("toggleDropdown(this)"));
+						
+						ch.add(drd);
+						
+						HTMLElement sd = HTMLElement.div()
+								.addClass("dropdown-container");
+						
+						for(PluginTab tab : impl.getTabs()) {
+							HTMLElement a = HTMLElement.a(tab.getName())
+								.addChild(HTMLElement.img("https://graphite-official.com/webinterface/img/home.png"))
+								.setContentSortingIndex(1);
+							
+							a.onClicked()
+								.function(JSFunction.raw("redirect('"+impl.getPlugin().getName()+"/"+tab.getName()+"')"));
+							
+							sd.addChild(a);
+						}
+						ch.add(sd);
+					}
+					return ch;
+				})
 				.setID("sidebar-nav");
 		
 		sidebarNav.css()
@@ -94,23 +132,14 @@ public class PagePluginsBase {
 		sidebarNav.addChild(HTMLElement.button("Something")
 				.addClass("tab-button"));
 		
-		HTMLElement drd = HTMLElement.button("Something-Drop")
-				.addClass("dropdown-button")
-				.addChild(HTMLElement.i().addClasses("fa", "fa-caret-down").setSortingIndex(2))
-				.addChild(HTMLElement.img("https://graphite-official.com/webinterface/img/home.png"))
-				.setContentSortingIndex(1);
+		HTMLElement tabContent = HTMLElement.div().setID("tab-content");
 		
-		drd.onClicked().function(JSFunction.raw("toggleDropdown(this)"));
-		
-		sidebarNav.addChild(drd);
-		
-		sidebarNav.addChild(HTMLElement.div()
-				.addClass("dropdown-container")
-				.addChild(HTMLElement.a("Something else")
-					.addChild(HTMLElement.img("https://graphite-official.com/webinterface/img/home.png"))
-					.setContentSortingIndex(1)));
+		tabContent.css()
+			.position("absolute", "0", "15%", "85%", "100%")
+			.addProperty("background-color", "#ecf0f5");
 		
 		div.addChild(sidebarNav);
+		div.addChild(tabContent);
 		
 		base.addElement(WebinterfaceUtils.addLoading(base));
 		base.addElement(WebinterfaceUtils.addHeader(base));
@@ -124,8 +153,8 @@ public class PagePluginsBase {
 		});
 	}
 	
-	public static HTMLDocument getPage() {
-		return base;
+	public static HTMLDocument getBase() {
+		return base.clone();
 	}
 	
 }

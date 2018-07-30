@@ -19,6 +19,10 @@ import me.mrletsplay.mrcore.http.server.HttpStatusCode;
 import me.mrletsplay.mrcore.http.server.ParsedURL;
 import me.mrletsplay.mrcore.http.server.css.CSSStyleElement;
 import me.mrletsplay.mrcore.http.server.css.CSSStylesheet;
+import me.mrletsplay.mrcore.http.server.html.HTMLElementTextInput.TextInputChangedEvent;
+import me.mrletsplay.mrcore.http.server.js.JSBuiltFunction;
+import me.mrletsplay.mrcore.http.server.js.JSBuiltScript;
+import me.mrletsplay.mrcore.http.server.js.JSFunctionConsumingCallable;
 import me.mrletsplay.mrcore.http.server.js.JSFunctionRaw;
 import me.mrletsplay.mrcore.http.server.js.JSScript;
 
@@ -28,7 +32,7 @@ public class HTMLDocument {
 	private List<HTMLElement> elements;
 	private JSScript baseScript;
 	private CSSStylesheet style;
-	private List<Consumer<HttpSiteAccessedEvent>> buildActions;
+	private List<Consumer<HttpSiteBuiltEvent>> buildActions;
 	private Map<String, String> headerProperties;
 	private String redirect;
 	private String name;
@@ -46,11 +50,22 @@ public class HTMLDocument {
 		this.headerProperties = new HashMap<>();
 	}
 	
+	public HTMLDocument(HTMLDocument doc) {
+		this.statusCode = doc.statusCode;
+		this.elements = new ArrayList<>(doc.elements).stream().map(HTMLElement::clone).collect(Collectors.toList());
+		this.baseScript = doc.baseScript.clone();
+		this.style = doc.style.clone();
+		this.buildActions = new ArrayList<>(doc.buildActions);
+		this.headerProperties = new HashMap<>(doc.headerProperties);
+		this.redirect = doc.redirect;
+		this.name = doc.name;
+	}
+	
 	public void addElement(HTMLElement element) {
 		elements.add(element);
 	}
 	
-	public void addBuildAction(Consumer<HttpSiteAccessedEvent> function) {
+	public void addBuildAction(Consumer<HttpSiteBuiltEvent> function) {
 		buildActions.add(function);
 	}
 	
@@ -66,11 +81,15 @@ public class HTMLDocument {
 		return baseScript;
 	}
 	
+	public HTMLElement getElementByID(String id) {
+		return elements.stream().map(e -> e.getElementByID(id)).filter(e -> e != null).findFirst().orElse(null);
+	}
+	
 	public List<HTMLElement> getElements() {
 		return elements;
 	}
 	
-	public List<Consumer<HttpSiteAccessedEvent>> getBuildActions() {
+	public List<Consumer<HttpSiteBuiltEvent>> getBuildActions() {
 		return buildActions;
 	}
 	
@@ -107,7 +126,7 @@ public class HTMLDocument {
 		return this;
 	}
 	
-	private StringBuilder appendElement(StringBuilder builder, JSScript script, CSSStylesheet style, HTMLElement el, AtomicInteger uID, HttpSiteAccessedEvent event, String... params) {
+	private StringBuilder appendElement(StringBuilder builder, JSBuiltScript script, CSSStylesheet style, HTMLElement el, AtomicInteger uID, HttpSiteAccessedEvent event, String... params) {
 //		System.out.println(el.getCondition() + "/" + el.getCondition() != null ? el.getCondition().apply(event) : "");
 		if(event.getConnectionInstance() != null && el.getCondition() != null && !el.getCondition().apply(event)) return builder;
 		HTMLElement.OnHover onHover = el.onHover();
@@ -131,30 +150,63 @@ public class HTMLDocument {
 				builder.append(" id=\""+el.getID()+"\"");
 			}
 			if(onClicked.getFunction() != null) {
-				script.appendFunction(onClicked.getFunction());
 				if(onClicked.getFunction() instanceof JSFunctionRaw) {
-					builder.append(" onclick=").append(StringEscapeUtils.escapeJavaScript(((JSFunctionRaw) onClicked.getFunction()).asString()));
+					builder.append(" onclick=").append(StringEscapeUtils.escapeHtml(((JSFunctionRaw) onClicked.getFunction()).asString(null)));
 				}else {
-					builder.append(" onclick=").append(onClicked.getFunction().getName()).append("()");
+					JSBuiltFunction f = script.appendFunction(onClicked.getFunction());
+					builder.append(" onclick=").append(f.getName()).append("(this)");
 				}
 			}
 			if(onHover.getFunction() != null) {
-				script.appendFunction(onHover.getFunction());
 				if(onHover.getFunction() instanceof JSFunctionRaw) {
-					builder.append(" onmouseover=").append(StringEscapeUtils.escapeJavaScript(((JSFunctionRaw) onHover.getFunction()).asString()));
+					builder.append(" onmouseover=").append(StringEscapeUtils.escapeHtml(((JSFunctionRaw) onHover.getFunction()).asString(null)));
 				}else {
-					builder.append(" onmouseover=").append(onHover.getFunction().getName()).append("()");
+					JSBuiltFunction f = script.appendFunction(onHover.getFunction());
+					builder.append(" onmouseover=").append(f.getName()).append("(this)");
 				}
+			}
+			if(el instanceof HTMLElementTextInput) {
+				HTMLElementTextInput input = (HTMLElementTextInput) el;
+				StringBuilder chBuilder = new StringBuilder();
+				if(input.onChanged().getFunction() != null) {
+					if(input.onChanged().getFunction() instanceof JSFunctionRaw) {
+						chBuilder.append(StringEscapeUtils.escapeHtml(((JSFunctionRaw) input.onChanged().getFunction()).asString(null))).append(";");
+					}else {
+						JSBuiltFunction f = script.appendFunction(input.onChanged().getFunction());
+						chBuilder.append(f.getName()).append("(this);");
+					}
+				}
+				if(input.onChanged().getEventHandler() != null) {
+					JSFunctionConsumingCallable consC = new JSFunctionConsumingCallable() {
+						
+						@Override
+						public void invoke(JSFunctionConsumingInvokedEvent event) {
+							if(!requireParams(event.getParameters(), "input")) return;
+							if(!(event.getParameters().get("input") instanceof String)) return;
+							String inp = event.getParameters().getString("input");
+							input.onChanged().getEventHandler().accept(TextInputChangedEvent.of(event, inp));
+						}
+						
+						@Override
+						public String getParamsMethod() {
+							return "return {input: self.value}";
+						}
+					};
+					JSBuiltFunction f = script.appendFunction(consC);
+					chBuilder.append(f.getName()).append("(this);");
+				}
+				if(chBuilder.length() != 0) builder.append(" onchange=").append(chBuilder);
 			}
 			builder.append(">");
 		}
 		String content = el.getContent(event);
+		if(content == null) content = "";
 		for(int i = 0; i < params.length; i+=2) {
 			content = content.replace(params[i], params[i+1]);
 		}
 		List<Map.Entry<Integer, CharSequence>> strs = new ArrayList<>();
 		strs.add(new AbstractMap.SimpleEntry<>(el.getContentSortingIndex(), content));
-		el.getChildren().forEach(c -> strs.add(new AbstractMap.SimpleEntry<>(c.getSortingIndex(), appendElement(new StringBuilder(), script, style, c, uID, event, params))));
+		el.getAllChildren(event).forEach(c -> strs.add(new AbstractMap.SimpleEntry<>(c.getSortingIndex(), appendElement(new StringBuilder(), script, style, c, uID, event, params))));
 		strs.stream().sorted((o1, o2) -> o1.getKey() - o2.getKey()).map(en -> en.getValue()).collect(Collectors.toList()).forEach(builder::append);
 		if(el.getType() != null) {
 			builder.append("</").append(el.getType()).append(">");
@@ -163,7 +215,7 @@ public class HTMLDocument {
 	}
 	
 	public HTMLBuiltDocument build(HttpConnectionInstance forInstance, ClientHeader clientHeader, ParsedURL requestedURL, String... params) {
-		JSScript script = baseScript.clone();
+		JSBuiltScript script = baseScript.build();
 		CSSStylesheet style = this.style.clone();
 		StringBuilder builder = new StringBuilder();
 		AtomicInteger uID = new AtomicInteger(0);
@@ -191,22 +243,27 @@ public class HTMLDocument {
 		builder.append(script.asString());
 		builder.append("</script>");
 		builder.append("</body>");
-		
-		buildActions.forEach(a -> a.accept(event));
 		if(event.allowAccess) {
-			return new HTMLBuiltDocument(this, script, builder.toString());
+			HTMLBuiltDocument doc = new HTMLBuiltDocument(this, script, builder.toString());
+			HttpSiteBuiltEvent event2 = new HttpSiteBuiltEvent(forInstance, clientHeader, requestedURL, doc);
+			buildActions.forEach(a -> a.accept(event2));
+			return doc;
 		}else {
 			return forInstance.getConnection().getServer().get404Page().build(forInstance, clientHeader, requestedURL, HttpConstants.HTML_404_REQUESTED_URL, requestedURL.getPath());
 		}
 	}
 	
+	public HTMLDocument clone() {
+		return new HTMLDocument(this);
+	}
+	
 	public static class HTMLBuiltDocument {
 		
 		private HTMLDocument base;
-		private JSScript script;
+		private JSBuiltScript script;
 		private String htmlCode;
 		
-		public HTMLBuiltDocument(HTMLDocument base, JSScript script, String htmlCode) {
+		public HTMLBuiltDocument(HTMLDocument base, JSBuiltScript script, String htmlCode) {
 			this.base = base;
 			this.script = script;
 			this.htmlCode = htmlCode;
@@ -220,7 +277,7 @@ public class HTMLDocument {
 			return base;
 		}
 		
-		public JSScript getScript() {
+		public JSBuiltScript getScript() {
 			return script;
 		}
 		
@@ -261,6 +318,24 @@ public class HTMLDocument {
 		
 		public void setAllowAccess(boolean allowAccess) {
 			this.allowAccess = allowAccess;
+		}
+		
+	}
+	
+	public static class HttpSiteBuiltEvent extends HttpSiteAccessedEvent {
+
+		private HTMLBuiltDocument builtDocument;
+		
+		public HttpSiteBuiltEvent(HttpConnectionInstance connectionInstance, ClientHeader clientHeader, ParsedURL requestedURL, HTMLBuiltDocument document) {
+			super(connectionInstance, clientHeader, requestedURL);
+		}
+		
+		public HTMLBuiltDocument getBuiltDocument() {
+			return builtDocument;
+		}
+		
+		public HTMLDocument getDocument() {
+			return builtDocument.getBase();
 		}
 		
 	}

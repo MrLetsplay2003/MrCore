@@ -12,6 +12,7 @@ public abstract class JSFunction {
 	private String name;
 	
 	public void setName(String name) {
+		Thread.dumpStack();
 		this.name = name;
 	}
 	
@@ -19,7 +20,7 @@ public abstract class JSFunction {
 		return name;
 	}
 	
-	public abstract String asString();
+	public abstract String asString(String name);
 	
 	public static class JSFunctionInvokedEvent {
 		
@@ -50,10 +51,6 @@ public abstract class JSFunction {
 		}
 		
 	}
-	
-//	public static JSFunction basic(String name, String innerJS) {
-//		return new JSFunction(name, innerJS);
-//	}
 	
 	public static JSFunctionCallable callable(Consumer<JSFunctionInvokedEvent> callableFunction) {
 		return new JSFunctionCallable(callableFunction);

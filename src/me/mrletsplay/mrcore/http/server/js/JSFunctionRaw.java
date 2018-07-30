@@ -9,7 +9,7 @@ public class JSFunctionRaw extends JSFunction {
 	}
 	
 	@Override
-	public String asString() {
+	public String asString(String name) {
 		return raw;
 	}
 	
