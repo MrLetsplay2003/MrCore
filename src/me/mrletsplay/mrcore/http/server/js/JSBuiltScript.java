@@ -26,10 +26,8 @@ public class JSBuiltScript implements Cloneable {
 	}
 	
 	public JSBuiltFunction appendFunction(JSFunction function) {
-		System.out.println(function + " -> " + function.getName());
 		String name = function.getName();
 		if(name == null) name = randomFunctionName();
-		System.out.println(name);
 		JSBuiltFunction f = new JSBuiltFunction(function, name);
 		functions.add(f);
 		return f;

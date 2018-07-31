@@ -15,7 +15,6 @@ public class HttpConnectionInstance {
 	OutputStream out;
 	private Thread connectionThread;
 	private HttpConnection connection;
-//	HTMLBuiltDocument lastServedPage;
 	
 	public HttpConnectionInstance(HttpConnection connection, Socket s) throws IOException {
 		this.connection = connection;

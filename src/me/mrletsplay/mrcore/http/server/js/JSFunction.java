@@ -60,8 +60,17 @@ public abstract class JSFunction {
 		return consumingCallableFunction;
 	}
 	
+//	@Deprecated TODO
 	public static JSFunctionRaw raw(String js) {
 		return new JSFunctionRaw(js);
+	}
+	
+	public static JSFunctionBasic of(String innerJS) {
+		return new JSFunctionBasic(innerJS);
+	}
+	
+	public static JSFunctionBasic of(String name, String innerJS) {
+		return new JSFunctionBasic(name, innerJS);
 	}
 	
 }
