@@ -32,6 +32,7 @@ public class HTMLDocument {
 	private List<HTMLElement> elements;
 	private JSScript baseScript;
 	private CSSStylesheet style;
+	private List<Consumer<HttpSiteAccessedEvent>> accessActions;
 	private List<Consumer<HttpSiteBuiltEvent>> buildActions;
 	private Map<String, String> headerProperties;
 	private String redirect;
@@ -46,6 +47,7 @@ public class HTMLDocument {
 		this.elements = new ArrayList<>();
 		this.baseScript = new JSScript();
 		this.style = new CSSStylesheet();
+		this.accessActions = new ArrayList<>();
 		this.buildActions = new ArrayList<>();
 		this.headerProperties = new HashMap<>();
 	}
@@ -55,6 +57,7 @@ public class HTMLDocument {
 		this.elements = new ArrayList<>(doc.elements).stream().map(HTMLElement::clone).collect(Collectors.toList());
 		this.baseScript = doc.baseScript.clone();
 		this.style = doc.style.clone();
+		this.accessActions = new ArrayList<>(doc.accessActions);
 		this.buildActions = new ArrayList<>(doc.buildActions);
 		this.headerProperties = new HashMap<>(doc.headerProperties);
 		this.redirect = doc.redirect;
@@ -63,6 +66,10 @@ public class HTMLDocument {
 	
 	public void addElement(HTMLElement element) {
 		elements.add(element);
+	}
+	
+	public void addAccessAction(Consumer<HttpSiteAccessedEvent> function) {
+		accessActions.add(function);
 	}
 	
 	public void addBuildAction(Consumer<HttpSiteBuiltEvent> function) {
@@ -87,6 +94,10 @@ public class HTMLDocument {
 	
 	public List<HTMLElement> getElements() {
 		return elements;
+	}
+	
+	public List<Consumer<HttpSiteAccessedEvent>> getAccessActions() {
+		return accessActions;
 	}
 	
 	public List<Consumer<HttpSiteBuiltEvent>> getBuildActions() {
@@ -127,7 +138,6 @@ public class HTMLDocument {
 	}
 	
 	private StringBuilder appendElement(StringBuilder builder, JSBuiltScript script, CSSStylesheet style, HTMLElement el, AtomicInteger uID, HttpSiteAccessedEvent event, String... params) {
-//		System.out.println(el.getCondition() + "/" + el.getCondition() != null ? el.getCondition().apply(event) : "");
 		if(event.getConnectionInstance() != null && el.getCondition() != null && !el.getCondition().apply(event)) return builder;
 		HTMLElement.OnHover onHover = el.onHover();
 		HTMLElement.OnClicked onClicked = el.onClicked();
@@ -243,6 +253,7 @@ public class HTMLDocument {
 		builder.append(script.asString());
 		builder.append("</script>");
 		builder.append("</body>");
+		accessActions.forEach(a -> a.accept(event));
 		if(event.allowAccess) {
 			HTMLBuiltDocument doc = new HTMLBuiltDocument(this, script, builder.toString());
 			HttpSiteBuiltEvent event2 = new HttpSiteBuiltEvent(forInstance, clientHeader, requestedURL, doc);
@@ -320,14 +331,24 @@ public class HTMLDocument {
 			this.allowAccess = allowAccess;
 		}
 		
+		public boolean shouldAllowAccess() {
+			return allowAccess;
+		}
+		
 	}
 	
-	public static class HttpSiteBuiltEvent extends HttpSiteAccessedEvent {
+	public static class HttpSiteBuiltEvent {
 
 		private HTMLBuiltDocument builtDocument;
+		private HttpConnectionInstance connectionInstance;
+		private ClientHeader clientHeader;
+		private ParsedURL requestedURL;
 		
-		public HttpSiteBuiltEvent(HttpConnectionInstance connectionInstance, ClientHeader clientHeader, ParsedURL requestedURL, HTMLBuiltDocument document) {
-			super(connectionInstance, clientHeader, requestedURL);
+		public HttpSiteBuiltEvent(HttpConnectionInstance connectionInstance, ClientHeader clientHeader, ParsedURL requestedURL, HTMLBuiltDocument builtDocument) {
+			this.connectionInstance = connectionInstance;
+			this.clientHeader = clientHeader;
+			this.requestedURL = requestedURL;
+			this.builtDocument = builtDocument;
 		}
 		
 		public HTMLBuiltDocument getBuiltDocument() {
@@ -336,6 +357,22 @@ public class HTMLDocument {
 		
 		public HTMLDocument getDocument() {
 			return builtDocument.getBase();
+		}
+		
+		public HttpConnectionInstance getConnectionInstance() {
+			return connectionInstance;
+		}
+		
+		public HttpConnection getConnection() {
+			return connectionInstance.getConnection();
+		}
+		
+		public ClientHeader getClientHeader() {
+			return clientHeader;
+		}
+		
+		public ParsedURL getRequestedURL() {
+			return requestedURL;
 		}
 		
 	}

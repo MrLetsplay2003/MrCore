@@ -99,7 +99,7 @@ public class PagePluginsBase {
 								.addChild(HTMLElement.img("https://graphite-official.com/webinterface/img/home.png"))
 								.setContentSortingIndex(1);
 						
-						drd.onClicked().function(JSFunction.raw("toggleDropdown(this)"));
+						drd.onClicked().function(JSFunction.of("toggleDropdown(self)"));
 						
 						ch.add(drd);
 						
@@ -112,7 +112,7 @@ public class PagePluginsBase {
 								.setContentSortingIndex(1);
 							
 							a.onClicked()
-								.function(JSFunction.raw("redirect('"+impl.getPlugin().getName()+"/"+tab.getName()+"')"));
+								.function(JSFunction.of("redirect('"+impl.getPlugin().getName()+"/"+tab.getName()+"')"));
 							
 							sd.addChild(a);
 						}
@@ -145,7 +145,8 @@ public class PagePluginsBase {
 		base.addElement(WebinterfaceUtils.addHeader(base));
 		
 		base.addElement(div);
-		base.addBuildAction(event -> {
+		base.addAccessAction(event -> {
+			System.out.println("DENYYYYYY");
 			if(!Webinterface.isLoggedIn(event.getConnection())) {
 				event.setAllowAccess(false);
 				event.getConnection().addPoll(HttpClientPoll.redirect("/login"));
