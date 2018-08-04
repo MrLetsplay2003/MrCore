@@ -19,6 +19,8 @@ public class PageRegister {
 	
 	static {
 		register = new HTMLDocument();
+		register.setName("MrCore | Register");
+		register.setIcon("/_internals/img/MrCore.png");
 		CSSStylesheet style = register.getStyle();
 		
 		style.getType("body")

@@ -20,7 +20,7 @@ public class HttpServer {
 	private int port;
 	
 	private ServerSocket socket;
-	private HTMLDocument page404;
+	private HTMLDocument page404, page403;
 	private Thread listeningThread;
 	
 	private Map<String, HTMLDocument> pages;
@@ -34,6 +34,9 @@ public class HttpServer {
 		page404 = new HTMLDocument(HttpStatusCode.NOT_FOUND_404);
 		page404.addElement(HTMLElement.h1("404 Not Found"));
 		page404.addElement(HTMLElement.p("The URL " + HttpConstants.HTML_404_REQUESTED_URL + " could not be found on the server"));
+		page403 = new HTMLDocument(HttpStatusCode.ACCESS_DENIED_403);
+		page403.addElement(HTMLElement.h1("403 Access Denied"));
+		page403.addElement(HTMLElement.p("You don't have access to the URL " + HttpConstants.HTML_404_REQUESTED_URL));
 	}
 	
 	public void addPage(String path, HTMLDocument page) {
@@ -52,12 +55,20 @@ public class HttpServer {
 		return page404;
 	}
 	
+	public void set403Page(HTMLDocument page403) {
+		this.page403 = page403;
+	}
+	
+	public HTMLDocument get403Page() {
+		return page403;
+	}
+	
 	public void addConnection(HttpConnection connection) {
 		connections.add(connection);
 	}
 	
-	public void disconnect(HttpConnection connection) {
-		connections.remove(connection); // TODO
+	public void removeConnection(HttpConnection connection) {
+		connections.remove(connection);
 	}
 	
 	public List<HttpConnection> getActiveConnections() {
@@ -138,6 +149,8 @@ public class HttpServer {
 	
 	public void stop() {
 		if(!isRunning()) return;
+		connections.forEach(HttpConnection::disconnectRaw);
+		connections.clear();
 		try {
 			if(!socket.isClosed()) socket.close();
 		} catch (IOException e) {

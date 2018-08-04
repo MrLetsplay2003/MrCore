@@ -5,7 +5,9 @@ import me.mrletsplay.mrcore.http.server.html.HTMLElement;
 
 public class HttpConstants {
 
-	public static final String HTML_404_REQUESTED_URL = "{requested_url}";
+	public static final String
+			HTML_404_REQUESTED_URL = "{requested_url}",
+			HTML_403_REQUESTED_URL = "{requested_url}";
 	
 	public static final HTMLDocument
 			HTML_INTERNALS_404_PAGE,

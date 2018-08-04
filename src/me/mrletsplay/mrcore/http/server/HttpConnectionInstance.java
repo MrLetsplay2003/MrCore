@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 
 import me.mrletsplay.mrcore.http.server.HttpServer.ClientHeader;
@@ -40,6 +41,8 @@ public class HttpConnectionInstance {
 						continue;
 					}
 				}
+			}catch(SocketException e) {
+				e.printStackTrace(); //TODO
 			}catch(Exception e) {
 				e.printStackTrace();
 				return;
@@ -56,8 +59,8 @@ public class HttpConnectionInstance {
 	
 	public void close() {
 		try {
-			if(!socket.isClosed()) socket.close();
 			connectionThread.interrupt();
+			if(!socket.isClosed()) socket.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

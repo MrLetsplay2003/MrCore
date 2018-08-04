@@ -32,6 +32,26 @@ public class HttpClientPoll {
 		return new HttpClientPoll(HttpClientPollType.ALERT, d);
 	}
 	
+	public static HttpClientPoll setProperty(String elementID, String property, String value) {
+		JSONObject d = new JSONObject();
+		d.put("element", elementID);
+		d.put("property", property);
+		d.put("value", value);
+		return new HttpClientPoll(HttpClientPollType.SET_PROPERTY, d);
+	}
+	
+	public static HttpClientPoll setAttribute(String elementID, String attribute, String value) {
+		JSONObject d = new JSONObject();
+		d.put("element", elementID);
+		d.put("attribute", attribute);
+		d.put("value", value);
+		return new HttpClientPoll(HttpClientPollType.SET_ATTRIBUTE, d);
+	}
+	
+	public static HttpClientPoll reloadPage() {
+		return new HttpClientPoll(HttpClientPollType.RELOAD_PAGE, new JSONObject());
+	}
+	
 	public static HttpClientPoll custom(String customType, JSONObject customData) {
 		JSONObject d = new JSONObject();
 		d.put("type", customType);

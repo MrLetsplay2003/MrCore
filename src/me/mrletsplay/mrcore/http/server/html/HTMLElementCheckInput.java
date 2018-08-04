@@ -10,64 +10,38 @@ import me.mrletsplay.mrcore.http.server.js.JSFunction;
 import me.mrletsplay.mrcore.http.server.js.JSFunctionConsumingCallable.JSFunctionConsumingInvokedEvent;
 import me.mrletsplay.mrcore.misc.JSON.JSONObject;
 
-public class HTMLElementTextInput extends HTMLElement {
+public class HTMLElementCheckInput extends HTMLElement {
 
-	private TextInputType inputType;
 	private OnChanged onChanged;
-	private String placeholder;
+	private boolean defaultValue;
 	
-	protected HTMLElementTextInput(HTMLElementTextInput element) {
+	protected HTMLElementCheckInput(HTMLElementCheckInput element) {
 		super(element);
-		this.inputType = element.inputType;
 		this.onChanged = element.onChanged.clone();
 	}
 	
-	protected HTMLElementTextInput(TextInputType type) {
-		super("input type=" + type.html);
-		this.inputType = type;
+	protected HTMLElementCheckInput() {
+		super("input type=checkbox");
 		this.onChanged = new OnChanged();
 	}
 	
-	protected HTMLElementTextInput(TextInputType type, String placeholder) {
-		super("input type=" + type.html + " placeholder=" + placeholder);
-		this.inputType = type;
-		this.onChanged = new OnChanged();
-	}
-	
-	public HTMLElementTextInput setPlaceholder(String placeholder) {
-		this.placeholder = placeholder;
+	public HTMLElementCheckInput setDefaultValue(boolean defaultValue) {
+		this.defaultValue = defaultValue;
 		return this;
 	}
 	
-	public String getPlaceholder() {
-		return placeholder;
-	}
-	
-	public TextInputType getInputType() {
-		return inputType;
+	public boolean getDefaultValue() {
+		return defaultValue;
 	}
 	
 	public OnChanged onChanged() {
 		return onChanged;
 	}
 	
-	public static enum TextInputType {
-		
-		PLAIN("text"),
-		PASSWORD("password");
-		
-		public final String html;
-		
-		private TextInputType(String html) {
-			this.html = html;
-		}
-		
-	}
-	
 	public static class OnChanged {
 		
 		private JSFunction function;
-		private Consumer<TextInputChangedEvent> eventHandler;
+		private Consumer<CheckInputChangedEvent> eventHandler;
 		
 		public OnChanged() {}
 		
@@ -80,7 +54,7 @@ public class HTMLElementTextInput extends HTMLElement {
 			return this;
 		}
 		
-		public OnChanged event(Consumer<TextInputChangedEvent> handler) {
+		public OnChanged event(Consumer<CheckInputChangedEvent> handler) {
 			this.eventHandler = handler;
 			return this;
 		}
@@ -89,7 +63,7 @@ public class HTMLElementTextInput extends HTMLElement {
 			return function;
 		}
 		
-		public Consumer<TextInputChangedEvent> getEventHandler() {
+		public Consumer<CheckInputChangedEvent> getEventHandler() {
 			return eventHandler;
 		}
 		
@@ -99,12 +73,12 @@ public class HTMLElementTextInput extends HTMLElement {
 			
 	}
 	
-	public static class TextInputChangedEvent extends JSFunctionConsumingInvokedEvent {
+	public static class CheckInputChangedEvent extends JSFunctionConsumingInvokedEvent {
 
 		private String elementID;
-		private String input;
+		private boolean input;
 		
-		public TextInputChangedEvent(HttpServer server, HttpConnectionInstance connectionInstance, HTMLBuiltDocument context, JSONObject params, String elementID, String input) {
+		public CheckInputChangedEvent(HttpServer server, HttpConnectionInstance connectionInstance, HTMLBuiltDocument context, JSONObject params, String elementID, boolean input) {
 			super(server, connectionInstance, context, params);
 			this.elementID = elementID;
 			this.input = input;
@@ -114,7 +88,7 @@ public class HTMLElementTextInput extends HTMLElement {
 			return elementID;
 		}
 		
-		public String getInputText() {
+		public boolean getInputValue() {
 			return input;
 		}
 		
@@ -126,8 +100,8 @@ public class HTMLElementTextInput extends HTMLElement {
 			getConnection().addPoll(HttpClientPoll.setAttribute(elementID, "placeholder", placeholder));
 		}
 		
-		public static TextInputChangedEvent of(JSFunctionConsumingInvokedEvent jsEvent, String elementID, String input) {
-			return new TextInputChangedEvent(jsEvent.getServer(), jsEvent.getConnectionInstance(), jsEvent.getContext(), jsEvent.getParameters(), elementID, input);
+		public static CheckInputChangedEvent of(JSFunctionConsumingInvokedEvent jsEvent, String elementID, boolean input) {
+			return new CheckInputChangedEvent(jsEvent.getServer(), jsEvent.getConnectionInstance(), jsEvent.getContext(), jsEvent.getParameters(), elementID, input);
 		}
 
 	}

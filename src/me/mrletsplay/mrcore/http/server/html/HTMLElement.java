@@ -288,6 +288,10 @@ public class HTMLElement {
 		return new HTMLElementTextInput(TextInputType.PASSWORD, placeholder);
 	}
 	
+	public static HTMLElementCheckInput inputCheckBox() {
+		return new HTMLElementCheckInput();
+	}
+	
 	public static HTMLElement button(String text) {
 		return new HTMLElement("button", text);
 	}

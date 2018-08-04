@@ -3,9 +3,9 @@ package me.mrletsplay.mrcore.http.webinterface.plugins;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.mrletsplay.mrcore.http.server.HttpClientPoll;
 import me.mrletsplay.mrcore.http.server.css.CSSStylesheet;
 import me.mrletsplay.mrcore.http.server.html.HTMLDocument;
+import me.mrletsplay.mrcore.http.server.html.HTMLDocument.HttpSiteAccessedEvent.AccessResult;
 import me.mrletsplay.mrcore.http.server.html.HTMLElement;
 import me.mrletsplay.mrcore.http.server.js.JSFunction;
 import me.mrletsplay.mrcore.http.server.js.JSScript;
@@ -20,6 +20,8 @@ public class PagePluginsBase {
 	
 	static {
 		base = new HTMLDocument();
+		base.setIcon("/_internals/img/MrCore.png");
+		
 		CSSStylesheet style = base.getStyle();
 		JSScript script = base.getBaseScript();
 		
@@ -88,6 +90,9 @@ public class PagePluginsBase {
 			.addProperty("padding-right", "8px")
 			.addProperty("padding-top", "5px");
 		
+		style.get("::-webkit-scrollbar")
+			.addProperty("display", "none");
+		
 		HTMLElement div = HTMLElement.div().setID("page-content");
 		
 		HTMLElement sidebarNav = HTMLElement.dynamic(HTMLElement.div(), event -> null, event -> {
@@ -129,14 +134,20 @@ public class PagePluginsBase {
 		sidebarNav.addChild(HTMLElement.button("Category")
 				.addClass("tab-title"));
 		
-		sidebarNav.addChild(HTMLElement.button("Something")
-				.addClass("tab-button"));
+		HTMLElement hBtn = HTMLElement.button("Home")
+			.addClass("tab-button");
+		
+		hBtn.onClicked()
+			.function(JSFunction.of("redirect('home')"));
+		
+		sidebarNav.addChild(hBtn);
 		
 		HTMLElement tabContent = HTMLElement.div().setID("tab-content");
 		
 		tabContent.css()
 			.position("absolute", "0", "15%", "85%", "100%")
-			.addProperty("background-color", "#ecf0f5");
+			.addProperty("background-color", "#ecf0f5")
+			.addProperty("overflow-y", "scroll");
 		
 		div.addChild(sidebarNav);
 		div.addChild(tabContent);
@@ -146,10 +157,8 @@ public class PagePluginsBase {
 		
 		base.addElement(div);
 		base.addAccessAction(event -> {
-			System.out.println("DENYYYYYY");
 			if(!Webinterface.isLoggedIn(event.getConnection())) {
-				event.setAllowAccess(false);
-				event.getConnection().addPoll(HttpClientPoll.redirect("/login"));
+				event.setResult(AccessResult.redirect("/login"));
 			}
 		});
 	}
