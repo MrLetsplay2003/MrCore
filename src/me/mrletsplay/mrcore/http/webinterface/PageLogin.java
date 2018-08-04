@@ -16,6 +16,8 @@ public class PageLogin {
 	
 	static {
 		login = new HTMLDocument();
+		login.setName("MrCore | Login");
+		login.setIcon("/_internals/img/MrCore.png");
 		CSSStylesheet style = login.getStyle();
 		
 		style.getType("body")

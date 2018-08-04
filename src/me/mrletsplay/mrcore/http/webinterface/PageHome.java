@@ -10,7 +10,8 @@ public class PageHome {
 	
 	static {
 		home = new HTMLDocument();
-		home.setName("MrCore Web | Home");
+		home.setName("MrCore | Home");
+		home.setIcon("/_internals/img/MrCore.png");
 		CSSStylesheet style = home.getStyle();
 		
 		style.get("a:link")

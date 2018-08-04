@@ -116,7 +116,7 @@ public class HttpConnection {
 	private void writePage(HTMLBuiltDocument doc, HttpConnectionInstance instance) throws IOException {
 		String resp = doc.getHTMLCode();
 		String start, header;
-		if(doc.getBase().getRedirect() == null) {
+		if(doc.getRedirect() == null) {
 			Date date = new Date();
 			start = "HTTP/1.1 " + doc.getStatusCode().toString() + "\r\n";
 			header = "Date: " + date.toString() + "\r\n";
@@ -132,7 +132,7 @@ public class HttpConnection {
 			start = "HTTP/1.1 " + HttpStatusCode.SEE_OTHER_303.toString() + "\r\n";
 			header = "Date: " + date.toString() + "\r\n";
 			header += "Set-Cookie: mrcore_sessid=" + sessID + "\r\n";
-			header += "Location: " + doc.getBase().getRedirect() + "\r\n";
+			header += "Location: " + doc.getRedirect() + "\r\n";
 			for(Map.Entry<String, String> en : doc.getBase().getHeaderProperties().entrySet()) {
 				header += en.getKey() + ": " + en.getValue() + "\r\n";
 			}
@@ -186,7 +186,6 @@ public class HttpConnection {
 		return sessID;
 	}
 	
-	
 	public HttpServer getServer() {
 		return server;
 	}
@@ -202,12 +201,17 @@ public class HttpConnection {
 	}
 	
 	public void disconnect() {
+		disconnectRaw();
+		server.removeConnection(this);
+	}
+	
+	public void disconnectRaw() {
 		connections.forEach(HttpConnectionInstance::close);
 	}
 
 	public void removeConnection(HttpConnectionInstance httpConnectionInstance) {
 		connections.remove(httpConnectionInstance);
-//		if(connections.isEmpty()) disconnect();
+		if(connections.isEmpty()) disconnect();
 	}
 	
 }

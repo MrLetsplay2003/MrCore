@@ -9,6 +9,7 @@ public class PagePluginsHome {
 	
 	static {
 		home = PagePluginsBase.getBase();
+		home.setName("Plugins | Home");
 		
 		HTMLElement div = home.getElementByID("tab-content");
 		

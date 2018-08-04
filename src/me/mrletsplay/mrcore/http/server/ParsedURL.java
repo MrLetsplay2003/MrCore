@@ -39,12 +39,11 @@ public class ParsedURL {
 				String[] kV = qPair.split("=", 2);
 				try {
 					getParams.put(kV[0],kV.length==2?URLDecoder.decode(kV[1], "UTF-8"):null);
-				} catch (UnsupportedEncodingException e) {
-					e.printStackTrace();
-				}
+				} catch (UnsupportedEncodingException neverHappens) {}
 			}
 			raw = raw.substring(0, qMInd);
 		}
+		System.out.println(getParams);
 		return new ParsedURL(raw, getParams, query);
 	}
 	

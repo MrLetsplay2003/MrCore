@@ -6,7 +6,8 @@ public enum HttpStatusCode {
 	NOT_FOUND_404("404 Not Found"),
 	INTERNAL_ERROR_500("500 Internal Server Error"),
 	MOVED_PERMANENTLY_301("301 Moved Permanently"),
-	SEE_OTHER_303("303 See Other");
+	SEE_OTHER_303("303 See Other"),
+	ACCESS_DENIED_403("403 Access Denied");
 	
 	private final String http;
 	
