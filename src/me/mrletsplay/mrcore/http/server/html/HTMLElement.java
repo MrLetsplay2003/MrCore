@@ -2,13 +2,17 @@ package me.mrletsplay.mrcore.http.server.html;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import me.mrletsplay.mrcore.http.server.css.CSSStyleElement;
 import me.mrletsplay.mrcore.http.server.html.HTMLDocument.HttpSiteAccessedEvent;
 import me.mrletsplay.mrcore.http.server.html.HTMLElementTextInput.TextInputType;
+import me.mrletsplay.mrcore.http.server.html.built.HTMLBuiltDocument;
+import me.mrletsplay.mrcore.http.server.html.built.HTMLBuiltElement;
 import me.mrletsplay.mrcore.http.server.js.JSFunction;
 import me.mrletsplay.mrcore.misc.Condition;
 
@@ -23,6 +27,7 @@ public class HTMLElement {
 	private Function<HttpSiteAccessedEvent, String> getContentMethod;
 	private Function<HttpSiteAccessedEvent, List<HTMLElement>> getChildrenMethod;
 	private int sortingIndex, contentSortingIndex;
+	private Map<String, String> attributes;
 	
 	private OnHover onHover;
 	private OnClicked onClicked;
@@ -36,6 +41,7 @@ public class HTMLElement {
 		this.onClicked = new OnClicked();
 		this.onHover = new OnHover();
 		this.css = new CSSStyleElement();
+		this.attributes = new LinkedHashMap<>();
 	}
 	
 	protected HTMLElement(String type, String content) {
@@ -47,6 +53,7 @@ public class HTMLElement {
 		this.onClicked = new OnClicked();
 		this.onHover = new OnHover();
 		this.css = new CSSStyleElement();
+		this.attributes = new LinkedHashMap<>();
 	}
 	
 	protected HTMLElement(HTMLElement parent, HTMLElement element) {
@@ -63,6 +70,7 @@ public class HTMLElement {
 		this.parent = parent;
 		this.sortingIndex = element.sortingIndex;
 		this.contentSortingIndex = element.contentSortingIndex;
+		this.attributes = new LinkedHashMap<>(element.attributes);
 	}
 	
 	protected HTMLElement(HTMLElement element) {
@@ -79,6 +87,7 @@ public class HTMLElement {
 		this.parent = element.parent != null ? element.parent.clone() : null;
 		this.sortingIndex = element.sortingIndex;
 		this.contentSortingIndex = element.contentSortingIndex;
+		this.attributes = new LinkedHashMap<>(element.attributes);
 	}
 	
 	public HTMLElement(String type) {
@@ -96,6 +105,7 @@ public class HTMLElement {
 		this.css = other.css.clone();
 		this.condition = other.condition;
 		this.parent = other.parent;
+		this.attributes = new LinkedHashMap<>(other.attributes);
 	}
 	
 	public void copyInner(HTMLElement other) {
@@ -110,6 +120,11 @@ public class HTMLElement {
 	
 	public HTMLElement addClass(String htmlClass) {
 		classes.add(htmlClass);
+		return this;
+	}
+	
+	public HTMLElement addAttribute(String key, String value) {
+		this.attributes.put(key, value);
 		return this;
 	}
 	
@@ -194,6 +209,10 @@ public class HTMLElement {
 		return classes;
 	}
 	
+	public Map<String, String> getAttributes() {
+		return attributes;
+	}
+	
 	public OnHover onHover() {
 		return onHover;
 	}
@@ -224,6 +243,10 @@ public class HTMLElement {
 		return new HTMLElement(this);
 	}
 	
+	public HTMLBuiltElement build(HTMLBuiltElement parent, HTMLBuiltDocument doc, String id, HttpSiteAccessedEvent event, String... params) {
+		return new HTMLBuiltElement(parent, doc, this, id, event, params);
+	}
+	
 	public static HTMLElement h1(String h1) {
 		return new HTMLElement("h1", h1);
 	}
@@ -245,7 +268,7 @@ public class HTMLElement {
 	}
 	
 	public static HTMLElement a(String a, String href) {
-		return new HTMLElement("a href=\"" + href + "\"", a);
+		return new HTMLElement("a", a).addAttribute("href", href);
 	}
 	
 	public static HTMLElement nav() {
@@ -269,7 +292,7 @@ public class HTMLElement {
 	}
 	
 	public static HTMLElement img(String src) {
-		return new HTMLElement("img src=\"" + src + "\"");
+		return new HTMLElement("img").addAttribute("src", src);
 	}
 	
 	public static HTMLElementTextInput inputText() {

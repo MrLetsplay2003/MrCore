@@ -12,8 +12,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import me.mrletsplay.mrcore.http.server.html.HTMLDocument;
-import me.mrletsplay.mrcore.http.server.html.HTMLDocument.HTMLBuiltDocument;
 import me.mrletsplay.mrcore.http.server.html.HTMLElement;
+import me.mrletsplay.mrcore.http.server.html.built.HTMLBuiltDocument;
 
 public class HttpServer {
 

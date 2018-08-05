@@ -5,7 +5,10 @@ import java.util.function.Consumer;
 import me.mrletsplay.mrcore.http.server.HttpClientPoll;
 import me.mrletsplay.mrcore.http.server.HttpConnectionInstance;
 import me.mrletsplay.mrcore.http.server.HttpServer;
-import me.mrletsplay.mrcore.http.server.html.HTMLDocument.HTMLBuiltDocument;
+import me.mrletsplay.mrcore.http.server.html.HTMLDocument.HttpSiteAccessedEvent;
+import me.mrletsplay.mrcore.http.server.html.built.HTMLBuiltDocument;
+import me.mrletsplay.mrcore.http.server.html.built.HTMLBuiltElement;
+import me.mrletsplay.mrcore.http.server.html.built.HTMLBuiltElementTextInput;
 import me.mrletsplay.mrcore.http.server.js.JSFunction;
 import me.mrletsplay.mrcore.http.server.js.JSFunctionConsumingCallable.JSFunctionConsumingInvokedEvent;
 import me.mrletsplay.mrcore.misc.JSON.JSONObject;
@@ -23,19 +26,23 @@ public class HTMLElementTextInput extends HTMLElement {
 	}
 	
 	protected HTMLElementTextInput(TextInputType type) {
-		super("input type=" + type.html);
+		super("input");
+		addAttribute("type", type.html);
 		this.inputType = type;
 		this.onChanged = new OnChanged();
 	}
 	
 	protected HTMLElementTextInput(TextInputType type, String placeholder) {
-		super("input type=" + type.html + " placeholder=" + placeholder);
+		super("input");
+		addAttribute("type", type.html);
+		addAttribute("placeholder", placeholder);
 		this.inputType = type;
 		this.onChanged = new OnChanged();
 	}
 	
 	public HTMLElementTextInput setPlaceholder(String placeholder) {
 		this.placeholder = placeholder;
+		addAttribute("placeholder", placeholder);
 		return this;
 	}
 	
@@ -49,6 +56,11 @@ public class HTMLElementTextInput extends HTMLElement {
 	
 	public OnChanged onChanged() {
 		return onChanged;
+	}
+	
+	@Override
+	public HTMLBuiltElement build(HTMLBuiltElement parent, HTMLBuiltDocument doc, String id, HttpSiteAccessedEvent event, String... params) {
+		return new HTMLBuiltElementTextInput(parent, doc, this, id, event, params);
 	}
 	
 	public static enum TextInputType {
