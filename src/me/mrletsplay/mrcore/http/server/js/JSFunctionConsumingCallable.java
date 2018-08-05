@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import me.mrletsplay.mrcore.http.server.HttpConnectionInstance;
 import me.mrletsplay.mrcore.http.server.HttpServer;
-import me.mrletsplay.mrcore.http.server.html.HTMLDocument.HTMLBuiltDocument;
+import me.mrletsplay.mrcore.http.server.html.built.HTMLBuiltDocument;
 import me.mrletsplay.mrcore.misc.JSON.JSONObject;
 
 public abstract class JSFunctionConsumingCallable extends JSFunction {

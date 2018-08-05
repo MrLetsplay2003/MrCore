@@ -15,7 +15,7 @@ import javax.imageio.ImageIO;
 
 import me.mrletsplay.mrcore.http.server.HttpServer.ClientHeader;
 import me.mrletsplay.mrcore.http.server.html.HTMLDocument;
-import me.mrletsplay.mrcore.http.server.html.HTMLDocument.HTMLBuiltDocument;
+import me.mrletsplay.mrcore.http.server.html.built.HTMLBuiltDocument;
 import me.mrletsplay.mrcore.http.server.js.JSBuiltFunction;
 import me.mrletsplay.mrcore.http.server.js.JSFunction;
 import me.mrletsplay.mrcore.http.server.js.JSFunction.JSFunctionInvokedEvent;
@@ -114,7 +114,7 @@ public class HttpConnection {
 	}
 	
 	private void writePage(HTMLBuiltDocument doc, HttpConnectionInstance instance) throws IOException {
-		String resp = doc.getHTMLCode();
+		String resp = doc.asString();
 		String start, header;
 		if(doc.getRedirect() == null) {
 			Date date = new Date();

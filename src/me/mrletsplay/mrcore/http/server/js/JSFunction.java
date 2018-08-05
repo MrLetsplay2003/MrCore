@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 import me.mrletsplay.mrcore.http.server.HttpConnection;
 import me.mrletsplay.mrcore.http.server.HttpConnectionInstance;
 import me.mrletsplay.mrcore.http.server.HttpServer;
-import me.mrletsplay.mrcore.http.server.html.HTMLDocument.HTMLBuiltDocument;
+import me.mrletsplay.mrcore.http.server.html.built.HTMLBuiltDocument;
 
 public abstract class JSFunction {
 	

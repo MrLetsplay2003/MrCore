@@ -5,7 +5,10 @@ import java.util.function.Consumer;
 import me.mrletsplay.mrcore.http.server.HttpClientPoll;
 import me.mrletsplay.mrcore.http.server.HttpConnectionInstance;
 import me.mrletsplay.mrcore.http.server.HttpServer;
-import me.mrletsplay.mrcore.http.server.html.HTMLDocument.HTMLBuiltDocument;
+import me.mrletsplay.mrcore.http.server.html.HTMLDocument.HttpSiteAccessedEvent;
+import me.mrletsplay.mrcore.http.server.html.built.HTMLBuiltDocument;
+import me.mrletsplay.mrcore.http.server.html.built.HTMLBuiltElement;
+import me.mrletsplay.mrcore.http.server.html.built.HTMLBuiltElementCheckInput;
 import me.mrletsplay.mrcore.http.server.js.JSFunction;
 import me.mrletsplay.mrcore.http.server.js.JSFunctionConsumingCallable.JSFunctionConsumingInvokedEvent;
 import me.mrletsplay.mrcore.misc.JSON.JSONObject;
@@ -21,7 +24,8 @@ public class HTMLElementCheckInput extends HTMLElement {
 	}
 	
 	protected HTMLElementCheckInput() {
-		super("input type=checkbox");
+		super("input");
+		addAttribute("type", "checkbox");
 		this.onChanged = new OnChanged();
 	}
 	
@@ -36,6 +40,11 @@ public class HTMLElementCheckInput extends HTMLElement {
 	
 	public OnChanged onChanged() {
 		return onChanged;
+	}
+	
+	@Override
+	public HTMLBuiltElement build(HTMLBuiltElement parent, HTMLBuiltDocument doc, String id, HttpSiteAccessedEvent event, String... params) {
+		return new HTMLBuiltElementCheckInput(parent, doc, this, id, event, params);
 	}
 	
 	public static class OnChanged {
