@@ -66,10 +66,6 @@ public class JSFunction {
 		return new JSBuiltFunction(this, name, doc, event);
 	}
 	
-//	public abstract String asString(String name, HTMLBuiltDocument doc, HttpSiteAccessedEvent event);
-	
-//	public void onBuildFinished() {}
-	
 	public static class JSFunctionInvokedEvent {
 		
 		private HttpServer server;
@@ -108,10 +104,6 @@ public class JSFunction {
 		return consumingCallableFunction;
 	}
 	
-	public static JSFunctionChangeContent changeContent() {
-		return null; // TODO
-	}
-	
 	public static JSFunctionBasic of(String innerJS) {
 		return new JSFunctionBasic(innerJS);
 	}
@@ -127,22 +119,6 @@ public class JSFunction {
 	public static JSFunctionBasic of(String name, Function<JSFunctionBuildEvent, String> innerJS) {
 		return new JSFunctionBasic(name, innerJS);
 	}
-	
-//	public static JSSelfFunction self(String innerJS) {
-//		return new JSSelfFunction(innerJS);
-//	}
-//	
-//	public static JSSelfFunction self(String name, String innerJS) {
-//		return new JSSelfFunction(name, innerJS);
-//	}
-//	
-//	public static JSSelfFunction self(Function<JSFunctionBuildEvent, String> innerJS) {
-//		return new JSSelfFunction(innerJS);
-//	}
-//	
-//	public static JSSelfFunction self(String name, Function<JSFunctionBuildEvent, String> innerJS) {
-//		return new JSSelfFunction(name, innerJS);
-//	}
 	
 	public static JSFunctionChangeContent changeContent(HTMLElement element, String content) {
 		return new JSFunctionChangeContent(element, content);
