@@ -13,7 +13,7 @@ import me.mrletsplay.mrcore.http.server.HttpConstants;
 import me.mrletsplay.mrcore.http.server.HttpServer.ClientHeader;
 import me.mrletsplay.mrcore.http.server.HttpStatusCode;
 import me.mrletsplay.mrcore.http.server.ParsedURL;
-import me.mrletsplay.mrcore.http.server.css.CSSStylesheet;
+import me.mrletsplay.mrcore.http.server.css.CSSStyleSheet;
 import me.mrletsplay.mrcore.http.server.html.built.HTMLBuiltDocument;
 import me.mrletsplay.mrcore.http.server.js.JSScript;
 
@@ -22,7 +22,7 @@ public class HTMLDocument {
 	private HttpStatusCode statusCode;
 	private List<HTMLElement> elements;
 	private JSScript baseScript;
-	private CSSStylesheet style;
+	private CSSStyleSheet style;
 	private List<Consumer<HttpSiteAccessedEvent>> accessActions;
 	private List<Consumer<HttpSiteBuiltEvent>> buildActions;
 	private Map<String, String> headerProperties;
@@ -38,7 +38,7 @@ public class HTMLDocument {
 		this.statusCode = statusCode;
 		this.elements = new ArrayList<>();
 		this.baseScript = new JSScript();
-		this.style = new CSSStylesheet();
+		this.style = new CSSStyleSheet();
 		this.accessActions = new ArrayList<>();
 		this.buildActions = new ArrayList<>();
 		this.headerProperties = new HashMap<>();
@@ -81,7 +81,7 @@ public class HTMLDocument {
 		return icon;
 	}
 	
-	public CSSStylesheet getStyle() {
+	public CSSStyleSheet getStyle() {
 		return style;
 	}
 	
@@ -145,6 +145,7 @@ public class HTMLDocument {
 			case ALLOW:
 				HTMLBuiltDocument bD = new HTMLBuiltDocument(this, event, params);
 				elements.stream().filter(el -> el.getCondition() == null || el.getCondition().apply(event)).forEach(bD::appendElement);
+				bD.onBuildFinished();
 				HttpSiteBuiltEvent event2 = new HttpSiteBuiltEvent(connectionInstance, clientHeader, requestedURL, bD);
 				buildActions.forEach(a -> a.accept(event2));
 				return bD;

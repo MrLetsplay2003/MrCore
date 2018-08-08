@@ -1,24 +1,29 @@
 package me.mrletsplay.mrcore.http.server.js;
 
+import java.util.function.Function;
+
+import me.mrletsplay.mrcore.http.server.js.built.JSBuiltFunction.JSFunctionBuildEvent;
+
 public class JSFunctionBasic extends JSFunction {
 	
-	private String innerJS;
+	public JSFunctionBasic() {}
 	
 	public JSFunctionBasic(String innerJS) {
-		this.innerJS = innerJS;
+		setInnerJS(innerJS);
 	}
 	
-	public JSFunctionBasic(String innerJS, String name) {
-		this.innerJS = innerJS;
+	public JSFunctionBasic(String name, String innerJS) {
 		setName(name);
+		setInnerJS(innerJS);
 	}
 	
-	@Override
-	public String asString(String name) {
-		return
-				"function " + name + "(self) {" +
-				innerJS +
-				"}";
+	public JSFunctionBasic(Function<JSFunctionBuildEvent, String> innerJS) {
+		setInnerJS(innerJS);
+	}
+	
+	public JSFunctionBasic(String name, Function<JSFunctionBuildEvent, String> innerJS) {
+		setName(name);
+		setInnerJS(innerJS);
 	}
 	
 }

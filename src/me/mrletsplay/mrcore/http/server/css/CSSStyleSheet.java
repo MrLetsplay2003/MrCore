@@ -7,20 +7,21 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import me.mrletsplay.mrcore.http.server.html.HTMLDocument.HttpSiteAccessedEvent;
+import me.mrletsplay.mrcore.http.server.html.built.HTMLBuiltDocument;
 
-public class CSSStylesheet implements Cloneable {
+public class CSSStyleSheet implements Cloneable {
 	
 	private Map<String, CSSStyleElement> elements;
 	
-	public CSSStylesheet() {
+	public CSSStyleSheet() {
 		this.elements = new LinkedHashMap<>();
 	}
 	
-	public CSSStylesheet(Map<String, CSSStyleElement> elements) {
+	public CSSStyleSheet(Map<String, CSSStyleElement> elements) {
 		this.elements = new LinkedHashMap<>(elements);
 	}
 	
-	public CSSStylesheet addElement(String key, CSSStyleElement element) {
+	public CSSStyleSheet addElement(String key, CSSStyleElement element) {
 		elements.put(key, element);
 		return this;
 	}
@@ -51,17 +52,17 @@ public class CSSStylesheet implements Cloneable {
 		return new ArrayList<>(elements.values());
 	}
 	
-	public String asString(HttpSiteAccessedEvent event) {
-		return elements.entrySet().stream().map(en -> en.getValue().asString(en.getKey(), event)).collect(Collectors.joining("\n"));
+	public String asString(HttpSiteAccessedEvent event, HTMLBuiltDocument context) {
+		return elements.entrySet().stream().map(en -> en.getValue().asString(en.getKey(), event, context)).collect(Collectors.joining());
 	}
 	
-	public void appendStylesheet(CSSStylesheet style) {
+	public void appendStylesheet(CSSStyleSheet style) {
 		elements.putAll(style.elements);
 	}
 	
 	@Override
-	public CSSStylesheet clone() {
-		return new CSSStylesheet(elements);
+	public CSSStyleSheet clone() {
+		return new CSSStyleSheet(elements);
 	}
 	
 }

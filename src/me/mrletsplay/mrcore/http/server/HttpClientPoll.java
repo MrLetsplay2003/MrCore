@@ -48,6 +48,13 @@ public class HttpClientPoll {
 		return new HttpClientPoll(HttpClientPollType.SET_ATTRIBUTE, d);
 	}
 	
+	public static HttpClientPoll setContent(String elementID, String content) {
+		JSONObject d = new JSONObject();
+		d.put("element", elementID);
+		d.put("content", content);
+		return new HttpClientPoll(HttpClientPollType.SET_CONTENT, d);
+	}
+	
 	public static HttpClientPoll reloadPage() {
 		return new HttpClientPoll(HttpClientPollType.RELOAD_PAGE, new JSONObject());
 	}

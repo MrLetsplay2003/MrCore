@@ -6,6 +6,7 @@ public enum HttpClientPollType {
 	ALERT("alert"),
 	SET_PROPERTY("set_property"),
 	SET_ATTRIBUTE("set_attribute"),
+	SET_CONTENT("set_content"),
 	RELOAD_PAGE("reload_page"),
 	CUSTOM("custom");
 	

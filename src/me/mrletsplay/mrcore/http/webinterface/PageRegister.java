@@ -4,7 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import me.mrletsplay.mrcore.http.server.HttpClientPoll;
-import me.mrletsplay.mrcore.http.server.css.CSSStylesheet;
+import me.mrletsplay.mrcore.http.server.css.CSSStyleSheet;
 import me.mrletsplay.mrcore.http.server.html.HTMLDocument;
 import me.mrletsplay.mrcore.http.server.html.HTMLElement;
 import me.mrletsplay.mrcore.http.server.js.JSFunctionConsumingCallable;
@@ -21,7 +21,7 @@ public class PageRegister {
 		register = new HTMLDocument();
 		register.setName("MrCore | Register");
 		register.setIcon("/_internals/img/MrCore.png");
-		CSSStylesheet style = register.getStyle();
+		CSSStyleSheet style = register.getStyle();
 		
 		style.getType("body")
 			.addProperty("background-color", "#ecf0f5");

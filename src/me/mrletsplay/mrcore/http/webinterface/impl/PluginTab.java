@@ -1,6 +1,6 @@
 package me.mrletsplay.mrcore.http.webinterface.impl;
 
-import me.mrletsplay.mrcore.http.server.css.CSSStylesheet;
+import me.mrletsplay.mrcore.http.server.css.CSSStyleSheet;
 import me.mrletsplay.mrcore.http.server.html.HTMLElement;
 
 public class PluginTab {
@@ -8,9 +8,9 @@ public class PluginTab {
 	private String name;
 	private String title;
 	private HTMLElement html;
-	private CSSStylesheet css;
+	private CSSStyleSheet css;
 	
-	public PluginTab(String name, HTMLElement html, CSSStylesheet css) {
+	public PluginTab(String name, HTMLElement html, CSSStyleSheet css) {
 		this.name = name;
 		this.html = html;
 		this.css = css;
@@ -32,7 +32,7 @@ public class PluginTab {
 		return html;
 	}
 	
-	public CSSStylesheet getCSS() {
+	public CSSStyleSheet getCSS() {
 		return css;
 	}
 	

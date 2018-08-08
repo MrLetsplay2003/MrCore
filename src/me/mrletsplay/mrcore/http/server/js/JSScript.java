@@ -3,6 +3,10 @@ package me.mrletsplay.mrcore.http.server.js;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.mrletsplay.mrcore.http.server.html.HTMLDocument.HttpSiteAccessedEvent;
+import me.mrletsplay.mrcore.http.server.html.built.HTMLBuiltDocument;
+import me.mrletsplay.mrcore.http.server.js.built.JSBuiltScript;
+
 public class JSScript implements Cloneable {
 
 	private List<JSFunction> functions;
@@ -31,8 +35,8 @@ public class JSScript implements Cloneable {
 		functions.addAll(script.functions);
 	}
 	
-	public JSBuiltScript build() {
-		JSBuiltScript b = new JSBuiltScript();
+	public JSBuiltScript build(HTMLBuiltDocument doc, HttpSiteAccessedEvent event) {
+		JSBuiltScript b = new JSBuiltScript(doc, event);
 		functions.forEach(b::appendFunction);
 		return b;
 	}

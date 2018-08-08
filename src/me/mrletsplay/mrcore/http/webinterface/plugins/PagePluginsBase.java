@@ -3,7 +3,7 @@ package me.mrletsplay.mrcore.http.webinterface.plugins;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.mrletsplay.mrcore.http.server.css.CSSStylesheet;
+import me.mrletsplay.mrcore.http.server.css.CSSStyleSheet;
 import me.mrletsplay.mrcore.http.server.html.HTMLDocument;
 import me.mrletsplay.mrcore.http.server.html.HTMLDocument.HttpSiteAccessedEvent.AccessResult;
 import me.mrletsplay.mrcore.http.server.html.HTMLElement;
@@ -22,25 +22,25 @@ public class PagePluginsBase {
 		base = new HTMLDocument();
 		base.setIcon("/_internals/img/MrCore.png");
 		
-		CSSStylesheet style = base.getStyle();
+		CSSStyleSheet style = base.getStyle();
 		JSScript script = base.getBaseScript();
 		
-		script.addFunction(JSFunction.raw(
-					"function toggleDropdown(dd){" + 
-					"	var dropdownContent = dd.nextElementSibling;" + 
-					"	if (dropdownContent.style.display === \"block\") {" + 
-					"		dropdownContent.style.display = \"none\";" + 
-					"	} else {" + 
-					"		dropdownContent.style.display = \"block\";" + 
-					"	}" + 
-					"}"
-				));
+		JSFunction toggleDropdown = JSFunction.of("toggleDropdown",
+				"var dropdownContent = dd.nextElementSibling;" + 
+				"if (dropdownContent.style.display === \"block\") {" + 
+				"	dropdownContent.style.display = \"none\";" + 
+				"} else {" + 
+				"	dropdownContent.style.display = \"block\";" + 
+				"}"
+			);
+		toggleDropdown.addParameter("dd");
+		script.addFunction(toggleDropdown);
 		
-		script.addFunction(JSFunction.raw(
-					"function redirect(url){\r\n" + 
-					"	window.location.href = \"/plugins/\"+url+window.location.search;" + 
-					"}"
-				));
+		JSFunction redirect = JSFunction.of("redirect",
+				"window.location.href = \"/plugins/\"+url+window.location.search;"
+			);
+		redirect.addParameter("url");
+		script.addFunction(redirect);
 		
 		style.get(".tab-button, .dropdown-button, .dropdown-container > a")
 			.addProperty("font-family", "'Ek Mukta'")
