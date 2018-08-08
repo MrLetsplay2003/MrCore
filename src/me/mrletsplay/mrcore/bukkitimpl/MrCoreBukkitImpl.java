@@ -19,7 +19,6 @@ public class MrCoreBukkitImpl {
 
 	/**
 	 * This will load (or download) the MrCore lib<br>
-	 * Version "latest" is to be used with caution, because i'm horrible at sustaining backwards-compatability
 	 * @param plugin The plugin to load it for
 	 */
 	public static void loadMrCore(Plugin plugin) {

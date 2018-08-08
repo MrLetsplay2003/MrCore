@@ -1,6 +1,6 @@
 package me.mrletsplay.mrcore.http.webinterface;
 
-import me.mrletsplay.mrcore.http.server.css.CSSStylesheet;
+import me.mrletsplay.mrcore.http.server.css.CSSStyleSheet;
 import me.mrletsplay.mrcore.http.server.html.HTMLDocument;
 import me.mrletsplay.mrcore.http.server.html.HTMLElement;
 
@@ -9,10 +9,11 @@ public class PageHome {
 	private static HTMLDocument home;
 	
 	static {
+		try {
 		home = new HTMLDocument();
 		home.setName("MrCore | Home");
 		home.setIcon("/_internals/img/MrCore.png");
-		CSSStylesheet style = home.getStyle();
+		CSSStyleSheet style = home.getStyle();
 		
 		style.get("a:link")
 			.addProperty("text-decoration", "none")
@@ -91,6 +92,7 @@ public class PageHome {
 		home.addElement(WebinterfaceUtils.addLoading(home));
 		home.addElement(WebinterfaceUtils.addHeader(home));
 		home.addElement(div);
+		}catch(Exception e) {e.printStackTrace();}
 	}
 	
 	public static HTMLDocument getPage() {

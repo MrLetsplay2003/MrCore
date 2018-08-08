@@ -4,7 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
 import me.mrletsplay.mrcore.http.server.HttpClientPoll;
-import me.mrletsplay.mrcore.http.server.css.CSSStylesheet;
+import me.mrletsplay.mrcore.http.server.css.CSSStyleSheet;
 import me.mrletsplay.mrcore.http.server.html.HTMLDocument;
 import me.mrletsplay.mrcore.http.server.html.HTMLElement;
 import me.mrletsplay.mrcore.http.server.js.JSFunctionConsumingCallable;
@@ -18,7 +18,7 @@ public class PageLogin {
 		login = new HTMLDocument();
 		login.setName("MrCore | Login");
 		login.setIcon("/_internals/img/MrCore.png");
-		CSSStylesheet style = login.getStyle();
+		CSSStyleSheet style = login.getStyle();
 		
 		style.getType("body")
 			.addProperty("background-color", "#ecf0f5");

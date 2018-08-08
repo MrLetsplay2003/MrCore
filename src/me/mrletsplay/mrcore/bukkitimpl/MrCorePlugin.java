@@ -81,7 +81,6 @@ public class MrCorePlugin extends JavaPlugin{
 				if(args[1].equalsIgnoreCase("register-confirm")) {
 					if(args.length != 3) return sendCommandHelp(sender, null);
 					HttpConnection con = Webinterface.getServer().getConnection(args[2]);
-					System.out.println(con);
 					if(con == null) return sendCommandHelp(sender, null);
 					Webinterface.confirmRegistration((Player) sender, con);
 				}else return sendCommandHelp(sender, null);

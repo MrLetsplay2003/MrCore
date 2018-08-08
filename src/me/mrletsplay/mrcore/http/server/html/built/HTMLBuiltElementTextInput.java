@@ -4,8 +4,8 @@ import me.mrletsplay.mrcore.http.server.html.HTMLDocument.HttpSiteAccessedEvent;
 import me.mrletsplay.mrcore.http.server.html.HTMLElementTextInput;
 import me.mrletsplay.mrcore.http.server.html.HTMLElementTextInput.OnChanged;
 import me.mrletsplay.mrcore.http.server.html.HTMLElementTextInput.TextInputChangedEvent;
-import me.mrletsplay.mrcore.http.server.js.JSBuiltFunction;
 import me.mrletsplay.mrcore.http.server.js.JSFunctionConsumingCallable;
+import me.mrletsplay.mrcore.http.server.js.built.JSBuiltFunction;
 
 public class HTMLBuiltElementTextInput extends HTMLBuiltElement {
 	

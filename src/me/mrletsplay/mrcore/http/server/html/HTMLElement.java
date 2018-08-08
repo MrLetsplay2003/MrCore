@@ -91,7 +91,7 @@ public class HTMLElement {
 	}
 	
 	public HTMLElement(String type) {
-		this(type, "");
+		this(type, (String) null);
 	}
 	
 	public void copyProperties(HTMLElement other) {
@@ -327,6 +327,34 @@ public class HTMLElement {
 		return new HTMLElement(null, raw);
 	}
 	
+	public static HTMLElement table() {
+		return new HTMLElement("table");
+	}
+	
+	public static HTMLElement thead() {
+		return new HTMLElement("thead");
+	}
+	
+	public static HTMLElement tbody() {
+		return new HTMLElement("tbody");
+	}
+	
+	public static HTMLElement th(String title) {
+		return new HTMLElement("th", title);
+	}
+	
+	public static HTMLElement tr() {
+		return new HTMLElement("tr");
+	}
+	
+	public static HTMLElement td() {
+		return new HTMLElement("td");
+	}
+	
+	public static HTMLElement td(String text) {
+		return new HTMLElement("td", text);
+	}
+	
 	public static HTMLElement dynamic(HTMLElement element, Function<HttpSiteAccessedEvent, String> getContentMethod) {
 		HTMLElement el =  new HTMLElement(element);
 		el.getContentMethod = getContentMethod;
@@ -346,6 +374,14 @@ public class HTMLElement {
 	
 	public static HTMLElement i() {
 		return new HTMLElement("i");
+	}
+	
+	public static HTMLElementLabel label(HTMLElement forElement) {
+		return new HTMLElementLabel(forElement);
+	}
+	
+	public static HTMLElementLabel label(HTMLElement forElement, String text) {
+		return new HTMLElementLabel(forElement, text);
 	}
 	
 	public static class OnHover {
@@ -411,6 +447,14 @@ public class HTMLElement {
 		public OnClicked clone() {
 			return new OnClicked(this);
 		}
+		
+	}
+	
+	public static interface HTMLElementEvent {
+
+		public String getElementID();
+		
+		public HTMLBuiltElement getElement();
 		
 	}
 	

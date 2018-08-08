@@ -1,7 +1,7 @@
 package me.mrletsplay.mrcore.http.webinterface;
 
 import me.mrletsplay.mrcore.http.server.css.CSSStyleElement;
-import me.mrletsplay.mrcore.http.server.css.CSSStylesheet;
+import me.mrletsplay.mrcore.http.server.css.CSSStyleSheet;
 import me.mrletsplay.mrcore.http.server.html.HTMLDocument;
 import me.mrletsplay.mrcore.http.server.html.HTMLElement;
 
@@ -58,7 +58,7 @@ public class WebinterfaceUtils {
 	}
 	
 	public static HTMLElement addHeader(HTMLDocument doc) {
-		CSSStylesheet style = doc.getStyle();
+		CSSStyleSheet style = doc.getStyle();
 		HTMLElement headerDiv = HTMLElement.div().setID("page-header");
 		
 		style.getElement("page-content")
