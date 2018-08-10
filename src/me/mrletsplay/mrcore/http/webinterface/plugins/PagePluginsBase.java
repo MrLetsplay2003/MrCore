@@ -142,6 +142,14 @@ public class PagePluginsBase {
 		
 		sidebarNav.addChild(hBtn);
 		
+		HTMLElement cBtn = HTMLElement.button("Console")
+			.addClass("tab-button");
+		
+		cBtn.onClicked()
+			.function(JSFunction.of("redirect('console')"));
+		
+		sidebarNav.addChild(cBtn);
+		
 		HTMLElement tabContent = HTMLElement.div().setID("tab-content");
 		
 		tabContent.css()

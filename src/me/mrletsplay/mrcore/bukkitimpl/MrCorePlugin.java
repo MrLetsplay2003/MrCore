@@ -14,6 +14,7 @@ import me.mrletsplay.mrcore.bukkitimpl.GUIUtils.GUIListener;
 import me.mrletsplay.mrcore.config.ConfigLoader;
 import me.mrletsplay.mrcore.config.CustomConfig;
 import me.mrletsplay.mrcore.http.server.HttpConnection;
+import me.mrletsplay.mrcore.http.webinterface.ConsoleLogInterceptor;
 import me.mrletsplay.mrcore.http.webinterface.Webinterface;
 import me.mrletsplay.mrcore.http.webinterface.WebinterfaceDataManager;
 import me.mrletsplay.mrcore.main.MrCore;
@@ -38,6 +39,7 @@ public class MrCorePlugin extends JavaPlugin{
 		}
 		config.saveConfigSafely();
 		getLogger().info("And MrCore is on board as well! :wave:");
+		ConsoleLogInterceptor.a();
 	}
 	
 	public static JavaPlugin getInstance() {

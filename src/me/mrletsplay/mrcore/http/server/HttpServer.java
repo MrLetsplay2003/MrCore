@@ -121,7 +121,7 @@ public class HttpServer {
 						String sessID = clientHeader.getCookies().get("mrcore_sessid");
 						hcon = getConnection(sessID);
 						if(hcon==null) {
-							hcon = new HttpConnection(this, s, sessID);
+							hcon = new HttpConnection(this, s, UUID.randomUUID().toString());
 							addConnection(hcon);
 							con = hcon.getConnections().get(0);
 						}else {

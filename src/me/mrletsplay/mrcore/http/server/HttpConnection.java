@@ -44,7 +44,7 @@ public class HttpConnection {
 	
 	public void handleRequest(ClientHeader clientHeader, HttpConnectionInstance connection) throws IOException {
 		ParsedURL parsedUrl = ParsedURL.parse(clientHeader.getRequestedURL());
-		System.out.println(clientHeader.getRequestedURL() + " | " + parsedUrl.getPath());
+//		System.out.println(clientHeader.getRequestedURL() + " | " + parsedUrl.getPath());
 		if(parsedUrl.getPath().startsWith("/_internals/")) {
 			String iName = parsedUrl.getPath().substring("/_internals/".length());
 			if(iName.equals("callback")) {
