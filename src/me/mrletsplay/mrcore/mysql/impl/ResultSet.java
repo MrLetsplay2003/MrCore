@@ -11,11 +11,12 @@ import me.mrletsplay.mrcore.mysql.protocol.packet.text.MySQLResultSetPacket;
 
 public class ResultSet {
 
-	private ColumnDefinition columnDefinitions;
+	private ColumnDefinition[] columnDefinitions;
 	private TableColumn[] columns;
 	private TableRow[] rows;
 	
 	public ResultSet(MySQLResultSetPacket fromPacket) {
+		this.columnDefinitions = fromPacket.getColumnDefinitions();
 		this.columns = new TableColumn[fromPacket.getColumnDefinitions().length];
 		for(int i = 0; i < columns.length; i++) {
 			columns[i] = new TableColumn(this, fromPacket.getColumnDefinitions()[i], i);
@@ -26,6 +27,7 @@ public class ResultSet {
 	}
 	
 	public ResultSet(MySQLResultSetBinaryPacket fromPacket) {
+		this.columnDefinitions = fromPacket.getColumnDefinitions();
 		this.columns = new TableColumn[fromPacket.getColumnDefinitions().length];
 		for(int i = 0; i < columns.length; i++) {
 			columns[i] = new TableColumn(this, fromPacket.getColumnDefinitions()[i], i);
@@ -57,7 +59,7 @@ public class ResultSet {
 		return rows;
 	}
 	
-	public ColumnDefinition getColumnDefinitions() {
+	public ColumnDefinition[] getColumnDefinitions() {
 		return columnDefinitions;
 	}
 	
