@@ -15,6 +15,7 @@ public class HTMLBuiltElementCheckInput extends HTMLBuiltElement {
 	private BuiltOnChanged onChanged;
 	private BuiltOnChecked onChecked;
 	private BuiltOnUnchecked onUnchecked;
+	private boolean checked;
 
 	public HTMLBuiltElementCheckInput(HTMLBuiltElement parent, HTMLBuiltDocument doc, HTMLElementCheckInput base, String id, HttpSiteAccessedEvent event, String[] params) {
 		super(parent, doc, base, id, event, params);
@@ -35,6 +36,8 @@ public class HTMLBuiltElementCheckInput extends HTMLBuiltElement {
 			onCh.append(onUnchecked.getOnUncheckedFunction().getName() + "(this);");
 		}
 		if(onCh.length() != 0) addAttribute("onchange", onCh.toString());
+		this.checked = base.getDefaultValue() != null && base.getDefaultValue().apply(event);
+		if(checked) addAttribute("checked", "checked");
 	}
 	
 	public BuiltOnChanged onChanged() {
@@ -47,6 +50,10 @@ public class HTMLBuiltElementCheckInput extends HTMLBuiltElement {
 	
 	public BuiltOnUnchecked onUnchecked() {
 		return onUnchecked;
+	}
+	
+	public boolean isChecked() {
+		return checked;
 	}
 	
 	public static class BuiltOnChanged {
@@ -85,7 +92,7 @@ public class HTMLBuiltElementCheckInput extends HTMLBuiltElement {
 		
 	}
 	
-public static class BuiltOnChecked {
+	public static class BuiltOnChecked {
 		
 		private JSBuiltFunction onChecked, function, eventFunction;
 		

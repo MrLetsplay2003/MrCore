@@ -1,5 +1,6 @@
 package me.mrletsplay.mrcore.http.server;
 
+import me.mrletsplay.mrcore.http.server.html.PollType;
 import me.mrletsplay.mrcore.misc.JSON.JSONObject;
 
 public class HttpClientPoll {
@@ -59,9 +60,9 @@ public class HttpClientPoll {
 		return new HttpClientPoll(HttpClientPollType.RELOAD_PAGE, new JSONObject());
 	}
 	
-	public static HttpClientPoll custom(String customType, JSONObject customData) {
+	public static HttpClientPoll custom(PollType customType, JSONObject customData) {
 		JSONObject d = new JSONObject();
-		d.put("type", customType);
+		d.put("type", customType.getIdentifier());
 		d.put("data", customData);
 		return new HttpClientPoll(HttpClientPollType.CUSTOM, d);
 	}

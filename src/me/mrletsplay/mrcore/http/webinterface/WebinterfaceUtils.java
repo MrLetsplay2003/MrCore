@@ -157,7 +157,7 @@ public class WebinterfaceUtils {
 		
 		HTMLElement name = HTMLElement.dynamic(HTMLElement.a(null), event -> {
 				return Webinterface
-						.getLoggedInAccount(event.getConnection())
+						.getLoggedInAccount(event.getAccessEvent().getConnection())
 						.getMinecraftPlayer()
 						.getName();
 			})

@@ -7,9 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import me.mrletsplay.mrcore.http.server.html.HTMLDocument.HttpSiteAccessedEvent;
 import me.mrletsplay.mrcore.http.server.HttpClientPoll;
+import me.mrletsplay.mrcore.http.server.html.HTMLDocument.HttpSiteAccessedEvent;
 import me.mrletsplay.mrcore.http.server.html.HTMLElement;
+import me.mrletsplay.mrcore.http.server.html.HTMLElement.HTMLElementGetContentEvent;
 import me.mrletsplay.mrcore.http.server.html.HTMLElement.OnClicked;
 import me.mrletsplay.mrcore.http.server.html.HTMLElement.OnHover;
 import me.mrletsplay.mrcore.http.server.js.built.JSBuiltFunction;
@@ -22,23 +23,24 @@ public class HTMLBuiltElement {
 	private List<HTMLBuiltElement> children;
 	private HTMLBuiltElement parent;
 	private HTMLBuiltDocument document;
+	private Map<String, String> attributes;
+	private HttpSiteAccessedEvent accessEvent;
+	private String[] params;
+	
 	private BuiltOnClicked onClicked;
 	private BuiltOnHover onHover;
-	private Map<String, String> attributes;
 	
-	public HTMLBuiltElement(HTMLBuiltElement parent, HTMLBuiltDocument doc, HTMLElement base, String id, HttpSiteAccessedEvent event, String... params) {
+	public HTMLBuiltElement(HTMLBuiltElement parent, HTMLBuiltDocument doc, HTMLElement base, String id, HttpSiteAccessedEvent accessEvent, String... params) {
 		this.parent = parent;
 		this.base = base;
 		this.id = id;
-		this.content = base.getContent(event);
-		for(int i = 0; i < params.length; i+=2) {
-			content = content.replace(params[i], params[i+1]);
-		}
+		this.accessEvent = accessEvent;
+		this.params = params;
 		this.children = new ArrayList<>();
 		this.attributes = new LinkedHashMap<>(base.getAttributes());
 		this.document = doc;
-		for(HTMLElement c : base.getAllChildren(event)) {
-			if(c.getCondition() == null || c.getCondition().apply(event)) children.add(c.build(this, doc, c.getID() == null ? doc.randomElementID() : c.getID(), event));
+		for(HTMLElement c : base.getAllChildren(accessEvent)) {
+			if(c.getCondition() == null || c.getCondition().apply(accessEvent)) children.add(c.build(this, doc, c.getID() == null ? doc.randomElementID() : c.getID(), accessEvent));
 		}
 		if(!base.css().isEmpty()) doc.getCSS().addElement("#" + id, base.css());
 		this.onClicked = new BuiltOnClicked(base.onClicked(), this);
@@ -46,11 +48,17 @@ public class HTMLBuiltElement {
 	}
 	
 	public void callOnBuildFinished() {
-		onBuildFinished();
+		HTMLElementGetContentEvent event = new HTMLElementGetContentEvent(this, accessEvent);
+		onBuildFinished(event);
 		children.forEach(HTMLBuiltElement::callOnBuildFinished);
 	}
 	
-	public void onBuildFinished() {}
+	public void onBuildFinished(HTMLElementGetContentEvent event) {
+		this.content = base.getContent(event);
+		for(int i = 0; i < params.length; i+=2) {
+			content = content.replace(params[i], params[i+1]);
+		}
+	}
 	
 	public HTMLElement getBase() {
 		return base;
@@ -86,8 +94,36 @@ public class HTMLBuiltElement {
 		return children.stream().map(c -> c.findElementByID(id)).filter(e -> e != null).findFirst().orElse(null);
 	}
 	
+	public void setContent(String content) {
+		this.content = content;
+	}
+	
+	public String getContent() {
+		return content;
+	}
+	
 	public void pollContentChange(String newContent) {
 		document.getConnection().addPoll(HttpClientPoll.setContent(id, newContent));
+	}
+	
+	public BuiltOnClicked onClicked() {
+		return onClicked;
+	}
+	
+	public BuiltOnHover onHover() {
+		return onHover;
+	}
+	
+	public List<HTMLBuiltElement> getChildren() {
+		return children;
+	}
+	
+	public HttpSiteAccessedEvent getAccessEvent() {
+		return accessEvent;
+	}
+	
+	public String[] getParameters() {
+		return params;
 	}
 	
 	public CharSequence asString() {

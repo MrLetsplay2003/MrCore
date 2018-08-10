@@ -29,6 +29,7 @@ public class HTMLDocument {
 	private String redirect;
 	private String name;
 	private String icon;
+	private List<CustomPollHandler> customPollHandlers;
 	
 	public HTMLDocument() {
 		this(HttpStatusCode.OKAY_200);
@@ -42,6 +43,7 @@ public class HTMLDocument {
 		this.accessActions = new ArrayList<>();
 		this.buildActions = new ArrayList<>();
 		this.headerProperties = new HashMap<>();
+		this.customPollHandlers = new ArrayList<>();
 	}
 	
 	public HTMLDocument(HTMLDocument doc) {
@@ -55,6 +57,7 @@ public class HTMLDocument {
 		this.redirect = doc.redirect;
 		this.name = doc.name;
 		this.icon = doc.icon;
+		this.customPollHandlers = new ArrayList<>(doc.customPollHandlers);
 	}
 	
 	public void addElement(HTMLElement element) {
@@ -67,6 +70,14 @@ public class HTMLDocument {
 	
 	public void addBuildAction(Consumer<HttpSiteBuiltEvent> function) {
 		buildActions.add(function);
+	}
+	
+	public void addCustomPollHandler(CustomPollHandler handler) {
+		this.customPollHandlers.add(handler);
+	}
+	
+	public List<CustomPollHandler> getCustomPollHandlers() {
+		return customPollHandlers;
 	}
 	
 	public void setIcon(String icon) {

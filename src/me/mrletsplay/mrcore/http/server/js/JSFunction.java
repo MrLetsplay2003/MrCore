@@ -1,6 +1,7 @@
 package me.mrletsplay.mrcore.http.server.js;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -44,6 +45,14 @@ public class JSFunction {
 	
 	public String getInnerJS(JSFunctionBuildEvent event) {
 		return innerJS.apply(event);
+	}
+	
+	public void setParameters(List<String> parameters) {
+		this.parameters = parameters;
+	}
+	
+	public void setParameters(String... parameters) {
+		this.parameters = Arrays.asList(parameters);
 	}
 	
 	public void addParameter(String parameter) {

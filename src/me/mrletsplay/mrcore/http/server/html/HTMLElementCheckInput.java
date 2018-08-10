@@ -1,6 +1,7 @@
 package me.mrletsplay.mrcore.http.server.html;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import me.mrletsplay.mrcore.http.server.HttpClientPoll;
 import me.mrletsplay.mrcore.http.server.HttpConnectionInstance;
@@ -19,7 +20,7 @@ public class HTMLElementCheckInput extends HTMLElement {
 	private OnChanged onChanged;
 	private OnChecked onChecked;
 	private OnUnchecked onUnchecked;
-	private boolean defaultValue;
+	private Function<HttpSiteAccessedEvent, Boolean> defaultValue;
 	
 	protected HTMLElementCheckInput() {
 		super("input");
@@ -36,12 +37,17 @@ public class HTMLElementCheckInput extends HTMLElement {
 		this.onUnchecked = element.onUnchecked.clone();
 	}
 	
-	public HTMLElementCheckInput setDefaultValue(boolean defaultValue) {
+	public HTMLElementCheckInput setDefaultValue(Function<HttpSiteAccessedEvent, Boolean> defaultValue) {
 		this.defaultValue = defaultValue;
 		return this;
 	}
 	
-	public boolean getDefaultValue() {
+	public HTMLElementCheckInput setDefaultValue(boolean defaultValue) {
+		this.defaultValue = event -> defaultValue;
+		return this;
+	}
+	
+	public Function<HttpSiteAccessedEvent, Boolean> getDefaultValue() {
 		return defaultValue;
 	}
 	
@@ -197,7 +203,7 @@ public class HTMLElementCheckInput extends HTMLElement {
 		}
 
 		@Override
-		public HTMLBuiltElement getElement() {
+		public HTMLBuiltElementCheckInput getElement() {
 			return element;
 		}
 		

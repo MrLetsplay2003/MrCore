@@ -3,15 +3,19 @@ package me.mrletsplay.mrcore.http.server.html.built;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringEscapeUtils;
 
 import me.mrletsplay.mrcore.http.server.HttpConnection;
 import me.mrletsplay.mrcore.http.server.HttpStatusCode;
 import me.mrletsplay.mrcore.http.server.css.CSSStyleSheet;
+import me.mrletsplay.mrcore.http.server.html.BuiltCustomPollHandler;
 import me.mrletsplay.mrcore.http.server.html.HTMLDocument;
-import me.mrletsplay.mrcore.http.server.html.HTMLElement;
 import me.mrletsplay.mrcore.http.server.html.HTMLDocument.HttpSiteAccessedEvent;
+import me.mrletsplay.mrcore.http.server.html.HTMLElement;
+import me.mrletsplay.mrcore.http.server.js.JSFunction;
+import me.mrletsplay.mrcore.http.server.js.built.JSBuiltFunction;
 import me.mrletsplay.mrcore.http.server.js.built.JSBuiltScript;
 
 public class HTMLBuiltDocument {
@@ -25,7 +29,8 @@ public class HTMLBuiltDocument {
 	private HttpSiteAccessedEvent event;
 	private String[] params;
 	private String pageUID;
-
+	private List<BuiltCustomPollHandler> customPollHandlers;
+	
 	public HTMLBuiltDocument(HTMLDocument base, HttpSiteAccessedEvent event, String... params) {
 		this.base = base;
 		this.script = base.getBaseScript().build(this, event);
@@ -35,6 +40,19 @@ public class HTMLBuiltDocument {
 		this.event = event;
 		this.params = params;
 		this.pageUID = UUID.randomUUID().toString();
+		this.customPollHandlers = base.getCustomPollHandlers().stream().map(p -> p.build(this, event)).collect(Collectors.toCollection(ArrayList::new));
+		StringBuilder pollHandlerFct = new StringBuilder();
+		for(BuiltCustomPollHandler pH : customPollHandlers) {
+			pollHandlerFct
+				.append("if(poll.type==\"")
+				.append(pH.getBase().getHandlingType().getIdentifier())
+				.append("\"){")
+				.append(pH.getHandlingFunction().getName())
+				.append("(poll);")
+				.append("}");
+		}
+		JSBuiltFunction pollHandler = script.appendFunction(JSFunction.of(pollHandlerFct.toString()));
+		
 	}
 
 	public HttpStatusCode getStatusCode() {
@@ -75,6 +93,18 @@ public class HTMLBuiltDocument {
 	
 	public String getPageUID() {
 		return pageUID;
+	}
+	
+	public List<BuiltCustomPollHandler> getCustomPollHandlers() {
+		return customPollHandlers;
+	}
+	
+	public List<HTMLBuiltElement> getElements() {
+		return elements;
+	}
+	
+	public String[] getParameters() {
+		return params;
 	}
 	
 	public HTMLBuiltElement appendElement(HTMLElement element) {

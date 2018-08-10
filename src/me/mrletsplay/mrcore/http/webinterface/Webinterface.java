@@ -11,6 +11,7 @@ import me.mrletsplay.mrcore.http.server.HttpClientPoll;
 import me.mrletsplay.mrcore.http.server.HttpConnection;
 import me.mrletsplay.mrcore.http.server.HttpServer;
 import me.mrletsplay.mrcore.http.server.html.HTMLDocument;
+import me.mrletsplay.mrcore.http.server.html.HTMLDocument.HttpSiteAccessedEvent;
 import me.mrletsplay.mrcore.http.server.html.HTMLElement;
 import me.mrletsplay.mrcore.http.webinterface.doc.PageDocs;
 import me.mrletsplay.mrcore.http.webinterface.impl.PluginTab;
@@ -98,6 +99,25 @@ public class Webinterface {
 	
 	public static void stop() {
 		if(server != null) server.stop();
+	}
+	
+	public static class WebinterfacePageAccessedEvent extends HttpSiteAccessedEvent {
+
+		private WebinterfaceAccount account;
+		
+		public WebinterfacePageAccessedEvent(HttpSiteAccessedEvent event) {
+			super(event.getConnectionInstance(), event.getClientHeader(), event.getRequestedURL());
+			this.account = getLoggedInAccount(getConnection());
+		}
+		
+		public boolean isLoggedIn() {
+			return account != null;
+		}
+		
+		public WebinterfaceAccount getAccount() {
+			return account;
+		}
+		
 	}
 	
 }

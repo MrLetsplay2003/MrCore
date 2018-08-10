@@ -3,6 +3,7 @@ package me.mrletsplay.mrcore.http.webinterface.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import me.mrletsplay.mrcore.http.server.css.CSSStyleElement.CSSTarget.CSSTargetType;
 import me.mrletsplay.mrcore.http.server.css.CSSStyleSheet;
@@ -12,8 +13,11 @@ import me.mrletsplay.mrcore.http.server.html.HTMLElementCheckInput.CheckInputCha
 import me.mrletsplay.mrcore.http.server.html.HTMLElementLabel;
 import me.mrletsplay.mrcore.http.server.html.HTMLElementTextInput;
 import me.mrletsplay.mrcore.http.server.html.HTMLElementTextInput.TextInputChangedEvent;
+import me.mrletsplay.mrcore.http.server.html.built.HTMLBuiltElementCheckInput;
+import me.mrletsplay.mrcore.http.server.html.built.HTMLBuiltElementLabel;
 import me.mrletsplay.mrcore.http.server.js.JSFunction;
 import me.mrletsplay.mrcore.http.webinterface.Webinterface;
+import me.mrletsplay.mrcore.http.webinterface.Webinterface.WebinterfacePageAccessedEvent;
 import me.mrletsplay.mrcore.http.webinterface.WebinterfaceAccount;
 import me.mrletsplay.mrcore.http.webinterface.impl.PluginSettingsTabBuilder.CheckBoxList.CheckBoxListElement.CheckBoxListElementChangedEvent;
 
@@ -311,8 +315,13 @@ public class PluginSettingsTabBuilder {
 //					.addProperty("text-align", "center");
 				
 				HTMLElementCheckInput input = HTMLElement.inputCheckBox();
+				if(el.defaultValue != null) input.setDefaultValue(event -> el.defaultValue.apply(new WebinterfacePageAccessedEvent(event)));
 				
-				HTMLElementLabel lbl = HTMLElement.label(input, "Disabled");
+				HTMLElementLabel lbl = HTMLElement.dynamic(HTMLElement.label(input),
+						event -> {
+							HTMLBuiltElementCheckInput cEl = (HTMLBuiltElementCheckInput) event.getElement().getDocument().getElement(((HTMLBuiltElementLabel) event.getElement()).getTarget());
+							return cEl.isChecked() ? "Enabled" : "Disabled";
+						});
 				
 				lbl.css()
 					.addProperty("display", "inline-block")
@@ -369,6 +378,7 @@ public class PluginSettingsTabBuilder {
 			
 			private String name, description;
 			private Consumer<CheckBoxListElementChangedEvent> changedListener;
+			private Function<WebinterfacePageAccessedEvent, Boolean> defaultValue;
 			
 			public CheckBoxListElement(String name) {
 				this.name = name;
@@ -376,6 +386,16 @@ public class PluginSettingsTabBuilder {
 			
 			public CheckBoxListElement withDescription(String description) {
 				this.description = description;
+				return this;
+			}
+			
+			public CheckBoxListElement withDefaultValue(Function<WebinterfacePageAccessedEvent, Boolean> defaultValue) {
+				this.defaultValue = defaultValue;
+				return this;
+			}
+			
+			public CheckBoxListElement withDefaultValue(boolean defaultValue) {
+				this.defaultValue = event -> defaultValue;
 				return this;
 			}
 			
