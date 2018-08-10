@@ -51,8 +51,10 @@ public class HTMLBuiltDocument {
 				.append("(poll);")
 				.append("}");
 		}
-		JSBuiltFunction pollHandler = script.appendFunction(JSFunction.of(pollHandlerFct.toString()));
-		
+		JSFunction rPollHandler = JSFunction.of(pollHandlerFct.toString());
+		rPollHandler.setParameters("poll");
+		JSBuiltFunction pollHandler = script.appendFunction(rPollHandler);
+		script.appendBaseCode("setCustomPollHandler(" + pollHandler.getName() + ");");
 	}
 
 	public HttpStatusCode getStatusCode() {

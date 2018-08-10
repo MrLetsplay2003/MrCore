@@ -43,7 +43,6 @@ public class ParsedURL {
 			}
 			raw = raw.substring(0, qMInd);
 		}
-		System.out.println(getParams);
 		return new ParsedURL(raw, getParams, query);
 	}
 	

@@ -384,6 +384,19 @@ public class HTMLElement {
 		return new HTMLElementLabel(forElement, text);
 	}
 	
+	public static HTMLElement textarea(int rows, int cols) {
+		return new HTMLElement("textarea")
+				.addAttribute("rows", "" + rows)
+				.addAttribute("cols", "" + cols);
+	}
+	
+	public static HTMLElement textareaReadOnly(int rows, int cols) {
+		return new HTMLElement("textarea")
+				.addAttribute("rows", "" + rows)
+				.addAttribute("cols", "" + cols)
+				.addAttribute("readonly", "readonly");
+	}
+	
 	public static class OnHover {
 		
 		private CSSStyleElement style;

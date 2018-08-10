@@ -13,6 +13,7 @@ public class JSBuiltScript implements Cloneable {
 	private HTMLBuiltDocument document;
 	private HttpSiteAccessedEvent event;
 	private long lastFunctionID;
+	private String baseCode = "";
 	
 	public JSBuiltScript(HTMLBuiltDocument doc, HttpSiteAccessedEvent event) {
 		this.functions = new ArrayList<>();
@@ -45,6 +46,10 @@ public class JSBuiltScript implements Cloneable {
 		return f;
 	}
 	
+	public void appendBaseCode(String baseCode) {
+		this.baseCode += baseCode;
+	}
+	
 	public JSBuiltFunction getFunction(String name) {
 		return functions.stream().filter(f -> f.getName().equals(name)).findFirst().orElse(null);
 	}
@@ -67,6 +72,7 @@ public class JSBuiltScript implements Cloneable {
 		for(JSBuiltFunction f : functions) {
 			builder.append(f.asString());
 		}
+		builder.append(baseCode);
 		return builder.toString();
 	}
 	

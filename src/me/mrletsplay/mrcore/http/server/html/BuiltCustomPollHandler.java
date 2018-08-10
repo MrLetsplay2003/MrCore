@@ -13,6 +13,7 @@ public class BuiltCustomPollHandler {
 		this.base = base;
 		base.getHandlingFunction().setParameters("poll");
 		this.handlingFunction = doc.getScript().appendFunction(base.getHandlingFunction());
+		System.out.println(this.handlingFunction.asString());
 	}
 	
 	public JSBuiltFunction getHandlingFunction() {
