@@ -24,15 +24,15 @@ public class HTMLElement {
 	private HTMLElement parent;
 	private CSSStyleElement css;
 	private Condition<HttpSiteAccessedEvent> condition;
-	private Function<HttpSiteAccessedEvent, String> getContentMethod;
+	protected Function<HTMLElementGetContentEvent, String> getContentMethod;
 	private Function<HttpSiteAccessedEvent, List<HTMLElement>> getChildrenMethod;
 	private int sortingIndex, contentSortingIndex;
 	private Map<String, String> attributes;
 	
 	private OnHover onHover;
 	private OnClicked onClicked;
-	
-	protected HTMLElement(String type, Function<HttpSiteAccessedEvent, String> getContentMethod) {
+
+	protected HTMLElement(String type, Function<HTMLElementGetContentEvent, String> getContentMethod) {
 		this.type = type;
 		this.getContentMethod = getContentMethod;
 		this.id = null;
@@ -170,7 +170,7 @@ public class HTMLElement {
 		return type;
 	}
 	
-	public String getContent(HttpSiteAccessedEvent event) {
+	public String getContent(HTMLElementGetContentEvent event) {
 		return getContentMethod.apply(event);
 	}
 	
@@ -355,13 +355,13 @@ public class HTMLElement {
 		return new HTMLElement("td", text);
 	}
 	
-	public static HTMLElement dynamic(HTMLElement element, Function<HttpSiteAccessedEvent, String> getContentMethod) {
-		HTMLElement el =  new HTMLElement(element);
-		el.getContentMethod = getContentMethod;
-		return el;
+	public static <T extends HTMLElement> T dynamic(T element, Function<HTMLElementGetContentEvent, String> getContentMethod) {
+//		HTMLElement el =  element.clone(); TODO
+		element.getContentMethod = getContentMethod;
+		return element;
 	}
 	
-	public static HTMLElement dynamic(HTMLElement element, Function<HttpSiteAccessedEvent, String> getContentMethod, Function<HttpSiteAccessedEvent, List<HTMLElement>> getChildrenMethod) {
+	public static HTMLElement dynamic(HTMLElement element, Function<HTMLElementGetContentEvent, String> getContentMethod, Function<HttpSiteAccessedEvent, List<HTMLElement>> getChildrenMethod) {
 		HTMLElement el =  new HTMLElement(element);
 		el.getContentMethod = getContentMethod;
 		el.getChildrenMethod = getChildrenMethod;
@@ -455,6 +455,32 @@ public class HTMLElement {
 		public String getElementID();
 		
 		public HTMLBuiltElement getElement();
+		
+	}
+	
+	public static class HTMLElementGetContentEvent implements HTMLElementEvent {
+		
+		private HTMLBuiltElement element;
+		private HttpSiteAccessedEvent accessEvent;
+		
+		public HTMLElementGetContentEvent(HTMLBuiltElement element, HttpSiteAccessedEvent accessEvent) {
+			this.element = element;
+			this.accessEvent = accessEvent;
+		}
+
+		@Override
+		public String getElementID() {
+			return element.getID();
+		}
+
+		@Override
+		public HTMLBuiltElement getElement() {
+			return element;
+		}
+		
+		public HttpSiteAccessedEvent getAccessEvent() {
+			return accessEvent;
+		}
 		
 	}
 	

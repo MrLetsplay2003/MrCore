@@ -935,7 +935,7 @@ public class GUIUtils {
 	 * Do NOT register this listener yourself. It will be handled by MrCore and registering it will cause double calls to GUIs
 	 * @author MrLetsplay2003
 	 */
-	public static class GUIListener implements Listener{
+	public static class GUIListener implements Listener {
 		
 		@SuppressWarnings("unchecked")
 		@EventHandler
