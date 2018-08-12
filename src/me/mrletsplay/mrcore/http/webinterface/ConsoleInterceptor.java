@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class ConsoleLogInterceptor {
+public class ConsoleInterceptor {
 
 	public static final Interceptor INTERCEPTOR;
 	

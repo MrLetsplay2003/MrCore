@@ -17,7 +17,7 @@ import me.mrletsplay.mrcore.http.server.html.HTMLElement;
 import me.mrletsplay.mrcore.http.webinterface.doc.PageDocs;
 import me.mrletsplay.mrcore.http.webinterface.impl.PluginTab;
 import me.mrletsplay.mrcore.http.webinterface.impl.PluginWebinterfaceImpl;
-import me.mrletsplay.mrcore.http.webinterface.plugins.PageConsole;
+import me.mrletsplay.mrcore.http.webinterface.plugins.PagePluginsConsole;
 import me.mrletsplay.mrcore.http.webinterface.plugins.PagePluginsBase;
 import me.mrletsplay.mrcore.http.webinterface.plugins.PagePluginsHome;
 import me.mrletsplay.mrcore.misc.JSON.JSONObject;
@@ -41,18 +41,20 @@ public class Webinterface {
 		server.addPage("/login", PageLogin.getPage());
 		server.addPage("/logout", PageLogout.getPage());
 		server.addPage("/plugins/home", PagePluginsHome.getPage());
-		server.addPage("/plugins/console", PageConsole.getPage());
+		server.addPage("/plugins/console", PagePluginsConsole.getPage());
 		server.addPage("/docs", PageDocs.getPage());
 		
 		server.start();
 		
-		ConsoleLogInterceptor.addListener(event -> handleLog(event.getLogLine()));
+		ConsoleInterceptor.addListener(event -> handleLog(event.getLogLine()));
 	}
 	
 	private static void handleLog(String line) {
 		JSONObject dt = new JSONObject();
 		dt.put("line", line);
-		server.getActiveConnections().forEach(c -> c.addPoll(HttpClientPoll.custom(ConsolePollType.CONSOLE_LINE, dt)));
+		server.getActiveConnections().stream()
+				.filter(c -> isLoggedIn(c) && getLoggedInAccount(c).hasPermission("webinterface.console"))
+				.forEach(c -> c.addPoll(HttpClientPoll.custom(ConsolePollType.CONSOLE_LINE, dt)));
 	}
 	
 	public static HttpServer getServer() {
