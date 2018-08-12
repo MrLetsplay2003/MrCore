@@ -113,7 +113,7 @@ public class PagePluginsBase {
 						
 						for(PluginTab tab : impl.getTabs()) {
 							HTMLElement a = HTMLElement.a(tab.getName())
-								.addChild(HTMLElement.img("https://graphite-official.com/webinterface/img/home.png"))
+								.addChild(HTMLElement.img("https://graphite-official.com/webinterface/img/premium.png"))
 								.setContentSortingIndex(1);
 							
 							a.onClicked()
@@ -132,10 +132,12 @@ public class PagePluginsBase {
 			.addProperty("background-color", "rgb(90, 90, 90)");
 		
 		sidebarNav.addChild(HTMLElement.button("Category")
-				.addClass("tab-title"));
+			.addClass("tab-title"));
 		
 		HTMLElement hBtn = HTMLElement.button("Home")
-			.addClass("tab-button");
+			.addClass("tab-button")
+			.addChild(HTMLElement.img("https://graphite-official.com/webinterface/img/home.png"))
+			.setContentSortingIndex(1);
 		
 		hBtn.onClicked()
 			.function(JSFunction.of("redirect('home')"));
@@ -143,7 +145,9 @@ public class PagePluginsBase {
 		sidebarNav.addChild(hBtn);
 		
 		HTMLElement cBtn = HTMLElement.button("Console")
-			.addClass("tab-button");
+			.addClass("tab-button")
+			.addChild(HTMLElement.img("https://graphite-official.com/webinterface/img/commands.png"))
+			.setContentSortingIndex(1);
 		
 		cBtn.onClicked()
 			.function(JSFunction.of("redirect('console')"));
@@ -155,7 +159,8 @@ public class PagePluginsBase {
 		tabContent.css()
 			.position("absolute", "0", "15%", "85%", "100%")
 			.addProperty("background-color", "#ecf0f5")
-			.addProperty("overflow-y", "scroll");
+			.addProperty("overflow-y", "scroll")
+			.addProperty("font-family", "'Ek Mukta'");
 		
 		div.addChild(sidebarNav);
 		div.addChild(tabContent);

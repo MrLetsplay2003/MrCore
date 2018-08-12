@@ -1112,7 +1112,7 @@ public class CustomConfig {
 	
 	public <T> List<T> getGenericList(String key, Class<T> clazz) {
 		Property prop = parentSection.get(key);
-		if(prop == null) return new ArrayList<>();
+		if(prop == null) return null;
 		if(!prop.type.equals(PropertyType.LIST)) throw new InvalidTypeException(key, "Invalid property type "+prop.type);
 		try {
 			return castGenericList((List<?>) prop.value, clazz);

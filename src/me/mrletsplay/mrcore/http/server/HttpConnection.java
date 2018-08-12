@@ -33,6 +33,7 @@ public class HttpConnection {
 	private List<HttpConnectionInstance> connections;
 	private List<HttpClientPoll> polls;
 	private HTMLBuiltDocument lastServedPage;
+	private String host;
 	
 	public HttpConnection(HttpServer server, Socket s, String sessID) throws IOException {
 		this.server = server;
@@ -40,6 +41,7 @@ public class HttpConnection {
 		this.connections = new ArrayList<>();
 		this.connections.add(new HttpConnectionInstance(this, s));
 		this.polls = new ArrayList<>();
+		this.host = s.getInetAddress().getHostAddress();
 	}
 	
 	public void handleRequest(ClientHeader clientHeader, HttpConnectionInstance connection) throws IOException {
@@ -111,6 +113,10 @@ public class HttpConnection {
 			lastServedPage = doc;
 			writePage(doc, connection);
 		}
+	}
+	
+	public String getHostAddress() {
+		return host;
 	}
 	
 	private void writePage(HTMLBuiltDocument doc, HttpConnectionInstance instance) throws IOException {

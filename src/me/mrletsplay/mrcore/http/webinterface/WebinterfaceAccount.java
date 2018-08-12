@@ -11,7 +11,7 @@ public class WebinterfaceAccount {
 	private UUID minecraftUUID;
 	private List<String> permissions;
 	
-	public WebinterfaceAccount(UUID minecraftUUID, List<String> permissions) {
+	protected WebinterfaceAccount(UUID minecraftUUID, List<String> permissions) {
 		this.minecraftUUID = minecraftUUID;
 		this.permissions = permissions;
 	}
