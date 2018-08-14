@@ -178,7 +178,6 @@ public class HTMLDocument {
 	public static class HttpSiteAccessedEvent {
 		
 		private HttpConnectionInstance connectionInstance;
-//		private boolean allowAccess = true;
 		private ClientHeader clientHeader;
 		private ParsedURL requestedURL;
 		private AccessResult result;
@@ -205,14 +204,6 @@ public class HTMLDocument {
 		public ParsedURL getRequestedURL() {
 			return requestedURL;
 		}
-		
-//		public void setAllowAccess(boolean allowAccess) {
-//			this.allowAccess = allowAccess;
-//		}
-//		
-//		public boolean shouldAllowAccess() {
-//			return allowAccess;
-//		}
 		
 		public void setResult(AccessResult result) {
 			this.result = result;

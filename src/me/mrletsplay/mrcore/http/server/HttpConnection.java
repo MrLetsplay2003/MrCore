@@ -14,6 +14,7 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 
 import me.mrletsplay.mrcore.http.server.HttpServer.ClientHeader;
+import me.mrletsplay.mrcore.http.server.InternalPage.InternalResult;
 import me.mrletsplay.mrcore.http.server.html.HTMLDocument;
 import me.mrletsplay.mrcore.http.server.html.built.HTMLBuiltDocument;
 import me.mrletsplay.mrcore.http.server.js.JSFunction;
@@ -104,6 +105,11 @@ public class HttpConnection {
 					writePage(new HTMLDocument(HttpStatusCode.INTERNAL_ERROR_500).build(connection, clientHeader, parsedUrl), connection);
 				}
 			}else {
+				InternalResult r = server.lookupInternal("/" + iName, parsedUrl, clientHeader, connection);
+				if(r != null) {
+					writeInternal(r, connection);
+					return;
+				}
 				writePage(HttpConstants.HTML_INTERNALS_404_PAGE.build(connection, clientHeader, parsedUrl), connection);
 			}
 			return;
@@ -117,6 +123,14 @@ public class HttpConnection {
 	
 	public String getHostAddress() {
 		return host;
+	}
+	
+	public HTMLBuiltDocument getLastServedPage() {
+		return lastServedPage;
+	}
+	
+	public List<HttpClientPoll> getQueuedPolls() {
+		return polls;
 	}
 	
 	private void writePage(HTMLBuiltDocument doc, HttpConnectionInstance instance) throws IOException {
@@ -171,6 +185,18 @@ public class HttpConnection {
 		header += "Set-Cookie: mrcore_sessid=" + sessID + "\r\n";
 		header += "\r\n";
 		instance.out.write((start + header + raw).getBytes());
+	}
+	
+	private void writeInternal(InternalResult res, HttpConnectionInstance instance) throws IOException {
+		Date date = new Date();
+		String start = "HTTP/1.1 " + res.getStatusCode().toString() + "\r\n";
+		String header = "Date: " + date.toString() + "\r\n";
+		header += "Content-Type: " + res.getContentType() + "\r\n";
+		header += "Content-length: " + res.getContent().length + "\r\n";
+		header += "Set-Cookie: mrcore_sessid=" + sessID + "\r\n";
+		header += "\r\n";
+		instance.out.write((start + header).getBytes());
+		instance.out.write(res.getContent());
 	}
 	
 	private void writeEmpty(HttpConnectionInstance instance) throws IOException {

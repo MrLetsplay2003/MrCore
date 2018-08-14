@@ -59,6 +59,10 @@ public class JSFunction {
 		this.parameters.add(parameter);
 	}
 	
+	public void addParameters(String... parameters) {
+		this.parameters.addAll(Arrays.asList(parameters));
+	}
+	
 	public List<String> getParameters() {
 		return parameters;
 	}

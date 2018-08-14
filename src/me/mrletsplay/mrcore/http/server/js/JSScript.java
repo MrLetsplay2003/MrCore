@@ -9,17 +9,15 @@ import me.mrletsplay.mrcore.http.server.js.built.JSBuiltScript;
 
 public class JSScript implements Cloneable {
 
+	private String baseCode = "";
 	private List<JSFunction> functions;
 	
 	public JSScript() {
 		this.functions = new ArrayList<>();
 	}
 	
-	public JSScript(List<JSFunction> functions) {
-		this.functions = new ArrayList<>(functions);
-	}
-	
 	public JSScript(JSScript jsScript) {
+		this.baseCode = jsScript.baseCode;
 		this.functions = new ArrayList<>(jsScript.functions);
 	}
 	
@@ -31,12 +29,21 @@ public class JSScript implements Cloneable {
 		return functions;
 	}
 	
+	public void appendBaseCode(String baseCode) {
+		this.baseCode += baseCode;
+	}
+	
+	public String getBaseCode() {
+		return baseCode;
+	}
+	
 	public void appendScript(JSScript script) {
 		functions.addAll(script.functions);
 	}
 	
 	public JSBuiltScript build(HTMLBuiltDocument doc, HttpSiteAccessedEvent event) {
 		JSBuiltScript b = new JSBuiltScript(doc, event);
+		if(baseCode != null) b.appendBaseCode(baseCode);
 		functions.forEach(b::appendFunction);
 		return b;
 	}

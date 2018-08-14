@@ -154,6 +154,16 @@ public class PagePluginsBase {
 		
 		sidebarNav.addChild(cBtn);
 		
+		HTMLElement mBtn = HTMLElement.button("Map")
+			.addClass("tab-button")
+			.addChild(HTMLElement.img("https://graphite-official.com/webinterface/img/premium.png"))
+			.setContentSortingIndex(1);
+		
+		mBtn.onClicked()
+			.function(JSFunction.of("redirect('map')"));
+		
+		sidebarNav.addChild(mBtn);
+		
 		HTMLElement tabContent = HTMLElement.div().setID("tab-content");
 		
 		tabContent.css()

@@ -1,4 +1,4 @@
- package me.mrletsplay.mrcore.http.server;
+package me.mrletsplay.mrcore.http.server;
 
 public enum HttpClientPollType {
 

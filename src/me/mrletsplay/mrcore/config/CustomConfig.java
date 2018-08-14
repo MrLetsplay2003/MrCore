@@ -44,7 +44,7 @@ public class CustomConfig {
 	
 	/**
 	 * Returns this CustomConfig class's config version<br>
-	 * This value might not be the newest version nor the value returned by {@link #getInstanceVersion()}<br>
+	 * This value might not be the newest version<br>
 	 * This value is used to tell the config loader what version this is
 	 * @return This CustomConfig class's config version
 	 */
@@ -1673,7 +1673,8 @@ public class CustomConfig {
 		}
 		
 		public boolean containsKey(String key) {
-			return properties.containsKey(key) || subsections.values().stream().anyMatch(s -> s.containsKey(key));
+			return get(key) != null;
+//			return properties.containsKey(key) || subsections.values().stream().anyMatch(s -> s.containsKey(key));
 		}
 		
 		public List<String> getKeys(String key, boolean deep, boolean fullKeys){

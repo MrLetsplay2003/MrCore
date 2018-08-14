@@ -17,6 +17,8 @@ import me.mrletsplay.mrcore.http.server.html.HTMLElement;
 import me.mrletsplay.mrcore.http.webinterface.doc.PageDocs;
 import me.mrletsplay.mrcore.http.webinterface.impl.PluginTab;
 import me.mrletsplay.mrcore.http.webinterface.impl.PluginWebinterfaceImpl;
+import me.mrletsplay.mrcore.http.webinterface.map.MapRenderer;
+import me.mrletsplay.mrcore.http.webinterface.map.PageMap;
 import me.mrletsplay.mrcore.http.webinterface.plugins.PagePluginsConsole;
 import me.mrletsplay.mrcore.http.webinterface.plugins.PagePluginsBase;
 import me.mrletsplay.mrcore.http.webinterface.plugins.PagePluginsHome;
@@ -34,6 +36,13 @@ public class Webinterface {
 		awaitingConfirmation = new HashMap<>();
 		pluginPages = new ArrayList<>();
 		
+		MapRenderer.init();
+		for(int x = -64; x < 64; x++) {
+			for(int z = -64; z < 64; z++) {
+				MapRenderer.queueChunk(x, z);
+			}
+		}
+		
 		server = new HttpServer(WebinterfaceDataManager.getWebinterfacePort());
 		
 		server.addPage("/", PageHome.getPage());
@@ -43,6 +52,9 @@ public class Webinterface {
 		server.addPage("/plugins/home", PagePluginsHome.getPage());
 		server.addPage("/plugins/console", PagePluginsConsole.getPage());
 		server.addPage("/docs", PageDocs.getPage());
+		server.addPage("/plugins/map", PageMap.getPage());
+		
+		server.addInternalPage("/map", PageMap.getInternalPage());
 		
 		server.start();
 		
