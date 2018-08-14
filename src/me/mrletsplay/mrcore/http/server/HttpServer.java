@@ -11,7 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import me.mrletsplay.mrcore.http.server.InternalPage.InternalResult;
 import me.mrletsplay.mrcore.http.server.html.HTMLDocument;
+import me.mrletsplay.mrcore.http.server.html.HTMLDocument.HttpSiteAccessedEvent;
 import me.mrletsplay.mrcore.http.server.html.HTMLElement;
 import me.mrletsplay.mrcore.http.server.html.built.HTMLBuiltDocument;
 
@@ -24,12 +26,14 @@ public class HttpServer {
 	private Thread listeningThread;
 	
 	private Map<String, HTMLDocument> pages;
+	private Map<String, InternalPage> internalPages;
 	
 	private List<HttpConnection> connections;
 	
 	public HttpServer(int port) {
 		this.port = port;
 		pages = new LinkedHashMap<>();
+		internalPages = new LinkedHashMap<>();
 		connections = new ArrayList<>();
 		page404 = new HTMLDocument(HttpStatusCode.NOT_FOUND_404);
 		page404.addElement(HTMLElement.h1("404 Not Found"));
@@ -45,6 +49,14 @@ public class HttpServer {
 	
 	public void removePage(String path) {
 		pages.remove(path);
+	}
+	
+	public void addInternalPage(String path, InternalPage page) {
+		internalPages.put(path, page);
+	}
+	
+	public void removeInternalPage(String path) {
+		internalPages.remove(path);
 	}
 	
 	public void set404Page(HTMLDocument page404) {
@@ -161,6 +173,11 @@ public class HttpServer {
 	
 	public boolean isRunning() {
 		return listeningThread != null && listeningThread.isAlive();
+	}
+	
+	protected InternalResult lookupInternal(String url, ParsedURL fullURL, ClientHeader header, HttpConnectionInstance connectionInstance) {
+		if(!internalPages.containsKey(url)) return null;
+		return internalPages.get(url).call(new HttpSiteAccessedEvent(connectionInstance, header, fullURL));
 	}
 	
 	protected HTMLBuiltDocument lookupURL(ParsedURL url, ClientHeader header, HttpConnectionInstance connectionInstance) {

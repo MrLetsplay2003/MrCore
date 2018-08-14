@@ -323,6 +323,10 @@ public class HTMLElement {
 		return new HTMLElement("script", js);
 	}
 	
+	public static HTMLElement scriptSrc(String src) {
+		return new HTMLElement("script").addAttribute("src", src);
+	}
+	
 	public static HTMLElement raw(String raw) {
 		return new HTMLElement(null, raw);
 	}

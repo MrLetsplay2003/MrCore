@@ -134,13 +134,13 @@ public class HTMLBuiltDocument {
 		builder.append(css.asString(event, this));
 		builder.append("</style>");
 		builder.append("</head>");
-		
+
+		builder.append("<script src=\"https://code.jquery.com/jquery-3.3.1.min.js\"></script>");
+		builder.append("<script src=\"https://graphite-official.com/api/mrcore/files/http_client_impl.js\"></script>");
 		builder.append("<body>");
 		for(HTMLBuiltElement el : elements) {
 			builder.append(el.asString());
 		}
-		builder.append("<script src=\"https://code.jquery.com/jquery-3.3.1.min.js\"></script>");
-		builder.append("<script src=\"https://graphite-official.com/api/mrcore/files/http_client_impl.js\"></script>");
 		builder.append("<script>");
 		builder.append(script.asString());
 		builder.append("</script>");
