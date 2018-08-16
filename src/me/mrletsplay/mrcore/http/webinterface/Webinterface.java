@@ -37,11 +37,6 @@ public class Webinterface {
 		pluginPages = new ArrayList<>();
 		
 		MapRenderer.init();
-//		for(int x = -64; x < 64; x++) {
-//			for(int z = -64; z < 64; z++) {
-//				MapRenderer.queueChunk(x, z);
-//			}
-//		}
 		
 		server = new HttpServer(WebinterfaceDataManager.getWebinterfacePort());
 		
