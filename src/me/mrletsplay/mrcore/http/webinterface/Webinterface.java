@@ -37,11 +37,11 @@ public class Webinterface {
 		pluginPages = new ArrayList<>();
 		
 		MapRenderer.init();
-		for(int x = -64; x < 64; x++) {
-			for(int z = -64; z < 64; z++) {
-				MapRenderer.queueChunk(x, z);
-			}
-		}
+//		for(int x = -64; x < 64; x++) {
+//			for(int z = -64; z < 64; z++) {
+//				MapRenderer.queueChunk(x, z);
+//			}
+//		}
 		
 		server = new HttpServer(WebinterfaceDataManager.getWebinterfacePort());
 		
@@ -97,7 +97,7 @@ public class Webinterface {
 		
 		HTMLElement el = doc.getElementByID("tab-content");
 		
-		el.copyInner(tab.getHTML());
+		el.copyInner(tab.getTabContent());
 		
 		return doc;
 	}
