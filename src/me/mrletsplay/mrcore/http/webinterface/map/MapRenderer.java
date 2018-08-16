@@ -26,29 +26,35 @@ public class MapRenderer {
 	
 	public static void init() {
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(MrCorePlugin.pl, () -> {
-			long a = System.currentTimeMillis();
-			int perTick = 200;
+			int perTick = 50;
 			for(int i = 0; i < perTick; i++) {
 				PrioritizedChunk ch = chunkQueue.poll();
 				if(ch != null) {
-					//System.out.println("@" + ch.getChunkX() + "/" + ch.getChunkZ());
 					drawChunk(ch.getChunkX(), ch.getChunkZ());
 				}else {
 					chunkQueue.addAll(getNextRenderableChunks(perTick * 2));
 				}
 			}
-			System.out.println(System.currentTimeMillis() - a);
 		}, 1, 1);
 	}
 	
 	public static void drawChunk(int cX, int cZ) {
 		BufferedImage img = new BufferedImage(16, 16, BufferedImage.TYPE_3BYTE_BGR);
 		Graphics2D g2d = img.createGraphics();
-		g2d.setColor(Color.GREEN);
 		for(int x = 0; x < 16; x++) {
 			for(int z = 0; z < 16; z++) {
 				Block b = Bukkit.getWorld("world").getHighestBlockAt(cX * 16 + x, cZ * 16 + z).getRelative(BlockFace.DOWN);
-				if(b.getType().equals(Material.GRASS)) g2d.fillRect(x, z, 1, 1);
+				g2d.setColor(Color.RED);
+				if(b.getType().equals(Material.GRASS)) {
+					g2d.setColor(Color.GREEN);
+				}else if(b.getType().equals(Material.LEAVES) || b.getType().equals(Material.LEAVES_2)) {
+					g2d.setColor(Color.PINK);
+				}else if(b.getType().equals(Material.WATER) || b.getType().equals(Material.STATIONARY_WATER)) {
+					g2d.setColor(Color.BLUE);
+				}else if(b.getType().equals(Material.STONE)) {
+					g2d.setColor(Color.GRAY);
+				}
+				g2d.fillRect(x, z, 1, 1);
 			}
 		}
 		drawnChunks.put(chunkCoordsAsInt(cX, cZ), img);
@@ -59,7 +65,7 @@ public class MapRenderer {
 	}
 	
 	private static long chunkCoordsAsInt(int cX, int cZ) {
-		return ((long) cX << 32) + cZ;
+		return (((long) cX) << 32) + cZ;
 	}
 	
 	public static List<PrioritizedChunk> getNextRenderableChunks(int count) {
@@ -67,7 +73,7 @@ public class MapRenderer {
 		boolean a = false;
 		List<PrioritizedChunk> chunks = new ArrayList<>();
 		while(chunks.size() < count) {
-			while(drawnChunks.containsKey(chunkCoordsAsInt(x, y))) {
+			while(drawnChunks.containsKey(chunkCoordsAsInt(x, y)) && Bukkit.getWorld("world").getChunkAt(x, y) != null) {
 				if(x > tX) x--;
 				if(x < tX) x++;
 				if(y > tY) y--;

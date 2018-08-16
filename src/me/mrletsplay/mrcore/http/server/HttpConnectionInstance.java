@@ -42,7 +42,7 @@ public class HttpConnectionInstance {
 					}
 				}
 			}catch(SocketException e) {
-				e.printStackTrace(); //TODO
+				e.printStackTrace(); //TODO: Ignore exception
 			}catch(Exception e) {
 				e.printStackTrace();
 				return;

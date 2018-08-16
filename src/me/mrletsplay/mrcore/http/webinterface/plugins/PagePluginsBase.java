@@ -156,7 +156,7 @@ public class PagePluginsBase {
 		
 		HTMLElement mBtn = HTMLElement.button("Map")
 			.addClass("tab-button")
-			.addChild(HTMLElement.img("https://graphite-official.com/webinterface/img/premium.png"))
+			.addChild(HTMLElement.img("/_internals/img/map.png"))
 			.setContentSortingIndex(1);
 		
 		mBtn.onClicked()

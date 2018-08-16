@@ -12,6 +12,7 @@ import me.mrletsplay.mrcore.misc.JSON.JSONObject;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
 
 public class PageRegister {
 
@@ -162,7 +163,7 @@ public class PageRegister {
 					}
 					Webinterface.awaitingConfirmation.put(event.getConnection().getSessionID(), params);
 					event.getConnection().addPoll(HttpClientPoll.alert("Waiting for registration"));
-					player.spigot().sendMessage(new ComponentBuilder("Click here").color(ChatColor.GRAY).event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/mrcore web register-confirm " + event.getConnection().getSessionID())).create());
+					player.spigot().sendMessage(new ComponentBuilder("Click here").color(ChatColor.GRAY).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("CLICK ME!").color(ChatColor.DARK_RED).create())).event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/mrcore web register-confirm " + event.getConnection().getSessionID())).create());
 				}
 				
 				@Override

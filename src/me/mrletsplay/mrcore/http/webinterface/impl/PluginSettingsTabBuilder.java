@@ -46,7 +46,7 @@ public class PluginSettingsTabBuilder {
 	public PluginTab build() {
 		HTMLElement content = HTMLElement.div();
 		elements.forEach(e -> content.addChild(e.toHTML()));
-		return new PluginTab(name, content, new CSSStyleSheet());
+		return new PluginTabImpl(name, content, new CSSStyleSheet());
 	}
 	
 	public static abstract class PluginTabElement {
