@@ -13,39 +13,12 @@ import me.mrletsplay.mrcore.http.webinterface.plugins.PagePluginsBase;
 public class PageMap {
 	
 	private static HTMLDocument page;
-//	private static final BufferedImage EMPTY_IMAGE;
 	private static final int
 			TILE_SIZE = 256;
 	
 	static {
-//		EMPTY_IMAGE = new BufferedImage(1, 1, BufferedImage.TYPE_3BYTE_BGR);
 		page = PagePluginsBase.getBase();
 		JSScript script = page.getBaseScript();
-		
-//		JSFunction moveMap = JSFunction.of("moveMapBy",
-//				"let els = document.getElementsByClassName(\"map-tile\");" +
-//				"for(let el of els) {" +
-//				"el.left = el.left + x;" +
-//				"el.top = el.top + y;" +
-//				"}" +
-//				"let mapParent = document.getElementById(\"mc-map\");" +
-//				"let i = 0;" +
-//				"while(i++ < 1000) {" +
-//				"let newEl = document.createElement(\"img\");" +
-//				"newEl.src = \"https://i.ytimg.com/an_webp/7uiv6tKtoKg/mqdefault_6s.webp?du=3000&sqp=CKDZx9sF&rs=AOn4CLDeWYIn9FtSYNyLHK315Xr1KBTcmA\";" +
-//				"mapParent.appendChild(newEl);" +
-//				"console.log(mapParent.offsetHeight, mapParent.scrollHeight);" +
-//				"if(mapParent.offsetHeight < mapParent.scrollHeight || mapParent.offsetWidth < mapParent.scrollWidth) {" +
-//				"console.log(\"hi\");" +
-//				"newEl.remove();" +
-//				"break;" +
-//				"}" +
-//				"}"
-//			);
-//		moveMap.addParameters("x", "y");
-//		
-//		script.addFunction(moveMap);
-//		script.appendBaseCode("moveMapBy(0, 0);");
 		
 		script.appendBaseCode(
 				"let map = new Map(document.getElementById(\"mc-map\"));" +
@@ -65,7 +38,6 @@ public class PageMap {
 		page.setName("Plugins | Map");
 		
 		page.addElement(HTMLElement.scriptSrc("https://graphite-official.com/api/mrcore/files/map.js"));
-//		page.addElement(HTMLElement.scriptSrc("https://graphite-official.com/api/mrcore/files/jquery.viewport.js"));
 		page.addElement(HTMLElement.scriptSrc("https://graphite-official.com/api/mrcore/files/jquery.mousewheel.min.js"));
 		page.addAccessAction(event -> {
 			
@@ -87,7 +59,6 @@ public class PageMap {
 				for(int y = 0; y < tileSize; y++) {
 					BufferedImage img2 = MapRenderer.getChunkAt(cX + x, cZ + y);
 					if(img != null) {
-//						return InternalResult.ofImage(EMPTY_IMAGE);
 						g2d.drawImage(img2, x * TILE_SIZE / tileSize, y * TILE_SIZE / tileSize, TILE_SIZE / tileSize + 2, TILE_SIZE / tileSize + 2, null);
 					}
 				}

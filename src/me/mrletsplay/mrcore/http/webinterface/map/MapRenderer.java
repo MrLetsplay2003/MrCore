@@ -73,7 +73,7 @@ public class MapRenderer {
 		boolean a = false;
 		List<PrioritizedChunk> chunks = new ArrayList<>();
 		while(chunks.size() < count) {
-			while(drawnChunks.containsKey(chunkCoordsAsInt(x, y)) && Bukkit.getWorld("world").getChunkAt(x, y) != null) {
+			while(drawnChunks.containsKey(chunkCoordsAsInt(x, y))) { //TODO: Check chunks generated
 				if(x > tX) x--;
 				if(x < tX) x++;
 				if(y > tY) y--;
