@@ -1011,6 +1011,7 @@ public class GUIUtils {
 					GUIClosedEvent ev = new GUIClosedEvent(holder, player, inv);
 					gui.builder.closed.onClosed(ev);
 					if(ev.isCancelled()) {
+						holder.cps();
 						Bukkit.getScheduler().runTaskLater(MrCorePlugin.pl, () -> {
 							player.openInventory(inv);
 						}, 1);
@@ -1039,6 +1040,8 @@ public class GUIUtils {
 
 		private GUI gui;
 		private Map<String, Object> properties;
+		private int cps = 0;
+		private long lastC = 0;
 		
 		/**
 		 * Creates a gui holder for the specified GUI<br>
@@ -1108,6 +1111,16 @@ public class GUIUtils {
 		 */
 		public Map<String, Object> getProperties() {
 			return properties;
+		}
+		
+		public void cps() {
+			cps++;
+			if(System.currentTimeMillis() / 1000 == lastC / 1000) {
+				if(cps > 10) MrCorePlugin.getInstance().getLogger().warning("Spam of Inventory#close on GUI (#close/sec = " + cps + ", Title = " + gui.builder.title + ")");
+			}else {
+				cps = 0;
+			}
+			lastC = System.currentTimeMillis();
 		}
 		
 		/**

@@ -31,8 +31,8 @@ public class ExtraChatComponents {
 		@SuppressWarnings("deprecation")
 		public BaseComponent[] toBase() {
 			JSONObject o = new JSONObject();
-			MaterialLookup lookup = MaterialLookup.byMaterial(item.getType());
-			o.set("id", lookup.getMinecraftID());
+//			MaterialLookup lookup = MaterialLookup.byMaterial(item.getType());
+			o.set("id", item.getType().getId());
 			o.set("Count", item.getAmount());
 			if(item.hasItemMeta()) {
 				ItemMeta meta = item.getItemMeta();
@@ -47,7 +47,7 @@ public class ExtraChatComponents {
 					JSONArray ench = new JSONArray();
 					for(Map.Entry<Enchantment, Integer> en : meta.getEnchants().entrySet()) {
 						JSONObject e = new JSONObject();
-						e.set("id", en.getKey().getId());
+						e.set("id", en.getKey().getName()); // TODO
 						e.set("lvl", en.getValue());
 						ench.add(e);
 					}

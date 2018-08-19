@@ -47,10 +47,10 @@ public class MapRenderer {
 				g2d.setColor(Color.RED);
 				if(b.getType().equals(Material.GRASS)) {
 					g2d.setColor(Color.GREEN);
-				}else if(b.getType().equals(Material.LEAVES) || b.getType().equals(Material.LEAVES_2)) {
-					g2d.setColor(Color.PINK);
-				}else if(b.getType().equals(Material.WATER) || b.getType().equals(Material.STATIONARY_WATER)) {
-					g2d.setColor(Color.BLUE);
+//				}else if(b.getType().equals(Material.LEAVES) || b.getType().equals(Material.LEAVES_2)) {
+//					g2d.setColor(Color.PINK);
+//				}else if(b.getType().equals(Material.WATER) || b.getType().equals(Material.STATIONARY_WATER)) {
+//					g2d.setColor(Color.BLUE);
 				}else if(b.getType().equals(Material.STONE)) {
 					g2d.setColor(Color.GRAY);
 				}

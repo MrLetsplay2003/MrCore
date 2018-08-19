@@ -47,8 +47,7 @@ public class HttpConnectionInstance {
 				e.printStackTrace();
 				return;
 			}
-			close();
-			connection.removeConnection(this);
+			closeRaw();
 		});
 		connectionThread.start();
 	}
@@ -58,6 +57,11 @@ public class HttpConnectionInstance {
 	}
 	
 	public void close() {
+		closeRaw();
+		connection.removeConnection(this);
+	}
+	
+	public void closeRaw() {
 		try {
 			connectionThread.interrupt();
 			if(!socket.isClosed()) socket.close();

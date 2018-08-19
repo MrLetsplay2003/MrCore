@@ -11,6 +11,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import me.mrletsplay.mrcore.bukkitimpl.ChatUI.UIListener;
 import me.mrletsplay.mrcore.bukkitimpl.GUIUtils.GUIListener;
+import me.mrletsplay.mrcore.bukkitimpl.nms.NMSVersion;
 import me.mrletsplay.mrcore.config.ConfigLoader;
 import me.mrletsplay.mrcore.config.CustomConfig;
 import me.mrletsplay.mrcore.http.server.HttpConnection;
@@ -27,7 +28,9 @@ public class MrCorePlugin extends JavaPlugin{
 	@Override
 	public void onEnable() {
 		pl = this;
-		MaterialLookup.loadAll();
+//		MaterialLookup.loadAll();
+		NMSVersion nmsv = NMSVersion.getCurrentServerVersion();
+		getLogger().info("Applying compat for " + nmsv.friendlyName + " / " + nmsv.name());
 		Bukkit.getPluginManager().registerEvents(new GUIListener(), this);
 		getCommand("mrcoreui").setExecutor(new UIListener());
 		config = ConfigLoader.loadConfig(new File(getDataFolder(), "config.yml"));

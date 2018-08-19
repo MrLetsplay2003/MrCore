@@ -14,6 +14,7 @@ import me.mrletsplay.mrcore.http.HttpUtils;
 import me.mrletsplay.mrcore.misc.JSON.JSONArray;
 import me.mrletsplay.mrcore.misc.JSON.JSONObject;
 
+@Deprecated
 public class MaterialLookup {
 	
 	private static final String ID_LOOKUP_LIST_LINK = "https://minecraft-ids.grahamedgecombe.com/items.json";
@@ -45,7 +46,6 @@ public class MaterialLookup {
 		return lookups.stream().filter(m -> m.material.equals(material) && m.data == data).findFirst().orElse(null);
 	}
 
-	@SuppressWarnings("deprecation")
 	public static MaterialLookup byMaterial(MaterialData materialData) {
 		return byMaterial(materialData.getItemType(), materialData.getData());
 	}
@@ -74,13 +74,12 @@ public class MaterialLookup {
 //		this(Material.getMaterial(id));
 //	}
 	
-	@SuppressWarnings("deprecation")
 	private MaterialLookup(JSONObject lookupData) {
-		this.typeID = lookupData.getInt("type");
-		this.material = Material.getMaterial(typeID);
-		this.data = (byte) lookupData.getInt("meta");
-		this.friendlyName = lookupData.getString("name");
-		this.minecraftID = lookupData.getString("text_type");
+//		this.typeID = lookupData.getInt("type");
+//		this.material = Material.getMaterial(typeID);
+//		this.data = (byte) lookupData.getInt("meta");
+//		this.friendlyName = lookupData.getString("name");
+//		this.minecraftID = lookupData.getString("text_type");
 	}
 	
 	public Material getMaterial() {
