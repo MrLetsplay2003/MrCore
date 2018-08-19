@@ -238,7 +238,7 @@ public class HttpConnection {
 	}
 	
 	public void disconnectRaw() {
-		connections.forEach(HttpConnectionInstance::close);
+		connections.forEach(HttpConnectionInstance::closeRaw);
 	}
 
 	public void removeConnection(HttpConnectionInstance httpConnectionInstance) {

@@ -49,21 +49,45 @@ public class PluginSettingsTabBuilder {
 		return new PluginTabImpl(name, content, new CSSStyleSheet());
 	}
 	
-	public static abstract class PluginTabElement {
+	public static interface ElementListable {
+		
+		public String getName();
+		
+		public String getDescription();
+		
+		public HTMLElement getTD();
+		
+	}
+	
+	public static interface PluginTabElement {
+		
+		public PluginTabElement setLayoutWidth(LayoutConstant layoutWidth);
+		
+		public PluginTabElement setLayoutHeight(LayoutConstant layoutHeight);
+		
+		public LayoutConstant getLayoutWidth();
+		
+		public LayoutConstant getLayoutHeight();
+		
+		public HTMLElement toHTML();
+		
+	}
+	
+	public static abstract class AbstractPluginTabElement implements PluginTabElement {
 		
 		private LayoutConstant layoutWidth, layoutHeight;
 		
-		public PluginTabElement() {
+		public AbstractPluginTabElement() {
 			this.layoutWidth = LayoutConstant.HALF_PAGE;
 			this.layoutHeight = LayoutConstant.QUARTER_PAGE;
 		}
 		
-		public PluginTabElement setLayoutWidth(LayoutConstant layoutWidth) {
+		public AbstractPluginTabElement setLayoutWidth(LayoutConstant layoutWidth) {
 			this.layoutWidth = layoutWidth;
 			return this;
 		}
 		
-		public PluginTabElement setLayoutHeight(LayoutConstant layoutHeight) {
+		public AbstractPluginTabElement setLayoutHeight(LayoutConstant layoutHeight) {
 			this.layoutHeight = layoutHeight;
 			return this;
 		}
@@ -94,7 +118,7 @@ public class PluginSettingsTabBuilder {
 		
 	}
 	
-	public static class InputBox extends PluginTabElement {
+	public static class InputBox extends AbstractPluginTabElement {
 
 		private String title, description, placeholder;
 		private Consumer<InputBoxChangedEvent> changedListener;
@@ -201,7 +225,7 @@ public class PluginSettingsTabBuilder {
 		
 	}
 	
-	public static class CheckBoxList extends PluginTabElement {
+	public static class CheckBoxList extends AbstractPluginTabElement {
 
 		private String title, description;
 		private List<CheckBoxListElement> checkBoxes;

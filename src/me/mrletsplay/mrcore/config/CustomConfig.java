@@ -966,7 +966,7 @@ public class CustomConfig {
 	 * The <b>get[type]</b> functions return their type respectively<br>
 	 * If the type is invalid, these functions will throw a {@link ClassCastException} or a {@link NumberFormatException}<br>
 	 * <br>
-	 * this specific function will always either return a {@link List}<{@link String}> or a {@link String}
+	 * this specific function will always either return a {@link String}, {@link List}<{@link String}> or a {@link Map}<{@link String}, {@link Object}>
 	 * @param key The key to the property
 	 * @param defaultVal If there is no value stored in the CustomConfig, this value will be returned
 	 * @param applyDefault Whether the default value should be added to the config, if it's not set

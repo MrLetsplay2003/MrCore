@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -19,7 +20,29 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
+import me.mrletsplay.mrcore.bukkitimpl.nms.MaterialDefinition;
+import me.mrletsplay.mrcore.bukkitimpl.nms.NMSDyeColor;
+import me.mrletsplay.mrcore.bukkitimpl.nms.NMSMaterial;
+
 public class ItemUtils {
+	
+	public static ItemStack createNMS(NMSMaterial material, int amount) {
+		return material.getCurrentMaterialDefinition().newStack(amount);
+	}
+	
+	public static ItemStack createNMS(NMSMaterial material) {
+		return material.getCurrentMaterialDefinition().newStack();
+	}
+	
+	public static ItemStack createItem(NMSMaterial m, int am, String name, String... lore) {
+		MaterialDefinition d = m.getCurrentMaterialDefinition();
+		ItemStack i = new ItemStack(d.getMaterial(), am, d.getDamage());
+		ItemMeta me = i.getItemMeta();
+		if(name!=null) me.setDisplayName(name);
+		me.setLore(Arrays.stream(lore).filter(l -> !l.equals("")).collect(Collectors.toList()));
+		i.setItemMeta(me);
+		return i;
+	}
 
 	public static ItemStack createItem(Material m, int am, int dam, String name, String... lore){
 		ItemStack i = new ItemStack(m, am, (short)dam);
@@ -56,7 +79,7 @@ public class ItemUtils {
 			if(!l.isEmpty()) s.add(l);
 		}
 		me.setLore(s);
-		i.setItemMeta(me);
+		i.setItemMeta(me); 
 		return i;
 	}
 	
@@ -73,56 +96,67 @@ public class ItemUtils {
 		return i;
 	}
 
-	@SuppressWarnings("deprecation")
-	public static ItemStack arrowRight(DyeColor col){
-		ItemStack i = new ItemStack(Material.BANNER);
+	public static ItemStack blankBanner(NMSDyeColor color) {
+		return createBanner(null, color);
+	}
+
+	public static ItemStack arrowRight() {
+		return arrowRight(NMSDyeColor.WHITE);
+	}
+
+	public static ItemStack arrowLeft() {
+		return arrowLeft(NMSDyeColor.WHITE);
+	}
+
+	public static ItemStack arrowRight(NMSDyeColor col){
+		ItemStack i = createNMS(NMSMaterial.getBanner(col));
 		BannerMeta m = (BannerMeta)i.getItemMeta();
 		m.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
-		m.setBaseColor(col);
+//		m.setBaseColor(col);
 		m.addPattern(new Pattern(DyeColor.BLACK, PatternType.RHOMBUS_MIDDLE));
-		m.addPattern(new Pattern(col, PatternType.STRIPE_LEFT));
-		m.addPattern(new Pattern(col, PatternType.SQUARE_TOP_LEFT));
-		m.addPattern(new Pattern(col, PatternType.SQUARE_BOTTOM_LEFT));
+		DyeColor c = col.getBukkitDyeColor();
+		m.addPattern(new Pattern(c, PatternType.STRIPE_LEFT));
+		m.addPattern(new Pattern(c, PatternType.SQUARE_TOP_LEFT));
+		m.addPattern(new Pattern(c, PatternType.SQUARE_BOTTOM_LEFT));
 		i.setItemMeta(m);
 		return i;
 	}
 	
-	@SuppressWarnings("deprecation")
-	public static ItemStack arrowLeft(DyeColor col){
-		ItemStack i = new ItemStack(Material.BANNER);
+	public static ItemStack arrowLeft(NMSDyeColor col){
+		ItemStack i = createNMS(NMSMaterial.getBanner(col));
 		BannerMeta m = (BannerMeta)i.getItemMeta();
 		m.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
-		m.setBaseColor(col);
+//		m.setBaseColor(col);
 		m.addPattern(new Pattern(DyeColor.BLACK, PatternType.RHOMBUS_MIDDLE));
-		m.addPattern(new Pattern(col, PatternType.STRIPE_RIGHT));
-		m.addPattern(new Pattern(col, PatternType.SQUARE_TOP_RIGHT));
-		m.addPattern(new Pattern(col, PatternType.SQUARE_BOTTOM_RIGHT));
+		DyeColor c = col.getBukkitDyeColor();
+		m.addPattern(new Pattern(c, PatternType.STRIPE_RIGHT));
+		m.addPattern(new Pattern(c, PatternType.SQUARE_TOP_RIGHT));
+		m.addPattern(new Pattern(c, PatternType.SQUARE_BOTTOM_RIGHT));
 		i.setItemMeta(m);
 		return i;
 	}
 	
-	@SuppressWarnings("deprecation")
-	public static ItemStack letterC(DyeColor col){
-		ItemStack i = new ItemStack(Material.BANNER);
+	public static ItemStack letterC(NMSDyeColor col){
+		ItemStack i = createNMS(NMSMaterial.getBanner(col));
 		BannerMeta m = (BannerMeta)i.getItemMeta();
 		m.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
-		m.setBaseColor(col);
+//		m.setBaseColor(col);
 		m.addPattern(new Pattern(DyeColor.BLACK, PatternType.STRIPE_TOP));
 		m.addPattern(new Pattern(DyeColor.BLACK, PatternType.STRIPE_BOTTOM));
 		m.addPattern(new Pattern(DyeColor.BLACK, PatternType.STRIPE_RIGHT));
-		m.addPattern(new Pattern(col, PatternType.STRIPE_MIDDLE));
+		DyeColor c = col.getBukkitDyeColor();
+		m.addPattern(new Pattern(c, PatternType.STRIPE_MIDDLE));
 		m.addPattern(new Pattern(DyeColor.BLACK, PatternType.STRIPE_LEFT));
-		m.addPattern(new Pattern(col, PatternType.BORDER));
+		m.addPattern(new Pattern(c, PatternType.BORDER));
 		i.setItemMeta(m);
 		return i;
 	}
 	
-	@SuppressWarnings("deprecation")
-	public static ItemStack createBanner(String name, DyeColor baseCol, Pattern... patterns){
-		ItemStack banner = new ItemStack(Material.BANNER);
+	public static ItemStack createBanner(String name, NMSDyeColor baseCol, Pattern... patterns){
+		ItemStack banner = createNMS(NMSMaterial.getBanner(baseCol));
 		BannerMeta bMeta = (BannerMeta)banner.getItemMeta();
 		bMeta.setDisplayName(name);
-		bMeta.setBaseColor(baseCol);
+//		bMeta.setBaseColor(baseCol);
 		for(Pattern p : patterns){
 			bMeta.addPattern(p);
 		}
