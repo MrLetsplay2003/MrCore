@@ -912,7 +912,6 @@ public class GUIUtils {
 			ItemSupplier<T> supp = builder.supplier;
 			List<T> items = supp.getItems(event);
 			
-//			List<GUIElement> elements = items.stream().map(i -> supp.toGUIElement(event, i)).collect(Collectors.toList());
 			Map<Integer, GUIElement> elSlots = new HashMap<>();
 			int pages = items.size()/nSlots;
 			

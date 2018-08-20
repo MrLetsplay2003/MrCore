@@ -50,6 +50,7 @@ public class ItemUtils {
 		me.setDisplayName(name);
 		List<String> s = new ArrayList<>();
 		for(String l:lore){
+			System.out.println(l);
 			if(!l.isEmpty()) s.add(l);
 		}
 		me.setLore(s);

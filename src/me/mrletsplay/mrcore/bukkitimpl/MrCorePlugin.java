@@ -14,10 +14,6 @@ import me.mrletsplay.mrcore.bukkitimpl.GUIUtils.GUIListener;
 import me.mrletsplay.mrcore.bukkitimpl.versioned.NMSVersion;
 import me.mrletsplay.mrcore.config.ConfigLoader;
 import me.mrletsplay.mrcore.config.CustomConfig;
-import me.mrletsplay.mrcore.http.server.HttpConnection;
-import me.mrletsplay.mrcore.http.webinterface.ConsoleInterceptor;
-import me.mrletsplay.mrcore.http.webinterface.Webinterface;
-import me.mrletsplay.mrcore.http.webinterface.WebinterfaceDataManager;
 import me.mrletsplay.mrcore.main.MrCore;
 
 public class MrCorePlugin extends JavaPlugin{
@@ -34,15 +30,12 @@ public class MrCorePlugin extends JavaPlugin{
 		Bukkit.getPluginManager().registerEvents(new GUIListener(), this);
 		getCommand("mrcoreui").setExecutor(new UIListener());
 		config = ConfigLoader.loadConfig(new File(getDataFolder(), "config.yml"));
-		WebinterfaceDataManager.init();
-		if(WebinterfaceDataManager.isWebinterfaceEnabled()) Webinterface.start();
 		if(config.getBoolean("versioning.check-update", true, true)) {
 			String version = config.getString("versioning.version-to-use", "latest", true);
 			MrCoreUpdateChecker.checkForUpdate(version);
 		}
 		config.saveConfigSafely();
 		getLogger().info("And MrCore is on board as well! :wave:");
-		ConsoleInterceptor.a();
 	}
 	
 	public static JavaPlugin getInstance() {
@@ -63,8 +56,6 @@ public class MrCorePlugin extends JavaPlugin{
 			}
 		}
 		
-		Webinterface.stop();
-		
 		getLogger().info("Goodbye");
 	}
 	
@@ -77,18 +68,6 @@ public class MrCorePlugin extends JavaPlugin{
 				sendCommandHelp(sender, args[1]);
 			}else if(args[0].equalsIgnoreCase("version")) {
 				sender.sendMessage("§6MrCore version: §r"+MrCore.getVersion());
-			}else if(args[0].equalsIgnoreCase("web")) {
-				if(!(sender instanceof Player)) {
-					sender.sendMessage("§cThe console can't do that");
-					return true;
-				}
-				if(args.length == 1) return sendCommandHelp(sender, null);
-				if(args[1].equalsIgnoreCase("register-confirm")) {
-					if(args.length != 3) return sendCommandHelp(sender, null);
-					HttpConnection con = Webinterface.getServer().getConnection(args[2]);
-					if(con == null) return sendCommandHelp(sender, null);
-					Webinterface.confirmRegistration((Player) sender, con);
-				}else return sendCommandHelp(sender, null);
 			}else {
 				sendCommandHelp(sender, null);
 			}
