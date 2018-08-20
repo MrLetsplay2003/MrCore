@@ -20,21 +20,21 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import me.mrletsplay.mrcore.bukkitimpl.nms.MaterialDefinition;
-import me.mrletsplay.mrcore.bukkitimpl.nms.NMSDyeColor;
-import me.mrletsplay.mrcore.bukkitimpl.nms.NMSMaterial;
+import me.mrletsplay.mrcore.bukkitimpl.versioned.MaterialDefinition;
+import me.mrletsplay.mrcore.bukkitimpl.versioned.VersionedDyeColor;
+import me.mrletsplay.mrcore.bukkitimpl.versioned.VersionedMaterial;
 
 public class ItemUtils {
 	
-	public static ItemStack createNMS(NMSMaterial material, int amount) {
+	public static ItemStack createNMS(VersionedMaterial material, int amount) {
 		return material.getCurrentMaterialDefinition().newStack(amount);
 	}
 	
-	public static ItemStack createNMS(NMSMaterial material) {
+	public static ItemStack createNMS(VersionedMaterial material) {
 		return material.getCurrentMaterialDefinition().newStack();
 	}
 	
-	public static ItemStack createItem(NMSMaterial m, int am, String name, String... lore) {
+	public static ItemStack createItem(VersionedMaterial m, int am, String name, String... lore) {
 		MaterialDefinition d = m.getCurrentMaterialDefinition();
 		ItemStack i = new ItemStack(d.getMaterial(), am, d.getDamage());
 		ItemMeta me = i.getItemMeta();
@@ -96,20 +96,20 @@ public class ItemUtils {
 		return i;
 	}
 
-	public static ItemStack blankBanner(NMSDyeColor color) {
+	public static ItemStack blankBanner(VersionedDyeColor color) {
 		return createBanner(null, color);
 	}
 
 	public static ItemStack arrowRight() {
-		return arrowRight(NMSDyeColor.WHITE);
+		return arrowRight(VersionedDyeColor.WHITE);
 	}
 
 	public static ItemStack arrowLeft() {
-		return arrowLeft(NMSDyeColor.WHITE);
+		return arrowLeft(VersionedDyeColor.WHITE);
 	}
 
-	public static ItemStack arrowRight(NMSDyeColor col){
-		ItemStack i = createNMS(NMSMaterial.getBanner(col));
+	public static ItemStack arrowRight(VersionedDyeColor col){
+		ItemStack i = createNMS(VersionedMaterial.getBanner(col));
 		BannerMeta m = (BannerMeta)i.getItemMeta();
 		m.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
 //		m.setBaseColor(col);
@@ -122,8 +122,8 @@ public class ItemUtils {
 		return i;
 	}
 	
-	public static ItemStack arrowLeft(NMSDyeColor col){
-		ItemStack i = createNMS(NMSMaterial.getBanner(col));
+	public static ItemStack arrowLeft(VersionedDyeColor col){
+		ItemStack i = createNMS(VersionedMaterial.getBanner(col));
 		BannerMeta m = (BannerMeta)i.getItemMeta();
 		m.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
 //		m.setBaseColor(col);
@@ -136,8 +136,8 @@ public class ItemUtils {
 		return i;
 	}
 	
-	public static ItemStack letterC(NMSDyeColor col){
-		ItemStack i = createNMS(NMSMaterial.getBanner(col));
+	public static ItemStack letterC(VersionedDyeColor col){
+		ItemStack i = createNMS(VersionedMaterial.getBanner(col));
 		BannerMeta m = (BannerMeta)i.getItemMeta();
 		m.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
 //		m.setBaseColor(col);
@@ -152,8 +152,8 @@ public class ItemUtils {
 		return i;
 	}
 	
-	public static ItemStack createBanner(String name, NMSDyeColor baseCol, Pattern... patterns){
-		ItemStack banner = createNMS(NMSMaterial.getBanner(baseCol));
+	public static ItemStack createBanner(String name, VersionedDyeColor baseCol, Pattern... patterns){
+		ItemStack banner = createNMS(VersionedMaterial.getBanner(baseCol));
 		BannerMeta bMeta = (BannerMeta)banner.getItemMeta();
 		bMeta.setDisplayName(name);
 //		bMeta.setBaseColor(baseCol);

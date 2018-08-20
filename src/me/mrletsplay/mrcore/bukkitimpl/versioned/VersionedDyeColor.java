@@ -1,4 +1,4 @@
-package me.mrletsplay.mrcore.bukkitimpl.nms;
+package me.mrletsplay.mrcore.bukkitimpl.versioned;
 
 import java.util.AbstractMap;
 import java.util.Arrays;
@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.bukkit.DyeColor;
 
-public enum NMSDyeColor {
+public enum VersionedDyeColor {
 
 	BLACK(of("BLACK", NMSVersion.v1_8to1_13())),
 	RED(of("RED", NMSVersion.v1_8to1_13())),
@@ -32,7 +32,7 @@ public enum NMSDyeColor {
 	private Map<NMSVersion, String> definitions;
 	
 	@SafeVarargs
-	private NMSDyeColor(Map.Entry<NMSVersion, String>[]... defs) {
+	private VersionedDyeColor(Map.Entry<NMSVersion, String>[]... defs) {
 		this.definitions = new HashMap<>();
 		for(Map.Entry<NMSVersion, String>[] d : defs) {
 			for(Map.Entry<NMSVersion, String> d2 : d) {

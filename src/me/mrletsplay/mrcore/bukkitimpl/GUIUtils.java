@@ -114,11 +114,16 @@ public class GUIUtils {
 			return this;
 		}
 		
+		@Deprecated
+		public void setProperties(Map<String, Object> properties) {
+			this.properties = properties;
+		}
+		
 		/**
 		 * Sets the default properties for this GUIBuilder
 		 * @param properties The properties to use
 		 */
-		public void setProperties(Map<String, Object> properties) {
+		public void setDefaultProperties(Map<String, Object> properties) {
 			this.properties = properties;
 		}
 		
@@ -290,11 +295,11 @@ public class GUIUtils {
 		
 	}
 	
-	public static abstract class ItemSupplier<T> {
+	public static interface ItemSupplier<T> {
 		
-		public abstract List<T> getItems(GUIBuildEvent event);
+		public List<T> getItems(GUIBuildEvent event);
 		
-		public abstract GUIElement toGUIElement(GUIBuildEvent event, T item);
+		public GUIElement toGUIElement(GUIBuildEvent event, T item);
 		
 	}
 	
@@ -394,6 +399,10 @@ public class GUIUtils {
 		
 		public GUIHolder getGUIHolder() {
 			return guiHolder;
+		}
+		
+		public void refreshInstance() {
+			gui.refreshInstance(p);
 		}
 		
 		public InventoryClickEvent getEvent() {
@@ -572,7 +581,12 @@ public class GUIUtils {
 			this.inv = inv;
 		}
 		
+		@Deprecated
 		public GUIHolder getHolder() {
+			return holder;
+		}
+		
+		public GUIHolder getGUIHolder() {
 			return holder;
 		}
 		
