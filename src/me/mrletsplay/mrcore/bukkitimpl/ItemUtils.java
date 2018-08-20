@@ -26,11 +26,11 @@ import me.mrletsplay.mrcore.bukkitimpl.versioned.VersionedMaterial;
 
 public class ItemUtils {
 	
-	public static ItemStack createNMS(VersionedMaterial material, int amount) {
+	public static ItemStack createVersioned(VersionedMaterial material, int amount) {
 		return material.getCurrentMaterialDefinition().newStack(amount);
 	}
 	
-	public static ItemStack createNMS(VersionedMaterial material) {
+	public static ItemStack createVersioned(VersionedMaterial material) {
 		return material.getCurrentMaterialDefinition().newStack();
 	}
 	
@@ -50,7 +50,6 @@ public class ItemUtils {
 		me.setDisplayName(name);
 		List<String> s = new ArrayList<>();
 		for(String l:lore){
-			System.out.println(l);
 			if(!l.isEmpty()) s.add(l);
 		}
 		me.setLore(s);
@@ -110,7 +109,7 @@ public class ItemUtils {
 	}
 
 	public static ItemStack arrowRight(VersionedDyeColor col){
-		ItemStack i = createNMS(VersionedMaterial.getBanner(col));
+		ItemStack i = createVersioned(VersionedMaterial.getBanner(col));
 		BannerMeta m = (BannerMeta)i.getItemMeta();
 		m.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
 //		m.setBaseColor(col);
@@ -124,7 +123,7 @@ public class ItemUtils {
 	}
 	
 	public static ItemStack arrowLeft(VersionedDyeColor col){
-		ItemStack i = createNMS(VersionedMaterial.getBanner(col));
+		ItemStack i = createVersioned(VersionedMaterial.getBanner(col));
 		BannerMeta m = (BannerMeta)i.getItemMeta();
 		m.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
 //		m.setBaseColor(col);
@@ -138,7 +137,7 @@ public class ItemUtils {
 	}
 	
 	public static ItemStack letterC(VersionedDyeColor col){
-		ItemStack i = createNMS(VersionedMaterial.getBanner(col));
+		ItemStack i = createVersioned(VersionedMaterial.getBanner(col));
 		BannerMeta m = (BannerMeta)i.getItemMeta();
 		m.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
 //		m.setBaseColor(col);
@@ -154,7 +153,7 @@ public class ItemUtils {
 	}
 	
 	public static ItemStack createBanner(String name, VersionedDyeColor baseCol, Pattern... patterns){
-		ItemStack banner = createNMS(VersionedMaterial.getBanner(baseCol));
+		ItemStack banner = createVersioned(VersionedMaterial.getBanner(baseCol));
 		BannerMeta bMeta = (BannerMeta)banner.getItemMeta();
 		bMeta.setDisplayName(name);
 //		bMeta.setBaseColor(baseCol);
