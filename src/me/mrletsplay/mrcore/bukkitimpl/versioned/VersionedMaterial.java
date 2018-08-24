@@ -5,309 +5,338 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.bukkit.Material;
+
+import me.mrletsplay.mrcore.bukkitimpl.versioned.definition.BannerDefinition;
+import me.mrletsplay.mrcore.bukkitimpl.versioned.definition.DyeDefinition;
+import me.mrletsplay.mrcore.bukkitimpl.versioned.definition.StainedClayDefinition;
+import me.mrletsplay.mrcore.bukkitimpl.versioned.definition.StainedGlassDefinition;
+import me.mrletsplay.mrcore.bukkitimpl.versioned.definition.StainedGlassPaneDefinition;
+import me.mrletsplay.mrcore.bukkitimpl.versioned.definition.TypeDefinition;
+
+/**
+ * An enum containing version-independent representations of {@link Material}s
+ * @author MrLetsplay2003
+ */
 public enum VersionedMaterial {
 
 	WHITE_STAINED_CLAY(
+			new StainedClayDefinition(VersionedDyeColor.WHITE),
 			of(new MaterialDefinition("STAINED_CLAY"), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("WHITE_TERRACOTTA", 0), NMSVersion.V1_13_R1)
 		),
 	ORANGE_STAINED_CLAY(
+			new StainedClayDefinition(VersionedDyeColor.ORANGE),
 			of(new MaterialDefinition("STAINED_CLAY", 1), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("ORANGE_TERRACOTTA", 0), NMSVersion.V1_13_R1)
 		),
 	MAGENTA_STAINED_CLAY(
+			new StainedClayDefinition(VersionedDyeColor.MAGENTA),
 			of(new MaterialDefinition("STAINED_CLAY", 2), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("MAGENTA_TERRACOTTA", 0), NMSVersion.V1_13_R1)
 		),
 	LIGHT_BLUE_STAINED_CLAY(
+			new StainedClayDefinition(VersionedDyeColor.LIGHT_BLUE),
 			of(new MaterialDefinition("STAINED_CLAY", 3), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("LIGHT_BLUE_TERRACOTTA", 0), NMSVersion.V1_13_R1)
 		),
 	YELLOW_STAINED_CLAY(
+			new StainedClayDefinition(VersionedDyeColor.YELLOW),
 			of(new MaterialDefinition("STAINED_CLAY", 4), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("YELLOW_TERRACOTTA", 0), NMSVersion.V1_13_R1)
 		),
 	LIME_STAINED_CLAY(
+			new StainedClayDefinition(VersionedDyeColor.LIME),
 			of(new MaterialDefinition("STAINED_CLAY", 5), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("LIME_TERRACOTTA", 0), NMSVersion.V1_13_R1)
 		),
 	PINK_STAINED_CLAY(
+			new StainedClayDefinition(VersionedDyeColor.PINK),
 			of(new MaterialDefinition("STAINED_CLAY", 6), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("PINK_TERRACOTTA", 0), NMSVersion.V1_13_R1)
 		),
 	GRAY_STAINED_CLAY(
+			new StainedClayDefinition(VersionedDyeColor.GRAY),
 			of(new MaterialDefinition("STAINED_CLAY", 7), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("GRAY_TERRACOTTA", 0), NMSVersion.V1_13_R1)
 		),
 	LIGHT_GRAY_STAINED_CLAY(
+			new StainedClayDefinition(VersionedDyeColor.LIGHT_GRAY),
 			of(new MaterialDefinition("STAINED_CLAY", 8), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("LIGHT_GRAY_TERRACOTTA", 0), NMSVersion.V1_13_R1)
 		),
 	CYAN_STAINED_CLAY(
+			new StainedClayDefinition(VersionedDyeColor.CYAN),
 			of(new MaterialDefinition("STAINED_CLAY", 9), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("CYAN_TERRACOTTA", 0), NMSVersion.V1_13_R1)
 		),
 	PURPLE_STAINED_CLAY(
+			new StainedClayDefinition(VersionedDyeColor.PURPLE),
 			of(new MaterialDefinition("STAINED_CLAY", 10), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("PURPLE_TERRACOTTA", 0), NMSVersion.V1_13_R1)
 		),
 	BLUE_STAINED_CLAY(
+			new StainedClayDefinition(VersionedDyeColor.BLUE),
 			of(new MaterialDefinition("STAINED_CLAY", 11), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("BLUE_TERRACOTTA", 0), NMSVersion.V1_13_R1)
 		),
 	BROWN_STAINED_CLAY(
+			new StainedClayDefinition(VersionedDyeColor.BROWN),
 			of(new MaterialDefinition("STAINED_CLAY", 12), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("BROWN_TERRACOTTA", 0), NMSVersion.V1_13_R1)
 		),
 	GREEN_STAINED_CLAY(
+			new StainedClayDefinition(VersionedDyeColor.GREEN),
 			of(new MaterialDefinition("STAINED_CLAY", 13), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("GREEN_TERRACOTTA", 0), NMSVersion.V1_13_R1)
 		),
 	RED_STAINED_CLAY(
+			new StainedClayDefinition(VersionedDyeColor.RED),
 			of(new MaterialDefinition("STAINED_CLAY", 14), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("RED_TERRACOTTA", 0), NMSVersion.V1_13_R1)
 		),
 	BLACK_STAINED_CLAY(
+			new StainedClayDefinition(VersionedDyeColor.BLACK),
 			of(new MaterialDefinition("STAINED_CLAY", 15), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("BLACK_TERRACOTTA", 0), NMSVersion.V1_13_R1)
 		),
 	BLACK_BANNER(
-			new ColoredDefinition(VersionedDyeColor.BLACK),
+			new BannerDefinition(VersionedDyeColor.BLACK),
 			of(new MaterialDefinition("BANNER"), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("WHITE_BANNER", 0), NMSVersion.V1_13_R1)
 		),
 	RED_BANNER(
-			new ColoredDefinition(VersionedDyeColor.RED),
+			new BannerDefinition(VersionedDyeColor.RED),
 			of(new MaterialDefinition("BANNER", 1), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("RED_BANNER", 0), NMSVersion.V1_13_R1)
 		),
 	GREEN_BANNER(
-			new ColoredDefinition(VersionedDyeColor.GREEN),
+			new BannerDefinition(VersionedDyeColor.GREEN),
 			of(new MaterialDefinition("BANNER", 2), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("GREEN_BANNER", 0), NMSVersion.V1_13_R1)
 		),
 	BROWN_BANNER(
-			new ColoredDefinition(VersionedDyeColor.BROWN),
+			new BannerDefinition(VersionedDyeColor.BROWN),
 			of(new MaterialDefinition("BANNER", 3), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("BROWN_BANNER", 0), NMSVersion.V1_13_R1)
 		),
 	BLUE_BANNER(
-			new ColoredDefinition(VersionedDyeColor.BLUE),
+			new BannerDefinition(VersionedDyeColor.BLUE),
 			of(new MaterialDefinition("BANNER", 4), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("BLUE_BANNER", 0), NMSVersion.V1_13_R1)
 		),
 	PURPLE_BANNER(
-			new ColoredDefinition(VersionedDyeColor.PURPLE),
+			new BannerDefinition(VersionedDyeColor.PURPLE),
 			of(new MaterialDefinition("BANNER", 5), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("PURPLE_BANNER", 0), NMSVersion.V1_13_R1)
 		),
 	CYAN_BANNER(
-			new ColoredDefinition(VersionedDyeColor.CYAN),
+			new BannerDefinition(VersionedDyeColor.CYAN),
 			of(new MaterialDefinition("BANNER", 6), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("CYAN_BANNER", 0), NMSVersion.V1_13_R1)
 		),
 	LIGHT_GRAY_BANNER(
-			new ColoredDefinition(VersionedDyeColor.LIGHT_GRAY),
+			new BannerDefinition(VersionedDyeColor.LIGHT_GRAY),
 			of(new MaterialDefinition("BANNER", 7), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("LIGHT_GRAY_BANNER", 0), NMSVersion.V1_13_R1)
 		),
 	GRAY_BANNER(
-			new ColoredDefinition(VersionedDyeColor.GRAY),
+			new BannerDefinition(VersionedDyeColor.GRAY),
 			of(new MaterialDefinition("BANNER", 8), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("GRAY_BANNER", 0), NMSVersion.V1_13_R1)
 		),
 	PINK_BANNER(
-			new ColoredDefinition(VersionedDyeColor.PINK),
+			new BannerDefinition(VersionedDyeColor.PINK),
 			of(new MaterialDefinition("BANNER", 9), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("PINK_BANNER", 0), NMSVersion.V1_13_R1)
 		),
 	LIME_BANNER(
-			new ColoredDefinition(VersionedDyeColor.LIME),
+			new BannerDefinition(VersionedDyeColor.LIME),
 			of(new MaterialDefinition("BANNER", 10), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("LIME_BANNER", 0), NMSVersion.V1_13_R1)
 		),
 	YELLOW_BANNER(
-			new ColoredDefinition(VersionedDyeColor.YELLOW),
+			new BannerDefinition(VersionedDyeColor.YELLOW),
 			of(new MaterialDefinition("BANNER", 11), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("YELLOW_BANNER", 0), NMSVersion.V1_13_R1)
 		),
 	LIGHT_BLUE_BANNER(
-			new ColoredDefinition(VersionedDyeColor.LIGHT_BLUE),
+			new BannerDefinition(VersionedDyeColor.LIGHT_BLUE),
 			of(new MaterialDefinition("BANNER", 12), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("LIGHT_BLUE_BANNER", 0), NMSVersion.V1_13_R1)
 		),
 	MAGENTA_BANNER(
-			new ColoredDefinition(VersionedDyeColor.MAGENTA),
+			new BannerDefinition(VersionedDyeColor.MAGENTA),
 			of(new MaterialDefinition("BANNER", 13), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("MAGENTA_BANNER", 0), NMSVersion.V1_13_R1)
 		),
 	ORANGE_BANNER(
-			new ColoredDefinition(VersionedDyeColor.ORANGE),
+			new BannerDefinition(VersionedDyeColor.ORANGE),
 			of(new MaterialDefinition("BANNER", 14), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("ORANGE_BANNER", 0), NMSVersion.V1_13_R1)
 		),
 	WHITE_BANNER(
-			new ColoredDefinition(VersionedDyeColor.WHITE),
+			new BannerDefinition(VersionedDyeColor.WHITE),
 			of(new MaterialDefinition("BANNER", 15), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("WHITE_BANNER", 0), NMSVersion.V1_13_R1)
 		),
 	WHITE_STAINED_GLASS_PANE(
-			new ColoredDefinition(VersionedDyeColor.WHITE),
+			new StainedGlassPaneDefinition(VersionedDyeColor.WHITE),
 			of(new MaterialDefinition("STAINED_GLASS_PANE"), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("WHITE_STAINED_GLASS_PANE", 0), NMSVersion.V1_13_R1)
 		),
 	ORANGE_STAINED_GLASS_PANE(
-			new ColoredDefinition(VersionedDyeColor.ORANGE),
+			new StainedGlassPaneDefinition(VersionedDyeColor.ORANGE),
 			of(new MaterialDefinition("STAINED_GLASS_PANE", 1), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("ORANGE_STAINED_GLASS_PANE", 0), NMSVersion.V1_13_R1)
 		),
 	MAGENTA_STAINED_GLASS_PANE(
-			new ColoredDefinition(VersionedDyeColor.MAGENTA),
+			new StainedGlassPaneDefinition(VersionedDyeColor.MAGENTA),
 			of(new MaterialDefinition("STAINED_GLASS_PANE", 2), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("MAGENTA_STAINED_GLASS_PANE", 0), NMSVersion.V1_13_R1)
 		),
 	LIGHT_BLUE_STAINED_GLASS_PANE(
-			new ColoredDefinition(VersionedDyeColor.LIGHT_BLUE),
+			new StainedGlassPaneDefinition(VersionedDyeColor.LIGHT_BLUE),
 			of(new MaterialDefinition("STAINED_GLASS_PANE", 3), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("LIGHT_BLUE_STAINED_GLASS_PANE", 0), NMSVersion.V1_13_R1)
 		),
 	YELLOW_STAINED_GLASS_PANE(
-			new ColoredDefinition(VersionedDyeColor.YELLOW),
+			new StainedGlassPaneDefinition(VersionedDyeColor.YELLOW),
 			of(new MaterialDefinition("STAINED_GLASS_PANE", 4), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("YELLOW_STAINED_GLASS_PANE", 0), NMSVersion.V1_13_R1)
 		),
 	LIME_STAINED_GLASS_PANE(
-			new ColoredDefinition(VersionedDyeColor.LIME),
+			new StainedGlassPaneDefinition(VersionedDyeColor.LIME),
 			of(new MaterialDefinition("STAINED_GLASS_PANE", 5), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("LIME_STAINED_GLASS_PANE", 0), NMSVersion.V1_13_R1)
 		),
 	PINK_STAINED_GLASS_PANE(
-			new ColoredDefinition(VersionedDyeColor.PINK),
+			new StainedGlassPaneDefinition(VersionedDyeColor.PINK),
 			of(new MaterialDefinition("STAINED_GLASS_PANE", 6), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("PINK_STAINED_GLASS_PANE", 0), NMSVersion.V1_13_R1)
 		),
 	GRAY_STAINED_GLASS_PANE(
-			new ColoredDefinition(VersionedDyeColor.GRAY),
+			new StainedGlassPaneDefinition(VersionedDyeColor.GRAY),
 			of(new MaterialDefinition("STAINED_GLASS_PANE", 7), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("GRAY_STAINED_GLASS_PANE", 0), NMSVersion.V1_13_R1)
 		),
 	LIGHT_GRAY_STAINED_GLASS_PANE(
-			new ColoredDefinition(VersionedDyeColor.LIGHT_GRAY),
+			new StainedGlassPaneDefinition(VersionedDyeColor.LIGHT_GRAY),
 			of(new MaterialDefinition("STAINED_GLASS_PANE", 8), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("LIGHT_GRAY_STAINED_GLASS_PANE", 0), NMSVersion.V1_13_R1)
 		),
 	CYAN_STAINED_GLASS_PANE(
-			new ColoredDefinition(VersionedDyeColor.CYAN),
+			new StainedGlassPaneDefinition(VersionedDyeColor.CYAN),
 			of(new MaterialDefinition("STAINED_GLASS_PANE", 9), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("CYAN_STAINED_GLASS_PANE", 0), NMSVersion.V1_13_R1)
 		),
 	PURPLE_STAINED_GLASS_PANE(
-			new ColoredDefinition(VersionedDyeColor.PURPLE),
+			new StainedGlassPaneDefinition(VersionedDyeColor.PURPLE),
 			of(new MaterialDefinition("STAINED_GLASS_PANE", 10), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("PURPLE_STAINED_GLASS_PANE", 0), NMSVersion.V1_13_R1)
 		),
 	BLUE_STAINED_GLASS_PANE(
-			new ColoredDefinition(VersionedDyeColor.BLUE),
+			new StainedGlassPaneDefinition(VersionedDyeColor.BLUE),
 			of(new MaterialDefinition("STAINED_GLASS_PANE", 11), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("BLUE_STAINED_GLASS_PANE", 0), NMSVersion.V1_13_R1)
 		),
 	BROWN_STAINED_GLASS_PANE(
-			new ColoredDefinition(VersionedDyeColor.BROWN),
+			new StainedGlassPaneDefinition(VersionedDyeColor.BROWN),
 			of(new MaterialDefinition("STAINED_GLASS_PANE", 12), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("BROWN_STAINED_GLASS_PANE", 0), NMSVersion.V1_13_R1)
 		),
 	GREEN_STAINED_GLASS_PANE(
-			new ColoredDefinition(VersionedDyeColor.GREEN),
+			new StainedGlassPaneDefinition(VersionedDyeColor.GREEN),
 			of(new MaterialDefinition("STAINED_GLASS_PANE", 13), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("GREEN_STAINED_GLASS_PANE", 0), NMSVersion.V1_13_R1)
 		),
 	RED_STAINED_GLASS_PANE(
-			new ColoredDefinition(VersionedDyeColor.RED),
+			new StainedGlassPaneDefinition(VersionedDyeColor.RED),
 			of(new MaterialDefinition("STAINED_GLASS_PANE", 14), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("RED_STAINED_GLASS_PANE", 0), NMSVersion.V1_13_R1)
 		),
 	BLACK_STAINED_GLASS_PANE(
-			new ColoredDefinition(VersionedDyeColor.BLACK),
+			new StainedGlassPaneDefinition(VersionedDyeColor.BLACK),
 			of(new MaterialDefinition("STAINED_GLASS_PANE", 15), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("BLACK_STAINED_GLASS_PANE", 0), NMSVersion.V1_13_R1)
 		),
 	WHITE_STAINED_GLASS(
-			new ColoredDefinition(VersionedDyeColor.WHITE),
+			new StainedGlassDefinition(VersionedDyeColor.WHITE),
 			of(new MaterialDefinition("STAINED_GLASS"), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("WHITE_STAINED_GLASS", 0), NMSVersion.V1_13_R1)
 		),
 	ORANGE_STAINED_GLASS(
-			new ColoredDefinition(VersionedDyeColor.ORANGE),
+			new StainedGlassDefinition(VersionedDyeColor.ORANGE),
 			of(new MaterialDefinition("STAINED_GLASS", 1), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("ORANGE_STAINED_GLASS", 0), NMSVersion.V1_13_R1)
 		),
 	MAGENTA_STAINED_GLASS(
-			new ColoredDefinition(VersionedDyeColor.MAGENTA),
+			new StainedGlassDefinition(VersionedDyeColor.MAGENTA),
 			of(new MaterialDefinition("STAINED_GLASS", 2), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("MAGENTA_STAINED_GLASS", 0), NMSVersion.V1_13_R1)
 		),
 	LIGHT_BLUE_STAINED_GLASS(
-			new ColoredDefinition(VersionedDyeColor.LIGHT_BLUE),
+			new StainedGlassDefinition(VersionedDyeColor.LIGHT_BLUE),
 			of(new MaterialDefinition("STAINED_GLASS", 3), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("LIGHT_BLUE_STAINED_GLASS", 0), NMSVersion.V1_13_R1)
 		),
 	YELLOW_STAINED_GLASS(
-			new ColoredDefinition(VersionedDyeColor.YELLOW),
+			new StainedGlassDefinition(VersionedDyeColor.YELLOW),
 			of(new MaterialDefinition("STAINED_GLASS", 4), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("YELLOW_STAINED_GLASS", 0), NMSVersion.V1_13_R1)
 		),
 	LIME_STAINED_GLASS(
-			new ColoredDefinition(VersionedDyeColor.LIME),
+			new StainedGlassDefinition(VersionedDyeColor.LIME),
 			of(new MaterialDefinition("STAINED_GLASS", 5), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("LIME_STAINED_GLASS", 0), NMSVersion.V1_13_R1)
 		),
 	PINK_STAINED_GLASS(
-			new ColoredDefinition(VersionedDyeColor.PINK),
+			new StainedGlassDefinition(VersionedDyeColor.PINK),
 			of(new MaterialDefinition("STAINED_GLASS", 6), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("PINK_STAINED_GLASS", 0), NMSVersion.V1_13_R1)
 		),
 	GRAY_STAINED_GLASS(
-			new ColoredDefinition(VersionedDyeColor.GRAY),
+			new StainedGlassDefinition(VersionedDyeColor.GRAY),
 			of(new MaterialDefinition("STAINED_GLASS", 7), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("GRAY_STAINED_GLASS", 0), NMSVersion.V1_13_R1)
 		),
 	LIGHT_GRAY_STAINED_GLASS(
-			new ColoredDefinition(VersionedDyeColor.LIGHT_GRAY),
+			new StainedGlassDefinition(VersionedDyeColor.LIGHT_GRAY),
 			of(new MaterialDefinition("STAINED_GLASS", 8), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("LIGHT_GRAY_STAINED_GLASS", 0), NMSVersion.V1_13_R1)
 		),
 	CYAN_STAINED_GLASS(
-			new ColoredDefinition(VersionedDyeColor.CYAN),
+			new StainedGlassDefinition(VersionedDyeColor.CYAN),
 			of(new MaterialDefinition("STAINED_GLASS", 9), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("CYAN_STAINED_GLASS", 0), NMSVersion.V1_13_R1)
 		),
 	PURPLE_STAINED_GLASS(
-			new ColoredDefinition(VersionedDyeColor.PURPLE),
+			new StainedGlassDefinition(VersionedDyeColor.PURPLE),
 			of(new MaterialDefinition("STAINED_GLASS", 10), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("PURPLE_STAINED_GLASS", 0), NMSVersion.V1_13_R1)
 		),
 	BLUE_STAINED_GLASS(
-			new ColoredDefinition(VersionedDyeColor.BLUE),
+			new StainedGlassDefinition(VersionedDyeColor.BLUE),
 			of(new MaterialDefinition("STAINED_GLASS", 11), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("BLUE_STAINED_GLASS", 0), NMSVersion.V1_13_R1)
 		),
 	BROWN_STAINED_GLASS(
-			new ColoredDefinition(VersionedDyeColor.BROWN),
+			new StainedGlassDefinition(VersionedDyeColor.BROWN),
 			of(new MaterialDefinition("STAINED_GLASS", 12), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("BROWN_STAINED_GLASS", 0), NMSVersion.V1_13_R1)
 		),
 	GREEN_STAINED_GLASS(
-			new ColoredDefinition(VersionedDyeColor.GREEN),
+			new StainedGlassDefinition(VersionedDyeColor.GREEN),
 			of(new MaterialDefinition("STAINED_GLASS", 13), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("GREEN_STAINED_GLASS", 0), NMSVersion.V1_13_R1)
 		),
 	RED_STAINED_GLASS(
-			new ColoredDefinition(VersionedDyeColor.RED),
+			new StainedGlassDefinition(VersionedDyeColor.RED),
 			of(new MaterialDefinition("STAINED_GLASS", 14), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("RED_STAINED_GLASS", 0), NMSVersion.V1_13_R1)
 		),
 	BLACK_STAINED_GLASS(
-			new ColoredDefinition(VersionedDyeColor.BLACK),
+			new StainedGlassDefinition(VersionedDyeColor.BLACK),
 			of(new MaterialDefinition("STAINED_GLASS", 15), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("BLACK_STAINED_GLASS", 0), NMSVersion.V1_13_R1)
 		),
@@ -359,6 +388,86 @@ public enum VersionedMaterial {
 			of(new MaterialDefinition("RECORD_12"), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("MUSIC_DISC_WAIT"), NMSVersion.V1_13_R1)
 		),
+	INK_SACK(
+			new DyeDefinition(VersionedDyeColor.BLACK),
+			of(new MaterialDefinition("INK_SACK"), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("INK_SAC"), NMSVersion.V1_13_R1)
+		),
+	ROSE_RED(
+			new DyeDefinition(VersionedDyeColor.RED),
+			of(new MaterialDefinition("INK_SACK", 1), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("ROSE_RED"), NMSVersion.V1_13_R1)
+		),
+	CACTUS_GREEN(
+			new DyeDefinition(VersionedDyeColor.GREEN),
+			of(new MaterialDefinition("INK_SACK", 2), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("CACTUS_GREEN"), NMSVersion.V1_13_R1)
+		),
+	COCOA_BEANS(
+			new DyeDefinition(VersionedDyeColor.BROWN),
+			of(new MaterialDefinition("INK_SACK", 3), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("COCOA_BEANS"), NMSVersion.V1_13_R1)
+		),
+	LAPIS_LAZULI(
+			new DyeDefinition(VersionedDyeColor.BLUE),
+			of(new MaterialDefinition("INK_SACK", 4), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("LAPIS_LAZULI"), NMSVersion.V1_13_R1)
+		),
+	PURPLE_DYE(
+			new DyeDefinition(VersionedDyeColor.PURPLE),
+			of(new MaterialDefinition("INK_SACK", 5), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("PURPLE_DYE"), NMSVersion.V1_13_R1)
+		),
+	CYAN_DYE(
+			new DyeDefinition(VersionedDyeColor.CYAN),
+			of(new MaterialDefinition("INK_SACK", 6), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("CYAN_DYE"), NMSVersion.V1_13_R1)
+		),
+	LIGHT_GRAY_DYE(
+			new DyeDefinition(VersionedDyeColor.LIGHT_GRAY),
+			of(new MaterialDefinition("INK_SACK", 7), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("LIGHT_GRAY_DYE"), NMSVersion.V1_13_R1)
+		),
+	GRAY_DYE(
+			new DyeDefinition(VersionedDyeColor.GRAY),
+			of(new MaterialDefinition("INK_SACK", 8), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("GRAY_DYE"), NMSVersion.V1_13_R1)
+		),
+	PINK_DYE(
+			new DyeDefinition(VersionedDyeColor.PINK),
+			of(new MaterialDefinition("INK_SACK", 9), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("PINK_DYE"), NMSVersion.V1_13_R1)
+		),
+	LIME_DYE(
+			new DyeDefinition(VersionedDyeColor.LIME),
+			of(new MaterialDefinition("INK_SACK", 10), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("LIME_DYE"), NMSVersion.V1_13_R1)
+		),
+	DANDELION_YELLOW(
+			new DyeDefinition(VersionedDyeColor.YELLOW),
+			of(new MaterialDefinition("INK_SACK", 11), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("DANDELION_YELLOW"), NMSVersion.V1_13_R1)
+		),
+	LIGHT_BLUE_DYE(
+			new DyeDefinition(VersionedDyeColor.LIGHT_BLUE),
+			of(new MaterialDefinition("INK_SACK", 12), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("LIGHT_BLUE_DYE"), NMSVersion.V1_13_R1)
+		),
+	MAGENTA_DYE(
+			new DyeDefinition(VersionedDyeColor.MAGENTA),
+			of(new MaterialDefinition("INK_SACK", 13), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("MAGENTA_DYE"), NMSVersion.V1_13_R1)
+		),
+	ORANGE_DYE(
+			new DyeDefinition(VersionedDyeColor.ORANGE),
+			of(new MaterialDefinition("INK_SACK", 14), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("ORANGE_DYE"), NMSVersion.V1_13_R1)
+		),
+	BONE_MEAL(
+			new DyeDefinition(VersionedDyeColor.WHITE),
+			of(new MaterialDefinition("INK_SACK", 15), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("BONE_MEAL"), NMSVersion.V1_13_R1)
+		)
 	;
 	
 	private TypeDefinition typeDefinition;
@@ -385,14 +494,24 @@ public enum VersionedMaterial {
 		}
 	}
 	
+	/**
+	 * @return The {@link TypeDefinition} for this material, can be null
+	 */
 	public TypeDefinition getTypeDefinition() {
 		return typeDefinition;
 	}
 	
+	/**
+	 * @param version The version to get the definition for
+	 * @return The {@link MaterialDefinition} for that version, null if none
+	 */
 	public MaterialDefinition getMaterialDefinition(NMSVersion version) {
 		return definitions.get(version);
 	}
 	
+	/**
+	 * @return The {@link MaterialDefinition} of the material for the current server version
+	 */
 	public MaterialDefinition getCurrentMaterialDefinition() {
 		return getMaterialDefinition(NMSVersion.getCurrentServerVersion());
 	}
@@ -404,22 +523,62 @@ public enum VersionedMaterial {
 				.toArray(Map.Entry[]::new);
 	}
 	
+	/**
+	 * Finds the corresponding banner material by its color
+	 * @param bannerColor The color of the banner
+	 * @return The corresponding banner material
+	 */
 	public static VersionedMaterial getBanner(VersionedDyeColor bannerColor) {
 		return Arrays.stream(values())
 				.filter(m ->
 						m.getTypeDefinition() != null &&
-						m.getTypeDefinition().asColored() != null &&
-						m.getTypeDefinition().asColored().getDyeColor().equals(bannerColor)
+						m.getTypeDefinition().asBanner() != null &&
+						m.getTypeDefinition().asBanner().getDyeColor().equals(bannerColor)
 					)
 				.findFirst().orElse(null);
 	}
-	
-	public static VersionedMaterial getGlassPane(VersionedDyeColor bannerColor) {
+
+	/**
+	 * Finds the corresponding glass pane material by its color
+	 * @param bannerColor The color of the glass pane
+	 * @return The corresponding glass pane material
+	 */
+	public static VersionedMaterial getStainedGlassPane(VersionedDyeColor bannerColor) {
 		return Arrays.stream(values())
 				.filter(m ->
 						m.getTypeDefinition() != null &&
-						m.getTypeDefinition().asColored() != null &&
-						m.getTypeDefinition().asColored().getDyeColor().equals(bannerColor)
+						m.getTypeDefinition().asStainedGlassPane() != null &&
+						m.getTypeDefinition().asStainedGlassPane().getDyeColor().equals(bannerColor)
+					)
+				.findFirst().orElse(null);
+	}
+
+	/**
+	 * Finds the corresponding glass material by its color
+	 * @param bannerColor The color of the glass
+	 * @return The corresponding glass material
+	 */
+	public static VersionedMaterial getStainedGlass(VersionedDyeColor bannerColor) {
+		return Arrays.stream(values())
+				.filter(m ->
+						m.getTypeDefinition() != null &&
+						m.getTypeDefinition().asStainedGlass() != null &&
+						m.getTypeDefinition().asStainedGlass().getDyeColor().equals(bannerColor)
+					)
+				.findFirst().orElse(null);
+	}
+
+	/**
+	 * Finds the corresponding glass pane material by its color
+	 * @param bannerColor The color of the glass pane
+	 * @return The corresponding glass pane material
+	 */
+	public static VersionedMaterial getDye(VersionedDyeColor bannerColor) {
+		return Arrays.stream(values())
+				.filter(m ->
+						m.getTypeDefinition() != null &&
+						m.getTypeDefinition().asDye() != null &&
+						m.getTypeDefinition().asDye().getDyeColor().equals(bannerColor)
 					)
 				.findFirst().orElse(null);
 	}
