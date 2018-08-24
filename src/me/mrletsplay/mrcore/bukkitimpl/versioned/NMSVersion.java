@@ -35,6 +35,18 @@ public enum NMSVersion {
 		return CURRENT_VERSION;
 	}
 	
+	public static NMSVersion[] range(NMSVersion from, NMSVersion to) {
+		return Arrays.stream(values()).filter(o -> o.ordinal() >= from.ordinal() && o.ordinal() <= to.ordinal()).toArray(NMSVersion[]::new);
+	}
+	
+	public static NMSVersion[] v1_8() {
+		return new NMSVersion[] {V1_8_R1, V1_8_R2, V1_8_R3};
+	}
+	
+	public static NMSVersion[] v1_9() {
+		return new NMSVersion[] {V1_9_R1, V1_9_R2};
+	}
+	
 	public static NMSVersion[] v1_8to1_12() {
 		return new NMSVersion[] {V1_8_R1, V1_8_R2, V1_8_R3, V1_9_R1, V1_9_R2, V1_10_R1, V1_11_R1, V1_12_R1};
 	}
