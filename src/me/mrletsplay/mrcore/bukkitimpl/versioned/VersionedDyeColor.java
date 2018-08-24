@@ -7,6 +7,10 @@ import java.util.Map;
 
 import org.bukkit.DyeColor;
 
+/**
+ * An enum containing version-independent representations of {@link DyeColor}s
+ * @author MrLetsplay2003
+ */
 public enum VersionedDyeColor {
 
 	BLACK(of("BLACK", NMSVersion.v1_8to1_13())),
@@ -41,14 +45,24 @@ public enum VersionedDyeColor {
 		}
 	}
 	
+	/**
+	 * @return The bukkit DyeColor for the current server version using {@link DyeColor#valueOf(String)}
+	 */
 	public DyeColor getBukkitDyeColor() {
 		return DyeColor.valueOf(getCurrentBukkitName());
 	}
 	
+	/**
+	 * @param version The version to get the name for
+	 * @return The name for that version, null if none
+	 */
 	public String getBukkitName(NMSVersion version) {
 		return definitions.get(version);
 	}
 	
+	/**
+	 * @return The {@link DyeColor} enum name for the color for the current server version
+	 */
 	public String getCurrentBukkitName() {
 		return getBukkitName(NMSVersion.getCurrentServerVersion());
 	}
