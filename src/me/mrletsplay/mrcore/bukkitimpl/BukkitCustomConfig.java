@@ -31,7 +31,7 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import me.mrletsplay.mrcore.config.ConfigExpansions.ExpandableCustomConfig;
-import me.mrletsplay.mrcore.misc.OtherTools.FriendlyException;
+import me.mrletsplay.mrcore.misc.FriendlyException;
 
 public class BukkitCustomConfig extends ExpandableCustomConfig {
 	

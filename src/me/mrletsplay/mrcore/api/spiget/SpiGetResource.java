@@ -12,7 +12,7 @@ import javax.imageio.ImageIO;
 
 import me.mrletsplay.mrcore.misc.JSON.JSONArray;
 import me.mrletsplay.mrcore.misc.JSON.JSONObject;
-import me.mrletsplay.mrcore.misc.OtherTools.FriendlyException;
+import me.mrletsplay.mrcore.misc.FriendlyException;
 
 public class SpiGetResource {
 

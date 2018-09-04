@@ -7,9 +7,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
+/**
+ * @deprecated Methods to be re-/moved, class to be removed
+ * @author MrLetsplay
+ * @see {@link StringUtils#similarity(String, String)}, {@link StringUtils#wrapString(String)}, {@link NumberUtils#round(double, int)}
+ */
+@Deprecated
 public class OtherTools {
 	
 	/**
+	 * @deprecated To be removed
 	 * @param ms The amount of milliseconds
 	 * @param formatting Example format: "s,min,h,d"
 	 * @return A formatted string
@@ -28,11 +36,13 @@ public class OtherTools {
 	}
 	
 	/**
-	 * Rounds a double to a given amount of decimals using the {@link java.math.RoundingMode#HALF_UP HALF_UP} method
+	 * Rounds a double to a given amount of decimals using the {@link RoundingMode#HALF_UP} method
+	 * @deprecated Moved to {@link NumberUtils#round(double, int)}
 	 * @param value The number to round
 	 * @param places The number of decimals to round to
 	 * @return The number rounded to the specified amount of decimals
-	 * @throws IllegalArgumentException - If the specified amount of decimals is < 0
+	 * @throws IllegalArgumentException If the specified amount of decimals is < 0
+	 * @see {@link NumberUtils#round(double, int)}
 	 */
 	public static double round(double value, int places) {
 	    if (places < 0) throw new IllegalArgumentException("Can't have a negative amount of decimal places");
@@ -46,9 +56,11 @@ public class OtherTools {
 	 * - A string will never be longer than *length*
 	 * - The string will be cut on the end of a word
 	 * - If that's not possible, the string will be cut exactly at *length*
+	 * @deprecated Method moved to {@link StringUtils#wrapString(String)}
 	 * @param string The string to cut into lines
 	 * @param length The maximum length of a line
 	 * @return An array of lines cut into properly-sized pieces by above rules
+	 * @see {@link StringUtils#wrapString(String)}
 	 */
 	public static List<String> advSplit(String string, int length) {
 		List<String> words = new ArrayList<>();
@@ -86,9 +98,11 @@ public class OtherTools {
 	}
 	
 	/**
+	 * @deprecated Method moved and refactured to {@link StringUtils#similarity(String, String)}
 	 * @param f One string
 	 * @param f2 Another string
-	 * @return A value representing the similarity of two strings. (Higher = more similar) 
+	 * @return A value representing the similarity of two strings. (Higher = more similar)
+	 * @see {@link StringUtils#similarity(String, String)}
 	 */
 	public static double similarity(String f, String f2){
 		char[] ch = f.toCharArray();
@@ -121,6 +135,10 @@ public class OtherTools {
 		return list.stream().collect(Collectors.joining(" "));
 	}
 	
+	/**
+	 * @deprecated To be removed
+	 * @author MrLetsplay2003
+	 */
 	public static class UnitConverter {
 		
 		private String[] formatting;
@@ -163,6 +181,10 @@ public class OtherTools {
 		
 	}
 	
+	/**
+	 * @deprecated Moved to {@link me.mrletsplay.mrcore.misc.FriendlyException misc.FriendlyException}
+	 * @author MrLetsplay2003
+	 */
 	public static class FriendlyException extends RuntimeException {
 		
 		private static final long serialVersionUID = -4265858806922130917L;
