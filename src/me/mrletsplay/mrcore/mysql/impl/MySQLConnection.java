@@ -21,7 +21,6 @@ public class MySQLConnection {
 	}
 	
 	public ResultSet query(MySQLStatement stmt) {
-		System.out.println(stmt.asString());
 		return serverConnection.query(stmt.asString());
 	}
 	
