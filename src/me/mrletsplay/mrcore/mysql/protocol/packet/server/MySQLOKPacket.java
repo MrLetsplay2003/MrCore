@@ -3,8 +3,8 @@ package me.mrletsplay.mrcore.mysql.protocol.packet.server;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
+import me.mrletsplay.mrcore.misc.FlagCompound;
 import me.mrletsplay.mrcore.mysql.protocol.MySQLServerConnection;
-import me.mrletsplay.mrcore.mysql.protocol.flag.FlagCompound;
 import me.mrletsplay.mrcore.mysql.protocol.flag.MySQLCapabilityFlag;
 import me.mrletsplay.mrcore.mysql.protocol.flag.MySQLStatusFlag;
 import me.mrletsplay.mrcore.mysql.protocol.io.MySQLReader;

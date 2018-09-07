@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
+import me.mrletsplay.mrcore.misc.FlagCompound;
+import me.mrletsplay.mrcore.misc.FlagCompound.CombinationMode;
 import me.mrletsplay.mrcore.mysql.impl.ResultSet;
 import me.mrletsplay.mrcore.mysql.impl.statement.PreparedStatement;
 import me.mrletsplay.mrcore.mysql.impl.statement.StatementParameter;
@@ -14,7 +16,6 @@ import me.mrletsplay.mrcore.mysql.impl.table.TableColumn;
 import me.mrletsplay.mrcore.mysql.protocol.auth.MySQLAuthPlugin;
 import me.mrletsplay.mrcore.mysql.protocol.auth.MySQLAuthPluginBase;
 import me.mrletsplay.mrcore.mysql.protocol.command.MySQLCommand;
-import me.mrletsplay.mrcore.mysql.protocol.flag.FlagCompound;
 import me.mrletsplay.mrcore.mysql.protocol.flag.MySQLCapabilityFlag;
 import me.mrletsplay.mrcore.mysql.protocol.io.MySQLReader;
 import me.mrletsplay.mrcore.mysql.protocol.io.MySQLWriter;
@@ -42,7 +43,6 @@ public class MySQLServerConnection {
 			MySQLCapabilityFlag.CLIENT_MULTI_STATEMENTS,
 			MySQLCapabilityFlag.CLIENT_MULTI_RESULTS,
 			MySQLCapabilityFlag.CLIENT_PS_MULTI_RESULTS
-//			MySQLCapabilityFlag.CLIENT_LOCAL_FILES
 		);
 
 	private Socket socket;
@@ -69,8 +69,8 @@ public class MySQLServerConnection {
 		this.out = out;
 		this.username = username;
 		this.database = database;
-		this.clientCapabilityFlags = FlagCompound.combineIfOne(defaultCapabilityFlags,
-																	new FlagCompound(database != null ? MySQLCapabilityFlag.CLIENT_CONNECT_WITH_DB : 0));
+		this.clientCapabilityFlags = new FlagCompound(defaultCapabilityFlags);
+		if(database != null) this.clientCapabilityFlags.addFlag(MySQLCapabilityFlag.CLIENT_CONNECT_WITH_DB);
 		init(password);
 	}
 	
@@ -102,7 +102,7 @@ public class MySQLServerConnection {
 					authPlugin = plugin.newInstance();
 				}
 			}
-			commonCapabilityFlags = FlagCompound.combineIfBoth(serverCapabilityFlags, clientCapabilityFlags);
+			commonCapabilityFlags = FlagCompound.combine(serverCapabilityFlags, clientCapabilityFlags, CombinationMode.AND);
 		}
 		this.authPluginData = authPluginData.getBytes();
 		sendHandshakeResponse(password, authPluginData.getBytes());
