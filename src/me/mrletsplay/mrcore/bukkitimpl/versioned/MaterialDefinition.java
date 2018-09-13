@@ -52,6 +52,7 @@ public class MaterialDefinition {
 	 * @param amount The amount of items in the new stack
 	 * @return An {@link ItemStack} with the type represented by this instance
 	 */
+	@SuppressWarnings("deprecation")
 	public ItemStack newStack(int amount) {
 		return new ItemStack(getMaterial(), amount, getDamage());
 	}

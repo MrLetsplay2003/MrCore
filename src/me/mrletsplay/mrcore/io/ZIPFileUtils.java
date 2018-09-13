@@ -12,11 +12,13 @@ public class ZIPFileUtils {
 
 	/**
 	 * Zips a folder
+	 * @deprecated Has been replaced by {@link ZipOut}
 	 * @param file The file to zip, can be a folder as well
 	 * @param zipFile The file to zip to (Will be created if it doesn't exist)
 	 * @param compressionLevel The compression level to use (0-9) See {@link ZipOutputStream#setLevel(int)}
 	 * @throws IOException If an IO error occurs while zipping the folder
 	 */
+	@Deprecated
 	public static void zipFolder(File file, File zipFile, int compressionLevel) throws IOException{
 		if(!zipFile.exists()) {
 			zipFile.getParentFile().mkdirs();

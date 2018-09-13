@@ -34,16 +34,18 @@ public class ItemUtils {
 		return material.getCurrentMaterialDefinition().newStack();
 	}
 	
+	@SuppressWarnings("deprecation")
 	public static ItemStack createItem(VersionedMaterial m, int am, String name, String... lore) {
 		MaterialDefinition d = m.getCurrentMaterialDefinition();
 		ItemStack i = new ItemStack(d.getMaterial(), am, d.getDamage());
 		ItemMeta me = i.getItemMeta();
 		if(name!=null) me.setDisplayName(name);
-		me.setLore(Arrays.stream(lore).filter(l -> !l.equals("")).collect(Collectors.toList()));
+		me.setLore(Arrays.stream(lore).filter(l -> !l.isEmpty()).collect(Collectors.toList()));
 		i.setItemMeta(me);
 		return i;
 	}
 
+	@SuppressWarnings("deprecation")
 	public static ItemStack createItem(Material m, int am, int dam, String name, String... lore){
 		ItemStack i = new ItemStack(m, am, (short)dam);
 		ItemMeta me = i.getItemMeta();
@@ -57,6 +59,7 @@ public class ItemUtils {
 		return i;
 	}
 
+	@SuppressWarnings("deprecation")
 	public static ItemStack createItem(Material m, int am, int dam, String name, List<String> lore){
 		ItemStack i = new ItemStack(m, am, (short)dam);
 		ItemMeta me = i.getItemMeta();
