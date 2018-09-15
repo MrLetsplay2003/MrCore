@@ -90,7 +90,7 @@ public class ConfigConverter {
 			while((len = in.read(buf)) > 0) {
 				nOut.write(buf, 0, len);
 			}
-			JSONObject obj = new JSONObject(new String(nOut.toByteArray()));
+			JSONObject obj = new JSONObject(new String(nOut.toByteArray(), StandardCharsets.UTF_8));
 			if(obj.getBoolean("success")) {
 				return (BukkitCustomConfig) saveTo.loadConfig(new ByteArrayInputStream(obj.getString("data").getBytes(StandardCharsets.UTF_8)));
 			}else {
