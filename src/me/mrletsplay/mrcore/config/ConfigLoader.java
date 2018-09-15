@@ -1,5 +1,6 @@
 package me.mrletsplay.mrcore.config;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -64,7 +65,7 @@ public class ConfigLoader {
 				out.write(b, 0, len);
 			}
 			try {
-				cc.loadConfig(in);
+				cc.loadConfig(new ByteArrayInputStream(out.toByteArray()));
 				return cc;
 			}catch(InvalidConfigVersionException e) {
 				ConfigVersion v = ConfigVersion.getByName(e.getVersion());
@@ -73,7 +74,6 @@ public class ConfigLoader {
 						new String(out.toByteArray(), StandardCharsets.UTF_8),
 						cc,
 						v);
-				cfg.saveConfigSafely();
 				return cfg;
 			}
 		}catch(IOException e2) {
