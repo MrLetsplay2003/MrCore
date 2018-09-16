@@ -9,7 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -37,10 +37,10 @@ public class CompactCustomConfig extends CustomConfig {
 		
 		out.writeUTF(getVersion());
 		
-		HashMap<String, Short> cKs = new HashMap<>();
+		Map<String, Short> cKs = new LinkedHashMap<>();
 		
-		HashMap<String, Property> properties = getProperties();
-		HashMap<String, String> comments = getComments();
+		Map<String, Property> properties = getProperties();
+		Map<String, String> comments = getComments();
 		
 		short i = 0;
 		for(String key : properties.keySet()) {
@@ -113,7 +113,7 @@ public class CompactCustomConfig extends CustomConfig {
 		}
 	}
 	
-	private void writeKey(String key, HashMap<String, Short> lookupTable, DataOutputStream out) throws IOException {
+	private void writeKey(String key, Map<String, Short> lookupTable, DataOutputStream out) throws IOException {
 		String[] splK = key.split("\\.");
 		out.writeByte(splK.length);
 		for(String part : splK) {
@@ -137,7 +137,7 @@ public class CompactCustomConfig extends CustomConfig {
 	public CustomConfig loadConfig(InputStream oIn) throws IOException {
 		DataInputStream in = new DataInputStream(oIn);
 		try {
-			HashMap<Short, String> cKs = new HashMap<>();
+			Map<Short, String> cKs = new LinkedHashMap<>();
 			
 			if(in.available() == 0) {
 				in.close();
@@ -195,14 +195,14 @@ public class CompactCustomConfig extends CustomConfig {
 	
 	private Map<String, ?> readMap(DataInputStream in) throws IOException {
 		int size = in.readInt();
-		Map<String, Object> map = new HashMap<>();
+		Map<String, Object> map = new LinkedHashMap<>();
 		while(size-- > 0) {
 			map.put(in.readUTF(), readValue(in));
 		}
 		return map;
 	}
 	
-	private String readKey(HashMap<Short, String> lookupTable, DataInputStream in) throws IOException {
+	private String readKey(Map<Short, String> lookupTable, DataInputStream in) throws IOException {
 		List<Short> parts = new ArrayList<>();
 		short len = in.readByte();
 		if(len <= 0) return null;

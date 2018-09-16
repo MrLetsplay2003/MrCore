@@ -17,7 +17,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -500,8 +499,8 @@ public class CustomConfig {
 	 * @throws InvalidConfigException If this config needs to be loaded and is in an invalid format
 	 */
 	public CustomConfig loadDefault(CustomConfig cfg, boolean override) {
-		HashMap<String, Property> properties = getProperties();
-		HashMap<String, String> comments = getComments();
+		Map<String, Property> properties = getProperties();
+		Map<String, String> comments = getComments();
 		for(Map.Entry<String, Property> en : cfg.getProperties().entrySet()) {
 			if(override || !properties.containsKey(en.getKey())) {
 				set(en.getKey(), en.getValue().getValue());
@@ -565,7 +564,7 @@ public class CustomConfig {
 	 * @param properties The comment map to load
 	 * @return This CustomConfig instance
 	 */
-	public CustomConfig setComments(HashMap<String, String> comments) {
+	public CustomConfig setComments(Map<String, String> comments) {
 		comments.entrySet().forEach(en -> {
 			parentSection.setComment(en.getKey(), en.getValue());
 		});
@@ -583,14 +582,14 @@ public class CustomConfig {
 	/**
 	 * @return This config's property HashMap
 	 */
-	public HashMap<String, Property> getProperties(){
+	public Map<String, Property> getProperties(){
 		return parentSection.getProperties(true);
 	}
 
 	/**
 	 * @return This config's comment HashMap
 	 */
-	public HashMap<String, String> getComments(){
+	public Map<String, String> getComments(){
 		return parentSection.getComments(true);
 	}
 
@@ -1066,7 +1065,7 @@ public class CustomConfig {
 	 * See {@link #get(String, Object, boolean)}
 	 */
 	public Map<String, Object> getMap(String key) {
-		return getGenericMap(key, Object.class, new HashMap<>(), false);
+		return getGenericMap(key, Object.class, new LinkedHashMap<>(), false);
 	}
 
 	/**
@@ -1192,7 +1191,7 @@ public class CustomConfig {
 	}
 	
 	public <V> Map<String, V> getComplexMap(String key, ComplexMap<String, V> complex) {
-		return getComplexMap(key, complex, new HashMap<>(), false);
+		return getComplexMap(key, complex, new LinkedHashMap<>(), false);
 	}
 	
 	public <V> Map<String, V> getComplexMap(String key, ComplexMap<String, V> complex, Map<String, V> defaultVal, boolean applyDefault) {
@@ -1487,9 +1486,11 @@ public class CustomConfig {
 		SPACE_COMMENTED_PROPERTIES,
 		
 		/**
+		 * @deprecated Standard
 		 * When loading/saving the config, the properties will stay in the order as they're set. <br>
 		 * <b>This option can only be used in the constructor</b>
 		 */
+		@Deprecated
 		KEEP_CONFIG_SORTING,
 	}
 
@@ -1572,9 +1573,8 @@ public class CustomConfig {
 			this.config = config;
 			this.parent = parent;
 			this.name = name;
-			boolean keepOrder = config.hasProperty(ConfigSaveProperty.KEEP_CONFIG_SORTING);
-			subsections = keepOrder ? new LinkedHashMap<>() : new LinkedHashMap<>();
-			properties = keepOrder ? new LinkedHashMap<>() : new LinkedHashMap<>();
+			subsections = new LinkedHashMap<>();
+			properties = new LinkedHashMap<>();
 			comments = new LinkedHashMap<>();
 		}
 		
@@ -1723,20 +1723,20 @@ public class CustomConfig {
 			return parent.getFullName() + name;
 		}
 		
-		public HashMap<String, ConfigSection> getSubsections() {
+		public Map<String, ConfigSection> getSubsections() {
 			return subsections;
 		}
 		
-		public HashMap<String, Property> getProperties() {
+		public Map<String, Property> getProperties() {
 			return getProperties(false);
 		}
 		
-		public HashMap<String, String> getComments() {
+		public Map<String, String> getComments() {
 			return getComments(false);
 		}
 		
-		public HashMap<String, Property> getProperties(boolean deep) {
-			HashMap<String, Property> ps = new HashMap<>();
+		public Map<String, Property> getProperties(boolean deep) {
+			Map<String, Property> ps = new LinkedHashMap<>();
 			properties.entrySet().stream()
 					.map(en -> new AbstractMap.SimpleEntry<String, Property>(name != null ? name + "." + en.getKey() : en.getKey(), en.getValue()))
 					.forEach(en -> ps.put(en.getKey(), en.getValue()));
@@ -1747,8 +1747,8 @@ public class CustomConfig {
 			return ps;
 		}
 		
-		public HashMap<String, String> getComments(boolean deep) {
-			HashMap<String, String> cs = new HashMap<>();
+		public Map<String, String> getComments(boolean deep) {
+			Map<String, String> cs = new LinkedHashMap<>();
 			comments.entrySet().stream()
 				.map(en -> new AbstractMap.SimpleEntry<String, String>(name != null ? name + "." + en.getKey() : en.getKey(), en.getValue()))
 				.forEach(en -> cs.put(en.getKey(), en.getValue()));
@@ -1816,7 +1816,7 @@ public class CustomConfig {
 		}
 		
 		public Map<String, Object> toMap() {
-			Map<String, Object> map = new HashMap<>();
+			Map<String, Object> map = new LinkedHashMap<>();
 			map.putAll(properties.entrySet().stream()
 					.map(en -> new AbstractMap.SimpleEntry<>(en.getKey(), en.getValue().getValue()))
 					.collect(Collectors.toMap(en -> en.getKey(), en -> en.getValue())));
