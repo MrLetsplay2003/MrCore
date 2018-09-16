@@ -76,7 +76,7 @@ public class CompactCustomConfig extends CustomConfig {
 			out.writeUTF(comment);
 		}
 		out.writeByte(-1);
-		out.close();
+		out.flush();
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -164,10 +164,8 @@ public class CompactCustomConfig extends CustomConfig {
 			while((key = readKey(cKs, in)) != null) {
 				getParentSection().setComment(key, in.readUTF());
 			}
-			in.close();
 			return this;
 		}catch(EOFException e) {
-			in.close();
 			e.printStackTrace();
 			throw new InvalidConfigException("Invalid compact config", -1);
 		}
