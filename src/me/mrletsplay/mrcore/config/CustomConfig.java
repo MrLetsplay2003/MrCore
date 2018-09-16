@@ -212,7 +212,9 @@ public class CustomConfig {
 	public void saveConfig(List<ConfigSaveProperty> saveProperties) throws IOException {
 		if(isExternal) throw new UnsupportedOperationException("External configs cannot be saved");
 		configFile.getParentFile().mkdirs();
-		saveConfig(new FileOutputStream(configFile), saveProperties);
+		OutputStream o = new FileOutputStream(configFile);
+		saveConfig(o, saveProperties);
+		o.close();
 	}
 	
 	/**
@@ -266,7 +268,6 @@ public class CustomConfig {
 		w.write(customConfigVersionString + getVersion());
 		w.write(ConfigFormatter.newLine());
 		w.write(parentSection.saveToString(props, 0));
-		w.close();
 		if(configFile != null) lastEdited = configFile.lastModified();
 	}
 
