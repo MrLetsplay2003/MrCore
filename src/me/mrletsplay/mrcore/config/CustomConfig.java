@@ -268,6 +268,7 @@ public class CustomConfig {
 		w.write(customConfigVersionString + getVersion());
 		w.write(ConfigFormatter.newLine());
 		w.write(parentSection.saveToString(props, 0));
+		w.flush();
 		if(configFile != null) lastEdited = configFile.lastModified();
 	}
 
