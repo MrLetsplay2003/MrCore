@@ -467,6 +467,42 @@ public enum VersionedMaterial {
 			new DyeDefinition(VersionedDyeColor.WHITE),
 			of(new MaterialDefinition("INK_SACK", 15), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("BONE_MEAL"), NMSVersion.v1_13())
+		),
+	GOLDEN_HELMET(
+			of(new MaterialDefinition("GOLD_HELMET"), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("GOLDEN_HELMET"), NMSVersion.v1_13())
+		),
+	GOLDEN_CHESTPLATE(
+			of(new MaterialDefinition("GOLD_CHESTPLATE"), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("GOLDEN_CHESTPLATE"), NMSVersion.v1_13())
+		),
+	GOLDEN_LEGGINGS(
+			of(new MaterialDefinition("GOLD_LEGGINGS"), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("GOLDEN_LEGGINGS"), NMSVersion.v1_13())
+		),
+	GOLDEN_BOOTS(
+			of(new MaterialDefinition("GOLD_BOOTS"), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("GOLDEN_BOOTS"), NMSVersion.v1_13())
+		),
+	GOLDEN_SWORD(
+			of(new MaterialDefinition("GOLD_SWORD"), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("GOLDEN_SWORD"), NMSVersion.v1_13())
+		),
+	GOLDEN_PICKAXE(
+			of(new MaterialDefinition("GOLD_PICKAXE"), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("GOLDEN_PICKAXE"), NMSVersion.v1_13())
+		),
+	GOLDEN_AXE(
+			of(new MaterialDefinition("GOLD_AXE"), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("GOLDEN_AXE"), NMSVersion.v1_13())
+		),
+	GOLDEN_SHOVEL(
+			of(new MaterialDefinition("GOLD_SHOVEL"), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("GOLDEN_SHOVEL"), NMSVersion.v1_13())
+		),
+	GOLDEN_HOE(
+			of(new MaterialDefinition("GOLD_HOE"), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("GOLDEN_HOE"), NMSVersion.v1_13())
 		)
 	;
 	
