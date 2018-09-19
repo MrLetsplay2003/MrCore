@@ -1,6 +1,7 @@
 package me.mrletsplay.mrcore.mysql.impl.table;
 
 import me.mrletsplay.mrcore.mysql.impl.ResultSet;
+import me.mrletsplay.mrcore.mysql.protocol.misc.MySQLException;
 import me.mrletsplay.mrcore.mysql.protocol.type.MySQLDataType;
 
 public class TableColumn {
@@ -35,7 +36,7 @@ public class TableColumn {
 	}
 	
 	public <T> T getEntry(int index, MySQLDataType<T> type) {
-		if(!definition.getColumnType().equals(type)) throw new RuntimeException("Invalid type");
+		if(!definition.getColumnType().equals(type)) throw new MySQLException("Invalid type");
 		return type.getJavaType().cast(getEntry(index));
 	}
 	

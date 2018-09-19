@@ -3,6 +3,7 @@ package me.mrletsplay.mrcore.mysql.impl.table;
 import java.util.Arrays;
 
 import me.mrletsplay.mrcore.mysql.impl.ResultSet;
+import me.mrletsplay.mrcore.mysql.protocol.misc.MySQLException;
 import me.mrletsplay.mrcore.mysql.protocol.packet.MySQLBasePacket;
 import me.mrletsplay.mrcore.mysql.protocol.packet.binary.MySQLResultSetRowBinaryPacket;
 import me.mrletsplay.mrcore.mysql.protocol.packet.text.MySQLResultSetRowPacket;
@@ -47,22 +48,22 @@ public class TableRow {
 				return entries[i];
 			}
 		}
-		throw new RuntimeException("Invalid column \"" + columnName + "\" specified");
+		throw new MySQLException("Invalid column \"" + columnName + "\" specified");
 	}
 	
 	public <T> T getEntry(int index, MySQLDataType<T> type) {
-		if(!resultSet.getColumn(index).getDefinition().getColumnType().equals(type)) throw new RuntimeException("Invalid type");
+		if(!resultSet.getColumn(index).getDefinition().getColumnType().equals(type)) throw new MySQLException("Invalid type");
 		return type.getJavaType().cast(entries[index]);
 	}
 	
 	public <T> T getEntry(String columnName, MySQLDataType<T> type) {
 		for(int i = 0; i < resultSet.getColumns().length; i++) {
 			if(resultSet.getColumn(i).getDefinition().getPhysicalName().toString().equals(columnName)) {
-				if(!resultSet.getColumn(i).getDefinition().getColumnType().equals(type)) throw new RuntimeException("Invalid type");
+				if(!resultSet.getColumn(i).getDefinition().getColumnType().equals(type)) throw new MySQLException("Invalid type");
 				return type.getJavaType().cast(entries[i]);
 			}
 		}
-		throw new RuntimeException("Invalid column \"" + columnName + "\" specified");
+		throw new MySQLException("Invalid column \"" + columnName + "\" specified");
 	}
 	
 	public MySQLBasePacket getDefiningPacket() {

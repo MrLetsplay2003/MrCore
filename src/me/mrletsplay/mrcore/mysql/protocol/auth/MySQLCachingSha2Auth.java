@@ -15,6 +15,7 @@ import javax.crypto.Cipher;
 
 import me.mrletsplay.mrcore.mysql.protocol.MySQLServerConnection;
 import me.mrletsplay.mrcore.mysql.protocol.io.RawPacket;
+import me.mrletsplay.mrcore.mysql.protocol.misc.MySQLException;
 
 public class MySQLCachingSha2Auth implements MySQLAuthPluginBase {
 
@@ -30,7 +31,7 @@ public class MySQLCachingSha2Auth implements MySQLAuthPluginBase {
 			this.authData = authData;
 			return scrambleCachingSha2(password.getBytes(StandardCharsets.UTF_8), authData);
 		} catch (DigestException e) {
-			throw new RuntimeException(e);
+			throw new MySQLException(e);
 		}
 	}
 
@@ -63,7 +64,7 @@ public class MySQLCachingSha2Auth implements MySQLAuthPluginBase {
         try {
             md = MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException ex) {
-            throw new RuntimeException(ex);
+            throw new MySQLException(ex);
         }
 
         byte[] dig1 = new byte[CACHING_SHA2_DIGEST_LENGTH];
@@ -130,7 +131,7 @@ public class MySQLCachingSha2Auth implements MySQLAuthPluginBase {
             KeyFactory kf = KeyFactory.getInstance("RSA");
             return (RSAPublicKey) kf.generatePublic(spec);
         } catch (Exception ex) {
-            throw new RuntimeException(ex);
+            throw new MySQLException(ex);
         }
     }
 
@@ -140,7 +141,7 @@ public class MySQLCachingSha2Auth implements MySQLAuthPluginBase {
             cipher.init(Cipher.ENCRYPT_MODE, key);
             return cipher.doFinal(source);
         } catch (Exception ex) {
-            throw new RuntimeException(ex);
+            throw new MySQLException(ex);
         }
     }
 
