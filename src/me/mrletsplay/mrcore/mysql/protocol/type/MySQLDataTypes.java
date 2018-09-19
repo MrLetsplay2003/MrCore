@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.mrletsplay.mrcore.mysql.protocol.io.MySQLReader;
+import me.mrletsplay.mrcore.mysql.protocol.misc.MySQLException;
 
 public class MySQLDataTypes {
 	
@@ -59,7 +60,7 @@ public class MySQLDataTypes {
 	public static MySQLDataType<?> getTypeById(byte identifier) {
 		return DEFAULT_TYPES.stream()
 				.filter(t -> t.getSQLIdentifier() == identifier)
-				.findFirst().orElseThrow(() -> new RuntimeException("Invalid/unsupported data type identifier: "+Integer.toHexString(identifier)));
+				.findFirst().orElseThrow(() -> new MySQLException("Invalid/unsupported data type identifier: "+Integer.toHexString(identifier)));
 	}
 	
 	private static long readTime(MySQLReader r) throws IOException {

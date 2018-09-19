@@ -6,6 +6,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import me.mrletsplay.mrcore.mysql.protocol.MySQLServerConnection;
+import me.mrletsplay.mrcore.mysql.protocol.misc.MySQLException;
 
 public class MySQLNative41PasswordAuth implements MySQLAuthPluginBase {
 
@@ -31,7 +32,7 @@ public class MySQLNative41PasswordAuth implements MySQLAuthPluginBase {
 			}
 			return pwBytes;
 		} catch (NoSuchAlgorithmException e) {
-			throw new RuntimeException(e);
+			throw new MySQLException(e);
 		}
 	}
 

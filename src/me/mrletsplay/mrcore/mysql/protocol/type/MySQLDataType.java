@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.function.Function;
 
 import me.mrletsplay.mrcore.mysql.protocol.io.MySQLReader;
+import me.mrletsplay.mrcore.mysql.protocol.misc.MySQLException;
 
 public class MySQLDataType<T> {
 
@@ -54,7 +55,7 @@ public class MySQLDataType<T> {
 	}
 	
 	public MySQLString format(Object value) {
-		if(value != null && !javaType.isInstance(value)) throw new RuntimeException("Invalid type: " + value.getClass().getName());
+		if(value != null && !javaType.isInstance(value)) throw new MySQLException("Invalid type: " + value.getClass().getName());
 		if(value == null) return null;
 		return new MySQLString(formattingFunction.apply(javaType.cast(value)));
 	}
@@ -66,7 +67,7 @@ public class MySQLDataType<T> {
 		try {
 			return readingFunction.apply(reader);
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			throw new MySQLException(e);
 		}
 	}
 	

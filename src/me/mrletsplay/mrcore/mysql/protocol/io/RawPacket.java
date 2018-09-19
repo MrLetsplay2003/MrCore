@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
 import me.mrletsplay.mrcore.mysql.protocol.MySQLServerConnection;
+import me.mrletsplay.mrcore.mysql.protocol.misc.MySQLException;
 import me.mrletsplay.mrcore.mysql.protocol.packet.binary.MySQLBinaryPacket;
 import me.mrletsplay.mrcore.mysql.protocol.packet.server.MySQLServerPacket;
 import me.mrletsplay.mrcore.mysql.protocol.packet.server.MySQLServerPacketType;
@@ -82,7 +83,7 @@ public class RawPacket {
 					.newInstance(con, payload);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {
-			throw new RuntimeException(e);
+			throw new MySQLException(e);
 		}
 	}
 	
@@ -97,7 +98,7 @@ public class RawPacket {
 					.newInstance(con, payload, command);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {
-			throw new RuntimeException(e);
+			throw new MySQLException(e);
 		}
 	}
 	
@@ -108,7 +109,7 @@ public class RawPacket {
 					.newInstance(con, payload, command);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {
-			throw new RuntimeException(e);
+			throw new MySQLException(e);
 		}
 	}
 	

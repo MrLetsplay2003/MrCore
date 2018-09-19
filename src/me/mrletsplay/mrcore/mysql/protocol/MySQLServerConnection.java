@@ -21,6 +21,7 @@ import me.mrletsplay.mrcore.mysql.protocol.io.MySQLReader;
 import me.mrletsplay.mrcore.mysql.protocol.io.MySQLWriter;
 import me.mrletsplay.mrcore.mysql.protocol.io.RawPacket;
 import me.mrletsplay.mrcore.mysql.protocol.misc.MySQLCharset;
+import me.mrletsplay.mrcore.mysql.protocol.misc.MySQLException;
 import me.mrletsplay.mrcore.mysql.protocol.misc.NullBitmap;
 import me.mrletsplay.mrcore.mysql.protocol.packet.binary.MySQLResultSetBinaryPacket;
 import me.mrletsplay.mrcore.mysql.protocol.packet.server.MySQLERRPacket;
@@ -226,9 +227,9 @@ public class MySQLServerConnection {
 			case OK:
 				return (MySQLOKPacket) r;
 			case ERR:
-				throw new RuntimeException(errorMessage + ": \"" + ((MySQLERRPacket) r).getErrorMessage() + "\" (from Server)");
+				throw new MySQLException(errorMessage + ": \"" + ((MySQLERRPacket) r).getErrorMessage() + "\" (from Server)");
 			default:
-				throw new RuntimeException(errorMessage);
+				throw new MySQLException(errorMessage);
 		}
 	}
 	
@@ -255,12 +256,12 @@ public class MySQLServerConnection {
 				newLifecycle();
 				return null; // No further data
 			}
-			if(raw.getServerPacketType().equals(MySQLServerPacketType.ERR)) throw new RuntimeException(((MySQLERRPacket) raw.parseServerPacket(this)).getErrorMessage().toString()); // No further data
+			if(raw.getServerPacketType().equals(MySQLServerPacketType.ERR)) throw new MySQLException(((MySQLERRPacket) raw.parseServerPacket(this)).getErrorMessage().toString()); // No further data
 			MySQLResultSetPacket packet = raw.parseTextPacket(this, MySQLResultSetPacket.class, MySQLCommand.COM_QUERY);
 			newLifecycle();
 			return new ResultSet(packet);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new MySQLException(e);
 		}
 	}
 	
@@ -272,12 +273,12 @@ public class MySQLServerConnection {
 			w.writeString(new MySQLString(query));
 			sendPacket(RawPacket.of(bOut.toByteArray()));
 			RawPacket raw = readPacket();
-			if(raw.getServerPacketType().equals(MySQLServerPacketType.ERR)) throw new RuntimeException(((MySQLERRPacket) raw.parseServerPacket(this)).getErrorMessage().toString()); // No further data
+			if(raw.getServerPacketType().equals(MySQLServerPacketType.ERR)) throw new MySQLException(((MySQLERRPacket) raw.parseServerPacket(this)).getErrorMessage().toString()); // No further data
 			MySQLPrepareStatementResponsePacket packet = raw.parseTextPacket(this, MySQLPrepareStatementResponsePacket.class, MySQLCommand.COM_QUERY);
 			newLifecycle();
 			return new PreparedStatement(packet);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new MySQLException(e);
 		}
 	}
 	
@@ -309,7 +310,7 @@ public class MySQLServerConnection {
 			newLifecycle();
 			return new ResultSet(raw);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new MySQLException(e);
 		}
 	}
 	
@@ -320,7 +321,7 @@ public class MySQLServerConnection {
 			w.write(MySQLCommand.COM_STMT_CLOSE);
 			w.writeFixedLengthInteger(4, statement.getID());
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new MySQLException(e);
 		}
 	}
 	
@@ -339,7 +340,7 @@ public class MySQLServerConnection {
 			this.database = schemaName;
 			newLifecycle();
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new MySQLException(e);
 		}
 	}
 	
@@ -347,7 +348,7 @@ public class MySQLServerConnection {
 		try {
 			sendPacket(RawPacket.of(MySQLCommand.COM_QUIT));
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new MySQLException(e);
 		}
 		try {
 			awaitOkay("Improper disconnect");
@@ -360,7 +361,7 @@ public class MySQLServerConnection {
 		try {
 			if(!socket.isClosed()) socket.close();
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new MySQLException(e);
 		}
 	}
 	
