@@ -25,104 +25,104 @@ public class MySQLType {
 		return name + (params.length > 0 ? "("+Arrays.stream(params).map(o -> o.toString()).collect(Collectors.joining(","))+")" : "");
 	}
 	
-	public static <T> MySQLType getType(String name, Object... params) {
+	public static <T> MySQLType ofType(String name, Object... params) {
 		return new MySQLType(name, params);
 	}
 	
 	public static MySQLType bit() {
-		return getType("bit");
+		return ofType("bit");
 	}
 	
 	public static MySQLType bit(int numBits) {
-		return getType("bit", numBits);
+		return ofType("bit", numBits);
 	}
 	
 	public static MySQLType tinyInt() {
-		return getType("tinyint");
+		return ofType("tinyint");
 	}
 	
 	public static MySQLType bool() {
-		return getType("bool");
+		return ofType("bool");
 	}
 	
 	public static MySQLType booleanT() {
-		return getType("boolean");
+		return ofType("boolean");
 	}
 	
 	public static MySQLType smallInt() {
-		return getType("smallint");
+		return ofType("smallint");
 	}
 	
 	public static MySQLType mediumInt() {
-		return getType("mediumint");
+		return ofType("mediumint");
 	}
 	
 	public static MySQLType intT() {
-		return getType("int");
+		return ofType("int");
 	}
 	
 	public static MySQLType integer() {
-		return getType("integer");
+		return ofType("integer");
 	}
 	
 	public static MySQLType bigInt() {
-		return getType("bigint");
+		return ofType("bigint");
 	}
 	
 	public static MySQLType decimal() {
-		return getType("decimal");
+		return ofType("decimal");
 	}
 	
 	public static MySQLType floatT() {
-		return getType("float");
+		return ofType("float");
 	}
 	
 	public static MySQLType doubleT() {
-		return getType("double");
+		return ofType("double");
 	}
 	
 	public static MySQLType floatT(int precisionBits) {
-		return getType("float", precisionBits);
+		return ofType("float", precisionBits);
 	}
 	
 	public static MySQLType date() {
-		return getType("date");
+		return ofType("date");
 	}
 	
 	public static MySQLType dateTime() {
-		return getType("datetime");
+		return ofType("datetime");
 	}
 	
 	public static MySQLType dateTime(int precisionBits) {
-		return getType("datetime", precisionBits);
+		return ofType("datetime", precisionBits);
 	}
 	
 	public static MySQLType timestamp() {
-		return getType("timestamp");
+		return ofType("timestamp");
 	}
 	
 	public static MySQLType timestamp(int precisionBits) {
-		return getType("timestamp", precisionBits);
+		return ofType("timestamp", precisionBits);
 	}
 	
 	public static MySQLType time() {
-		return getType("time");
+		return ofType("time");
 	}
 	
 	public static MySQLType time(int precisionBits) {
-		return getType("time", precisionBits);
+		return ofType("time", precisionBits);
 	}
 	
 	public static MySQLType year() {
-		return getType("year");
+		return ofType("year");
 	}
 	
 	public static MySQLType varChar(int length) {
-		return getType("varchar", length);
+		return ofType("varchar", length);
 	}
 	
 	public static MySQLType charT(int length) {
-		return getType("char", length);
+		return ofType("char", length);
 	}
 	
 }
