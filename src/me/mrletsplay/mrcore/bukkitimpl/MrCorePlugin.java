@@ -24,7 +24,6 @@ public class MrCorePlugin extends JavaPlugin{
 	@Override
 	public void onEnable() {
 		pl = this;
-//		MaterialLookup.loadAll();
 		NMSVersion nmsv = NMSVersion.getCurrentServerVersion();
 		getLogger().info("Applying compat for " + nmsv.getFriendlyName() + " / " + nmsv.name());
 		Bukkit.getPluginManager().registerEvents(new GUIListener(), this);
