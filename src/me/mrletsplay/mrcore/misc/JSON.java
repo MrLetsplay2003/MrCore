@@ -134,6 +134,25 @@ public class JSON {
 		public JSONArray getJSONArray(String key) {
 			return (JSONArray) get(key);
 		}
+
+		public boolean isOfType(String key, JSONType type) {
+			switch (type) {
+				case OBJECT:
+					return has(key) && get(key) instanceof JSONObject;
+				case ARRAY:
+					return has(key) && get(key) instanceof JSONArray;
+				case BOOLEAN:
+					return has(key) && get(key) instanceof Boolean;
+				case DOUBLE:
+				case INTEGER:
+				case LONG:
+				case NUMBER:
+					return has(key) && get(key) instanceof Number;
+				case NULL:
+					return has(key) && get(key) == null;
+			}
+			return false;
+		}
 		
 		/**
 		 * Converts this JSON object into a JSON string according to <a href="http://www.json.org/">The JSON Data Interchange Standard</a>
@@ -260,6 +279,25 @@ public class JSON {
 			return (JSONArray) get(index);
 		}
 
+		public boolean isOfType(int index, JSONType type) {
+			switch (type) {
+				case OBJECT:
+					return get(index) instanceof JSONObject;
+				case ARRAY:
+					return get(index) instanceof JSONArray;
+				case BOOLEAN:
+					return get(index) instanceof Boolean;
+				case DOUBLE:
+				case INTEGER:
+				case LONG:
+				case NUMBER:
+					return get(index) instanceof Number;
+				case NULL:
+					return get(index) == null;
+			}
+			return false;
+		}
+
 		/**
 		 * Converts this JSON object into a JSON string according to <a href="http://www.json.org/">The JSON Data Interchange Standard</a>
 		 * @throws JSONException If a conversion error occurs (e.g. a property has an invalid type)
@@ -276,6 +314,20 @@ public class JSON {
 		public String toFancyString() {
 			return JSONFormatter.formatArray(this, 0, true).toString();
 		}
+		
+	}
+	
+	public static enum JSONType {
+		
+		NULL,
+		NUMBER,
+		INTEGER,
+		DOUBLE,
+		LONG,
+		BOOLEAN,
+		OBJECT,
+		ARRAY,
+		;
 		
 	}
 	
