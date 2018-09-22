@@ -53,10 +53,12 @@ public class GUIUtils {
 
 		/**
 		 * Creates a GUI builder for a single page GUI
+		 * @deprecated Creating Inventories with custom types & holders currently causes unpredictable behaviour in MC 1.13
 		 * @see <a href="https://github.com/MrLetsplay2003/MrCore/wiki/GUIUtils">GUIUtils wiki</a>
 		 * @param title The title for the GUI (inventory)
 		 * @param type The inventory type for this GUI
 		 */
+		@Deprecated
 		public GUIBuilder(String title, InventoryType type) {
 			this.title = title;
 			this.invType = type;
