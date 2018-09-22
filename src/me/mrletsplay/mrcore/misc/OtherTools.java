@@ -56,11 +56,11 @@ public class OtherTools {
 	 * - A string will never be longer than *length*
 	 * - The string will be cut on the end of a word
 	 * - If that's not possible, the string will be cut exactly at *length*
-	 * @deprecated Method moved to {@link StringUtils#wrapString(String)}
+	 * @deprecated Method moved to {@link StringUtils#wrapString(String, int)}
 	 * @param string The string to cut into lines
 	 * @param length The maximum length of a line
 	 * @return An array of lines cut into properly-sized pieces by above rules
-	 * @see {@link StringUtils#wrapString(String)}
+	 * @see {@link StringUtils#wrapString(String, int)}
 	 */
 	public static List<String> advSplit(String string, int length) {
 		List<String> words = new ArrayList<>();
