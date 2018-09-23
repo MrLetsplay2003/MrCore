@@ -53,14 +53,14 @@ public class TableRow {
 	
 	public <T> T getEntry(int index, MySQLDataType<T> type) {
 		if(!resultSet.getColumn(index).getDefinition().getColumnType().equals(type)) throw new MySQLException("Invalid type");
-		return type.getJavaType().cast(entries[index]);
+		return type.getJavaType().cast(entries[index].getValue());
 	}
 	
 	public <T> T getEntry(String columnName, MySQLDataType<T> type) {
 		for(int i = 0; i < resultSet.getColumns().length; i++) {
 			if(resultSet.getColumn(i).getDefinition().getPhysicalName().toString().equals(columnName)) {
 				if(!resultSet.getColumn(i).getDefinition().getColumnType().equals(type)) throw new MySQLException("Invalid type");
-				return type.getJavaType().cast(entries[i]);
+				return type.getJavaType().cast(entries[i].getValue());
 			}
 		}
 		throw new MySQLException("Invalid column \"" + columnName + "\" specified");
