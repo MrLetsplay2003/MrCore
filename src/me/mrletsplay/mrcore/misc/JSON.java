@@ -141,6 +141,8 @@ public class JSON {
 					return has(key) && get(key) instanceof JSONObject;
 				case ARRAY:
 					return has(key) && get(key) instanceof JSONArray;
+				case STRING:
+					return has(key) && get(key) instanceof String;
 				case BOOLEAN:
 					return has(key) && get(key) instanceof Boolean;
 				case DOUBLE:
@@ -285,6 +287,8 @@ public class JSON {
 					return get(index) instanceof JSONObject;
 				case ARRAY:
 					return get(index) instanceof JSONArray;
+				case STRING:
+					return get(index) instanceof String;
 				case BOOLEAN:
 					return get(index) instanceof Boolean;
 				case DOUBLE:
@@ -327,6 +331,7 @@ public class JSON {
 		BOOLEAN,
 		OBJECT,
 		ARRAY,
+		STRING,
 		;
 		
 	}
