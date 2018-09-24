@@ -595,7 +595,7 @@ public enum VersionedMaterial {
 	
 	/**
 	 * @param version The version to get the definition for
-	 * @return The {@link MaterialDefinition} for that version, null if none
+	 * @return The {@link MaterialDefinition} for that version, null if none / not available for that version
 	 */
 	public MaterialDefinition getMaterialDefinition(NMSVersion version) {
 		return definitions.get(version);
@@ -606,6 +606,14 @@ public enum VersionedMaterial {
 	 */
 	public MaterialDefinition getCurrentMaterialDefinition() {
 		return getMaterialDefinition(NMSVersion.getCurrentServerVersion());
+	}
+	
+	public boolean isAvailableForCurrentVersion() {
+		return isAvailableForVersion(NMSVersion.getCurrentServerVersion());
+	}
+	
+	public boolean isAvailableForVersion(NMSVersion version) {
+		return getMaterialDefinition(version) != null;
 	}
 	
 	@SuppressWarnings("unchecked")
