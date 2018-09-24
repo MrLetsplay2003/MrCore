@@ -497,12 +497,44 @@ public enum VersionedMaterial {
 			of(new MaterialDefinition("GOLDEN_AXE"), NMSVersion.v1_13())
 		),
 	GOLDEN_SHOVEL(
-			of(new MaterialDefinition("GOLD_SHOVEL"), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("GOLD_SPADE"), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("GOLDEN_SHOVEL"), NMSVersion.v1_13())
 		),
 	GOLDEN_HOE(
 			of(new MaterialDefinition("GOLD_HOE"), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("GOLDEN_HOE"), NMSVersion.v1_13())
+		),
+	WOODEN_SWORD(
+			of(new MaterialDefinition("WOOD_SWORD"), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("WOODEN_SWORD"), NMSVersion.v1_13())
+		),
+	WOODEN_PICKAXE(
+			of(new MaterialDefinition("WOOD_PICKAXE"), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("WOODEN_PICKAXE"), NMSVersion.v1_13())
+		),
+	WOODEN_AXE(
+			of(new MaterialDefinition("WOOD_AXE"), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("WOODEN_AXE"), NMSVersion.v1_13())
+		),
+	WOODEN_SHOVEL(
+			of(new MaterialDefinition("WOOD_SPADE"), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("WOODEN_SHOVEL"), NMSVersion.v1_13())
+		),
+	WOODEN_HOE(
+			of(new MaterialDefinition("WOOD_HOE"), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("WOODEN_HOE"), NMSVersion.v1_13())
+		),
+	STONE_SHOVEL(
+			of(new MaterialDefinition("STONE_SPADE"), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("STONE_SHOVEL"), NMSVersion.v1_13())
+		),
+	IRON_SHOVEL(
+			of(new MaterialDefinition("IRON_SPADE"), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("IRON_SHOVEL"), NMSVersion.v1_13())
+		),
+	DIAMOND_SHOVEL(
+			of(new MaterialDefinition("DIAMOND_SPADE"), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("DIAMOND_SHOVEL"), NMSVersion.v1_13())
 		),
 	WITHER_SKELETON_SKULL(
 			of(new MaterialDefinition("SKULL_ITEM", 1), NMSVersion.v1_8to1_12()),
