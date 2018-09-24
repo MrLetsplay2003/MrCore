@@ -555,6 +555,10 @@ public enum VersionedMaterial {
 	DRAGON_HEAD(
 			of(new MaterialDefinition("SKULL_ITEM", 5), NMSVersion.v1_9to1_12()),
 			of(new MaterialDefinition("DRAGON_HEAD"), NMSVersion.v1_13())
+		),
+	COMMAND_BLOCK(
+			of(new MaterialDefinition("COMMAND"), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("COMMAND_BLOCK"), NMSVersion.v1_13())
 		)
 	;
 	
