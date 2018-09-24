@@ -503,6 +503,26 @@ public enum VersionedMaterial {
 	GOLDEN_HOE(
 			of(new MaterialDefinition("GOLD_HOE"), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("GOLDEN_HOE"), NMSVersion.v1_13())
+		),
+	WITHER_SKELETON_SKULL(
+			of(new MaterialDefinition("SKULL_ITEM", 1), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("WITHER_SKELETON_SKULL"), NMSVersion.v1_13())
+		),
+	ZOMBIE_HEAD(
+			of(new MaterialDefinition("SKULL_ITEM", 2), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("ZOMBIE_HEAD"), NMSVersion.v1_13())
+		),
+	PLAYER_HEAD(
+			of(new MaterialDefinition("SKULL_ITEM", 3), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("PLAYER_HEAD"), NMSVersion.v1_13())
+		),
+	CREEPER_HEAD(
+			of(new MaterialDefinition("SKULL_ITEM", 4), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("CREEPER_HEAD"), NMSVersion.v1_13())
+		),
+	DRAGON_HEAD(
+			of(new MaterialDefinition("SKULL_ITEM", 5), NMSVersion.v1_9to1_12()),
+			of(new MaterialDefinition("DRAGON_HEAD"), NMSVersion.v1_13())
 		)
 	;
 	
