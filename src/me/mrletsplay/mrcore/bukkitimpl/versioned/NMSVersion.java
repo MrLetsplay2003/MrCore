@@ -91,6 +91,14 @@ public enum NMSVersion {
 	}
 
 	/**
+	 * Returns an array of all the versions from 1.9 to 1.12.<br>
+	 * @return An array containing all the 1.9-1.12 versions
+	 */
+	public static NMSVersion[] v1_9to1_12() {
+		return range(NMSVersion.V1_9_R1, NMSVersion.V1_12_R1);
+	}
+
+	/**
 	 * Returns an array of all the versions from 1.8 to 1.13.<br>
 	 * @return An array containing all the 1.8-1.13 versions
 	 */
