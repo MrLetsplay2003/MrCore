@@ -11,7 +11,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import me.mrletsplay.mrcore.http.HttpUtils;
+import me.mrletsplay.mrcore.http.HttpRequest;
 import me.mrletsplay.mrcore.main.MrCore;
 
 public class MrCoreUpdater {
@@ -36,7 +36,8 @@ public class MrCoreUpdater {
 			}
 			String downloadL = getDownloadLink(version);
 			MrCorePlugin.pl.getLogger().info("Downloading from "+downloadL+"...");
-			HttpUtils.download(new URL(downloadL), mrCoreFile);
+			HttpRequest.createGet(downloadL).execute().transferTo(mrCoreFile);
+//			HttpUtils.download(new URL(downloadL), mrCoreFile);
 			MrCorePlugin.pl.getLogger().info("Downloaded MrCore jar");
 			File currentFile = new File(MrCorePlugin.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 			currentFile.deleteOnExit();
