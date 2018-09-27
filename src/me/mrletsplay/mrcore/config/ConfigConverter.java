@@ -1,18 +1,14 @@
 package me.mrletsplay.mrcore.config;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import me.mrletsplay.mrcore.bukkitimpl.BukkitCustomConfig;
-import me.mrletsplay.mrcore.http.HttpUtils;
+import me.mrletsplay.mrcore.http.HttpRequest;
 import me.mrletsplay.mrcore.misc.JSON.JSONObject;
 
 public class ConfigConverter {
@@ -53,22 +49,14 @@ public class ConfigConverter {
 	
 	public static String convertVersion(String configString, String fromVersion, String toVersion) {
 		String getURL = "https://graphite-official.com/api/mrcore/convert_config.php?from_version="+fromVersion+"&to_version="+toVersion;
-		try {
-			InputStream in = HttpUtils.httpPost(new URL(getURL), "data=" + URLEncoder.encode(configString, "UTF-8"));
-			ByteArrayOutputStream nOut = new ByteArrayOutputStream();
-			byte[] buf = new byte[1024];
-			int len;
-			while((len = in.read(buf)) > 0) {
-				nOut.write(buf, 0, len);
-			}
-			JSONObject obj = new JSONObject(new String(nOut.toByteArray()));
-			if(obj.getBoolean("success")) {
-				return obj.getString("data");
-			}else {
-				throw new ConfigConversionException("Failed to convert config: "+obj.getString("error"));
-			}
-		}catch(IOException e) {
-			throw new ConfigConversionException("Failed to convert config: An IO error occured", e);
+		JSONObject result = HttpRequest.createPost(getURL)
+								.setPostParameter("data", configString)
+								.execute()
+								.asJSONObject();
+		if(result.getBoolean("success")) {
+			return result.getString("data");
+		}else {
+			throw new ConfigConversionException("Failed to convert config: " + result.getString("error"));
 		}
 	}
 	
@@ -83,18 +71,14 @@ public class ConfigConverter {
 		String getURL = "https://graphite-official.com/api/mrcore/convert_yaml.php";
 		try {
 			String cfgString = bukkitConfig.saveToString();
-			InputStream in = HttpUtils.httpPost(new URL(getURL), "data=" + URLEncoder.encode(cfgString, "UTF-8"));
-			ByteArrayOutputStream nOut = new ByteArrayOutputStream();
-			byte[] buf = new byte[1024];
-			int len;
-			while((len = in.read(buf)) > 0) {
-				nOut.write(buf, 0, len);
-			}
-			JSONObject obj = new JSONObject(new String(nOut.toByteArray(), StandardCharsets.UTF_8));
-			if(obj.getBoolean("success")) {
-				return (BukkitCustomConfig) saveTo.loadConfig(new ByteArrayInputStream(obj.getString("data").getBytes(StandardCharsets.UTF_8)));
+			JSONObject result = HttpRequest.createPost(getURL)
+					.setPostParameter("data", cfgString)
+					.execute()
+					.asJSONObject();
+			if(result.getBoolean("success")) {
+				return (BukkitCustomConfig) saveTo.loadConfig(new ByteArrayInputStream(result.getString("data").getBytes(StandardCharsets.UTF_8)));
 			}else {
-				throw new ConfigConversionException("Failed to convert config: "+obj.getString("error"));
+				throw new ConfigConversionException("Failed to convert config: " + result.getString("error"));
 			}
 		}catch(IOException e) {
 			throw new ConfigConversionException("Failed to convert config: An IO error occured", e);
