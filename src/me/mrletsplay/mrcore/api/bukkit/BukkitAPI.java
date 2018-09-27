@@ -37,16 +37,7 @@ public class BukkitAPI {
 	}
 	
 	private static String makeRequest(String url) {
-		String response = HttpRequest.createGet(url).execute().asString();
-//		InputStream stream = HttpUtils.httpGet(new URL(url));
-//		byte[] buf = new byte[4096];
-//		int len;
-//		ByteArrayOutputStream out = new ByteArrayOutputStream();
-//		while((len = stream.read(buf)) > 0) {
-//			out.write(buf, 0, len);
-//		}
-//		String response = new String(out.toByteArray());
-		return response;
+		return HttpRequest.createGet(url).execute().asString();
 	}
 	
 }
