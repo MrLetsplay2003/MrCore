@@ -67,6 +67,8 @@ public class HttpUtils {
 	 * @param file The file to save to
 	 * @return The amount of bytes downloaded
 	 * @throws IOException If an IO error occurs while downloading the file
+	 * @deprecated Replaced by {@link HttpResult#transferTo(File)}
+	 * @see {@link HttpRequest#createGet(String)}, {@link HttpResult#transferToSafely(File)}
 	 */
 	@Deprecated
 	public static long download(URL url, File file) throws IOException {
