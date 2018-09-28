@@ -73,11 +73,11 @@ public class HttpResult {
 		URL u = new URL(url);
 		HttpURLConnection con = (HttpURLConnection) u.openConnection();
 		con.setRequestMethod(method);
-		con.setDoOutput(true);
 		con.setRequestProperty("charset", "utf-8");
 		byte[] postData = postParams.entrySet().stream()
 				.map(e -> HttpUtils.urlEncode(e.getKey()) + "=" + HttpUtils.urlEncode(e.getValue()))
 				.collect(Collectors.joining("&")).getBytes(StandardCharsets.UTF_8);
+		con.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
 		if(postData.length > 0) {
 			con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
 			con.setRequestProperty("Content-Length", Integer.toString(postData.length));
@@ -85,6 +85,7 @@ public class HttpResult {
 		headerParams.forEach(con::setRequestProperty);
 		con.setUseCaches(false);
 		if(postData.length > 0) {
+			con.setDoOutput(true);
 			OutputStream out = con.getOutputStream();
 			out.write(postData, 0, postData.length);
 		}
