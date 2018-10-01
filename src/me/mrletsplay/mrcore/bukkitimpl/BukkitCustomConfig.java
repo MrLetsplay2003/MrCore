@@ -22,10 +22,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.banner.Pattern;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BannerMeta;
+import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -133,6 +137,44 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 					if(m instanceof LeatherArmorMeta) {
 						LeatherArmorMeta lM = (LeatherArmorMeta) m;
 						map.put("leather-armor-color", Integer.toHexString(lM.getColor().asRGB()));
+					}
+					
+					if(m instanceof BannerMeta) {
+						BannerMeta bM = (BannerMeta) m;
+						map.put("base-color", bM.getBaseColor().getColor().asRGB());
+						List<Map<String, Object>> pM = new ArrayList<>();
+						for(Pattern p : bM.getPatterns()) {
+							Map<String, Object> pT = new HashMap<>();
+							pT.put("color", p.getColor());
+							pT.put("type", p.getPattern().name().toLowerCase());
+							pM.add(pT);
+						}
+					}
+					
+//					if(m instanceof BlockStateMeta) {
+//						BlockStateMeta bM = (BlockStateMeta) m;
+//						if(NMSVersion.getCurrentServerVersion().isNewerThanOrEqualTo(NMSVersion.V1_13_R1)) {
+//							map.put("block-data", bM.getBlockState().getBlockData().getAsString());
+//						}
+//					}
+					
+					if(m instanceof BookMeta) {
+						BookMeta bM = (BookMeta) m;
+						map.put("book-data", bM.getAuthor());
+						map.put("book-generation", bM.getGeneration().name().toLowerCase());
+						map.put("book-title", bM.getTitle());
+						map.put("book-pages", bM.getPages());
+					}
+					
+					if(m instanceof EnchantmentStorageMeta) {
+						EnchantmentStorageMeta bM = (EnchantmentStorageMeta) m;
+						if(!bM.getStoredEnchants().isEmpty()) {
+							HashMap<String, Integer> enchMap = new HashMap<>();
+							for(Map.Entry<Enchantment, Integer> ench : bM.getStoredEnchants().entrySet()) {
+								enchMap.put(ench.getKey().getName(), ench.getValue());
+							}
+							map.put("stored-enchantments", enchMap);
+						}
 					}
 					
 				}

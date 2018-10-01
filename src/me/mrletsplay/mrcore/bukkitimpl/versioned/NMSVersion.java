@@ -42,6 +42,22 @@ public enum NMSVersion {
 		return friendlyName;
 	}
 	
+	public boolean isNewerThan(NMSVersion other) {
+		return other.ordinal() < ordinal();
+	}
+	
+	public boolean isOlderThan(NMSVersion other) {
+		return other.ordinal() > ordinal();
+	}
+	
+	public boolean isNewerThanOrEqualTo(NMSVersion other) {
+		return other.ordinal() <= ordinal();
+	}
+	
+	public boolean isOlderThanOrEqualTo(NMSVersion other) {
+		return other.ordinal() >= ordinal();
+	}
+	
 	private static final NMSVersion CURRENT_VERSION;
 	
 	static {
