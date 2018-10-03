@@ -1,8 +1,10 @@
 package me.mrletsplay.mrcore.config.v2;
 
 public interface ConfigProperty {
+	
+	public ConfigSection getSection();
 
-	public String getKey();
+	public String getName();
 	
 	public ConfigValueType getValueType();
 	

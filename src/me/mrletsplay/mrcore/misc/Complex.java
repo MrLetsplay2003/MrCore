@@ -23,6 +23,7 @@ public interface Complex<T> {
 	public String getFriendlyClassName();
 	
 	public static <T> Complex<T> value(Class<T> clazz) {
+		if(ClassUtils.isPrimitiveTypeClass(clazz)) throw new IllegalArgumentException("Primitive types are not allowed");
 		return new ComplexValue<>(clazz);
 	}
 	
@@ -69,7 +70,7 @@ public interface Complex<T> {
 
 		@Override
 		public String getFriendlyClassName() {
-			return typeClass.getName();
+			return typeClass.getSimpleName();
 		}
 		
 	}
