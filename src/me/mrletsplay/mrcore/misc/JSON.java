@@ -530,7 +530,7 @@ public class JSON {
 				case 'r':
 					return '\r';
 				case 't':
-					return '\r';
+					return '\t';
 				case 'u':
 					String hex = reader.next(4);
 					try {
@@ -552,7 +552,7 @@ public class JSON {
 			boolean isDouble = false;
 			while(reader.hasNext()) {
 				char c = reader.nextIgnoreWhitespaces();
-				if(c == 'c' || Character.isDigit(c)) {
+				if(c == '-' || Character.isDigit(c)) {
 					numberString.append(c);
 				}else if(c == '.' || c == 'e' || c == 'E') {
 					isDouble = true;
