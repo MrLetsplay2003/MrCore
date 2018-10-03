@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class JSON {
@@ -41,6 +42,15 @@ public class JSON {
 		 */
 		public JSONObject(JSONObject fromObject) {
 			super(fromObject != null ? fromObject : new HashMap<>());
+		}
+		
+		/**
+		 * Creates a JSON object which has identical properties to the Map parameter<br>
+		 * Giving null as a parameter will result in an empty JSONObject, no exception will be thrown
+		 * @param fromMap  The Map to copy
+		 */
+		public JSONObject(Map<String, ?> fromMap) {
+			super(fromMap != null ? fromMap : new HashMap<>());
 		}
 		
 		/**

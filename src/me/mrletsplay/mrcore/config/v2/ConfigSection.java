@@ -2,11 +2,15 @@ package me.mrletsplay.mrcore.config.v2;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import me.mrletsplay.mrcore.misc.ClassUtils;
 import me.mrletsplay.mrcore.misc.Complex;
+import me.mrletsplay.mrcore.misc.JSON.JSONObject;
 
 public interface ConfigSection {
 	
@@ -18,11 +22,11 @@ public interface ConfigSection {
 	
 	public String getName();
 	
-	public Map<String, ConfigProperty> getProperties();
+	public Map<String, Object> getAllProperties();
 	
 	public Map<String, String> getComments();
 	
-	public Map<String, ConfigSection> getSubsections();
+	public ConfigSection getOrCreateSubsection(String name);
 	
 	public void set(String key, Object value);
 	
@@ -31,7 +35,52 @@ public interface ConfigSection {
 	public String saveToString();
 	
 	// Default methods
-
+	
+	public default ConfigSection getSubsection(String name) {
+		return (ConfigSection) getAllProperties().get(name);
+	}
+	
+	public default Map<String, ConfigProperty> getProperties() {
+		return getAllProperties().entrySet().stream()
+				.filter(en -> en.getValue() instanceof ConfigProperty)
+				.collect(Collectors.toMap(en -> en.getKey(), en -> (ConfigProperty) en.getValue()));
+	}
+	
+	public default Map<String, ?> getRawProperties() {
+		return getProperties().entrySet().stream()
+				.collect(Collectors.toMap(en -> en.getKey(), en -> en.getValue().getValue()));
+	}
+	
+	public default Map<String, ConfigSection> getSubsections() {
+		return getAllProperties().entrySet().stream()
+				.filter(en -> en.getValue() instanceof ConfigSection)
+				.collect(Collectors.toMap(en -> en.getKey(), en -> (ConfigSection) en.getValue()));
+	}
+	
+	public default Map<String, ?> toMap() {
+		Map<String, Object> map = new LinkedHashMap<>(getRawProperties());
+		for(ConfigSection sub : getSubsections().values()) {
+			map.put(sub.getName(), sub.toMap());
+		}
+		return map;
+	}
+	
+	public default void loadFromMap(Map<String, ?> map) {
+		map.forEach(this::set);
+	}
+	
+	public default JSONObject toJSON() {
+		JSONObject o = new JSONObject(getRawProperties());
+		for(ConfigSection sub : getSubsections().values()) {
+			o.put(sub.getName(), sub.toJSON());
+		}
+		return o;
+	}
+	
+	public default void loadFromJSON(JSONObject json) {
+		json.forEach(this::set);
+	}
+	
 	public default <T> T getGeneric(Class<T> clazz, String key, T defaultValue, boolean applyDefault) {
 		return getComplex(Complex.value(clazz), key, defaultValue, applyDefault);
 	}
@@ -40,12 +89,43 @@ public interface ConfigSection {
 		return getComplex(Complex.list(clazz), key, defaultValue, applyDefault);
 	}
 
-	public default <K, V> Map<K, V> getGenericMap(Class<K> keyClass, Class<V> valueClass, String key, Map<K, V> defaultValue, boolean applyDefault) {
-		return getComplex(Complex.map(keyClass, valueClass), key, defaultValue, applyDefault);
+	public default <T> Map<String, T> getGenericMap(Class<T> valueClass, String key, Map<String, T> defaultValue, boolean applyDefault) {
+		return getComplex(Complex.map(String.class, valueClass), key, defaultValue, applyDefault);
 	}
 	
-	public static <T> Optional<T> primitiveCast(Object o, Class<T> typeClass) {
-		return null;
+	public static <T> Optional<T> defaultCast(Object o, Class<T> typeClass) {
+		if(ClassUtils.isPrimitiveTypeClass(typeClass)) throw new IllegalArgumentException("Primitive types are not allowed");
+		if(o == null) return Optional.ofNullable(null);
+		if(Number.class.isAssignableFrom(typeClass)) {
+			if(!(o instanceof Number)) return Optional.empty();
+			Number n = (Number) o;
+			if(typeClass.equals(Byte.class)) {
+				return Optional.of(typeClass.cast(n.byteValue()));
+			}else if(typeClass.equals(Short.class)) {
+				return Optional.of(typeClass.cast(n.shortValue()));
+			}else if(typeClass.equals(Integer.class)) {
+				return Optional.of(typeClass.cast(n.intValue()));
+			}else if(typeClass.equals(Long.class)) {
+				return Optional.of(typeClass.cast(n.longValue()));
+			}else if(typeClass.equals(Float.class)) {
+				return Optional.of(typeClass.cast(n.floatValue()));
+			}else if(typeClass.equals(Double.class)) {
+				return Optional.of(typeClass.cast(n.doubleValue()));
+			}else {
+				return Optional.empty();
+			}
+		}else if(typeClass.equals(Map.class)) {
+			if(!(o instanceof ConfigSection)) return Optional.empty();
+			return Optional.of(typeClass.cast(((ConfigSection) o).toMap()));
+		}else if(typeClass.equals(String.class)
+				|| typeClass.equals(Boolean.class)
+				|| typeClass.equals(Character.class)
+				|| typeClass.equals(List.class) || typeClass.equals(ConfigSection.class)) {
+			if(!typeClass.isInstance(o)) return Optional.empty();
+			return Optional.of(typeClass.cast(o));
+		}else {
+			return Optional.empty();
+		}
 	}
 	
 	public default <T> T getComplex(Complex<T> complex, String key, T defaultValue, boolean applyDefault) {
@@ -54,7 +134,7 @@ public interface ConfigSection {
 			if(applyDefault) set(key, defaultValue);
 			return defaultValue;
 		}else {
-			Optional<T> value = complex.cast(prop.getValue(), ConfigSection::primitiveCast);
+			Optional<T> value = complex.cast(prop.getValue(), ConfigSection::defaultCast);
 			if(!value.isPresent()) throw new IncompatibleTypeException("Incompatible types, " + value.getClass() + " is not a compatible with " + complex.getFriendlyClassName());
 			return value.get();
 		}

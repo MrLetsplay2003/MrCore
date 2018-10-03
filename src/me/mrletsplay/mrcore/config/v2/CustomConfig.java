@@ -111,13 +111,8 @@ public interface CustomConfig extends ConfigSection {
 	}
 	
 	@Override
-	public default Map<String, ConfigSection> getSubsections() {
-		return getMainSection().getSubsections();
-	}
-	
-	@Override
-	public default Map<String, ConfigProperty> getProperties() {
-		return getMainSection().getProperties();
+	public default Map<String, Object> getAllProperties() {
+		return getMainSection().getAllProperties();
 	}
 	
 	@Override
@@ -125,12 +120,23 @@ public interface CustomConfig extends ConfigSection {
 		return getMainSection().getComments();
 	}
 	
+	@Override
+	public default ConfigSection getSubsection(String name) {
+		return getMainSection().getSubsection(name);
+	}
+	
+	@Override
+	public default ConfigSection getOrCreateSubsection(String name) {
+		return getMainSection().getOrCreateSubsection(name);
+	}
+	
+	
 	
 	// Must be implemented
 	
 	public ConfigSection getMainSection();
 	
-	public void load(InputStream out) throws ConfigException;
+	public void load(InputStream in) throws ConfigException;
 	
 	public void save(OutputStream out) throws ConfigException;
 	

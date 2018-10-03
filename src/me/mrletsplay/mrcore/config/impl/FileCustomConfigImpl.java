@@ -24,7 +24,7 @@ public class FileCustomConfigImpl implements FileCustomConfig {
 	}
 
 	@Override
-	public void load(InputStream out) throws ConfigException {
+	public void load(InputStream in) throws ConfigException {
 		
 	}
 
@@ -37,5 +37,7 @@ public class FileCustomConfigImpl implements FileCustomConfig {
 	public File getConfigFile() {
 		return configFile;
 	}
+	
+	
 	
 }
