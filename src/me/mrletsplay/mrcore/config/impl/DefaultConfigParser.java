@@ -130,10 +130,6 @@ public class DefaultConfigParser {
 		}
 	}
 	
-	public String debug() {
-		return r.currentLine + "/" + r.currentIndex;
-	}
-	
 	public boolean hasMore() {
 		return r.hasNextIgnoreWhitespaces();
 	}
