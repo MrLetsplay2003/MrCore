@@ -10,7 +10,7 @@ public class DefaultConfigParser {
 		r = new CharReader(raw);
 	}
 	
-	public String readPropertyDescriptor() { //TODO: Character checks (\n, \r, ...)
+	public String readPropertyDescriptor() {
 		String d = r.readUntil(':');
 		if(d == null) throw new ConfigException("Failed to read property descriptor: EOF reached");
 		r.skipWhitespaces();
@@ -26,15 +26,15 @@ public class DefaultConfigParser {
 		}else {
 			switch(c) {
 				case 'n':
-					if(!r.next(3).equals("ull")) throw new ConfigException("Invalid property value", r.currentLine, r.currentIndex - 3);
+					if(!r.next(3).equals("ull")) throw new ConfigException("Invalid property value", r.currentLine, r.currentIndex);
 					value = null;
 					break;
 				case 't':
-					if(!r.next(3).equals("rue")) throw new ConfigException("Invalid property value", r.currentLine, r.currentIndex - 3);
+					if(!r.next(3).equals("rue")) throw new ConfigException("Invalid property value", r.currentLine, r.currentIndex);
 					value = true;
 					break;
 				case 'f':
-					if(!r.next(4).equals("alse")) throw new ConfigException("Invalid property value", r.currentLine, r.currentIndex - 4);
+					if(!r.next(4).equals("alse")) throw new ConfigException("Invalid property value", r.currentLine, r.currentIndex);
 					value = false;
 					break;
 				case '"':
@@ -100,7 +100,7 @@ public class DefaultConfigParser {
 	}
 	
 	private char readEscaped() {
-		if(!r.hasNext()) throw new ConfigException("Failed to read special character: EOF reached", r.currentLine, r.currentIndex);
+		if(!r.hasNext()) throw new ConfigException("Failed to read special character: EOF reached");
 		char c = r.next(); //after the backslash
 		switch(c) {
 			case 'b':
@@ -115,12 +115,12 @@ public class DefaultConfigParser {
 				return '\t';
 			case 'u':
 				String hex = r.next(4);
-				if(hex == null) throw new ConfigException("Failed to read special character: EOF reached", r.currentLine, r.currentIndex);
+				if(hex == null) throw new ConfigException("Failed to read special character: EOF reached");
 				try {
 					int ch = Integer.parseInt(hex, 16);
 					return (char) ch;
 				}catch(NumberFormatException e) {
-					throw new ConfigException("Invalid special char: \\u"+hex, e, r.currentLine, r.currentIndex - 5);
+					throw new ConfigException("Invalid special char: \\u"+hex, e, r.currentLine, r.currentIndex);
 				}
 			case '"':
 			case '\\':
@@ -137,6 +137,7 @@ public class DefaultConfigParser {
 	private static class CharReader {
 		
 		private int currentLine, currentIndex;
+//		private String string;
 		private String[] lines;
 		
 		public CharReader(String[] lines) {
@@ -152,7 +153,7 @@ public class DefaultConfigParser {
 		public char next() {
 			currentIndex ++;
 			if(currentIndex >= lines[currentLine].length()) {
-				if(currentLine == lines.length - 1) throw new UnsupportedOperationException("Reached EOF");
+				if(currentLine == lines.length - 1) throw new RuntimeException("L: " + currentLine);
 				currentLine++;
 				currentIndex = 0;
 			}
@@ -210,6 +211,7 @@ public class DefaultConfigParser {
 				b.append(c);
 				c = next();
 			}
+//			revert();
 			return b.toString();
 		}
 		
@@ -242,12 +244,12 @@ public class DefaultConfigParser {
 		public CharReader revert() {
 			if(currentIndex == 0) {
 				currentLine --;
-				if(currentLine < 0) throw new UnsupportedOperationException("Already at beginning");
+				if(currentLine < 0) throw new RuntimeException();
 				currentIndex = lines[currentLine].length() - 1;
 				return this;
 			}
 			currentIndex --;
-			if(currentIndex < 0) throw new UnsupportedOperationException("Already at beginning");
+			if(currentIndex < 0) throw new RuntimeException();
 			return this;
 		}
 		
