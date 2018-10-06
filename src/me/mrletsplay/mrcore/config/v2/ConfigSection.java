@@ -77,12 +77,12 @@ public interface ConfigSection {
 	 */
 	public ConfigProperty getProperty(String key) throws ConfigException;
 	
-//	/** TODO
-//	 * Returns a string representation of this CustomConfig.<br>
-//	 * This representation can vary for each implementation and usually
-//	 * @return
-//	 */
-//	public String saveToString();
+	/**
+	 * Returns a string representation of this section.<br>
+	 * This representation can vary for each implementation and usually returns a value similar to what would be produced by the {@link CustomConfig#save(java.io.OutputStream)} method
+	 * @return A string representation of this section
+	 */
+	public String saveToString();
 	
 	// Default methods
 	
@@ -108,7 +108,7 @@ public interface ConfigSection {
 				.filter(en -> en.getValue() instanceof ConfigProperty)
 				.collect(Collectors.toMap(en -> en.getKey(), en -> (ConfigProperty) en.getValue()));
 	}
-
+	
 	/**
 	 * Returns a map containing all the raw properties (excluding subsections) of this section.<br>
 	 * Raw properties are - different to {@link ConfigProperty} properties returned by {@link #getProperties()} - the raw values of this section, represented by {@link ConfigValueType valid value types}.<br>
@@ -120,7 +120,7 @@ public interface ConfigSection {
 		return getProperties().entrySet().stream()
 				.collect(Collectors.toMap(en -> en.getKey(), en -> en.getValue().getValue()));
 	}
-
+	
 	/**
 	 * Returns a map containing all the subsections of this section.<br>
 	 * This implementation uses {@link #getAllProperties()} to retrieve the subsections.<br>
