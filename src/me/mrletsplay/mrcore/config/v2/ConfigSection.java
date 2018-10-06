@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import me.mrletsplay.mrcore.misc.ClassUtils;
 import me.mrletsplay.mrcore.misc.Complex;
+import me.mrletsplay.mrcore.misc.JSON.JSONArray;
 import me.mrletsplay.mrcore.misc.JSON.JSONObject;
 
 public interface ConfigSection {
@@ -46,7 +47,7 @@ public interface ConfigSection {
 				.collect(Collectors.toMap(en -> en.getKey(), en -> (ConfigProperty) en.getValue()));
 	}
 	
-	public default Map<String, ?> getRawProperties() {
+	public default Map<String, Object> getRawProperties() {
 		return getProperties().entrySet().stream()
 				.collect(Collectors.toMap(en -> en.getKey(), en -> en.getValue().getValue()));
 	}
@@ -57,7 +58,7 @@ public interface ConfigSection {
 				.collect(Collectors.toMap(en -> en.getKey(), en -> (ConfigSection) en.getValue()));
 	}
 	
-	public default Map<String, ?> toMap() {
+	public default Map<String, Object> toMap() {
 		Map<String, Object> map = new LinkedHashMap<>(getRawProperties());
 		for(ConfigSection sub : getSubsections().values()) {
 			map.put(sub.getName(), sub.toMap());
@@ -65,12 +66,16 @@ public interface ConfigSection {
 		return map;
 	}
 	
-	public default void loadFromMap(Map<String, ?> map) {
+	public default void loadFromMap(Map<String, Object> map) {
 		map.forEach(this::set);
 	}
 	
 	public default JSONObject toJSON() {
-		JSONObject o = new JSONObject(getRawProperties());
+		Map<String, Object> props = getRawProperties();
+		props.forEach((k, v) -> {
+			if(v instanceof List) props.put(k, new JSONArray((List<?>) v));
+		});
+		JSONObject o = new JSONObject(props);
 		for(ConfigSection sub : getSubsections().values()) {
 			o.put(sub.getName(), sub.toJSON());
 		}
