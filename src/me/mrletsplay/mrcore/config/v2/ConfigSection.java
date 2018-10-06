@@ -17,47 +17,127 @@ public interface ConfigSection {
 	
 	// Must be implemented
 
+	/**
+	 * Returns the CustomConfig this section belongs to.<br>
+	 * Will return the same instance, if this instance is already a CustomConfig
+	 * @return The CustomConfig this section belongs to
+	 */
 	public CustomConfig getConfig();
 	
+	/**
+	 * Returns the parent section of this section or null if none
+	 * @return The parent section
+	 */
 	public ConfigSection getParent();
 	
+	/**
+	 * Returns the name of this section
+	 * @return The name of this section
+	 */
 	public String getName();
 	
+	/**
+	 * Returns a map containing all the properties & subsections of this section.<br>
+	 * The values of this map may contain all {@link ConfigValueType valid value types}, including other ConfigSection instances.<br>
+	 * Implementations may return an unmodifiable map
+	 * @return A map containing all the properties & subsections of this section
+	 */
 	public Map<String, Object> getAllProperties();
 	
+	/**
+	 * Returns a map containing all comments of this section.<br>
+	 * The header comment is represented by the {@code null} key.<br>
+	 * Implementations may return an unmodifiable map
+	 * @return A map containing all comments of this section
+	 */
 	public Map<String, String> getComments();
 	
+	/**
+	 * Returns an exisiting subsection of this section or creates it, if it doesn't exist.<br>
+	 * The {@code name} parameter does not allow subpaths (e.g. "{@code somepath.somesubpath}")
+	 * @param name The name of the subsection
+	 * @return The subsection by that name
+	 */
 	public ConfigSection getOrCreateSubsection(String name);
 	
+	/**
+	 * Sets a key in this section to a value (represented by a {@link ConfigValueType valid value type}).<br>
+	 * The {@code key} parameter allows for subpaths (e.g. "{@code somepath.somesubpath}")
+	 * @param key The key of the property
+	 * @param value The value of the property
+	 */
 	public void set(String key, Object value);
 	
-	public ConfigProperty getProperty(String key);
+	/**
+	 * Gets a property by a specific key.<br>
+	 * The {@code key} parameter allows for subpaths (e.g. "{@code somepath.somesubpath}")
+	 * @param key The key of the property
+	 * @return The property by that name, {@code null} if none
+	 * @throws ConfigException If the value specified by that key represents a subsection, not a property
+	 */
+	public ConfigProperty getProperty(String key) throws ConfigException;
 	
-	public String saveToString();
+//	/** TODO
+//	 * Returns a string representation of this CustomConfig.<br>
+//	 * This representation can vary for each implementation and usually
+//	 * @return
+//	 */
+//	public String saveToString();
 	
 	// Default methods
 	
+	/**
+	 * Gets a subsection by the specified name.<br>
+	 * This implementation uses {@link #getAllProperties()} to retrieve the specified section.<br>
+	 * To create a subsection, use {@link #getOrCreateSubsection(String)}
+	 * @param name The name of the subsection
+	 * @return The subsection by that name, null if none
+	 */
 	public default ConfigSection getSubsection(String name) {
 		return (ConfigSection) getAllProperties().get(name);
 	}
 	
+	/**
+	 * Returns a map containing all the properties (excluding subsections) of this section.<br>
+	 * This implementation uses {@link #getAllProperties()} to retrieve the properties.<br>
+	 * Implementations may return an unmodifiable map
+	 * @return A map containing all the properties (excluding subsections) of this section 
+	 */
 	public default Map<String, ConfigProperty> getProperties() {
 		return getAllProperties().entrySet().stream()
 				.filter(en -> en.getValue() instanceof ConfigProperty)
 				.collect(Collectors.toMap(en -> en.getKey(), en -> (ConfigProperty) en.getValue()));
 	}
-	
+
+	/**
+	 * Returns a map containing all the raw properties (excluding subsections) of this section.<br>
+	 * Raw properties are - different to {@link ConfigProperty} properties returned by {@link #getProperties()} - the raw values of this section, represented by {@link ConfigValueType valid value types}.<br>
+	 * This implementation uses {@link #getProperties()} to retrieve the properties.<br>
+	 * Implementations may return an unmodifiable map
+	 * @return A map containing all the properties (excluding subsections) of this section 
+	 */
 	public default Map<String, Object> getRawProperties() {
 		return getProperties().entrySet().stream()
 				.collect(Collectors.toMap(en -> en.getKey(), en -> en.getValue().getValue()));
 	}
-	
+
+	/**
+	 * Returns a map containing all the subsections of this section.<br>
+	 * This implementation uses {@link #getAllProperties()} to retrieve the subsections.<br>
+	 * Implementations may return an unmodifiable map
+	 * @return A map containing all the properties (excluding subsections) of this section 
+	 */
 	public default Map<String, ConfigSection> getSubsections() {
 		return getAllProperties().entrySet().stream()
 				.filter(en -> en.getValue() instanceof ConfigSection)
 				.collect(Collectors.toMap(en -> en.getKey(), en -> (ConfigSection) en.getValue()));
 	}
 	
+	/**
+	 * Returns a map containing all the (raw) properties as well as subsections (represented by other {@link Map}s) of this section.<br>
+	 * The Map returned by this function may be passed to {@link #loadFromMap(Map)}
+	 * @return A map containing all the (raw) properties as well as subsections of this section
+	 */
 	public default Map<String, Object> toMap() {
 		Map<String, Object> map = new LinkedHashMap<>(getRawProperties());
 		for(ConfigSection sub : getSubsections().values()) {
@@ -66,10 +146,21 @@ public interface ConfigSection {
 		return map;
 	}
 	
+	/**
+	 * Sets all the values & subsections (represented by other {@link Map}s) of the specified map in this subsection.<br>
+	 * Any map created by {@link #toMap()} may be passed to this function
+	 * @param map A map containing all the values & subsections
+	 */
 	public default void loadFromMap(Map<String, Object> map) {
 		map.forEach(this::set);
 	}
 	
+	/**
+	 * Returns a JSONObject containing all the (raw) properties as well as subsections (represented by other {@link JSONObject}s) of this section.<br>
+	 * Lists will be converted to {@link JSONArray}s.<br>
+	 * The JSONObject returned by this function may be passed to {@link #loadFromJSON(JSONObject)}
+	 * @return A JSONObject containing all the (raw) properties as well as subsections of this section
+	 */
 	public default JSONObject toJSON() {
 		Map<String, Object> props = getRawProperties();
 		props.forEach((k, v) -> {
@@ -82,6 +173,11 @@ public interface ConfigSection {
 		return o;
 	}
 	
+	/**
+	 * Sets all the values & subsections (represented by other {@link JSONObject}s) of the specified JSONObject in this subsection.<br>
+	 * Any JSONObject created by {@link #toJSON()} may be passed to this function
+	 * @param map A JSONObject containing all the values & subsections
+	 */
 	public default void loadFromJSON(JSONObject json) {
 		json.forEach(this::set);
 	}
