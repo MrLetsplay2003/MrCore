@@ -50,7 +50,7 @@ public class HttpGeneric implements HttpRequest {
 	@Override
 	public InputStream executeAsInputStream() {
 		try {
-			return HttpResult.retrieveAsInputStreamFrom(url, "GET", queryParameters, headerParameters, new HashMap<>());
+			return HttpResult.retrieveAsInputStreamFrom(url, requestMethod, queryParameters, headerParameters, new HashMap<>());
 		} catch (IOException e) {
 			throw new HttpException(e);
 		}
