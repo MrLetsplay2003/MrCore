@@ -9,6 +9,7 @@ public class HttpGeneric implements HttpRequest {
 
 	private String requestMethod, url;
 	private Map<String, String> queryParameters, headerParameters;
+	private byte[] content;
 	
 	/**
 	 * Creates a request using the given request method to the specified url
@@ -27,6 +28,11 @@ public class HttpGeneric implements HttpRequest {
 		return this;
 	}
 	
+	public HttpGeneric setContent(byte[] content) {
+		this.content = content;
+		return this;
+	}
+	
 	@Override
 	public HttpGeneric setQueryParameter(String key, String value) {
 		queryParameters.put(key, value);
@@ -38,11 +44,11 @@ public class HttpGeneric implements HttpRequest {
 		headerParameters.put(key, value);
 		return this;
 	}
-
+	
 	@Override
 	public HttpResult execute() {
 		try {
-			return HttpResult.retrieveFrom(url, requestMethod, queryParameters, headerParameters, new HashMap<>());
+			return HttpResult.retrieveFrom(url, requestMethod, queryParameters, headerParameters, content);
 		} catch (IOException e) {
 			throw new HttpException(e);
 		}
@@ -51,7 +57,7 @@ public class HttpGeneric implements HttpRequest {
 	@Override
 	public InputStream executeAsInputStream() {
 		try {
-			return HttpResult.retrieveAsInputStreamFrom(url, requestMethod, queryParameters, headerParameters, new HashMap<>());
+			return HttpResult.retrieveAsInputStreamFrom(url, requestMethod, queryParameters, headerParameters, content);
 		} catch (IOException e) {
 			throw new HttpException(e);
 		}

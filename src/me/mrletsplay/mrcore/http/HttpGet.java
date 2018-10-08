@@ -36,7 +36,7 @@ public class HttpGet implements HttpRequest {
 	@Override
 	public HttpResult execute() {
 		try {
-			return HttpResult.retrieveFrom(url, "GET", queryParameters, headerParameters, new HashMap<>());
+			return HttpResult.retrieveFrom(url, "GET", queryParameters, headerParameters, null);
 		} catch (IOException e) {
 			throw new HttpException(e);
 		}
@@ -45,7 +45,7 @@ public class HttpGet implements HttpRequest {
 	@Override
 	public InputStream executeAsInputStream() {
 		try {
-			return HttpResult.retrieveAsInputStreamFrom(url, "GET", queryParameters, headerParameters, new HashMap<>());
+			return HttpResult.retrieveAsInputStreamFrom(url, "GET", queryParameters, headerParameters, null);
 		} catch (IOException e) {
 			throw new HttpException(e);
 		}
