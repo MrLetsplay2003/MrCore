@@ -51,6 +51,22 @@ public interface Complex<T> {
 		return new ComplexMap<>(value(keyClass), value(valueClass));
 	}
 	
+	public static <E> Optional<List<E>> castList(List<?> list, Class<E> toClass) {
+		return Complex.list(toClass).cast(list);
+	}
+	
+	public static <E> Optional<List<E>> castList(List<?> list, Class<E> toClass, CastingFunction castingFunction) {
+		return Complex.list(toClass).cast(list, castingFunction);
+	}
+	
+	public static <K, V> Optional<Map<K, V>> castMap(Map<?, ?> map, Class<K> keyClass, Class<V> valueClass) {
+		return Complex.map(keyClass, valueClass).cast(map);
+	}
+	
+	public static <K, V> Optional<Map<K, V>> castMap(Map<?, ?> map, Class<K> keyClass, Class<V> valueClass, CastingFunction castingFunction) {
+		return Complex.map(keyClass, valueClass).cast(map, castingFunction);
+	}
+	
 	public static class ComplexValue<T> implements Complex<T> {
 		
 		private Class<T> typeClass;

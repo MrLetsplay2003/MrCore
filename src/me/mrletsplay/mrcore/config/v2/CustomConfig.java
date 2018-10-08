@@ -74,11 +74,6 @@ public interface CustomConfig extends ConfigSection {
 		return getMainSection().getDouble(key);
 	}
 	
-	@Override
-	public default String saveToString() {
-		return getMainSection().saveToString();
-	}
-	
 	public default void load(File file) {
 		try {
 			load(new FileInputStream(file));
@@ -130,7 +125,15 @@ public interface CustomConfig extends ConfigSection {
 		return getMainSection().getOrCreateSubsection(name);
 	}
 	
+	@Override
+	public default void setComment(String key, String value) {
+		getMainSection().setComment(key, value);
+	}
 	
+	@Override
+	public default String getComment(String key) throws ConfigException {
+		return getMainSection().getComment(key);
+	}
 	
 	// Must be implemented
 	

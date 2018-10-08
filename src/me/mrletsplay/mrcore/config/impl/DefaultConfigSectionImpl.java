@@ -3,12 +3,14 @@ package me.mrletsplay.mrcore.config.impl;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import me.mrletsplay.mrcore.config.v2.ConfigException;
 import me.mrletsplay.mrcore.config.v2.ConfigPath;
 import me.mrletsplay.mrcore.config.v2.ConfigProperty;
 import me.mrletsplay.mrcore.config.v2.ConfigSection;
 import me.mrletsplay.mrcore.config.v2.CustomConfig;
+import me.mrletsplay.mrcore.config.v2.StringifiableConfigSection;
 
-public class DefaultConfigSectionImpl implements ConfigSection {
+public class DefaultConfigSectionImpl implements StringifiableConfigSection {
 
 	private CustomConfig config;
 	private ConfigSection parent;
@@ -71,12 +73,46 @@ public class DefaultConfigSectionImpl implements ConfigSection {
 	}
 	
 	@Override
-	public ConfigProperty getProperty(String key) {
-		return null;
+	public ConfigProperty getProperty(String key) throws ConfigException{
+		ConfigPath path = ConfigPath.of(key);
+		if(path.hasSubpaths()) {
+			ConfigSection section = getOrCreateSubsection(path.getName());
+			return section.getProperty(path.traverseDown().toRawPath());
+		}else {
+			Object o = rawProperties.get(path.getName());
+			if(!(o instanceof ConfigProperty)) throw new ConfigException("Value at " + key + " is not a property");
+			return (ConfigProperty) o;
+		}
+	}
+
+	@Override
+	public void setComment(String key, String value) {
+		ConfigPath path = ConfigPath.of(key);
+		if(path.hasSubpaths()) {
+			ConfigSection section = getOrCreateSubsection(path.getName());
+			section.setComment(path.traverseDown().toRawPath(), value);
+		}else {
+			comments.put(path.getName(), value);
+		}
+	}
+
+	@Override
+	public String getComment(String key) {
+		ConfigPath path = ConfigPath.of(key);
+		if(path.hasSubpaths()) {
+			ConfigSection section = getOrCreateSubsection(path.getName());
+			return section.getComment(path.traverseDown().toRawPath());
+		}else {
+			return comments.get(path.getName());
+		}
 	}
 
 	@Override
 	public String saveToString() {
+		return saveToString(0);
+	}
+
+	public String saveToString(int indents) {
 		return null;
 	}
 	

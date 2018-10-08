@@ -1,11 +1,10 @@
 package me.mrletsplay.mrcore.config.impl;
 
-import java.util.Map;
-
+import me.mrletsplay.mrcore.config.impl.DefaultConfigParser.ConfigSectionDescriptor;
+import me.mrletsplay.mrcore.config.v2.ConfigException;
 import me.mrletsplay.mrcore.config.v2.ConfigProperty;
 import me.mrletsplay.mrcore.config.v2.ConfigSection;
 import me.mrletsplay.mrcore.config.v2.ConfigValueType;
-import me.mrletsplay.mrcore.misc.Complex;
 
 public class DefaultConfigPropertyImpl implements ConfigProperty {
 
@@ -42,13 +41,14 @@ public class DefaultConfigPropertyImpl implements ConfigProperty {
 	}
 	
 	public static Object create(ConfigSection section, String name, Object value) {
-		if(value instanceof Map) {
+		if(value instanceof ConfigSectionDescriptor) {
+			ConfigSectionDescriptor d = (ConfigSectionDescriptor) value;
 			ConfigSection s = new DefaultConfigSectionImpl(section.getConfig(), section, name);
-			s.loadFromMap(Complex.map(String.class, Object.class).cast(value).orElseThrow(() -> new IllegalArgumentException("Unsupported type")));
+			s.loadFromMap(d.getProperties());
 			return s;
 		}
 		ConfigValueType type = ConfigValueType.getTypeOf(value);
-		if(type == null) throw new IllegalArgumentException("Unsupported type");
+		if(type == null) throw new ConfigException("Unsupported type");
 		return new DefaultConfigPropertyImpl(section, name, type, value);
 	}
 

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import me.mrletsplay.mrcore.config.v2.ConfigException;
 
@@ -13,6 +14,19 @@ public class DefaultConfigParser {
 	
 	public DefaultConfigParser(String[] raw) {
 		r = new CharReader(raw);
+	}
+	
+	public Object readCommentOrPropertyDescriptor() {
+		int sk = r.skipWhitespacesUntil('\n').length();
+		if(!r.hasNext()) throw new ConfigException("Failed to read property descriptor: EOF reached");
+		if(r.next() == '\n') throw new ConfigException("Invalid comment/property descriptor", r.currentLine, r.currentIndex);
+		r.revert();
+		if(r.next() == '#') {
+			return r.readUntil('\n');
+		}else {
+			r.revert(sk + 1);
+			return readPropertyDescriptor();
+		}
 	}
 	
 	public PropertyDescriptor readPropertyDescriptor() { //TODO: Character checks (\n, \r, ...)
@@ -81,19 +95,26 @@ public class DefaultConfigParser {
 		}
 	}
 	
-	public Map<String, Object> readSubsection(Marker start, int indents) {
-		Map<String, Object> map = new LinkedHashMap<>();
+	public ConfigSectionDescriptor readSubsection(Marker start, int indents) {
+		ConfigSectionDescriptor section = new ConfigSectionDescriptor();
+		List<String> commentBuffer = new ArrayList<>();
 		while(r.hasNext()) {
-			PropertyDescriptor s = readPropertyDescriptor();
-			if(s.getIndents() > indents) throw new ConfigException("Invalid amount of indents", s.start.line, s.start.index + 1);
-			if(s.getIndents() < indents) {
-				if(map.isEmpty()) throw new ConfigException("Empty subsection", start.line, start.index);
-				r.revert(s.getRawIndents() + s.getKey().length() + 1);
-				return map;
+			Object cop = readCommentOrPropertyDescriptor();
+			if(cop instanceof PropertyDescriptor) {
+				PropertyDescriptor s = (PropertyDescriptor) cop;
+				if(s.getIndents() > indents) throw new ConfigException("Invalid amount of indents", s.start.line, s.start.index + 1);
+				if(s.getIndents() < indents) {
+					if(section.properties.isEmpty()) throw new ConfigException("Empty subsection", start.line, start.index);
+					r.revert(s.getRawIndents() + s.getKey().length() + 1);
+					return section;
+				}
+				if(!commentBuffer.isEmpty()) section.comments.put(s.getKey(), commentBuffer.stream().collect(Collectors.joining("\n")));
+				section.properties.put(s.getKey(), readPropertyValue(indents));
+			}else if(cop instanceof String) { // Comment
+				commentBuffer.add((String) cop);
 			}
-			map.put(s.getKey(), readPropertyValue(indents));
 		}
-		return map;
+		return section;
 	}
 	
 	public PropertyDescriptor readListEntryDescriptor(int indents) {
@@ -290,6 +311,28 @@ public class DefaultConfigParser {
 		
 		public Marker getStart() {
 			return start;
+		}
+		
+	}
+	
+	public static class ConfigSectionDescriptor {
+		
+//		private int indents;
+//		private Marker start;
+		private Map<String, Object> properties;
+		private Map<String, String> comments;
+		
+		public ConfigSectionDescriptor() {
+			this.properties = new LinkedHashMap<>();
+			this.comments = new LinkedHashMap<>();
+		}
+		
+		public Map<String, Object> getProperties() {
+			return properties;
+		}
+		
+		public Map<String, String> getComments() {
+			return comments;
 		}
 		
 	}

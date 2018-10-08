@@ -57,8 +57,9 @@ public interface ConfigSection {
 	 * The {@code name} parameter does not allow subpaths (e.g. "{@code somepath.somesubpath}")
 	 * @param name The name of the subsection
 	 * @return The subsection by that name
+	 * @throws ConfigException If the value specified by that key represents a property, not a subsection
 	 */
-	public ConfigSection getOrCreateSubsection(String name);
+	public ConfigSection getOrCreateSubsection(String name) throws ConfigException;
 	
 	/**
 	 * Sets a key in this section to a value (represented by a {@link ConfigValueType valid value type}).<br>
@@ -78,11 +79,20 @@ public interface ConfigSection {
 	public ConfigProperty getProperty(String key) throws ConfigException;
 	
 	/**
-	 * Returns a string representation of this section.<br>
-	 * This representation can vary for each implementation and usually returns a value similar to what would be produced by the {@link CustomConfig#save(java.io.OutputStream)} method
-	 * @return A string representation of this section
+	 * Sets a comment in this section.<br>
+	 * The {@code key} parameter allows for subpaths (e.g. "{@code somepath.somesubpath}")
+	 * @param key The key of the property
+	 * @param value The value of the property
 	 */
-	public String saveToString();
+	public void setComment(String key, String value);
+	
+	/**
+	 * Gets a comment by a specific key.<br>
+	 * The {@code key} parameter allows for subpaths (e.g. "{@code somepath.somesubpath}")
+	 * @param key The key of the comment
+	 * @return The comment by that key, {@code null} if none
+	 */
+	public String getComment(String key);
 	
 	// Default methods
 	
@@ -93,9 +103,10 @@ public interface ConfigSection {
 	 * @param name The name of the subsection
 	 * @return The subsection by that name, null if none
 	 */
-	public default ConfigSection getSubsection(String name) {
+	public default ConfigSection getSubsection(String name) throws ConfigException {
 		return (ConfigSection) getAllProperties().get(name);
 	}
+	
 	
 	/**
 	 * Returns a map containing all the properties (excluding subsections) of this section.<br>
