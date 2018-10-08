@@ -16,6 +16,7 @@ public class HttpGeneric implements HttpRequest {
 	 * @see {@link HttpRequest#createGet(String)}
 	 */
 	public HttpGeneric(String requestMethod, String url) {
+		this.requestMethod = requestMethod;
 		this.url = url;
 		this.queryParameters = new HashMap<>();
 		this.headerParameters = new HashMap<>();
