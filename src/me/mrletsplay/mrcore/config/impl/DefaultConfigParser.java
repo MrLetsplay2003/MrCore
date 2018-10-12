@@ -184,6 +184,10 @@ public class DefaultConfigParser {
 					r.revert();
 					value = readString();
 					break;
+				case '\'':
+					r.revert();
+					value = readCharacter();
+					break;
 				case '{':
 					if(r.next() != '\n') throw new ConfigException("Invalid list entry value, unexpected character '" + r.current() + "'", r.currentLine, r.currentIndex);
 					Object los = readListOrSubsection(r.createMarker(), propertyIndents + 1);
@@ -212,16 +216,26 @@ public class DefaultConfigParser {
 			switch(c) {
 				case '"':
 					return sb.toString();
+				case '\\':
+					sb.append(readEscaped());
+					break;
 				default:
-					if(c == '\\') {
-						sb.append(readEscaped());
-					}else {
-						sb.append(c);
-					}
+					sb.append(c);
 					break;
 			}
 		}
 		throw new ConfigException("Missing end of string", r.currentLine, r.currentIndex);
+	}
+	
+	public char readCharacter() {
+		if(r.next() != '"') throw new UnsupportedOperationException();
+		char c = r.next();
+		switch(c) {
+			case '\\':
+				c = readEscaped();
+		}
+		if(r.next() != '\'') throw new ConfigException("Missing end of string", r.currentLine, r.currentIndex);
+		return c;
 	}
 	
 	public Number readNumber() {
