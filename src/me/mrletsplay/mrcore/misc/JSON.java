@@ -617,12 +617,12 @@ public class JSON {
 			StringBuilder builder = new StringBuilder("[").append(fancy ? "\n" : "").append(fancy ? space(indents + 1) : "");
 			builder.append(array.stream()
 				.map(en -> formatGeneric(en, indents + 1, fancy))
-				.collect(Collectors.joining(new StringBuilder(",").append(fancy ? " " : ""))));
+				.collect(Collectors.joining(new StringBuilder(",").append(fancy ? "\n" + space(indents + 1) : ""))));
 			return builder.append(fancy ? "\n" : "").append(fancy ? space(indents) : "").append("]");
 		}
 		
 		private static String space(int len){
-			return String.join("", Collections.nCopies(len * 4, " "));
+			return String.join("", Collections.nCopies(len * 2, " "));
 		}
 		
 		private static CharSequence formatGeneric(Object object, int indents, boolean fancy) {

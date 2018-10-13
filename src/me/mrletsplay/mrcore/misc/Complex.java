@@ -18,7 +18,15 @@ public interface Complex<T> {
 		return cast(o, Complex::defaultCast);
 	}
 	
+	public default boolean isInstance(Object o) {
+		return cast(o).isPresent();
+	}
+	
 	public Optional<T> cast(Object o, CastingFunction castingFunction);
+	
+	public default boolean isInstance(Object o, CastingFunction castingFunction) {
+		return cast(o, castingFunction).isPresent();
+	}
 	
 	public String getFriendlyClassName();
 	

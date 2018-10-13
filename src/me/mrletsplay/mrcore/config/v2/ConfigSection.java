@@ -173,10 +173,8 @@ public interface ConfigSection {
 	 * @return A JSONObject containing all the (raw) properties as well as subsections of this section
 	 */
 	public default JSONObject toJSON() {
-		Map<String, Object> props = getRawProperties();
-		props.forEach((k, v) -> {
-			if(v instanceof List) props.put(k, new JSONArray((List<?>) v));
-		});
+		Map<String, Object> props = getProperties().entrySet().stream()
+				.collect(Collectors.toMap(en -> en.getKey(), en -> en.getValue().getJSONValue()));
 		JSONObject o = new JSONObject(props);
 		for(ConfigSection sub : getSubsections().values()) {
 			o.put(sub.getName(), sub.toJSON());

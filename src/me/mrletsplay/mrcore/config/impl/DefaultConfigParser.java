@@ -228,7 +228,7 @@ public class DefaultConfigParser {
 	}
 	
 	public char readCharacter() {
-		if(r.next() != '"') throw new UnsupportedOperationException();
+		if(r.next() != '\'') throw new UnsupportedOperationException();
 		char c = r.next();
 		switch(c) {
 			case '\\':
