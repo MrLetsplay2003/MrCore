@@ -47,7 +47,7 @@ public class ExtraChatComponents {
 					JSONArray ench = new JSONArray();
 					for(Map.Entry<Enchantment, Integer> en : meta.getEnchants().entrySet()) {
 						JSONObject e = new JSONObject();
-						e.set("id", en.getKey().getName()); // TODO
+						e.set("id", en.getKey().getName()); // TODO: 1.8 - 1.13
 						e.set("lvl", en.getValue());
 						ench.add(e);
 					}
