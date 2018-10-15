@@ -306,6 +306,7 @@ public class GUIUtils {
 		public GUIBuildPageItemEvent(GUIHolder holder, Player player, Inventory inv, int page, List<T> items, int absoluteIndex, int relativeIndex) {
 			super(holder, player, inv);
 			this.page = page;
+			this.items = items;
 			this.absoluteIndex = absoluteIndex;
 			this.relativeIndex = relativeIndex;
 		}
