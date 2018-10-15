@@ -8,7 +8,7 @@ import java.util.Map;
 import me.mrletsplay.mrcore.config.v2.ConfigProperty;
 import me.mrletsplay.mrcore.config.v2.ConfigSection;
 
-public class DefaultConfigFormatter {
+class DefaultConfigFormatter {
 
 	private BufferedWriter w;
 	
@@ -86,8 +86,6 @@ public class DefaultConfigFormatter {
 				return "\\\"";
 			case '\\':
 				return "\\\\";
-			case '/':
-				return "\\/";
 			case '\b':
 				return "\\b";
 			case '\f':

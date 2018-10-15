@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import me.mrletsplay.mrcore.config.v2.ConfigException;
 
-public class DefaultConfigParser {
+class DefaultConfigParser {
 
 	public CharReader r;
 	
@@ -29,7 +29,7 @@ public class DefaultConfigParser {
 		}
 	}
 	
-	public PropertyDescriptor readPropertyDescriptor() { //TODO: Character checks (\n, \r, ...)
+	public PropertyDescriptor readPropertyDescriptor() {
 		int indents = r.skipWhitespacesUntil('\n').length();
 		if(!r.hasNext()) throw new ConfigException("Failed to read property descriptor: EOF reached");
 		if(r.next() == '\n') throw new ConfigException("Invalid property descriptor", r.currentLine, r.currentIndex);
@@ -67,6 +67,10 @@ public class DefaultConfigParser {
 				case '"':
 					r.revert();
 					value = readString();
+					break;
+				case '\'':
+					r.revert();
+					value = readCharacter();
 					break;
 				case '\n':
 					return readListOrSubsection(r.createMarker(), propertyIndents + 1);
@@ -191,8 +195,6 @@ public class DefaultConfigParser {
 				case '{':
 					if(r.next() != '\n') throw new ConfigException("Invalid list entry value, unexpected character '" + r.current() + "'", r.currentLine, r.currentIndex);
 					Object los = readListOrSubsection(r.createMarker(), propertyIndents + 1);
-//					String exp = StringUtils.repeat(" ", propertyIndents * 2) + "}";
-//					if(!r.next(exp.length()).equals(exp)) throw new ConfigException("Invalid list entry value, missing closing bracket", r.currentLine, r.currentIndex);
 					readListClosingBracketDescriptor(propertyIndents);
 					return los;
 				default:
@@ -289,7 +291,6 @@ public class DefaultConfigParser {
 				}
 			case '"':
 			case '\\':
-			case '/':
 			default:
 				return c;
 		}

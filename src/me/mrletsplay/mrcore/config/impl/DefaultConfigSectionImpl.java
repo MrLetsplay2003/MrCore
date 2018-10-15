@@ -1,5 +1,10 @@
 package me.mrletsplay.mrcore.config.impl;
 
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -113,7 +118,14 @@ public class DefaultConfigSectionImpl implements StringifiableConfigSection {
 	}
 
 	public String saveToString(int indents) {
-		return null;
+		ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+		BufferedWriter w = new BufferedWriter(new OutputStreamWriter(bOut));
+		DefaultConfigFormatter f = new DefaultConfigFormatter(w);
+		try {
+			f.writeSubsection(indents, this);
+			w.close();
+		} catch (IOException e) {}
+		return new String(bOut.toByteArray(), StandardCharsets.UTF_8);
 	}
 	
 }
