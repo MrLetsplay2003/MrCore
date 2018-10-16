@@ -19,8 +19,9 @@ public class SingleLookupList<I, E> extends AbstractList<E> implements LookupLis
 	}
 	
 	public SingleLookupList(Collection<? extends E> collection, Function<E, I> mappingFunction) {
-		elements = new ArrayList<>(collection);
-		lookupMap = new HashMap<>();
+		this.elements = new ArrayList<>(collection);
+		this.lookupMap = new HashMap<>();
+		this.mappingFunction = mappingFunction;
 		createMappings();
 	}
 	
