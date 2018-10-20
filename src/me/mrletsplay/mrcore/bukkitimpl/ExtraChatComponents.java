@@ -6,8 +6,8 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import me.mrletsplay.mrcore.misc.JSON.JSONArray;
-import me.mrletsplay.mrcore.misc.JSON.JSONObject;
+import me.mrletsplay.mrcore.json.JSONArray;
+import me.mrletsplay.mrcore.json.JSONObject;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 

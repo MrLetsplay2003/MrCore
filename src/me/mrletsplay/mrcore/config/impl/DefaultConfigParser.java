@@ -16,6 +16,22 @@ class DefaultConfigParser {
 		r = new CharReader(raw);
 	}
 	
+	public String readVersionDescriptor() {
+		r.skipWhitespacesUntil('\n');
+		if(!r.hasNext()) throw new ConfigException("Failed to read property descriptor: EOF reached");
+		if(r.next() == '\n') throw new ConfigException("Invalid version descriptor", r.currentLine, r.currentIndex);
+		r.revert();
+		if(!"###".equals(r.next(3))) throw new ConfigException("Version descriptor expected", r.currentLine, r.currentIndex);
+		r.skipWhitespacesUntil('\n');
+		if(!r.hasNext()) throw new ConfigException("Failed to read property descriptor: EOF reached");
+		if(r.next() == '\n') throw new ConfigException("Invalid version descriptor", r.currentLine, r.currentIndex);
+		r.revert();
+		String vDesc = r.readUntil('\n');
+		String vS = "CustomConfig version: ";
+		if(!vDesc.startsWith(vS)) throw new ConfigException("Invalid version descriptor", r.currentLine, r.currentIndex);
+		return vDesc.substring(vS.length()).trim();
+	}
+	
 	public Object readCommentOrPropertyDescriptor() {
 		int sk = r.skipWhitespacesUntil('\n').length();
 		if(!r.hasNext()) throw new ConfigException("Failed to read property descriptor: EOF reached");
@@ -44,8 +60,8 @@ class DefaultConfigParser {
 	
 	public Object readPropertyValue(int propertyIndents) {
 		r.skipWhitespacesUntil('\n');
-		char c = r.next();
 		if(!r.hasNext()) throw new ConfigException("Empty property value", r.currentLine, r.currentIndex);
+		char c = r.next();
 		Object value;
 		if(Character.isDigit(c) || c == '-') {
 			r.revert();

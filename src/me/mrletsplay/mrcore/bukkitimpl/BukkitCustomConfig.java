@@ -37,6 +37,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 import me.mrletsplay.mrcore.config.ConfigExpansions.ExpandableCustomConfig;
 import me.mrletsplay.mrcore.misc.FriendlyException;
 
+@Deprecated
 public class BukkitCustomConfig extends ExpandableCustomConfig {
 	
 	public BukkitCustomConfig(File configFile, ConfigSaveProperty... defaultSaveProperties) {
@@ -101,7 +102,6 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 		
 		registerMapper(new ObjectMapper<ItemStack>(ItemStack.class) {
 
-			@SuppressWarnings("deprecation")
 			@Override
 			public Map<String, Object> mapObject(ItemStack it) {
 				Map<String, Object> map = new HashMap<>();
@@ -181,7 +181,7 @@ public class BukkitCustomConfig extends ExpandableCustomConfig {
 				return map;
 			}
 
-			@SuppressWarnings({ "unchecked", "deprecation" })
+			@SuppressWarnings("unchecked")
 			@Override
 			public ItemStack constructObject(Map<String, Object> map) {
 				if(!map.containsKey("type")) return null;

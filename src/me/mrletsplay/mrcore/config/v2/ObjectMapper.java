@@ -1,69 +1,49 @@
 package me.mrletsplay.mrcore.config.v2;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.function.BiFunction;
 
-import me.mrletsplay.mrcore.config.ConfigExpansions.ExpandableCustomConfig;
+import me.mrletsplay.mrcore.config.impl.ObjectMapperImpl;
 
-public abstract class ObjectMapper<T> {
-
-	public Class<T> mappingClass;
-	public ExpandableCustomConfig config;
-	public int priority;
+public interface ObjectMapper<E, O> {
 	
-	public ObjectMapper(Class<T> clazz) {
-		this.mappingClass = clazz;
+	public O mapObject(ConfigSection section, E object);
+	
+	public E constructObject(ConfigSection section, O mapped);
+	
+	public Class<E> getMappingClass();
+	
+	public Class<O> getMappedClass();
+	
+	public default O mapRawObject(ConfigSection config, Object object) {
+		if(!canMap(object)) throw new IllegalArgumentException("Cannot map object of type " + object.getClass().getName());
+		return mapObject(config, getMappingClass().cast(object));
 	}
 	
-	public ObjectMapper(int priority, Class<T> clazz) {
-		this.mappingClass = clazz;
+	public default boolean canMap(Object object) {
+		return getMappingClass().isInstance(object);
 	}
 	
-	protected void init(ExpandableCustomConfig config) {
-		this.config = config;
+	public default boolean canMap(Class<?> clazz) {
+		return getMappingClass().isAssignableFrom(clazz);
 	}
 	
-	public Class<T> getMappingClass() {
-		return mappingClass;
+	public default int getClassDepth(Object object) {
+		return getClassDepth(object.getClass());
 	}
 	
-	public int getPriority() {
-		return priority;
+	public default int getClassDepth(Class<?> clazz) {
+		if(!canMap(clazz)) return -1;
+		Class<?> cClass = clazz;
+		int depth = 0;
+		while(!cClass.equals(getMappingClass())) {
+			cClass = cClass.getSuperclass();
+			depth++;
+		}
+		return depth;
 	}
 	
-	public ExpandableCustomConfig getConfig() {
-		return config;
+	public static <E, O> ObjectMapper<E, O> create(Class<E> mappingClass, Class<O> mappedClass, BiFunction<ConfigSection, E, O> mappingFunction, BiFunction<ConfigSection, O, E> constructingFunction) {
+		return new ObjectMapperImpl<>(mappingClass, mappedClass, mappingFunction, constructingFunction);
 	}
-	
-	public boolean canMap(Object o) {
-		if(o == null) return false;
-		return mappingClass.isAssignableFrom(o.getClass());
-	}
-	
-	public boolean requireKeys(Map<String, Object> map, String... keys) {
-		return Arrays.stream(keys).allMatch(map::containsKey);
-	}
-	
-	public Map<String, Object> map(Object o) {
-		return mapObject(mappingClass.cast(o));
-	}
-	
-	public <G> G castGeneric(Object o, Class<G> clazz) {
-		return getConfig().castGeneric(o, clazz);
-	}
-	
-	public <G> List<G> castGenericList(Object o, Class<G> clazz) {
-		return getConfig().castGenericList(castGeneric(o, List.class), clazz);
-	}
-	
-	@SuppressWarnings("unchecked")
-	public <G> Map<String, G> castGenericMap(Object o, Class<G> clazz) {
-		return getConfig().castGenericMap(castGeneric(o, Map.class), clazz);
-	}
-	
-	public abstract Map<String, Object> mapObject(T object);
-	
-	public abstract T constructObject(Map<String, Object> map);
 	
 }

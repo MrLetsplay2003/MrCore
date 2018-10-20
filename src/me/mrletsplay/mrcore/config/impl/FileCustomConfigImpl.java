@@ -3,28 +3,37 @@ package me.mrletsplay.mrcore.config.impl;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import me.mrletsplay.mrcore.config.impl.DefaultConfigParser.Marker;
 import me.mrletsplay.mrcore.config.v2.ConfigException;
 import me.mrletsplay.mrcore.config.v2.ConfigSection;
+import me.mrletsplay.mrcore.config.v2.DefaultConfigMappers;
 import me.mrletsplay.mrcore.config.v2.FileCustomConfig;
+import me.mrletsplay.mrcore.config.v2.IncompatibleConfigVersionException;
+import me.mrletsplay.mrcore.config.v2.ObjectMapper;
 
 public class FileCustomConfigImpl implements FileCustomConfig {
 
+	private static final String VERSION = "2.0";
+	
 	private File configFile;
 	private ConfigSection mainSection;
+	private Map<ObjectMapper<?, ?>, Integer> mappers;
 	
 	public FileCustomConfigImpl(File configFile) {
 		this.configFile = configFile;
-		this.mainSection = new DefaultConfigSectionImpl(this, null, null);
+		this.mainSection = new DefaultConfigSectionImpl(this);
+		this.mappers = new HashMap<>();
+		registerMapper(DefaultConfigMappers.JSON_MAPPER);
 	}
 	
 	@Override
@@ -42,8 +51,12 @@ public class FileCustomConfigImpl implements FileCustomConfig {
 			}
 			r.close();
 			DefaultConfigParser p = new DefaultConfigParser(lines.toArray(new String[lines.size()]));
-			DefaultConfigSectionImpl sc = new DefaultConfigSectionImpl(null, null, null);
-			sc.loadFromMap(p.readSubsection(new Marker(0, 0), 0).getProperties());
+			if(!p.hasMore()) {
+				return;
+			}
+			String version = p.readVersionDescriptor();
+			if(!version.equals(VERSION)) throw new IncompatibleConfigVersionException(version, VERSION);
+			mainSection.loadFromMap(p.readSubsection(new Marker(0, 0), 0).getProperties());
 		}catch(IOException e) {
 			throw new ConfigException("Unexpected IO exception", e);
 		}
@@ -51,10 +64,10 @@ public class FileCustomConfigImpl implements FileCustomConfig {
 
 	@Override
 	public void save(OutputStream out) {
-		try(BufferedWriter o = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("TEST/abc_s.yml")))) {
+		try(BufferedWriter o = new BufferedWriter(new OutputStreamWriter(out))) {
 			DefaultConfigFormatter f = new DefaultConfigFormatter(o);
 			f.writeSubsection(0, getMainSection());
-			o.close();
+			o.flush();
 		}catch(IOException e) {
 			throw new ConfigException("Unexpected IO exception", e);
 		}
@@ -63,6 +76,16 @@ public class FileCustomConfigImpl implements FileCustomConfig {
 	@Override
 	public File getConfigFile() {
 		return configFile;
+	}
+
+	@Override
+	public void registerMapper(int priority, ObjectMapper<?, ?> mapper) {
+		mappers.put(mapper, priority);
+	}
+
+	@Override
+	public Map<ObjectMapper<?, ?>, Integer> getMappers() {
+		return mappers;
 	}
 	
 	

@@ -44,14 +44,14 @@ class DefaultConfigFormatter {
 	}
 	
 	public void writeSubsection(int indents, ConfigSection section) throws IOException {
-		for(Map.Entry<String, Object> p : section.getAllProperties().entrySet()) {
+		for(Map.Entry<String, ConfigProperty> p : section.getAllProperties().entrySet()) {
 			w.write(space(indents) + p.getKey());
 			w.write(": ");
-			if(p.getValue() instanceof ConfigSection) {
+			if(p.getValue().isSubsection()) {
 				w.newLine();
-				writeSubsection(indents + 1, (ConfigSection) p.getValue());
-			}else if(p.getValue() instanceof ConfigProperty) {
-				writePropertyValue(indents + 1, ((ConfigProperty) p.getValue()).getValue());
+				writeSubsection(indents + 1, (ConfigSection) p.getValue().getValue());
+			}else {
+				writePropertyValue(indents + 1, p.getValue().getValue());
 				w.newLine();
 			}
 		}

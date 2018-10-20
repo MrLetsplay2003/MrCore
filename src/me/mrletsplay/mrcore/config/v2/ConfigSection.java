@@ -5,13 +5,14 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import me.mrletsplay.mrcore.json.JSONArray;
+import me.mrletsplay.mrcore.json.JSONObject;
 import me.mrletsplay.mrcore.misc.ClassUtils;
 import me.mrletsplay.mrcore.misc.Complex;
-import me.mrletsplay.mrcore.misc.JSON.JSONArray;
-import me.mrletsplay.mrcore.misc.JSON.JSONObject;
+import me.mrletsplay.mrcore.misc.NullableOptional;
 
 public interface ConfigSection {
 	
@@ -25,24 +26,12 @@ public interface ConfigSection {
 	public CustomConfig getConfig();
 	
 	/**
-	 * Returns the parent section of this section or null if none
-	 * @return The parent section
-	 */
-	public ConfigSection getParent();
-	
-	/**
-	 * Returns the name of this section
-	 * @return The name of this section
-	 */
-	public String getName();
-	
-	/**
 	 * Returns a map containing all the properties & subsections of this section.<br>
 	 * The values of this map may contain all {@link ConfigValueType valid value types}, including other ConfigSection instances.<br>
 	 * Implementations may return an unmodifiable map
 	 * @return A map containing all the properties & subsections of this section
 	 */
-	public Map<String, Object> getAllProperties();
+	public Map<String, ConfigProperty> getAllProperties();
 	
 	/**
 	 * Returns a map containing all comments of this section.<br>
@@ -104,7 +93,8 @@ public interface ConfigSection {
 	 * @return The subsection by that name, null if none
 	 */
 	public default ConfigSection getSubsection(String name) throws ConfigException {
-		return (ConfigSection) getAllProperties().get(name);
+		ConfigProperty p = getAllProperties().get(name);
+		return p != null && p.isSubsection() ? (ConfigSection) p.getValue() : null;
 	}
 	
 	
@@ -151,8 +141,8 @@ public interface ConfigSection {
 	 */
 	public default Map<String, Object> toMap() {
 		Map<String, Object> map = new LinkedHashMap<>(getRawProperties());
-		for(ConfigSection sub : getSubsections().values()) {
-			map.put(sub.getName(), sub.toMap());
+		for(Entry<String, ConfigSection> sub : getSubsections().entrySet()) {
+			map.put(sub.getKey(), sub.getValue().toMap());
 		}
 		return map;
 	}
@@ -176,8 +166,8 @@ public interface ConfigSection {
 		Map<String, Object> props = getProperties().entrySet().stream()
 				.collect(Collectors.toMap(en -> en.getKey(), en -> en.getValue().getJSONValue()));
 		JSONObject o = new JSONObject(props);
-		for(ConfigSection sub : getSubsections().values()) {
-			o.put(sub.getName(), sub.toJSON());
+		for(Entry<String, ConfigSection> sub : getSubsections().entrySet()) {
+			o.put(sub.getKey(), sub.getValue().toJSON());
 		}
 		return o;
 	}
@@ -203,38 +193,41 @@ public interface ConfigSection {
 		return getComplex(Complex.map(String.class, valueClass), key, defaultValue, applyDefault);
 	}
 	
-	public static <T> Optional<T> defaultCast(Object o, Class<T> typeClass) {
+	public static <T> NullableOptional<T> defaultCast(Object o, Class<T> typeClass) {
 		if(ClassUtils.isPrimitiveTypeClass(typeClass)) throw new IllegalArgumentException("Primitive types are not allowed");
-		if(o == null) return Optional.ofNullable(null);
+		if(o == null) return NullableOptional.of(null);
 		if(Number.class.isAssignableFrom(typeClass)) {
-			if(!(o instanceof Number)) return Optional.empty();
+			if(!(o instanceof Number)) return NullableOptional.empty();
 			Number n = (Number) o;
 			if(typeClass.equals(Byte.class)) {
-				return Optional.of(typeClass.cast(n.byteValue()));
+				return NullableOptional.of(typeClass.cast(n.byteValue()));
 			}else if(typeClass.equals(Short.class)) {
-				return Optional.of(typeClass.cast(n.shortValue()));
+				return NullableOptional.of(typeClass.cast(n.shortValue()));
 			}else if(typeClass.equals(Integer.class)) {
-				return Optional.of(typeClass.cast(n.intValue()));
+				return NullableOptional.of(typeClass.cast(n.intValue()));
 			}else if(typeClass.equals(Long.class)) {
-				return Optional.of(typeClass.cast(n.longValue()));
+				return NullableOptional.of(typeClass.cast(n.longValue()));
 			}else if(typeClass.equals(Float.class)) {
-				return Optional.of(typeClass.cast(n.floatValue()));
+				return NullableOptional.of(typeClass.cast(n.floatValue()));
 			}else if(typeClass.equals(Double.class)) {
-				return Optional.of(typeClass.cast(n.doubleValue()));
+				return NullableOptional.of(typeClass.cast(n.doubleValue()));
 			}else {
-				return Optional.empty();
+				return NullableOptional.empty();
 			}
 		}else if(typeClass.equals(Map.class)) {
-			if(!(o instanceof ConfigSection)) return Optional.empty();
-			return Optional.of(typeClass.cast(((ConfigSection) o).toMap()));
+			if(!(o instanceof ConfigSection)) return NullableOptional.empty();
+			return NullableOptional.of(typeClass.cast(((ConfigSection) o).toMap()));
+		}else if(typeClass.equals(JSONObject.class)) {
+			if(!(o instanceof ConfigSection)) return NullableOptional.empty();
+			return NullableOptional.of(typeClass.cast(new JSONObject(((ConfigSection) o).toMap())));
 		}else if(typeClass.equals(String.class)
 				|| typeClass.equals(Boolean.class)
 				|| typeClass.equals(Character.class)
 				|| typeClass.equals(List.class) || typeClass.equals(ConfigSection.class)) {
-			if(!typeClass.isInstance(o)) return Optional.empty();
-			return Optional.of(typeClass.cast(o));
+			if(!typeClass.isInstance(o)) return NullableOptional.empty();
+			return NullableOptional.of(typeClass.cast(o));
 		}else {
-			return Optional.empty();
+			return NullableOptional.empty();
 		}
 	}
 	
@@ -244,8 +237,8 @@ public interface ConfigSection {
 			if(applyDefault) set(key, defaultValue);
 			return defaultValue;
 		}else {
-			Optional<T> value = complex.cast(prop.getValue(), ConfigSection::defaultCast);
-			if(!value.isPresent()) throw new IncompatibleTypeException("Incompatible types, " + value.getClass() + " is not a compatible with " + complex.getFriendlyClassName());
+			NullableOptional<T> value = complex.cast(prop.getValue(), ConfigSection::defaultCast);
+			if(!value.isPresent()) throw new IncompatibleTypeException("Incompatible types, " + prop.getValue().getClass().getName() + " is not a compatible with " + complex.getFriendlyClassName());
 			return value.get();
 		}
 	}

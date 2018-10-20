@@ -4,17 +4,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public interface Complex<T> {
 	
-	public static <T> Optional<T> defaultCast(Object o, Class<T> typeClass) {
-		if(o == null) return Optional.ofNullable(null);
-		if(!typeClass.isInstance(o)) return Optional.empty();
-		return Optional.of(typeClass.cast(o));
+	public static <T> NullableOptional<T> defaultCast(Object o, Class<T> typeClass) {
+		if(o == null) return NullableOptional.of(null);
+		if(!typeClass.isInstance(o)) return NullableOptional.empty();
+		return NullableOptional.of(typeClass.cast(o));
 	}
 	
-	public default Optional<T> cast(Object o) {
+	public default NullableOptional<T> cast(Object o) {
 		return cast(o, Complex::defaultCast);
 	}
 	
@@ -22,7 +21,7 @@ public interface Complex<T> {
 		return cast(o).isPresent();
 	}
 	
-	public Optional<T> cast(Object o, CastingFunction castingFunction);
+	public NullableOptional<T> cast(Object o, CastingFunction castingFunction);
 	
 	public default boolean isInstance(Object o, CastingFunction castingFunction) {
 		return cast(o, castingFunction).isPresent();
@@ -59,19 +58,19 @@ public interface Complex<T> {
 		return new ComplexMap<>(value(keyClass), value(valueClass));
 	}
 	
-	public static <E> Optional<List<E>> castList(List<?> list, Class<E> toClass) {
+	public static <E> NullableOptional<List<E>> castList(List<?> list, Class<E> toClass) {
 		return Complex.list(toClass).cast(list);
 	}
 	
-	public static <E> Optional<List<E>> castList(List<?> list, Class<E> toClass, CastingFunction castingFunction) {
+	public static <E> NullableOptional<List<E>> castList(List<?> list, Class<E> toClass, CastingFunction castingFunction) {
 		return Complex.list(toClass).cast(list, castingFunction);
 	}
 	
-	public static <K, V> Optional<Map<K, V>> castMap(Map<?, ?> map, Class<K> keyClass, Class<V> valueClass) {
+	public static <K, V> NullableOptional<Map<K, V>> castMap(Map<?, ?> map, Class<K> keyClass, Class<V> valueClass) {
 		return Complex.map(keyClass, valueClass).cast(map);
 	}
 	
-	public static <K, V> Optional<Map<K, V>> castMap(Map<?, ?> map, Class<K> keyClass, Class<V> valueClass, CastingFunction castingFunction) {
+	public static <K, V> NullableOptional<Map<K, V>> castMap(Map<?, ?> map, Class<K> keyClass, Class<V> valueClass, CastingFunction castingFunction) {
 		return Complex.map(keyClass, valueClass).cast(map, castingFunction);
 	}
 	
@@ -88,13 +87,13 @@ public interface Complex<T> {
 		}
 
 		@Override
-		public Optional<T> cast(Object o, CastingFunction castingFunction) {
+		public NullableOptional<T> cast(Object o, CastingFunction castingFunction) {
 			return castingFunction.cast(o, typeClass);
 		}
 
 		@Override
 		public String getFriendlyClassName() {
-			return typeClass.getSimpleName();
+			return typeClass.getName();
 		}
 		
 	}
@@ -112,20 +111,20 @@ public interface Complex<T> {
 		}
 
 		@Override
-		public Optional<List<T>> cast(Object o, CastingFunction castingFunction) {
+		public NullableOptional<List<T>> cast(Object o, CastingFunction castingFunction) {
 			return cast(o, castingFunction, new ArrayList<>());
 		}
 
-		public Optional<List<T>> cast(Object o, CastingFunction castingFunction, List<T> toList) {
-			if(o == null) return Optional.ofNullable(null);
-			if(!(o instanceof List<?>)) return Optional.empty();
+		public NullableOptional<List<T>> cast(Object o, CastingFunction castingFunction, List<T> toList) {
+			if(o == null) return NullableOptional.of(null);
+			if(!(o instanceof List<?>)) return NullableOptional.empty();
 			List<?> oList = (List<?>) o;
 			for(Object e : oList) {
-				Optional<T> c = typeClass.cast(e, castingFunction);
-				if(!c.isPresent()) return Optional.empty();
+				NullableOptional<T> c = typeClass.cast(e, castingFunction);
+				if(!c.isPresent()) return NullableOptional.empty();
 				toList.add(c.get());
 			}
-			return Optional.of(toList);
+			return NullableOptional.of(toList);
 		}
 
 		@Override
@@ -154,22 +153,22 @@ public interface Complex<T> {
 		}
 
 		@Override
-		public Optional<Map<K, V>> cast(Object o, CastingFunction castingFunction) {
+		public NullableOptional<Map<K, V>> cast(Object o, CastingFunction castingFunction) {
 			return cast(o, castingFunction, new HashMap<>());
 		}
 
-		public Optional<Map<K, V>> cast(Object o, CastingFunction castingFunction, Map<K, V> toMap) {
-			if(o == null) return Optional.ofNullable(null);
-			if(!(o instanceof Map<?, ?>)) return Optional.empty();
+		public NullableOptional<Map<K, V>> cast(Object o, CastingFunction castingFunction, Map<K, V> toMap) {
+			if(o == null) return NullableOptional.of(null);
+			if(!(o instanceof Map<?, ?>)) return NullableOptional.empty();
 			Map<?, ?> oMap = (Map<?, ?>) o;
 			for(Map.Entry<?, ?> e : oMap.entrySet()) {
-				Optional<K> k = keyClass.cast(e.getKey(), castingFunction);
-				if(!k.isPresent()) return Optional.empty();
-				Optional<V> v = valueClass.cast(e.getValue(), castingFunction);
-				if(!v.isPresent()) return Optional.empty();
+				NullableOptional<K> k = keyClass.cast(e.getKey(), castingFunction);
+				if(!k.isPresent()) return NullableOptional.empty();
+				NullableOptional<V> v = valueClass.cast(e.getValue(), castingFunction);
+				if(!v.isPresent()) return NullableOptional.empty();
 				toMap.put(k.get(), v.get());
 			}
-			return Optional.of(toMap);
+			return NullableOptional.of(toMap);
 		}
 
 		@Override

@@ -3,8 +3,8 @@ package me.mrletsplay.mrcore.config.v2;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import me.mrletsplay.mrcore.misc.JSON.JSONArray;
-import me.mrletsplay.mrcore.misc.JSON.JSONObject;
+import me.mrletsplay.mrcore.json.JSONArray;
+import me.mrletsplay.mrcore.json.JSONObject;
 
 public interface ConfigProperty {
 	
@@ -22,6 +22,10 @@ public interface ConfigProperty {
 	
 	public default boolean isUndefined() {
 		return getValueType().equals(ConfigValueType.UNDEFINED);
+	}
+	
+	public default boolean isSubsection() {
+		return getValueType().equals(ConfigValueType.SECTION);
 	}
 	
 	public default <T> T getValue(Class<T> asType) {

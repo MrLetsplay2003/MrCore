@@ -12,8 +12,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import me.mrletsplay.mrcore.io.IOUtils;
-import me.mrletsplay.mrcore.misc.JSON.JSONArray;
-import me.mrletsplay.mrcore.misc.JSON.JSONObject;
+import me.mrletsplay.mrcore.json.JSONArray;
+import me.mrletsplay.mrcore.json.JSONObject;
 
 public class HttpResult {
 

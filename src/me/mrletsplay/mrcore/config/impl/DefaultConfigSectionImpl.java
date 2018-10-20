@@ -18,15 +18,11 @@ import me.mrletsplay.mrcore.config.v2.StringifiableConfigSection;
 public class DefaultConfigSectionImpl implements StringifiableConfigSection {
 
 	private CustomConfig config;
-	private ConfigSection parent;
-	private String name;
-	private Map<String, Object> rawProperties;
+	private Map<String, ConfigProperty> rawProperties;
 	private Map<String, String> comments;
 	
-	public DefaultConfigSectionImpl(CustomConfig config, ConfigSection parent, String name) {
+	public DefaultConfigSectionImpl(CustomConfig config) {
 		this.config = config;
-		this.parent = parent;
-		this.name = name;
 		this.rawProperties = new LinkedHashMap<>();
 		this.comments = new LinkedHashMap<>();
 	}
@@ -37,17 +33,7 @@ public class DefaultConfigSectionImpl implements StringifiableConfigSection {
 	}
 
 	@Override
-	public ConfigSection getParent() {
-		return parent;
-	}
-
-	@Override
-	public String getName() {
-		return name;
-	}
-
-	@Override
-	public Map<String, Object> getAllProperties() {
+	public Map<String, ConfigProperty> getAllProperties() {
 		return rawProperties;
 	}
 
@@ -60,8 +46,8 @@ public class DefaultConfigSectionImpl implements StringifiableConfigSection {
 	public ConfigSection getOrCreateSubsection(String name) {
 		ConfigSection s = getSubsection(name);
 		if(s == null) {
-			s = new DefaultConfigSectionImpl(config, this, name);
-			rawProperties.put(name, s);
+			s = new DefaultConfigSectionImpl(config);
+			rawProperties.put(name, DefaultConfigPropertyImpl.create(this, name, s));
 		}
 		return s;
 	}

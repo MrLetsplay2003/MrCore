@@ -2,8 +2,8 @@ package me.mrletsplay.mrcore.config.v2;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
@@ -76,16 +76,20 @@ public interface CustomConfig extends ConfigSection {
 	
 	public default void load(File file) {
 		try {
-			load(new FileInputStream(file));
-		}catch(FileNotFoundException e) {
+			FileInputStream in = new FileInputStream(file);
+			load(in);
+			in.close();
+		}catch(IOException e) {
 			throw new ConfigException(e);
 		}
 	}
 	
 	public default void save(File file) {
 		try {
-			save(new FileOutputStream(file));
-		}catch(FileNotFoundException e) {
+			FileOutputStream out = new FileOutputStream(file);
+			save(out);
+			out.close();
+		}catch(IOException e) {
 			throw new ConfigException(e);
 		}
 	}
@@ -96,17 +100,7 @@ public interface CustomConfig extends ConfigSection {
 	}
 	
 	@Override
-	public default ConfigSection getParent() {
-		return null;
-	}
-	
-	@Override
-	public default String getName() {
-		return null;
-	}
-	
-	@Override
-	public default Map<String, Object> getAllProperties() {
+	public default Map<String, ConfigProperty> getAllProperties() {
 		return getMainSection().getAllProperties();
 	}
 	
@@ -142,5 +136,13 @@ public interface CustomConfig extends ConfigSection {
 	public void load(InputStream in) throws ConfigException;
 	
 	public void save(OutputStream out) throws ConfigException;
+	
+	public default void registerMapper(ObjectMapper<?, ?> mapper) {
+		registerMapper(0, mapper);
+	}
+	
+	public void registerMapper(int priority, ObjectMapper<?, ?> mapper);
+	
+	public Map<ObjectMapper<?, ?>, Integer> getMappers();
 	
 }

@@ -12,13 +12,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 import me.mrletsplay.mrcore.bukkitimpl.ChatUI.UIListener;
 import me.mrletsplay.mrcore.bukkitimpl.GUIUtils.GUIListener;
 import me.mrletsplay.mrcore.bukkitimpl.versioned.NMSVersion;
-import me.mrletsplay.mrcore.config.ConfigLoader;
-import me.mrletsplay.mrcore.config.CustomConfig;
+import me.mrletsplay.mrcore.config.impl.ConfigLoader;
+import me.mrletsplay.mrcore.config.v2.FileCustomConfig;
 import me.mrletsplay.mrcore.main.MrCore;
 
 public class MrCorePlugin extends JavaPlugin{
 	
-	private static CustomConfig config;
+	private static FileCustomConfig config;
 	public static JavaPlugin pl;
 	
 	@Override
@@ -28,12 +28,12 @@ public class MrCorePlugin extends JavaPlugin{
 		getLogger().info("Applying compat for " + nmsv.getFriendlyName() + " / " + nmsv.name());
 		Bukkit.getPluginManager().registerEvents(new GUIListener(), this);
 		getCommand("mrcoreui").setExecutor(new UIListener());
-		config = ConfigLoader.loadConfig(new File(getDataFolder(), "config.yml"));
+		config = ConfigLoader.loadFileConfig(new File(getDataFolder(), "config.yml"));
 		if(config.getBoolean("versioning.check-update", true, true)) {
 			String version = config.getString("versioning.version-to-use", "latest", true);
 			MrCoreUpdateChecker.checkForUpdate(version);
 		}
-		config.saveConfigSafely();
+		config.saveToFile();
 		getLogger().info("And MrCore is on board as well! :wave:");
 	}
 	

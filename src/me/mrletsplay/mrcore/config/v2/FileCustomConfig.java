@@ -9,6 +9,14 @@ public interface FileCustomConfig extends CustomConfig {
 		save(getConfigFile());
 	}
 	
+	public default void loadFromFile() {
+		load(getConfigFile());
+	}
+	
+	public default void saveToFile() {
+		save(getConfigFile());
+	}
+	
 	public File getConfigFile();
 	
 }

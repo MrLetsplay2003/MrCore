@@ -5,6 +5,7 @@ import me.mrletsplay.mrcore.config.v2.ConfigException;
 import me.mrletsplay.mrcore.config.v2.ConfigProperty;
 import me.mrletsplay.mrcore.config.v2.ConfigSection;
 import me.mrletsplay.mrcore.config.v2.ConfigValueType;
+import me.mrletsplay.mrcore.misc.NullableOptional;
 
 public class DefaultConfigPropertyImpl implements ConfigProperty {
 
@@ -40,15 +41,17 @@ public class DefaultConfigPropertyImpl implements ConfigProperty {
 		return value;
 	}
 	
-	public static Object create(ConfigSection section, String name, Object value) {
+	public static DefaultConfigPropertyImpl create(ConfigSection section, String name, Object value) {
 		if(value instanceof ConfigSectionDescriptor) {
 			ConfigSectionDescriptor d = (ConfigSectionDescriptor) value;
-			ConfigSection s = new DefaultConfigSectionImpl(section.getConfig(), section, name);
+			ConfigSection s = new DefaultConfigSectionImpl(section.getConfig());
 			s.loadFromMap(d.getProperties());
-			return s;
+			return new DefaultConfigPropertyImpl(section, name, ConfigValueType.SECTION, s);
 		}
-		ConfigValueType type = ConfigValueType.getTypeOf(value);
-		if(type == null) throw new ConfigException("Unsupported type");
+		NullableOptional<?> v = ConfigValueType.createCompatible(section, value);
+		if(!v.isPresent()) throw new ConfigException("Unsupported type: " + value.getClass().getName());
+		value = v.get();
+		ConfigValueType type = ConfigValueType.getRawTypeOf(value);
 		return new DefaultConfigPropertyImpl(section, name, type, value);
 	}
 
