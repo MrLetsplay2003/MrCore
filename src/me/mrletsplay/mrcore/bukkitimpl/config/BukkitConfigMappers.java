@@ -18,7 +18,13 @@ public class BukkitConfigMappers {
 		o.put("yaw", loc.getYaw());
 		return o;
 	}, (c, o) -> {
-		return new Location(Bukkit.getWorld(o.getString("world")), o.getDouble("x"), o.getDouble("y"), o.getDouble("z"));
+		return new Location(
+				Bukkit.getWorld(o.getString("world")),
+				o.getDouble("x"),
+				o.getDouble("y"),
+				o.getDouble("z"),
+				o.has("pitch") ? (float) o.getDouble("pitch") : 0f,
+				o.has("yaw") ? (float) o.getDouble("yaw") : 0f);
 	});
 	
 }

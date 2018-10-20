@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import me.mrletsplay.mrcore.config.impl.DefaultConfigParser.ConfigSectionDescriptor;
 import me.mrletsplay.mrcore.config.impl.DefaultConfigParser.Marker;
 import me.mrletsplay.mrcore.config.v2.ConfigException;
 import me.mrletsplay.mrcore.config.v2.ConfigSection;
@@ -56,7 +57,11 @@ public class FileCustomConfigImpl implements FileCustomConfig {
 			}
 			String version = p.readVersionDescriptor();
 			if(!version.equals(VERSION)) throw new IncompatibleConfigVersionException(version, VERSION);
-			mainSection.loadFromMap(p.readSubsection(new Marker(0, 0), 0).getProperties());
+			String header = p.readHeader();
+			ConfigSectionDescriptor d = p.readSubsection(new Marker(0, 0), 0);
+			mainSection.loadFromMap(d.getProperties());
+			d.getComments().forEach(mainSection::setComment);
+			if(header != null) mainSection.setComment(null, header);
 		}catch(IOException e) {
 			throw new ConfigException("Unexpected IO exception", e);
 		}
@@ -66,6 +71,8 @@ public class FileCustomConfigImpl implements FileCustomConfig {
 	public void save(OutputStream out) {
 		try(BufferedWriter o = new BufferedWriter(new OutputStreamWriter(out))) {
 			DefaultConfigFormatter f = new DefaultConfigFormatter(o);
+			f.writeConfigVersionDescriptor(VERSION);
+			if(getHeader() != null) f.writeHeader(getHeader());
 			f.writeSubsection(0, getMainSection());
 			o.flush();
 		}catch(IOException e) {

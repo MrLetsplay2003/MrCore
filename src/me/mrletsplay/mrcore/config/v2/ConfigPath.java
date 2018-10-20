@@ -55,6 +55,7 @@ public class ConfigPath {
 	}
 	
 	public static ConfigPath of(String path) {
+		if(path == null) return new ConfigPath(new String[] {null}, 0);
 		return new ConfigPath(path, 0);
 	}
 	

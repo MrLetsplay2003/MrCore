@@ -129,6 +129,14 @@ public interface CustomConfig extends ConfigSection {
 		return getMainSection().getComment(key);
 	}
 	
+	public default void setHeader(String value) {
+		getMainSection().setComment(null, value);
+	}
+	
+	public default String getHeader() {
+		return getMainSection().getComment(null);
+	}
+	
 	// Must be implemented
 	
 	public ConfigSection getMainSection();

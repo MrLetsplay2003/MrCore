@@ -19,12 +19,25 @@ public interface ObjectMapper<E, O> {
 		return mapObject(config, getMappingClass().cast(object));
 	}
 	
+	public default E constructRawObject(ConfigSection config, Object object) {
+		if(!canConstruct(object)) throw new IllegalArgumentException("Cannot construct object of type " + object.getClass().getName());
+		return constructObject(config, getMappedClass().cast(object));
+	}
+	
 	public default boolean canMap(Object object) {
 		return getMappingClass().isInstance(object);
 	}
 	
 	public default boolean canMap(Class<?> clazz) {
 		return getMappingClass().isAssignableFrom(clazz);
+	}
+	
+	public default boolean canConstruct(Object object) {
+		return getMappedClass().isInstance(object);
+	}
+	
+	public default boolean canConstruct(Class<?> clazz) {
+		return getMappedClass().isAssignableFrom(clazz);
 	}
 	
 	public default int getClassDepth(Object object) {

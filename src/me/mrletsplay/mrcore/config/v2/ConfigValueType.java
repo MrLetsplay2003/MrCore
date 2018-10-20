@@ -99,13 +99,12 @@ public enum ConfigValueType {
 		for(ObjectMapper<?, ?> mapper : mappers) {
 			if(isConfigPrimitive(mapper.getMappedClass())) return new ArrayList<>(Arrays.asList(mapper));
 			List<ObjectMapper<?, ?>> path = calculateCompatiblePath(section, mapper.getMappedClass(), classes);
-			if(pth == null || (path != null && path.size() < pth.size())) {
+			if(path != null && pth == null /* || (pth != null && path.size() < pth.size())*/) {
 				path.add(0, mapper);
 				pth = path;
-				break; // TODO
+				break; // Only get the path with the highest priority, not the smallest one
 			}
 		}
-		if(pth == null) return null;
 		return pth;
 	}
 	

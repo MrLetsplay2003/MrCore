@@ -17,6 +17,11 @@ public interface FileCustomConfig extends CustomConfig {
 		save(getConfigFile());
 	}
 	
+	public default void reload(boolean save) {
+		if(save) saveToFile();
+		loadFromFile();
+	}
+	
 	public File getConfigFile();
 	
 }

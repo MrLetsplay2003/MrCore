@@ -16,6 +16,23 @@ class DefaultConfigParser {
 		r = new CharReader(raw);
 	}
 	
+	public String readHeader() {
+		List<String> rHeader = new ArrayList<>();
+		while(true) {
+			int sk = r.skipWhitespacesUntil('\n').length();
+			if(!r.hasNext()) throw new ConfigException("Failed to read header: EOF reached");
+			if(r.next() == '\n') throw new ConfigException("Invalid header", r.currentLine, r.currentIndex);
+			r.revert();
+			if(r.next(2).equals("##")) {
+				rHeader.add(r.readUntil('\n'));
+			}else {
+				r.revert(sk + 2);
+				break;
+			}
+		}
+		return rHeader.stream().collect(Collectors.joining("\n"));
+	}
+	
 	public String readVersionDescriptor() {
 		r.skipWhitespacesUntil('\n');
 		if(!r.hasNext()) throw new ConfigException("Failed to read property descriptor: EOF reached");
@@ -128,7 +145,10 @@ class DefaultConfigParser {
 					r.revert(s.getRawIndents() + s.getKey().length() + 1);
 					return section;
 				}
-				if(!commentBuffer.isEmpty()) section.comments.put(s.getKey(), commentBuffer.stream().collect(Collectors.joining("\n")));
+				if(!commentBuffer.isEmpty()) {
+					section.comments.put(s.getKey(), commentBuffer.stream().collect(Collectors.joining("\n")));
+					commentBuffer = new ArrayList<>();
+				}
 				section.properties.put(s.getKey(), readPropertyValue(indents));
 			}else if(cop instanceof String) { // Comment
 				commentBuffer.add((String) cop);
@@ -348,8 +368,6 @@ class DefaultConfigParser {
 	
 	public static class ConfigSectionDescriptor {
 		
-//		private int indents;
-//		private Marker start;
 		private Map<String, Object> properties;
 		private Map<String, String> comments;
 		

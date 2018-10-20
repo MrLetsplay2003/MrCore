@@ -16,6 +16,19 @@ class DefaultConfigFormatter {
 		this.w = out;
 	}
 	
+	public void writeHeader(String header) throws IOException {
+		String[] sHeader = header.split("\n");
+		for(String h : sHeader) {
+			w.write("##" + h);
+			w.newLine();
+		}
+	}
+	
+	public void writeConfigVersionDescriptor(String version) throws IOException {
+		w.write("### CustomConfig version: " + version);
+		w.newLine();
+	}
+	
 	public void writePropertyValue(int indents, Object property) throws IOException {
 		if(property == null) {
 			w.write("null");
@@ -45,6 +58,14 @@ class DefaultConfigFormatter {
 	
 	public void writeSubsection(int indents, ConfigSection section) throws IOException {
 		for(Map.Entry<String, ConfigProperty> p : section.getAllProperties().entrySet()) {
+			String comment = section.getComment(p.getKey());
+			if(comment != null) {
+				String[] sComment = comment.split("\n");
+				for(String c : sComment) {
+					w.write(space(indents) + "#" + c);
+					w.newLine();
+				}
+			}
 			w.write(space(indents) + p.getKey());
 			w.write(": ");
 			if(p.getValue().isSubsection()) {
