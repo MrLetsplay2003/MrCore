@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import me.mrletsplay.mrcore.misc.Complex;
 import me.mrletsplay.mrcore.misc.NullableOptional;
 
 public enum ConfigValueType {
@@ -14,12 +15,12 @@ public enum ConfigValueType {
 	/**
 	 * Property is not set (may evaluate to default value)
 	 */
-	UNDEFINED(null),
+	UNDEFINED((Complex<?>) null),
 	
 	/**
 	 * Java Type: {@code null}
 	 */
-	NULL(null),
+	NULL((Complex<?>) null),
 	
 	/**
 	 * Java Type: {@code String}
@@ -37,14 +38,14 @@ public enum ConfigValueType {
 	BOOLEAN(Boolean.class),
 	
 	/**
-	 * Java Type: {@code Number} -> {@code Byte}, {@code Short}, {@code Integer}, {@code Long}
+	 * Java Type: {@code Number} (stored as {@code Long}) -> {@code Byte}, {@code Short}, {@code Integer}, {@code Long}
 	 */
-	NUMBER(Number.class),
+	NUMBER(Number.class, Byte.class, Short.class, Integer.class, Long.class),
 	
 	/**
-	 * Java Type: {@code Number} -> {@code Float}, {@code Double}
+	 * Java Type: {@code Number} (stored as {@code Double}) -> {@code Float}, {@code Double}
 	 */
-	DECIMAL(Number.class),
+	DECIMAL(Number.class, Float.class, Double.class),
 	
 	/**
 	 * Java Type: {@link ConfigSection}
@@ -56,36 +57,41 @@ public enum ConfigValueType {
 	 */
 	LIST(List.class);
 	
-	private final Class<?> valueClass;
-	private final List<Class<?>> explicitValueTypes;
+	private final Complex<?> valueClass;
+	private final List<Complex<?>> explicitValueTypes;
 	
-	private ConfigValueType(Class<?> valueType, Class<?>... explicitValueTypes) {
+	private ConfigValueType(Complex<?> valueType, Complex<?>... explicitValueTypes) {
 		this.valueClass = valueType;
 		this.explicitValueTypes = Arrays.asList(explicitValueTypes);
 	}
 	
-	public Class<?> getValueClass() {
-		return valueClass;
+	private ConfigValueType(Class<?> valueType, Class<?>... explicitValueTypes) {
+		this.valueClass = Complex.value(valueType);
+		this.explicitValueTypes = Arrays.asList(explicitValueTypes).stream().map(Complex::value).collect(Collectors.toList());
 	}
 	
-	public boolean isValidTypeClass(Class<?> typeClass) {
+	public Complex<?> getValueClass() {
+		return valueClass;
+	}
+	 
+	public boolean isValidTypeClass(Complex<?> typeClass) {
 		if(valueClass == null) return false;
-		return explicitValueTypes.isEmpty() ? valueClass.isAssignableFrom(typeClass) : explicitValueTypes.contains(typeClass);
+		return explicitValueTypes.isEmpty() ? valueClass.isAssignableFrom(typeClass) : explicitValueTypes.stream().anyMatch(t -> t.isAssignableFrom(typeClass));
 	}
 	
 	public static NullableOptional<?> createCompatible(ConfigSection forSection, Object o) {
 		ConfigValueType type = getRawTypeOf(o);
 		if(type != null) return NullableOptional.of(o);
-		List<ObjectMapper<?, ?>> path = calculateCompatiblePath(forSection, o.getClass(), new ArrayList<>());
+		List<ObjectMapper<?, ?>> path = calculateCompatiblePath(forSection, Complex.value(o.getClass()), new ArrayList<>());
 		if(path == null) return NullableOptional.empty();
 		Object val = o;
 		for(ObjectMapper<?, ?> mapper : path) {
-			val = mapper.mapRawObject(forSection, val);
+			val = mapper.mapRawObject(forSection, val, forSection::castType);
 		}
 		return NullableOptional.of(val);
 	}
 	
-	private static List<ObjectMapper<?, ?>> calculateCompatiblePath(ConfigSection section, Class<?> clazz, List<Class<?>> classes) {
+	private static List<ObjectMapper<?, ?>> calculateCompatiblePath(ConfigSection section, Complex<?> clazz, List<Complex<?>> classes) {
 		if(isConfigPrimitive(clazz)) return new ArrayList<>();
 		classes.add(clazz);
 		Comparator<Map.Entry<ObjectMapper<?, ?>, Integer>> c = Comparator.comparingInt(en -> en.getKey().getClassDepth(clazz));
@@ -102,13 +108,13 @@ public enum ConfigValueType {
 			if(path != null && pth == null /* || (pth != null && path.size() < pth.size())*/) {
 				path.add(0, mapper);
 				pth = path;
-				break; // Only get the path with the highest priority, not the smallest one
+				break; // Only get the path with the highest priority, not the shortest one
 			}
 		}
 		return pth;
 	}
 	
-	public static boolean isConfigPrimitive(Class<?> typeClass) {
+	public static boolean isConfigPrimitive(Complex<?> typeClass) {
 		return Arrays.stream(ConfigValueType.values()).anyMatch(v -> v.isValidTypeClass(typeClass));
 	}
 	

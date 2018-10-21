@@ -70,9 +70,9 @@ public class DefaultConfigSectionImpl implements StringifiableConfigSection {
 			ConfigSection section = getOrCreateSubsection(path.getName());
 			return section.getProperty(path.traverseDown().toRawPath());
 		}else {
-			Object o = rawProperties.get(path.getName());
-			if(!(o instanceof ConfigProperty)) throw new ConfigException("Value at " + key + " is not a property");
-			return (ConfigProperty) o;
+			ConfigProperty o = rawProperties.get(path.getName());
+			if(o == null) return null;
+			return o;
 		}
 	}
 

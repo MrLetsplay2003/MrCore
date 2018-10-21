@@ -4,15 +4,16 @@ import java.util.function.BiFunction;
 
 import me.mrletsplay.mrcore.config.v2.ConfigSection;
 import me.mrletsplay.mrcore.config.v2.ObjectMapper;
+import me.mrletsplay.mrcore.misc.Complex;
 
 public class ObjectMapperImpl<E, O> implements ObjectMapper<E, O>{
 
-	private Class<E> mappingClass;
-	private Class<O> mappedClass;
+	private Complex<E> mappingClass;
+	private Complex<O> mappedClass;
 	private BiFunction<ConfigSection, E, O> mappingFunction;
 	private BiFunction<ConfigSection, O, E> constructingFunction;
 	
-	public ObjectMapperImpl(Class<E> mappingClass, Class<O> mappedClass, BiFunction<ConfigSection, E, O> mappingFunction, BiFunction<ConfigSection, O, E> constructingFunction) {
+	public ObjectMapperImpl(Complex<E> mappingClass, Complex<O> mappedClass, BiFunction<ConfigSection, E, O> mappingFunction, BiFunction<ConfigSection, O, E> constructingFunction) {
 		this.mappingClass = mappingClass;
 		this.mappedClass = mappedClass;
 		this.mappingFunction = mappingFunction;
@@ -20,12 +21,12 @@ public class ObjectMapperImpl<E, O> implements ObjectMapper<E, O>{
 	}
 
 	@Override
-	public Class<E> getMappingClass() {
+	public Complex<E> getMappingClass() {
 		return mappingClass;
 	}
 	
 	@Override
-	public Class<O> getMappedClass() {
+	public Complex<O> getMappedClass() {
 		return mappedClass;
 	}
 

@@ -109,7 +109,7 @@ public interface ConfigSection {
 	public default Map<String, ConfigProperty> getProperties() {
 		return getAllProperties().entrySet().stream()
 				.filter(en -> !en.getValue().isSubsection())
-				.collect(Collectors.toMap(en -> en.getKey(), en -> (ConfigProperty) en.getValue()));
+				.collect(Collectors.toMap(en -> en.getKey(), en -> en.getValue()));
 	}
 	
 	/**
@@ -195,9 +195,10 @@ public interface ConfigSection {
 		return getComplex(Complex.map(String.class, valueClass), key, defaultValue, applyDefault);
 	}
 	
-	public static <T> NullableOptional<T> defaultCast(ConfigSection section, Object o, Class<T> typeClass) {
+	public static <T> NullableOptional<T> defaultCast(ConfigSection section, Object o, Class<T> typeClass, boolean allowComplex) {
 		if(ClassUtils.isPrimitiveTypeClass(typeClass)) throw new IllegalArgumentException("Primitive types are not allowed");
 		if(o == null) return NullableOptional.of(null);
+		if(typeClass.isInstance(o)) return NullableOptional.of(typeClass.cast(o));
 		if(Number.class.isAssignableFrom(typeClass)) {
 			if(!(o instanceof Number)) return NullableOptional.empty();
 			Number n = (Number) o;
@@ -229,29 +230,29 @@ public interface ConfigSection {
 			if(!typeClass.isInstance(o)) return NullableOptional.empty();
 			return NullableOptional.of(typeClass.cast(o));
 		}else {
-			List<ObjectMapper<?, ?>> path = calculateCompatiblePath(section, o.getClass(), typeClass, new ArrayList<>());
+			if(!allowComplex) return NullableOptional.empty();
+			List<ObjectMapper<?, ?>> path = calculateCompatiblePath(section, o, Complex.value(o.getClass()), Complex.value(typeClass), new ArrayList<>());
 			if(path == null) return NullableOptional.empty();
 			Object val = o;
-			for(ObjectMapper<?, ?> m : path) val = m.constructRawObject(section, val);
+			for(ObjectMapper<?, ?> m : path) val = m.constructRawObject(section, val, section::castType);
 			return NullableOptional.of(typeClass.cast(val));
 		}
-			
 	}
 	
-	public static List<ObjectMapper<?, ?>> calculateCompatiblePath(ConfigSection section, Class<?> fromClass, Class<?> toClass, List<Class<?>> classes) {
-		if(fromClass.equals(toClass)) return new ArrayList<>();
+	public static List<ObjectMapper<?, ?>> calculateCompatiblePath(ConfigSection section, Object object, Complex<?> fromClass, Complex<?> toClass, List<Complex<?>> classes) {
+		if(toClass.equals(fromClass)) return new ArrayList<>();
 		classes.add(fromClass);
 		Comparator<Map.Entry<ObjectMapper<?, ?>, Integer>> c = Comparator.comparingInt(en -> en.getKey().getClassDepth(fromClass));
 		c = c.thenComparingInt(Map.Entry::getValue);
 		List<ObjectMapper<?, ?>> mappers = section.getConfig().getMappers().entrySet().stream()
-				.filter(m -> !classes.contains(m.getKey().getMappingClass()) && m.getKey().canConstruct(fromClass))
+				.filter(m -> !classes.contains(m.getKey().getMappingClass()) && m.getKey().canConstruct(object, section::castPrimitiveType))
 				.sorted(c)
 				.map(Map.Entry::getKey)
 				.collect(Collectors.toList());
 		List<ObjectMapper<?, ?>> pth = null;
 		for(ObjectMapper<?, ?> mapper : mappers) {
 			if(mapper.getMappingClass().equals(toClass)) return new ArrayList<>(Arrays.asList(mapper));
-			List<ObjectMapper<?, ?>> path = calculateCompatiblePath(section, mapper.getMappingClass(), toClass, classes);
+			List<ObjectMapper<?, ?>> path = calculateCompatiblePath(section, mapper.constructRawObject(section, object, section::castPrimitiveType), mapper.getMappingClass(), toClass, classes);
 			if(path != null && pth == null /* || (pth != null && path.size() < pth.size())*/) {
 				path.add(0, mapper);
 				pth = path;
@@ -262,7 +263,17 @@ public interface ConfigSection {
 	}
 	
 	public default <T> NullableOptional<T> castType(Object o, Class<T> clazz) {
-		return defaultCast(this, o, clazz);
+		return defaultCast(this, o, clazz, true);
+	}
+	
+	public default <T> NullableOptional<T> castPrimitiveType(Object o, Class<T> clazz) {
+		return defaultCast(this, o, clazz, false);
+	}
+	
+	public default ConfigValueType getTypeOf(String key) {
+		ConfigProperty p = getProperty(key);
+		if(p == null) return ConfigValueType.UNDEFINED;
+		return p.getValueType();
 	}
 	
 	public default <T> T getComplex(Complex<T> complex, String key, T defaultValue, boolean applyDefault) {
@@ -272,7 +283,7 @@ public interface ConfigSection {
 			return defaultValue;
 		}else {
 			NullableOptional<T> value = complex.cast(prop.getValue(), this::castType);
-			if(!value.isPresent()) throw new IncompatibleTypeException("Incompatible types, " + prop.getValue().getClass().getName() + " is not a compatible with " + complex.getFriendlyClassName());
+			if(!value.isPresent()) throw new IncompatibleTypeException("Incompatible types, " + prop.getValue().getClass().getName() + " cannot be cast/formatted to " + complex.getFriendlyClassName());
 			return value.get();
 		}
 	}

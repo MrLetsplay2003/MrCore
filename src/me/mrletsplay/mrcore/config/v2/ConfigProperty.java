@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import me.mrletsplay.mrcore.json.JSONArray;
 import me.mrletsplay.mrcore.json.JSONObject;
+import me.mrletsplay.mrcore.misc.Complex;
 
 public interface ConfigProperty {
 	
@@ -28,11 +29,11 @@ public interface ConfigProperty {
 		return getValueType().equals(ConfigValueType.SECTION);
 	}
 	
-	public default <T> T getValue(Class<T> asType) {
+	public default <T> T getValue(Complex<T> asType) {
 		if(isUndefined()) throw new ConfigException("Value is not defined");
 		if(isNull()) return null;
 		if(!getValueType().getValueClass().equals(asType)) throw new IncompatibleTypeException("Invalid class provided, must be " + getValueType().getValueClass());
-		return asType.cast(getValue());
+		return asType.cast(getValue()).get();
 	}
 	
 	public default Object getJSONValue() {

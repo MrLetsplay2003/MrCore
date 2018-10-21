@@ -21,11 +21,19 @@ public interface Complex<T> {
 		return cast(o).isPresent();
 	}
 	
+	public default boolean isAssignableFrom(Class<?> clazz) {
+		return isAssignableFrom(value(clazz));
+	}
+	
+	public boolean isAssignableFrom(Complex<?> clazz);
+	
 	public NullableOptional<T> cast(Object o, CastingFunction castingFunction);
 	
 	public default boolean isInstance(Object o, CastingFunction castingFunction) {
 		return cast(o, castingFunction).isPresent();
 	}
+	
+	public Class<?> getBaseClass();
 	
 	public String getFriendlyClassName();
 	
@@ -81,6 +89,11 @@ public interface Complex<T> {
 		private ComplexValue(Class<T> typeClass) {
 			this.typeClass = typeClass;
 		}
+
+		@Override
+		public Class<?> getBaseClass() {
+			return typeClass;
+		}
 		
 		public Class<T> getTypeClass() {
 			return typeClass;
@@ -94,6 +107,22 @@ public interface Complex<T> {
 		@Override
 		public String getFriendlyClassName() {
 			return typeClass.getName();
+		}
+		
+		@Override
+		public boolean isAssignableFrom(Complex<?> clazz) {
+			return typeClass.isAssignableFrom(clazz.getBaseClass());
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			if(!(obj instanceof ComplexValue<?>)) return false;
+			return ((ComplexValue<?>) obj).getBaseClass().equals(typeClass);
+		}
+		
+		@Override
+		public String toString() {
+			return "Complex[" + getFriendlyClassName() + "]";
 		}
 		
 	}
@@ -128,8 +157,34 @@ public interface Complex<T> {
 		}
 
 		@Override
+		public Class<?> getBaseClass() {
+			return List.class;
+		}
+
+		@Override
 		public String getFriendlyClassName() {
 			return "List<" + typeClass.getFriendlyClassName() + ">";
+		}
+
+		@Override
+		public boolean isAssignableFrom(Complex<?> clazz) {
+			if(!(List.class.isAssignableFrom(clazz.getBaseClass()))) return false;
+			if(clazz instanceof ComplexList<?>) {
+				ComplexList<?> l = (ComplexList<?>) clazz;
+				if(!typeClass.isAssignableFrom(l.getType())) return false;
+			}
+			return true;
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			if(!(obj instanceof ComplexList<?>)) return false;
+			return ((ComplexList<?>) obj).getType().equals(typeClass);
+		}
+		
+		@Override
+		public String toString() {
+			return "Complex[" + getFriendlyClassName() + "]";
 		}
 		
 	}
@@ -172,8 +227,36 @@ public interface Complex<T> {
 		}
 
 		@Override
+		public Class<?> getBaseClass() {
+			return Map.class;
+		}
+
+		@Override
 		public String getFriendlyClassName() {
 			return "Map<" + keyClass.getFriendlyClassName() + ", " + valueClass.getFriendlyClassName() + ">";
+		}
+
+		@Override
+		public boolean isAssignableFrom(Complex<?> clazz) {
+			if(!(Map.class.isAssignableFrom(clazz.getBaseClass()))) return false;
+			if(clazz instanceof ComplexList<?>) {
+				ComplexMap<?, ?> l = (ComplexMap<?, ?>) clazz;
+				if(!keyClass.isAssignableFrom(l.getKeyType())) return false;
+				if(!valueClass.isAssignableFrom(l.getValueType())) return false;
+			}
+			return true;
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			if(!(obj instanceof ComplexMap<?, ?>)) return false;
+			return ((ComplexMap<?, ?>) obj).getKeyType().equals(keyClass) &&
+					((ComplexMap<?, ?>) obj).getValueType().equals(valueClass);
+		}
+		
+		@Override
+		public String toString() {
+			return "Complex[" + getFriendlyClassName() + "]";
 		}
 		
 	}
