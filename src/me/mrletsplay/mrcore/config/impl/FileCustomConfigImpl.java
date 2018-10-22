@@ -73,7 +73,7 @@ public class FileCustomConfigImpl implements FileCustomConfig {
 			DefaultConfigFormatter f = new DefaultConfigFormatter(o);
 			f.writeConfigVersionDescriptor(VERSION);
 			if(getHeader() != null) f.writeHeader(getHeader());
-			f.writeSubsection(0, getMainSection());
+			f.writeSubsection(0, getMainSection().toMap(), getMainSection().commentsToMap());
 			o.flush();
 		}catch(IOException e) {
 			throw new ConfigException("Unexpected IO exception", e);

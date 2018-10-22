@@ -2,11 +2,12 @@ package me.mrletsplay.mrcore.config.impl;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import me.mrletsplay.mrcore.config.v2.ConfigProperty;
 import me.mrletsplay.mrcore.config.v2.ConfigSection;
+import me.mrletsplay.mrcore.misc.Complex;
 
 class DefaultConfigFormatter {
 
@@ -36,7 +37,8 @@ class DefaultConfigFormatter {
 		}
 		if(property instanceof ConfigSection) {
 			w.newLine();
-			writeSubsection(indents + 1, (ConfigSection) property);
+			ConfigSection s = (ConfigSection) property;
+			writeSubsection(indents + 1,  s.toMap(), s.commentsToMap());
 		}else if(property instanceof List) {
 			for(Object o : ((List<?>) property)) {
 				w.newLine();
@@ -56,9 +58,9 @@ class DefaultConfigFormatter {
 		}
 	}
 	
-	public void writeSubsection(int indents, ConfigSection section) throws IOException {
-		for(Map.Entry<String, ConfigProperty> p : section.getAllProperties().entrySet()) {
-			String comment = section.getComment(p.getKey());
+	public void writeSubsection(int indents, Map<String, Object> properties, Map<String, Object> comments) throws IOException {
+		for(Map.Entry<String, Object> p : properties.entrySet()) {
+			String comment = (String) comments.get(p.getKey());
 			if(comment != null) {
 				String[] sComment = comment.split("\n");
 				for(String c : sComment) {
@@ -68,11 +70,12 @@ class DefaultConfigFormatter {
 			}
 			w.write(space(indents) + p.getKey());
 			w.write(": ");
-			if(p.getValue().isSubsection()) {
+			Complex<Map<String, Object>> c = Complex.map(String.class, Object.class);
+			if(c.isInstance(p.getValue())) {
 				w.newLine();
-				writeSubsection(indents + 1, (ConfigSection) p.getValue().getValue());
+				writeSubsection(indents + 1, c.cast(p.getValue()).get(), c.cast(comments.get(p.getKey())).map(en -> en != null ? en : new HashMap<String, Object>()).get());
 			}else {
-				writePropertyValue(indents + 1, p.getValue().getValue());
+				writePropertyValue(indents + 1, p.getValue());
 				w.newLine();
 			}
 		}

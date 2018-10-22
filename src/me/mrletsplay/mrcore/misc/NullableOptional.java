@@ -61,6 +61,11 @@ public class NullableOptional<T> {
 		return of(mapper.apply(value));
 	}
 	
+	public <U> NullableOptional<U> mapExact(Function<T, U> mapper) {
+		if(!present) return empty();
+		return of(mapper.apply(value));
+	}
+	
 	public void ifPresent(Consumer<? super T> consumer) {
 		if(present) consumer.accept(value);
 	}

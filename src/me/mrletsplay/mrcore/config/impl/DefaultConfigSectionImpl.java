@@ -108,7 +108,7 @@ public class DefaultConfigSectionImpl implements StringifiableConfigSection {
 		BufferedWriter w = new BufferedWriter(new OutputStreamWriter(bOut));
 		DefaultConfigFormatter f = new DefaultConfigFormatter(w);
 		try {
-			f.writeSubsection(indents, this);
+			f.writeSubsection(indents, toMap(), commentsToMap());
 			w.close();
 		} catch (IOException e) {}
 		return new String(bOut.toByteArray(), StandardCharsets.UTF_8);

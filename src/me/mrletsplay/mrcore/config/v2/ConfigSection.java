@@ -159,6 +159,36 @@ public interface ConfigSection {
 	}
 	
 	/**
+	 * Returns a map containing all the comments as well as subsections' comments (represented by other {@link Map}s) of this section.<br>
+	 * The Map returned by this function may be passed to {@link #loadCommentsFromMap(Map)}
+	 * @return A map containing all the comments as well as subsections' comments of this section
+	 */
+	public default Map<String, Object> commentsToMap() {
+		Map<String, Object> map = new LinkedHashMap<>(getComments());
+		for(Entry<String, ConfigSection> sub : getSubsections().entrySet()) {
+			map.put(sub.getKey(), sub.getValue().commentsToMap());
+		}
+		return map;
+	}
+	
+	/**
+	 * Sets all the comments & subsections' comments (represented by other {@link Map}s) of the specified map in this subsection.<br>
+	 * Any map created by {@link #commentsToMap()} may be passed to this function
+	 * @param map A map containing all the comments & subsections' comments
+	 */
+	public default void loadCommentsFromMap(Map<String, Object> map) {
+		map.forEach((k, v) -> {
+			Complex<Map<String, Object>> c = Complex.map(String.class, Object.class);
+			NullableOptional<Map<String, Object>> m = c.cast(v);
+			if(m.isPresent()) {
+				getSubsection(k).loadCommentsFromMap(m.get());
+				return;
+			}
+			setComment(k, (String) v);
+		});
+	}
+	
+	/**
 	 * Returns a JSONObject containing all the (raw) properties as well as subsections (represented by other {@link JSONObject}s) of this section.<br>
 	 * Lists will be converted to {@link JSONArray}s.<br>
 	 * The JSONObject returned by this function may be passed to {@link #loadFromJSON(JSONObject)}
