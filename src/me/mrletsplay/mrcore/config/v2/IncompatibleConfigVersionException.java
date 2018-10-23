@@ -1,5 +1,7 @@
 package me.mrletsplay.mrcore.config.v2;
 
+import me.mrletsplay.mrcore.config.impl.ConfigVersion;
+
 public class IncompatibleConfigVersionException extends ConfigException {
 
 	private static final long serialVersionUID = 3106349501269549012L;
@@ -16,8 +18,16 @@ public class IncompatibleConfigVersionException extends ConfigException {
 		return givenVersion;
 	}
 	
+	public ConfigVersion getGivenDefaultVersion() {
+		return ConfigVersion.getByName(givenVersion);
+	}
+	
 	public String getRequiredVersion() {
 		return requiredVersion;
+	}
+	
+	public ConfigVersion getRequiredDefaultVersion() {
+		return ConfigVersion.getByName(requiredVersion);
 	}
 	
 }

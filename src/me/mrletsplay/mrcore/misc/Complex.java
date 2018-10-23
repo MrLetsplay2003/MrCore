@@ -98,7 +98,7 @@ public interface Complex<T> {
 		public Class<T> getTypeClass() {
 			return typeClass;
 		}
-
+		
 		@Override
 		public NullableOptional<T> cast(Object o, CastingFunction castingFunction) {
 			return castingFunction.cast(o, typeClass);

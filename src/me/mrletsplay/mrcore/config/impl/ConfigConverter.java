@@ -2,6 +2,7 @@ package me.mrletsplay.mrcore.config.impl;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -11,38 +12,24 @@ import me.mrletsplay.mrcore.http.HttpRequest;
 import me.mrletsplay.mrcore.json.JSONObject;
 
 public class ConfigConverter {
-
-	/**
-	 * This method will convert a given CustomConfig instance to the specified version<br>
-	 * by making a POST request to <a href="http://graphite-official.com/api/mrcore/convert_config.php">The CustomConfig conversion API</a><br>
-	 * This can be used to provide compatability inbetween version changes and thus provides a better experience to the user<br>
-	 * The API will be kept up to date with the latest config versions<br>
-	 * Note: The config version will only be changed when larger changes to the algorithm are made<br>
-	 * Classes extending the CustomConfig with custom saving algorithms will not work with this API<br>
-	 * Customized CustomConfig instances will also not work<br>
-	 * The value returned by this method will always be a non-modified CustomConfig/CompactCustomConfig instance (default comment prefix, spl string, etc.)
-	 * @param config The config to convert
-	 * @param version The {@link ConfigVersion} to convert to
-	 * @throws ConfigConversionException If the config provided is not supported by the API or a conversion error occurs
-	 * @return
-	 */
-	public static CustomConfig convertConfig(String config, CustomConfig toConfig, ConfigVersion fromVersion, ConfigVersion toVersion) {
-		toConfig.load(new ByteArrayInputStream(convertVersion(config, fromVersion, toVersion).getBytes(StandardCharsets.UTF_8)));
+	
+	public static <T extends CustomConfig> T convertConfig(byte[] config, T toConfig, ConfigVersion fromVersion, ConfigVersion toVersion) {
+		toConfig.load(new ByteArrayInputStream(convertVersion(config, fromVersion, toVersion)));
 		return toConfig;
 	}
 	
-	public static String convertVersion(String configString, ConfigVersion fromVersion, ConfigVersion toVersion) {
-		return convertVersion(configString, fromVersion.name, toVersion.name);
+	public static byte[] convertVersion(byte[] config, ConfigVersion fromVersion, ConfigVersion toVersion) {
+		return convertVersion(config, fromVersion.name, toVersion.name);
 	}
 	
-	public static String convertVersion(String configString, String fromVersion, String toVersion) {
-		String getURL = "https://graphite-official.com/api/mrcore/convert_config.php?from_version="+fromVersion+"&to_version="+toVersion;
+	public static byte[] convertVersion(byte[] config, String fromVersion, String toVersion) {
+		String getURL = "http://localhost:8745/api/mrcore/convert_config_v2.php?from_version="+fromVersion+"&to_version="+toVersion;
 		JSONObject result = HttpRequest.createPost(getURL)
-								.setPostParameter("data", configString)
+								.setPostParameter("data", Base64.getEncoder().encodeToString(config))
 								.execute()
 								.asJSONObject();
 		if(result.getBoolean("success")) {
-			return result.getString("data");
+			return Base64.getDecoder().decode(result.getString("data"));
 		}else {
 			throw new ConfigConversionException("Failed to convert config: " + result.getString("error"));
 		}

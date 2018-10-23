@@ -213,18 +213,6 @@ public interface ConfigSection {
 		json.forEach(this::set);
 	}
 	
-	public default <T> T getGeneric(Class<T> clazz, String key, T defaultValue, boolean applyDefault) {
-		return getComplex(Complex.value(clazz), key, defaultValue, applyDefault);
-	}
-
-	public default <T> List<T> getGenericList(Class<T> clazz, String key, List<T> defaultValue, boolean applyDefault) {
-		return getComplex(Complex.list(clazz), key, defaultValue, applyDefault);
-	}
-
-	public default <T> Map<String, T> getGenericMap(Class<T> valueClass, String key, Map<String, T> defaultValue, boolean applyDefault) {
-		return getComplex(Complex.map(String.class, valueClass), key, defaultValue, applyDefault);
-	}
-	
 	public static <T> NullableOptional<T> defaultCast(ConfigSection section, Object o, Class<T> typeClass, boolean allowComplex) {
 		if(ClassUtils.isPrimitiveTypeClass(typeClass)) throw new IllegalArgumentException("Primitive types are not allowed");
 		if(o == null) return NullableOptional.of(null);
@@ -306,7 +294,7 @@ public interface ConfigSection {
 		return p.getValueType();
 	}
 	
-	public default <T> T getComplex(Complex<T> complex, String key, T defaultValue, boolean applyDefault) {
+	public default <T> T getComplex(String key, Complex<T> complex, T defaultValue, boolean applyDefault) {
 		ConfigProperty prop = getProperty(key);
 		if(prop.isUndefined()) {
 			if(applyDefault) set(key, defaultValue);
@@ -318,52 +306,96 @@ public interface ConfigSection {
 		}
 	}
 	
+	public default <T> T getGeneric(String key, Class<T> clazz, T defaultValue, boolean applyDefault) {
+		return getComplex(key, Complex.value(clazz), defaultValue, applyDefault);
+	}
+
+	public default <T> List<T> getGenericList(Class<T> clazz, String key, List<T> defaultValue, boolean applyDefault) {
+		return getComplex(key, Complex.list(clazz), defaultValue, applyDefault);
+	}
+
+	public default <T> Map<String, T> getGenericMap(Class<T> valueClass, String key, Map<String, T> defaultValue, boolean applyDefault) {
+		return getComplex(key, Complex.map(String.class, valueClass), defaultValue, applyDefault);
+	}
+	
 	public default String getString(String key, String defaultValue, boolean applyDefault) {
-		return getGeneric(String.class, key, defaultValue, applyDefault);
+		return getGeneric(key, String.class, defaultValue, applyDefault);
 	}
 	
 	public default boolean getBoolean(String key, boolean defaultValue, boolean applyDefault) {
-		return getGeneric(Boolean.class, key, defaultValue, applyDefault);
+		return getGeneric(key, Boolean.class, defaultValue, applyDefault);
 	}
 	
 	public default byte getByte(String key, byte defaultValue, boolean applyDefault) {
-		return getGeneric(Byte.class, key, defaultValue, applyDefault);
+		return getGeneric(key, Byte.class, defaultValue, applyDefault);
 	}
 	
 	public default short getShort(String key, short defaultValue, boolean applyDefault) {
-		return getGeneric(Short.class, key, defaultValue, applyDefault);
+		return getGeneric(key, Short.class, defaultValue, applyDefault);
 	}
 	
 	public default int getInt(String key, int defaultValue, boolean applyDefault) {
-		return getGeneric(Integer.class, key, defaultValue, applyDefault);
+		return getGeneric(key, Integer.class, defaultValue, applyDefault);
 	}
 	
 	public default long getLong(String key, long defaultValue, boolean applyDefault) {
-		return getGeneric(Long.class, key, defaultValue, applyDefault);
+		return getGeneric(key, Long.class, defaultValue, applyDefault);
 	}
 	
 	public default float getFloat(String key, float defaultValue, boolean applyDefault) {
-		return getGeneric(Float.class, key, defaultValue, applyDefault);
+		return getGeneric(key, Float.class, defaultValue, applyDefault);
 	}
 	
 	public default double getDouble(String key, double defaultValue, boolean applyDefault) {
-		return getGeneric(Double.class, key, defaultValue, applyDefault);
+		return getGeneric(key, Double.class, defaultValue, applyDefault);
 	}
 	
 	public default List<?> getList(String key, List<?> defaultValue, boolean applyDefault) {
-		return getGeneric(List.class, key, defaultValue, applyDefault);
+		return getGeneric(key, List.class, defaultValue, applyDefault);
 	}
 	
 	public default Map<?, ?> getMap(String key, Map<?, ?> defaultValue, boolean applyDefault) {
-		return getGeneric(Map.class, key, defaultValue, applyDefault);
+		return getGeneric(key, Map.class, defaultValue, applyDefault);
 	}
 	
-	public default <T> T getGeneric(Class<T> clazz, String key) {
-		return getGeneric(clazz, key, null, false);
+	public default List<String> getStringList(String key, List<String> defaultValue, boolean applyDefault) {
+		return getGenericList(String.class, key, defaultValue, applyDefault);
 	}
 	
-	public default <T> T getComplex(Complex<T> complex, String key) {
-		return getComplex(complex, key, null, false);
+	public default List<Boolean> getBooleanList(String key, List<Boolean> defaultValue, boolean applyDefault) {
+		return getGenericList(Boolean.class, key, defaultValue, applyDefault);
+	}
+	
+	public default List<Byte> getByteList(String key, List<Byte> defaultValue, boolean applyDefault) {
+		return getGenericList(Byte.class, key, defaultValue, applyDefault);
+	}
+	
+	public default List<Short> getShortList(String key, List<Short> defaultValue, boolean applyDefault) {
+		return getGenericList(Short.class, key, defaultValue, applyDefault);
+	}
+	
+	public default List<Integer> getIntegerList(String key, List<Integer> defaultValue, boolean applyDefault) {
+		return getGenericList(Integer.class, key, defaultValue, applyDefault);
+	}
+	
+	public default List<Long> getLongList(String key, List<Long> defaultValue, boolean applyDefault) {
+		return getGenericList(Long.class, key, defaultValue, applyDefault);
+	}
+	
+	public default List<Float> getFloatList(String key, List<Float> defaultValue, boolean applyDefault) {
+		return getGenericList(Float.class, key, defaultValue, applyDefault);
+	}
+	
+	public default List<Double> getDoubleList(String key, List<Double> defaultValue, boolean applyDefault) {
+		return getGenericList(Double.class, key, defaultValue, applyDefault);
+	}
+	
+	public default <T> T getGeneric(String key, Class<T> clazz) {
+		return getGeneric(key, clazz, null, false);
+	}
+	
+	public default <T> T getComplex(String key, Complex<T> complex) {
+		return getComplex(key, complex, null, false);
 	}
 	
 	public default String getString(String key) {
@@ -404,6 +436,38 @@ public interface ConfigSection {
 	
 	public default Map<?, ?> getMap(String key) {
 		return getMap(key, new HashMap<>(), false);
+	}
+	
+	public default List<String> getStringList(String key) {
+		return getGenericList(String.class, key, new ArrayList<>(), false);
+	}
+	
+	public default List<Boolean> getBooleanList(String key) {
+		return getGenericList(Boolean.class, key, new ArrayList<>(), false);
+	}
+	
+	public default List<Byte> getByteList(String key) {
+		return getGenericList(Byte.class, key, new ArrayList<>(), false);
+	}
+	
+	public default List<Short> getShortList(String key) {
+		return getGenericList(Short.class, key, new ArrayList<>(), false);
+	}
+	
+	public default List<Integer> getIntegerList(String key) {
+		return getGenericList(Integer.class, key, new ArrayList<>(), false);
+	}
+	
+	public default List<Long> getLongList(String key) {
+		return getGenericList(Long.class, key, new ArrayList<>(), false);
+	}
+	
+	public default List<Float> getFloatList(String key) {
+		return getGenericList(Float.class, key, new ArrayList<>(), false);
+	}
+	
+	public default List<Double> getDoubleList(String key) {
+		return getGenericList(Double.class, key, new ArrayList<>(), false);
 	}
 	
 }

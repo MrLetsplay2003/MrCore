@@ -25,53 +25,8 @@ public interface CustomConfig extends ConfigSection {
 	}
 	
 	@Override
-	public default <T> T getGeneric(Class<T> clazz, String key) {
-		return getMainSection().getGeneric(clazz, key);
-	}
-	
-	@Override
-	public default <T> T getComplex(Complex<T> complex, String key) {
-		return getMainSection().getComplex(complex, key);
-	}
-	
-	@Override
-	public default String getString(String key) {
-		return getMainSection().getString(key);
-	}
-	
-	@Override
-	public default boolean getBoolean(String key) {
-		return getMainSection().getBoolean(key);
-	}
-	
-	@Override
-	public default byte getByte(String key) {
-		return getMainSection().getByte(key);
-	}
-	
-	@Override
-	public default short getShort(String key) {
-		return getMainSection().getShort(key);
-	}
-	
-	@Override
-	public default int getInt(String key) {
-		return getMainSection().getInt(key);
-	}
-	
-	@Override
-	public default long getLong(String key) {
-		return getMainSection().getLong(key);
-	}
-	
-	@Override
-	public default float getFloat(String key) {
-		return getMainSection().getFloat(key);
-	}
-	
-	@Override
-	public default double getDouble(String key) {
-		return getMainSection().getDouble(key);
+	public default <T> T getComplex(String key, Complex<T> complex) {
+		return getMainSection().getComplex(key, complex);
 	}
 	
 	public default void load(File file) {
