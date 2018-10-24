@@ -326,7 +326,7 @@ public interface ConfigSection {
 		return getComplex(key, Complex.value(clazz), defaultValue, applyDefault);
 	}
 
-	public default <T> List<T> getGenericList(Class<T> clazz, String key, List<T> defaultValue, boolean applyDefault) {
+	public default <T> List<T> getGenericList(String key, Class<T> clazz, List<T> defaultValue, boolean applyDefault) {
 		return getComplex(key, Complex.list(clazz), defaultValue, applyDefault);
 	}
 
@@ -375,35 +375,35 @@ public interface ConfigSection {
 	}
 	
 	public default List<String> getStringList(String key, List<String> defaultValue, boolean applyDefault) {
-		return getGenericList(String.class, key, defaultValue, applyDefault);
+		return getGenericList(key, String.class, defaultValue, applyDefault);
 	}
 	
 	public default List<Boolean> getBooleanList(String key, List<Boolean> defaultValue, boolean applyDefault) {
-		return getGenericList(Boolean.class, key, defaultValue, applyDefault);
+		return getGenericList(key, Boolean.class, defaultValue, applyDefault);
 	}
 	
 	public default List<Byte> getByteList(String key, List<Byte> defaultValue, boolean applyDefault) {
-		return getGenericList(Byte.class, key, defaultValue, applyDefault);
+		return getGenericList(key, Byte.class, defaultValue, applyDefault);
 	}
 	
 	public default List<Short> getShortList(String key, List<Short> defaultValue, boolean applyDefault) {
-		return getGenericList(Short.class, key, defaultValue, applyDefault);
+		return getGenericList(key, Short.class, defaultValue, applyDefault);
 	}
 	
 	public default List<Integer> getIntegerList(String key, List<Integer> defaultValue, boolean applyDefault) {
-		return getGenericList(Integer.class, key, defaultValue, applyDefault);
+		return getGenericList(key, Integer.class, defaultValue, applyDefault);
 	}
 	
 	public default List<Long> getLongList(String key, List<Long> defaultValue, boolean applyDefault) {
-		return getGenericList(Long.class, key, defaultValue, applyDefault);
+		return getGenericList(key, Long.class, defaultValue, applyDefault);
 	}
 	
 	public default List<Float> getFloatList(String key, List<Float> defaultValue, boolean applyDefault) {
-		return getGenericList(Float.class, key, defaultValue, applyDefault);
+		return getGenericList(key, Float.class, defaultValue, applyDefault);
 	}
 	
 	public default List<Double> getDoubleList(String key, List<Double> defaultValue, boolean applyDefault) {
-		return getGenericList(Double.class, key, defaultValue, applyDefault);
+		return getGenericList(key, Double.class, defaultValue, applyDefault);
 	}
 	
 	public default <T> T getGeneric(String key, Class<T> clazz) {
@@ -455,35 +455,35 @@ public interface ConfigSection {
 	}
 	
 	public default List<String> getStringList(String key) {
-		return getGenericList(String.class, key, new ArrayList<>(), false);
+		return getGenericList(key, String.class, new ArrayList<>(), false);
 	}
 	
 	public default List<Boolean> getBooleanList(String key) {
-		return getGenericList(Boolean.class, key, new ArrayList<>(), false);
+		return getGenericList(key, Boolean.class, new ArrayList<>(), false);
 	}
 	
 	public default List<Byte> getByteList(String key) {
-		return getGenericList(Byte.class, key, new ArrayList<>(), false);
+		return getGenericList(key, Byte.class, new ArrayList<>(), false);
 	}
 	
 	public default List<Short> getShortList(String key) {
-		return getGenericList(Short.class, key, new ArrayList<>(), false);
+		return getGenericList(key, Short.class, new ArrayList<>(), false);
 	}
 	
 	public default List<Integer> getIntegerList(String key) {
-		return getGenericList(Integer.class, key, new ArrayList<>(), false);
+		return getGenericList(key, Integer.class, new ArrayList<>(), false);
 	}
 	
 	public default List<Long> getLongList(String key) {
-		return getGenericList(Long.class, key, new ArrayList<>(), false);
+		return getGenericList(key, Long.class, new ArrayList<>(), false);
 	}
 	
 	public default List<Float> getFloatList(String key) {
-		return getGenericList(Float.class, key, new ArrayList<>(), false);
+		return getGenericList(key, Float.class, new ArrayList<>(), false);
 	}
 	
 	public default List<Double> getDoubleList(String key) {
-		return getGenericList(Double.class, key, new ArrayList<>(), false);
+		return getGenericList(key, Double.class, new ArrayList<>(), false);
 	}
 	
 	public default List<String> getKeys(String key, boolean deep, boolean fullKeys) {
