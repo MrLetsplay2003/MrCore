@@ -306,13 +306,13 @@ public interface ConfigSection {
 	
 	public default ConfigValueType getTypeOf(String key) {
 		ConfigProperty p = getProperty(key);
-		if(p == null) return ConfigValueType.UNDEFINED;
+		if(p == null || p.isUndefined()) return ConfigValueType.UNDEFINED;
 		return p.getValueType();
 	}
 	
 	public default <T> T getComplex(String key, Complex<T> complex, T defaultValue, boolean applyDefault) {
 		ConfigProperty prop = getProperty(key);
-		if(prop.isUndefined()) {
+		if(prop == null || prop.isUndefined()) {
 			if(applyDefault) set(key, defaultValue);
 			return defaultValue;
 		}else {
