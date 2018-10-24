@@ -573,7 +573,7 @@ class DefaultConfigParser {
 		}
 		
 		public boolean hasNext() {
-			return currentIndex < lines[currentLine].length() - 1 || currentLine < lines.length - 1;
+			return lines.length > 0 && (currentIndex < lines[currentLine].length() - 1 || currentLine < lines.length - 1);
 		}
 		
 		public boolean hasNextIgnoreWhitespaces() {
