@@ -54,9 +54,6 @@ public class DefaultConfigPropertyImpl implements ConfigProperty {
 		}
 		if(value instanceof List<?>) {
 			List<?> l = ((List<?>) value).stream().map(o -> create(section, null, o).getValue()).collect(Collectors.toList());
-//			ConfigSectionDescriptor d = (ConfigSectionDescriptor) value;
-//			ConfigSection s = new DefaultConfigSectionImpl(section.getConfig());
-//			s.loadFromMap(d.getProperties());
 			return new DefaultConfigPropertyImpl(section, name, ConfigValueType.LIST, l);
 		}
 		NullableOptional<?> v = ConfigValueType.createCompatible(section, value);

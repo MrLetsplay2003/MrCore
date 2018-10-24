@@ -486,7 +486,7 @@ public interface ConfigSection {
 	
 	public default List<String> getKeys(boolean deep, boolean fullKeys) {
 		List<String> keys = new ArrayList<>();
-		getProperties().forEach((k, v) -> keys.add(k));
+		getAllProperties().forEach((k, v) -> keys.add(k));
 		if(deep) {
 			for(Map.Entry<String, ConfigSection> ss : getSubsections().entrySet()) {
 				List<String> sK = ss.getValue().getKeys(deep, fullKeys);
@@ -499,7 +499,7 @@ public interface ConfigSection {
 	
 	public default List<String> getKeys() {
 		List<String> keys = new ArrayList<>();
-		getProperties().forEach((k, v) -> keys.add(k));
+		getAllProperties().forEach((k, v) -> keys.add(k));
 		return keys;
 	}
 	
