@@ -8,6 +8,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 
+import org.bukkit.util.FileUtil;
+
+import me.mrletsplay.mrcore.io.IOUtils;
 import me.mrletsplay.mrcore.misc.Complex;
 
 public interface CustomConfig extends ConfigSection {
@@ -41,6 +44,7 @@ public interface CustomConfig extends ConfigSection {
 	
 	public default void load(File file) {
 		try {
+			IOUtils.createFile(file);
 			FileInputStream in = new FileInputStream(file);
 			load(in);
 			in.close();
@@ -51,6 +55,7 @@ public interface CustomConfig extends ConfigSection {
 	
 	public default void save(File file) {
 		try {
+			IOUtils.createFile(file);
 			FileOutputStream out = new FileOutputStream(file);
 			save(out);
 			out.close();
