@@ -20,6 +20,11 @@ public interface CustomConfig extends ConfigSection {
 	}
 	
 	@Override
+	public default void unset(String key) {
+		getMainSection().unset(key);
+	}
+	
+	@Override
 	public default ConfigProperty getProperty(String key) {
 		return getMainSection().getProperty(key);
 	}

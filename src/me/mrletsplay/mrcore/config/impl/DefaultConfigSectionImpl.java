@@ -62,6 +62,17 @@ public class DefaultConfigSectionImpl implements StringifiableConfigSection {
 			rawProperties.put(path.getName(), DefaultConfigPropertyImpl.create(this, path.getName(), value));
 		}
 	}
+
+	@Override
+	public void unset(String key) {
+		ConfigPath path = ConfigPath.of(key);
+		if(path.hasSubpaths()) {
+			ConfigSection section = getOrCreateSubsection(path.getName());
+			section.unset(path.traverseDown().toRawPath());
+		}else {
+			rawProperties.remove(path.getName());
+		}
+	}
 	
 	@Override
 	public ConfigProperty getProperty(String key) throws ConfigException{
