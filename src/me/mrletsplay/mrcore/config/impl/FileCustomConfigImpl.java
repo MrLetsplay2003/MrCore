@@ -35,6 +35,7 @@ public class FileCustomConfigImpl implements FileCustomConfig {
 		this.mainSection = new DefaultConfigSectionImpl(this);
 		this.mappers = new HashMap<>();
 		registerMapper(DefaultConfigMappers.JSON_MAPPER);
+		registerMapper(DefaultConfigMappers.MAP_MAPPER);
 	}
 	
 	@Override

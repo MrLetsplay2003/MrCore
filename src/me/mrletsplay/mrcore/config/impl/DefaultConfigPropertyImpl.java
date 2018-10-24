@@ -1,5 +1,8 @@
 package me.mrletsplay.mrcore.config.impl;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import me.mrletsplay.mrcore.config.impl.DefaultConfigParser.ConfigSectionDescriptor;
 import me.mrletsplay.mrcore.config.v2.ConfigException;
 import me.mrletsplay.mrcore.config.v2.ConfigProperty;
@@ -45,14 +48,27 @@ public class DefaultConfigPropertyImpl implements ConfigProperty {
 		if(value instanceof ConfigSectionDescriptor) {
 			ConfigSectionDescriptor d = (ConfigSectionDescriptor) value;
 			ConfigSection s = new DefaultConfigSectionImpl(section.getConfig());
-			s.loadFromMap(d.getProperties());
+			s.loadFromMap(d.toPropertyMap());
+			s.loadCommentsFromMap(d.toCommentMap());
 			return new DefaultConfigPropertyImpl(section, name, ConfigValueType.SECTION, s);
+		}
+		if(value instanceof List<?>) {
+			List<?> l = ((List<?>) value).stream().map(o -> create(section, null, o).getValue()).collect(Collectors.toList());
+//			ConfigSectionDescriptor d = (ConfigSectionDescriptor) value;
+//			ConfigSection s = new DefaultConfigSectionImpl(section.getConfig());
+//			s.loadFromMap(d.getProperties());
+			return new DefaultConfigPropertyImpl(section, name, ConfigValueType.LIST, l);
 		}
 		NullableOptional<?> v = ConfigValueType.createCompatible(section, value);
 		if(!v.isPresent()) throw new ConfigException("Unsupported type: " + value.getClass().getName());
 		value = v.get();
 		ConfigValueType type = ConfigValueType.getRawTypeOf(value);
 		return new DefaultConfigPropertyImpl(section, name, type, value);
+	}
+	
+	@Override
+	public String toString() {
+		return "[P: " + value + "]";
 	}
 
 }

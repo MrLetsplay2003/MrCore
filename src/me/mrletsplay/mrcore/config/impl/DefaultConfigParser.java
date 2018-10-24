@@ -51,7 +51,7 @@ class DefaultConfigParser {
 		return vDesc.substring(vS.length()).trim();
 	}
 	
-	public Object readCommentOrPropertyDescriptor() {
+	public Object readCommentOrPropertyDescriptor(int indents) {
 		int sk = r.skipWhitespacesUntil('\n').length();
 		if(!r.hasNext()) throw new ConfigException("Failed to read property descriptor: EOF reached");
 		if(r.next() == '\n') throw new ConfigException("Invalid comment/property descriptor", r.currentLine, r.currentIndex);
@@ -60,21 +60,25 @@ class DefaultConfigParser {
 			return r.readUntil('\n');
 		}else {
 			r.revert(sk + 1);
-			return readPropertyDescriptor();
+			return readPropertyDescriptor(indents);
 		}
 	}
 	
-	public PropertyDescriptor readPropertyDescriptor() {
-		int indents = r.skipWhitespacesUntil('\n').length();
+	public PropertyDescriptor readPropertyDescriptor(int indents) {
+		int rIndents = r.skipWhitespacesUntil('\n').length();
 		if(!r.hasNext()) throw new ConfigException("Failed to read property descriptor: EOF reached");
 		if(r.next() == '\n') throw new ConfigException("Invalid property descriptor", r.currentLine, r.currentIndex);
 		r.revert();
-		if(indents % 2 != 0) throw new ConfigException("Invalid property descriptor: indents % 2 != 0", r.currentLine, r.currentIndex);
+		if(rIndents % 2 != 0) throw new ConfigException("Invalid property descriptor: indents % 2 != 0", r.currentLine, r.currentIndex);
 		Marker s = r.createMarker();
+		if(rIndents / 2 != indents) {
+			r.next(); // FIXME
+			return new PropertyDescriptor(rIndents, "", s);
+		}
 		String d = r.readUntil(':');
 		if(d == null) throw new ConfigException("Failed to read property descriptor: EOF reached");
 		if(d.contains("\n")) throw new ConfigException("Invalid property descriptor", r.currentLine, r.currentIndex);
-		return new PropertyDescriptor(indents, d, s);
+		return new PropertyDescriptor(rIndents, d, s);
 	}
 	
 	public Object readPropertyValue(int propertyIndents) {
@@ -138,7 +142,7 @@ class DefaultConfigParser {
 		ConfigSectionDescriptor section = new ConfigSectionDescriptor();
 		List<String> commentBuffer = new ArrayList<>();
 		while(r.hasNext()) {
-			Object cop = readCommentOrPropertyDescriptor();
+			Object cop = readCommentOrPropertyDescriptor(indents);
 			if(cop instanceof PropertyDescriptor) {
 				PropertyDescriptor s = (PropertyDescriptor) cop;
 				if(s.getIndents() > indents) throw new ConfigException("Invalid amount of indents", s.start.line, s.start.index + 1);
@@ -409,6 +413,11 @@ class DefaultConfigParser {
 				comments2.put(k, v.toCommentMap());
 			});
 			return comments2;
+		}
+		
+		@Override
+		public String toString() {
+			return "[SEC] " + properties;
 		}
 		
 	}

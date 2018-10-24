@@ -132,8 +132,8 @@ public interface ConfigSection {
 	 */
 	public default Map<String, ConfigSection> getSubsections() {
 		return getAllProperties().entrySet().stream()
-				.filter(en -> en.getValue() instanceof ConfigSection)
-				.collect(Collectors.toMap(en -> en.getKey(), en -> (ConfigSection) en.getValue()));
+				.filter(en -> en.getValue().isSubsection())
+				.collect(Collectors.toMap(en -> en.getKey(), en -> (ConfigSection) en.getValue().getValue()));
 	}
 	
 	/**
@@ -235,9 +235,9 @@ public interface ConfigSection {
 			}else {
 				return NullableOptional.empty();
 			}
-		}else if(typeClass.equals(Map.class)) {
-			if(!(o instanceof ConfigSection)) return NullableOptional.empty();
-			return NullableOptional.of(typeClass.cast(((ConfigSection) o).toMap()));
+//		}else if(typeClass.equals(Map.class)) {
+//			if(!(o instanceof ConfigSection)) return NullableOptional.empty();
+//			return NullableOptional.of(typeClass.cast(((ConfigSection) o).toMap()));
 //		}else if(typeClass.equals(JSONObject.class)) {
 //			if(!(o instanceof ConfigSection)) return NullableOptional.empty();
 //			return NullableOptional.of(typeClass.cast(new JSONObject(((ConfigSection) o).toMap())));
@@ -468,6 +468,39 @@ public interface ConfigSection {
 	
 	public default List<Double> getDoubleList(String key) {
 		return getGenericList(Double.class, key, new ArrayList<>(), false);
+	}
+	
+	public default List<String> getKeys(String key, boolean deep, boolean fullKeys) {
+		ConfigPath path = new ConfigPath(key, 0);
+		if(path.hasSubpaths()) {
+			return getSubsection(path.getName()).getKeys(path.traverseDown().toRawPath(), deep, fullKeys);
+		}
+		ConfigSection ss = getSubsection(key);
+		if(ss == null) return new ArrayList<>();
+		return ss.getKeys(deep, fullKeys);
+	}
+	
+	public default List<String> getKeys(String key) {
+		return getKeys(key, false, true);
+	}
+	
+	public default List<String> getKeys(boolean deep, boolean fullKeys) {
+		List<String> keys = new ArrayList<>();
+		getProperties().forEach((k, v) -> keys.add(k));
+		if(deep) {
+			for(Map.Entry<String, ConfigSection> ss : getSubsections().entrySet()) {
+				List<String> sK = ss.getValue().getKeys(deep, fullKeys);
+				if(fullKeys) sK = sK.stream().map(k -> ss.getKey() + "." + k).collect(Collectors.toList());
+				keys.addAll(sK);
+			}
+		}
+		return keys;
+	}
+	
+	public default List<String> getKeys() {
+		List<String> keys = new ArrayList<>();
+		getProperties().forEach((k, v) -> keys.add(k));
+		return keys;
 	}
 	
 }

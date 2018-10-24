@@ -29,6 +29,10 @@ public interface ConfigProperty {
 		return getValueType().equals(ConfigValueType.SECTION);
 	}
 	
+	public default boolean isList() {
+		return getValueType().equals(ConfigValueType.LIST);
+	}
+	
 	public default <T> T getValue(Complex<T> asType) {
 		if(isUndefined()) throw new ConfigException("Value is not defined");
 		if(isNull()) return null;
@@ -45,12 +49,20 @@ public interface ConfigProperty {
 	public static Object toJSONCompliant(Object o) {
 		if(o == null) return null;
 		if(o instanceof ConfigSection) {
-			return new JSONObject(((ConfigSection)o).toMap().entrySet().stream()
-					.collect(Collectors.toMap(en -> en.getKey(), en -> toJSONCompliant(en.getValue()))));
+			JSONObject obj = new JSONObject(((ConfigSection)o).getAllProperties().entrySet().stream()
+					.collect(Collectors.toMap(en -> en.getKey(), en -> {
+						Object jc = toJSONCompliant(en.getValue().getValue());
+						return jc;
+					})));
+			return obj;
 		}else if(o instanceof List) {
-			return new JSONArray(((List<?>)o).stream()
-					.map(en -> toJSONCompliant(en))
+			JSONArray arr = new JSONArray(((List<?>)o).stream()
+					.map(en -> {
+						Object jc = toJSONCompliant(en);
+						return jc;
+					})
 					.collect(Collectors.toList()));
+			return arr;
 		}else if(o instanceof Character) {
 			return o.toString();
 		}

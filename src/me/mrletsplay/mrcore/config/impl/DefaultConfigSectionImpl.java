@@ -114,4 +114,9 @@ public class DefaultConfigSectionImpl implements StringifiableConfigSection {
 		return new String(bOut.toByteArray(), StandardCharsets.UTF_8);
 	}
 	
+	@Override
+	public String toString() {
+		return "[S: " + rawProperties + "]";
+	}
+	
 }
