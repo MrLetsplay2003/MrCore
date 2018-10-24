@@ -65,9 +65,16 @@ public interface ConfigSection {
 	 * The {@code key} parameter allows for subpaths (e.g. "{@code somepath.somesubpath}").<br>
 	 * If the property represented by that key is a subsection, the entire subsection will be removed
 	 * @param key The key of the property
-	 * @param value The value of the property
 	 */
 	public void unset(String key);
+	
+	/**
+	 * Clears this section.<br>
+	 * Every property in this section will be unset
+	 * @param key The key of the property
+	 * @param value The value of the property
+	 */
+	public void clear();
 	
 	/**
 	 * Gets a property by a specific key.<br>

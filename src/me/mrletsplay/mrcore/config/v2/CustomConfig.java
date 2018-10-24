@@ -25,6 +25,11 @@ public interface CustomConfig extends ConfigSection {
 	}
 	
 	@Override
+	public default void clear() {
+		getMainSection().clear();
+	}
+	
+	@Override
 	public default ConfigProperty getProperty(String key) {
 		return getMainSection().getProperty(key);
 	}

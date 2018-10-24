@@ -73,6 +73,11 @@ public class DefaultConfigSectionImpl implements StringifiableConfigSection {
 			rawProperties.remove(path.getName());
 		}
 	}
+
+	@Override
+	public void clear() {
+		rawProperties.clear();
+	}
 	
 	@Override
 	public ConfigProperty getProperty(String key) throws ConfigException{
