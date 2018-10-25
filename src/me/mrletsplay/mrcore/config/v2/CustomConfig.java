@@ -8,8 +8,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 
-import org.bukkit.util.FileUtil;
-
 import me.mrletsplay.mrcore.io.IOUtils;
 import me.mrletsplay.mrcore.misc.Complex;
 

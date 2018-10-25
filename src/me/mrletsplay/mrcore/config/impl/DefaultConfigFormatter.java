@@ -60,7 +60,7 @@ class DefaultConfigFormatter {
 	
 	public void writeSubsection(int indents, Map<String, Object> properties, Map<String, Object> comments) throws IOException {
 		for(Map.Entry<String, Object> p : properties.entrySet()) {
-			String comment = (String) comments.get(p.getKey());
+			String comment = (String) comments.get(p.getKey()); // TODO: ClassCastException!!
 			if(comment != null) {
 				String[] sComment = comment.split("\n");
 				for(String c : sComment) {

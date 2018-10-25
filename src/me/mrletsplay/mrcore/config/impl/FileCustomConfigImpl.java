@@ -58,7 +58,9 @@ public class FileCustomConfigImpl implements FileCustomConfig {
 			}
 			String version = p.readVersionDescriptor();
 			if(!version.equals(VERSION)) throw new IncompatibleConfigVersionException(version, VERSION);
+			if(!p.hasMore()) return;
 			String header = p.readHeader();
+			if(!p.hasMore()) return;
 			ConfigSectionDescriptor d = p.readSubsection(new Marker(0, 0), 0);
 			mainSection.loadFromMap(d.getProperties());
 			d.getComments().forEach(mainSection::setComment);

@@ -1,7 +1,5 @@
 package me.mrletsplay.mrcore.misc;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -139,10 +137,23 @@ public interface Complex<T> {
 			return typeClass;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public NullableOptional<List<T>> cast(Object o, CastingFunction castingFunction) {
-			return cast(o, castingFunction, new ArrayList<>());
+			if(o == null) return NullableOptional.of(null);
+			if(!(o instanceof List<?>)) return NullableOptional.empty();
+			List<?> oList = (List<?>) o;
+			for(Object e : oList) {
+				NullableOptional<T> c = typeClass.cast(e, castingFunction);
+				if(!c.isPresent()) return NullableOptional.empty();
+			}
+			return NullableOptional.of((List<T>) o);
 		}
+
+//		@Override
+//		public NullableOptional<List<T>> cast(Object o, CastingFunction castingFunction) {
+//			return cast(o, castingFunction, new ArrayList<>());
+//		}
 
 		public NullableOptional<List<T>> cast(Object o, CastingFunction castingFunction, List<T> toList) {
 			if(o == null) return NullableOptional.of(null);
@@ -207,10 +218,25 @@ public interface Complex<T> {
 			return valueClass;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public NullableOptional<Map<K, V>> cast(Object o, CastingFunction castingFunction) {
-			return cast(o, castingFunction, new HashMap<>());
+			if(o == null) return NullableOptional.of(null);
+			if(!(o instanceof Map<?, ?>)) return NullableOptional.empty();
+			Map<?, ?> oMap = (Map<?, ?>) o;
+			for(Map.Entry<?, ?> e : oMap.entrySet()) {
+				NullableOptional<K> k = keyClass.cast(e.getKey(), castingFunction);
+				if(!k.isPresent()) return NullableOptional.empty();
+				NullableOptional<V> v = valueClass.cast(e.getValue(), castingFunction);
+				if(!v.isPresent()) return NullableOptional.empty();
+			}
+			return NullableOptional.of((Map<K, V>) o);
 		}
+
+//		@Override
+//		public NullableOptional<Map<K, V>> cast(Object o, CastingFunction castingFunction) {
+//			return cast(o, castingFunction, new HashMap<>());
+//		}
 
 		public NullableOptional<Map<K, V>> cast(Object o, CastingFunction castingFunction, Map<K, V> toMap) {
 			if(o == null) return NullableOptional.of(null);
