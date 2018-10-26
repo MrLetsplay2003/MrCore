@@ -13,7 +13,7 @@ import me.mrletsplay.mrcore.io.IOUtils;
 
 public class ConfigLoader {
 
-	public static FileCustomConfig loadFileConfig(File configFile) {
+	public static FileCustomConfig loadFileConfig(File configFile) throws ConfigException {
 		FileCustomConfigImpl cc = new FileCustomConfigImpl(configFile);
 		try {
 			cc.loadFromFile();
@@ -27,16 +27,19 @@ public class ConfigLoader {
 		return cc;
 	}
 
-	public static CustomConfig loadStreamConfig(InputStream stream) {
+	public static CustomConfig loadStreamConfig(InputStream stream, boolean closeAfterLoad) throws ConfigException {
 		FileCustomConfigImpl cc = new FileCustomConfigImpl(null);
 		try {
 			cc.load(stream);
+			if(closeAfterLoad) stream.close();
 		}catch(IncompatibleConfigVersionException e) {
 			try {
 				return ConfigConverter.convertConfig(IOUtils.readAllBytes(stream), cc, e.getGivenDefaultVersion(), e.getRequiredDefaultVersion());
 			} catch (IOException e1) {
 				throw new ConfigException(e1);
 			}
+		}catch(IOException e) {
+			throw new ConfigException(e);
 		}
 		return cc;
 	}

@@ -1678,7 +1678,6 @@ public class CustomConfig {
 		
 		public boolean containsKey(String key) {
 			return get(key) != null;
-//			return properties.containsKey(key) || subsections.values().stream().anyMatch(s -> s.containsKey(key));
 		}
 		
 		public List<String> getKeys(String key, boolean deep, boolean fullKeys){

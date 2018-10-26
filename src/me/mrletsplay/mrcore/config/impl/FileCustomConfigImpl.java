@@ -45,13 +45,13 @@ public class FileCustomConfigImpl implements FileCustomConfig {
 
 	@Override
 	public void load(InputStream in) throws ConfigException {
-		try(BufferedReader r = new BufferedReader(new InputStreamReader(in))) {
+		try {
+			BufferedReader r = new BufferedReader(new InputStreamReader(in));
 			List<String> lines = new ArrayList<>();
 			String s;
 			while((s = r.readLine()) != null) {
 				lines.add(s + "\n");
 			}
-			r.close();
 			DefaultConfigParser p = new DefaultConfigParser(lines.toArray(new String[lines.size()]));
 			if(!p.hasMore()) {
 				return;
@@ -72,7 +72,8 @@ public class FileCustomConfigImpl implements FileCustomConfig {
 
 	@Override
 	public void save(OutputStream out) {
-		try(BufferedWriter o = new BufferedWriter(new OutputStreamWriter(out))) {
+		try {
+			BufferedWriter o = new BufferedWriter(new OutputStreamWriter(out));
 			DefaultConfigFormatter f = new DefaultConfigFormatter(o);
 			f.writeConfigVersionDescriptor(VERSION);
 			if(getHeader() != null) f.writeHeader(getHeader());

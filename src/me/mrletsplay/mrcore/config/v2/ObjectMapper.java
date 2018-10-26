@@ -55,14 +55,6 @@ public interface ObjectMapper<E, O> {
 	}
 	
 	public default int getClassDepth(Class<?> clazz) {
-//		if(!canMap(clazz)) return -1;
-//		Class<?> cClass = clazz;
-//		int depth = 0;
-//		while(!cClass.equals(getMappingClass().getBaseClass())) {
-//			cClass = cClass.getSuperclass();
-//			depth++;
-//		}
-//		return depth;
 		return getClassDepth(Complex.value(clazz));
 	}
 	

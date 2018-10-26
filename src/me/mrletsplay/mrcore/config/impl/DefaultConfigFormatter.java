@@ -2,12 +2,14 @@ package me.mrletsplay.mrcore.config.impl;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import me.mrletsplay.mrcore.config.v2.ConfigSection;
 import me.mrletsplay.mrcore.misc.Complex;
+import me.mrletsplay.mrcore.misc.NullableOptional;
 
 class DefaultConfigFormatter {
 
@@ -35,15 +37,21 @@ class DefaultConfigFormatter {
 			w.write("null");
 			return;
 		}
+		if(isEmptyProperty(property)) return;
 		if(property instanceof ConfigSection) {
-			w.newLine();
 			ConfigSection s = (ConfigSection) property;
-			writeSubsection(indents + 1,  s.toMap(), s.commentsToMap());
-		}else if(property instanceof List) {
-			for(Object o : ((List<?>) property)) {
+			Map<String, Object> props = s.toMap();
+			if(!props.isEmpty()) {
 				w.newLine();
-				w.write(space(indents) + "- ");
-				writeListEntry(indents, o);
+				writeSubsection(indents + 1, props, s.commentsToMap());
+			}
+		}else if(property instanceof List) {
+			if(!((List<?>) property).isEmpty()) {
+				for(Object o : ((List<?>) property)) {
+					w.newLine();
+					w.write(space(indents) + "- ");
+					writeListEntry(indents, o);
+				}
 			}
 		}else if(property instanceof String) {
 			w.write("\"");
@@ -58,9 +66,11 @@ class DefaultConfigFormatter {
 		}
 	}
 	
-	public void writeSubsection(int indents, Map<String, Object> properties, Map<String, Object> comments) throws IOException {
+	public void writeSubsection(int indents, Map<String, Object> properties, Map<String, String> comments) throws IOException {
+		if(properties.isEmpty()) return;
 		for(Map.Entry<String, Object> p : properties.entrySet()) {
-			String comment = (String) comments.get(p.getKey()); // TODO: ClassCastException!!
+			if(isEmptyProperty(p.getValue())) continue;
+			String comment = comments.get(p.getKey()); // TODO: ClassCastException!!
 			if(comment != null) {
 				String[] sComment = comment.split("\n");
 				for(String c : sComment) {
@@ -73,11 +83,31 @@ class DefaultConfigFormatter {
 			Complex<Map<String, Object>> c = Complex.map(String.class, Object.class);
 			if(c.isInstance(p.getValue())) {
 				w.newLine();
-				writeSubsection(indents + 1, c.cast(p.getValue()).get(), c.cast(comments.get(p.getKey())).map(en -> en != null ? en : new HashMap<String, Object>()).get());
+//				writeSubsection(indents + 1, c.cast(p.getValue()).get(), c.cast(comments.get(p.getKey())).map(en -> en != null ? en : new HashMap<String, String>()).get());
+				Map<String, String> sC = comments.entrySet().stream().filter(en -> en.getKey().startsWith(p.getKey() + ".")).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+				Map<String, Object> props = c.cast(p.getValue()).get();
+				if(props != null && !props.isEmpty()) {
+					writeSubsection(indents + 1, props, sC);
+				}
 			}else {
 				writePropertyValue(indents + 1, p.getValue());
 				w.newLine();
 			}
+		}
+	}
+	
+	private boolean isEmptyProperty(Object o) {
+		if(o == null) return false;
+		Complex<Map<String, Object>> c = Complex.map(String.class, Object.class);
+		Complex<List<Object>> c2 = Complex.list(Object.class);
+		NullableOptional<Map<String, Object>> mC = c.cast(o);
+		NullableOptional<List<Object>> lC = c2.cast(o);
+		if(mC.isPresent()) {
+			return mC.get().isEmpty();
+		}else if(lC.isPresent()){
+			return lC.get().isEmpty();
+		}else {
+			return false;
 		}
 	}
 	
@@ -86,6 +116,7 @@ class DefaultConfigFormatter {
 			w.write("null");
 			return;
 		}
+		if(isEmptyProperty(value)) return;
 		if(value instanceof ConfigSection) {
 			w.write("{");
 			writePropertyValue(indents + 1, value);

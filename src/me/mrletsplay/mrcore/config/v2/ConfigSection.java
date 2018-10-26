@@ -136,8 +136,11 @@ public interface ConfigSection {
 	 * @return A map containing all the properties (excluding subsections) of this section 
 	 */
 	public default Map<String, Object> getRawProperties() {
-		return getProperties().entrySet().stream()
-				.collect(Collectors.toMap(en -> en.getKey(), en -> en.getValue().getValue()));
+		Map<String, Object> map = new HashMap<>();
+		for(Map.Entry<String, ConfigProperty> en : getProperties().entrySet()) {
+			map.put(en.getKey(), en.getValue().getValue());
+		}
+		return map;
 	}
 	
 	/**
@@ -179,10 +182,12 @@ public interface ConfigSection {
 	 * The Map returned by this function may be passed to {@link #loadCommentsFromMap(Map)}
 	 * @return A map containing all the comments as well as subsections' comments of this section
 	 */
-	public default Map<String, Object> commentsToMap() {
-		Map<String, Object> map = new LinkedHashMap<>(getComments());
+	public default Map<String, String> commentsToMap() {
+		Map<String, String> map = new LinkedHashMap<>(getComments());
 		for(Entry<String, ConfigSection> sub : getSubsections().entrySet()) {
-			map.put(sub.getKey(), sub.getValue().commentsToMap());
+			sub.getValue().commentsToMap().forEach((ck, cv) -> {
+				map.put(sub.getKey() + ck, cv);
+			});
 		}
 		return map;
 	}
@@ -192,15 +197,9 @@ public interface ConfigSection {
 	 * Any map created by {@link #commentsToMap()} may be passed to this function
 	 * @param map A map containing all the comments & subsections' comments
 	 */
-	public default void loadCommentsFromMap(Map<String, Object> map) {
+	public default void loadCommentsFromMap(Map<String, String> map) {
 		map.forEach((k, v) -> {
-			Complex<Map<String, Object>> c = Complex.map(String.class, Object.class);
-			NullableOptional<Map<String, Object>> m = c.cast(v);
-			if(m.isPresent()) {
-				getSubsection(k).loadCommentsFromMap(m.get());
-				return;
-			}
-			setComment(k, (String) v);
+			setComment(k, v);
 		});
 	}
 	
@@ -251,12 +250,6 @@ public interface ConfigSection {
 			}else {
 				return NullableOptional.empty();
 			}
-//		}else if(typeClass.equals(Map.class)) {
-//			if(!(o instanceof ConfigSection)) return NullableOptional.empty();
-//			return NullableOptional.of(typeClass.cast(((ConfigSection) o).toMap()));
-//		}else if(typeClass.equals(JSONObject.class)) {
-//			if(!(o instanceof ConfigSection)) return NullableOptional.empty();
-//			return NullableOptional.of(typeClass.cast(new JSONObject(((ConfigSection) o).toMap())));
 		}else if(typeClass.equals(String.class)
 				|| typeClass.equals(Boolean.class)
 				|| typeClass.equals(Character.class)
@@ -287,10 +280,10 @@ public interface ConfigSection {
 		for(ObjectMapper<?, ?> mapper : mappers) {
 			if(mapper.getMappingClass().equals(toClass)) return new ArrayList<>(Arrays.asList(mapper));
 			List<ObjectMapper<?, ?>> path = calculateCompatiblePath(section, mapper.constructRawObject(section, object, section::castPrimitiveType), mapper.getMappingClass(), toClass, classes);
-			if(path != null && pth == null /* || (pth != null && path.size() < pth.size())*/) {
+			if(path != null && pth == null) {
 				path.add(0, mapper);
 				pth = path;
-				break; // Only get the path with the highest priority, not the smallest one
+				break; // Only get the path with the highest priority, not the shortest one
 			}
 		}
 		return pth;

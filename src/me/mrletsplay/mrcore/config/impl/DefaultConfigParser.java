@@ -407,10 +407,13 @@ class DefaultConfigParser {
 					.collect(Collectors.toMap(en -> en.getKey(), en -> en.getValue()));
 		}
 		
-		public Map<String, Object> toCommentMap() {
-			Map<String, Object> comments2 = new HashMap<>(comments);
+		public Map<String, String> toCommentMap() {
+			Map<String, String> comments2 = new HashMap<>(comments);
 			getSubSections().forEach((k, v) -> {
-				comments2.put(k, v.toCommentMap());
+//				comments2.put(k, v.toCommentMap());
+				v.toCommentMap().forEach((ck, cv) -> {
+					comments2.put(k + ck, cv);
+				});
 			});
 			return comments2;
 		}
