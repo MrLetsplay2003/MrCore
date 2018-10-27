@@ -24,4 +24,13 @@ public class DefaultConfigMappers {
 				return s;
 			});
 	
+	public static final ObjectMapper<ConfigSection, Map<String, Object>> SECTION_MAPPER = ObjectMapper.create(Complex.value(ConfigSection.class), Complex.map(String.class, Object.class),
+			(c, j) -> {
+				return j.toMap();
+			}, (c, s) -> {
+				ConfigSection s1 = new DefaultConfigSectionImpl(c.getConfig());
+				s1.loadFromMap(s);
+				return s1;
+			});
+	
 }

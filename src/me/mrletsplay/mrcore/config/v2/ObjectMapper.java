@@ -17,7 +17,9 @@ public interface ObjectMapper<E, O> {
 	public Complex<O> getMappedClass();
 	
 	public default O mapRawObject(ConfigSection config, Object object, CastingFunction castingFunction) {
-		if(!canMap(object, castingFunction)) throw new IllegalArgumentException("Cannot map object of type " + object.getClass().getName());
+		if(!canMap(object, castingFunction)) {
+			throw new IllegalArgumentException("Cannot map object of type " + object.getClass().getName());
+		}
 		return mapObject(config, getMappingClass().cast(object, castingFunction).orElseThrow(() -> new ClassCastException("Can't cast " + object.getClass().getName() + " to " + getMappingClass().getFriendlyClassName())));
 	}
 	
@@ -30,25 +32,25 @@ public interface ObjectMapper<E, O> {
 		return getMappingClass().isInstance(object, castingFunction);
 	}
 	
-	public default boolean canMap(Class<?> clazz) {
-		return getMappingClass().isAssignableFrom(clazz);
-	}
-	
-	public default boolean canMap(Complex<?> clazz) {
-		return getMappingClass().isAssignableFrom(clazz);
-	}
+//	public default boolean canMap(Class<?> clazz) {
+//		return getMappingClass().isAssignableFrom(clazz);
+//	}
+//	
+//	public default boolean canMap(Complex<?> clazz) {
+//		return getMappingClass().isAssignableFrom(clazz);
+//	}
 	
 	public default boolean canConstruct(Object object, CastingFunction castingFunction) {
 		return getMappedClass().isInstance(object, castingFunction);
 	}
 	
-	public default boolean canConstruct(Class<?> clazz) {
-		return getMappedClass().isAssignableFrom(clazz);
-	}
-	
-	public default boolean canConstruct(Complex<?> clazz) {
-		return getMappedClass().isAssignableFrom(clazz);
-	}
+//	public default boolean canConstruct(Class<?> clazz) {
+//		return getMappedClass().isAssignableFrom(clazz);
+//	}
+//	
+//	public default boolean canConstruct(Complex<?> clazz) {
+//		return getMappedClass().isAssignableFrom(clazz);
+//	}
 	
 	public default int getClassDepth(Object object) {
 		return getClassDepth(object.getClass());
@@ -59,14 +61,18 @@ public interface ObjectMapper<E, O> {
 	}
 	
 	public default int getClassDepth(Complex<?> clazz) {
-		if(!canMap(clazz)) return -1;
+//		if(!canMap(clazz)) return -1;
 		Class<?> cClass = clazz.getBaseClass();
 		int depth = 0;
-		while(!cClass.equals(getMappingClass().getBaseClass())) {
+		while(!cClass.isAssignableFrom(getMappingClass().getBaseClass())) {
+			System.out.println(cClass);
 			cClass = cClass.getSuperclass();
+			if(cClass == null) cClass = Object.class;
 			depth++;
 		}
 		return depth;
+		
+//		return Complex.getCommonClass(clazz, getMappingClass());
 	}
 	
 	public static <E, O> ObjectMapper<E, O> create(Class<E> mappingClass, Class<O> mappedClass, BiFunction<ConfigSection, E, O> mappingFunction, BiFunction<ConfigSection, O, E> constructingFunction) {

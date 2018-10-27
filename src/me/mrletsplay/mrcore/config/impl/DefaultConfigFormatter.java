@@ -2,7 +2,6 @@ package me.mrletsplay.mrcore.config.impl;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -69,8 +68,10 @@ class DefaultConfigFormatter {
 	public void writeSubsection(int indents, Map<String, Object> properties, Map<String, String> comments) throws IOException {
 		if(properties.isEmpty()) return;
 		for(Map.Entry<String, Object> p : properties.entrySet()) {
-			if(isEmptyProperty(p.getValue())) continue;
-			String comment = comments.get(p.getKey()); // TODO: ClassCastException!!
+			if(isEmptyProperty(p.getValue())) {
+				continue;
+			}
+			String comment = comments.get(p.getKey());
 			if(comment != null) {
 				String[] sComment = comment.split("\n");
 				for(String c : sComment) {
@@ -81,10 +82,12 @@ class DefaultConfigFormatter {
 			w.write(space(indents) + p.getKey());
 			w.write(": ");
 			Complex<Map<String, Object>> c = Complex.map(String.class, Object.class);
-			if(c.isInstance(p.getValue())) {
+			if(p.getValue() != null && c.isInstance(p.getValue())) {
 				w.newLine();
 //				writeSubsection(indents + 1, c.cast(p.getValue()).get(), c.cast(comments.get(p.getKey())).map(en -> en != null ? en : new HashMap<String, String>()).get());
-				Map<String, String> sC = comments.entrySet().stream().filter(en -> en.getKey().startsWith(p.getKey() + ".")).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+				Map<String, String> sC = comments.entrySet().stream()
+						.filter(en -> en.getKey() != null && en.getValue() != null && en.getKey().startsWith(p.getKey() + "."))
+						.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 				Map<String, Object> props = c.cast(p.getValue()).get();
 				if(props != null && !props.isEmpty()) {
 					writeSubsection(indents + 1, props, sC);
@@ -119,11 +122,11 @@ class DefaultConfigFormatter {
 		if(isEmptyProperty(value)) return;
 		if(value instanceof ConfigSection) {
 			w.write("{");
-			writePropertyValue(indents + 1, value);
+			writePropertyValue(indents, value);
 			w.write(space(indents) + "}");
 		}else if(value instanceof List) {
 			w.write("{");
-			writePropertyValue(indents + 1, value);
+			writePropertyValue(indents, value);
 			w.newLine();
 			w.write(space(indents) + "}");
 		}else {

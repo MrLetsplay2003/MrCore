@@ -3,7 +3,6 @@ package me.mrletsplay.mrcore.config.v2;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -136,7 +135,7 @@ public interface ConfigSection {
 	 * @return A map containing all the properties (excluding subsections) of this section 
 	 */
 	public default Map<String, Object> getRawProperties() {
-		Map<String, Object> map = new HashMap<>();
+		Map<String, Object> map = new LinkedHashMap<>();
 		for(Map.Entry<String, ConfigProperty> en : getProperties().entrySet()) {
 			map.put(en.getKey(), en.getValue().getValue());
 		}
@@ -163,7 +162,7 @@ public interface ConfigSection {
 	public default Map<String, Object> toMap() {
 		Map<String, Object> map = new LinkedHashMap<>(getRawProperties());
 		for(Entry<String, ConfigSection> sub : getSubsections().entrySet()) {
-			map.put(sub.getKey(), sub.getValue().toMap());
+			if(!sub.getValue().isEmpty()) map.put(sub.getKey(), sub.getValue().toMap());
 		}
 		return map;
 	}
@@ -203,6 +202,10 @@ public interface ConfigSection {
 		});
 	}
 	
+	public default boolean isEmpty() {
+		return getProperties().values().stream().allMatch(ConfigProperty::isEmpty) && getSubsections().values().stream().allMatch(ConfigSection::isEmpty);
+	}
+	
 	/**
 	 * Returns a JSONObject containing all the (raw) properties as well as subsections (represented by other {@link JSONObject}s) of this section.<br>
 	 * Lists will be converted to {@link JSONArray}s.<br>
@@ -210,8 +213,10 @@ public interface ConfigSection {
 	 * @return A JSONObject containing all the (raw) properties as well as subsections of this section
 	 */
 	public default JSONObject toJSON() {
-		Map<String, Object> props = getProperties().entrySet().stream()
-				.collect(Collectors.toMap(en -> en.getKey(), en -> en.getValue().getJSONValue()));
+		Map<String, Object> props = new LinkedHashMap<>();
+		for(Map.Entry<String, ConfigProperty> en : getProperties().entrySet()) {
+			props.put(en.getKey(), en.getValue().getJSONValue());
+		}
 		JSONObject o = new JSONObject(props);
 		for(Entry<String, ConfigSection> sub : getSubsections().entrySet()) {
 			o.put(sub.getKey(), sub.getValue().toJSON());
@@ -258,7 +263,7 @@ public interface ConfigSection {
 			return NullableOptional.of(typeClass.cast(o));
 		}else {
 			if(!allowComplex) return NullableOptional.empty();
-			List<ObjectMapper<?, ?>> path = calculateCompatiblePath(section, o, Complex.value(o.getClass()), Complex.value(typeClass), new ArrayList<>());
+			List<ObjectMapper<?, ?>> path = calculateCompatiblePath(section, o, Complex.typeOf(o), Complex.value(typeClass), new ArrayList<>());
 			if(path == null) return NullableOptional.empty();
 			Object val = o;
 			for(ObjectMapper<?, ?> m : path) val = m.constructRawObject(section, val, section::castType);
@@ -278,8 +283,9 @@ public interface ConfigSection {
 				.collect(Collectors.toList());
 		List<ObjectMapper<?, ?>> pth = null;
 		for(ObjectMapper<?, ?> mapper : mappers) {
-			if(mapper.getMappingClass().equals(toClass)) return new ArrayList<>(Arrays.asList(mapper));
-			List<ObjectMapper<?, ?>> path = calculateCompatiblePath(section, mapper.constructRawObject(section, object, section::castPrimitiveType), mapper.getMappingClass(), toClass, classes);
+			Object mO = mapper.constructRawObject(section, object, section::castPrimitiveType);
+			if(toClass.cast(mO).isPresent()) return new ArrayList<>(Arrays.asList(mapper));
+			List<ObjectMapper<?, ?>> path = calculateCompatiblePath(section, mO, mapper.getMappingClass(), toClass, classes);
 			if(path != null && pth == null) {
 				path.add(0, mapper);
 				pth = path;
@@ -310,7 +316,10 @@ public interface ConfigSection {
 			return defaultValue;
 		}else {
 			NullableOptional<T> value = complex.cast(prop.getValue(), this::castType);
-			if(!value.isPresent()) throw new IncompatibleTypeException("Incompatible types, " + prop.getValue().getClass().getName() + " cannot be cast/formatted to " + complex.getFriendlyClassName());
+			if(!value.isPresent()) {
+//				System.out.println(prop.getValue() + "/" + complex.cast(prop.getValue()));
+				throw new IncompatibleTypeException("Incompatible types, " + prop.getValue().getClass().getName() + " cannot be cast/formatted to " + complex.getFriendlyClassName());
+			}
 			return value.get();
 		}
 	}
@@ -444,7 +453,7 @@ public interface ConfigSection {
 	}
 	
 	public default Map<?, ?> getMap(String key) {
-		return getMap(key, new HashMap<>(), false);
+		return getMap(key, new LinkedHashMap<>(), false);
 	}
 	
 	public default List<String> getStringList(String key) {
@@ -482,7 +491,7 @@ public interface ConfigSection {
 	public default List<String> getKeys(String key, boolean deep, boolean fullKeys) {
 		ConfigPath path = new ConfigPath(key, 0);
 		if(path.hasSubpaths()) {
-			return getSubsection(path.getName()).getKeys(path.traverseDown().toRawPath(), deep, fullKeys);
+			return getOrCreateSubsection(path.getName()).getKeys(path.traverseDown().toRawPath(), deep, fullKeys);
 		}
 		ConfigSection ss = getSubsection(key);
 		if(ss == null) return new ArrayList<>();

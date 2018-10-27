@@ -1,8 +1,6 @@
 package me.mrletsplay.mrcore.config.impl;
 
-import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -397,18 +395,19 @@ class DefaultConfigParser {
 		}
 		
 		public Map<String, Object> toPropertyMap() {
-			return properties.entrySet().stream()
-					.map(en -> {
-						if(en.getValue() instanceof ConfigSectionDescriptor) {
-							en = new AbstractMap.SimpleEntry<>(en.getKey(), ((ConfigSectionDescriptor) en.getValue()).toPropertyMap());
-						}
-						return en;
-					})
-					.collect(Collectors.toMap(en -> en.getKey(), en -> en.getValue()));
+			Map<String, Object> map = new LinkedHashMap<>();
+			for(Map.Entry<String, Object> en : properties.entrySet()) {
+				if(en.getValue() instanceof ConfigSectionDescriptor) {
+					map.put(en.getKey(), ((ConfigSectionDescriptor) en.getValue()).toPropertyMap());
+					continue;
+				}
+				map.put(en.getKey(), en.getValue());
+			}
+			return map;
 		}
 		
 		public Map<String, String> toCommentMap() {
-			Map<String, String> comments2 = new HashMap<>(comments);
+			Map<String, String> comments2 = new LinkedHashMap<>(comments);
 			getSubSections().forEach((k, v) -> {
 //				comments2.put(k, v.toCommentMap());
 				v.toCommentMap().forEach((ck, cv) -> {

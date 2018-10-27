@@ -8,8 +8,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,9 +34,10 @@ public class FileCustomConfigImpl implements FileCustomConfig {
 	public FileCustomConfigImpl(File configFile) {
 		this.configFile = configFile;
 		this.mainSection = new DefaultConfigSectionImpl(this);
-		this.mappers = new HashMap<>();
+		this.mappers = new LinkedHashMap<>();
 		registerMapper(DefaultConfigMappers.JSON_MAPPER);
 		registerMapper(DefaultConfigMappers.MAP_MAPPER);
+		registerMapper(100, DefaultConfigMappers.SECTION_MAPPER);
 	}
 	
 	@Override
@@ -46,7 +48,7 @@ public class FileCustomConfigImpl implements FileCustomConfig {
 	@Override
 	public void load(InputStream in) throws ConfigException {
 		try {
-			BufferedReader r = new BufferedReader(new InputStreamReader(in));
+			BufferedReader r = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
 			List<String> lines = new ArrayList<>();
 			String s;
 			while((s = r.readLine()) != null) {
@@ -73,7 +75,7 @@ public class FileCustomConfigImpl implements FileCustomConfig {
 	@Override
 	public void save(OutputStream out) {
 		try {
-			BufferedWriter o = new BufferedWriter(new OutputStreamWriter(out));
+			BufferedWriter o = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
 			DefaultConfigFormatter f = new DefaultConfigFormatter(o);
 			f.writeConfigVersionDescriptor(VERSION);
 			if(getHeader() != null) f.writeHeader(getHeader());

@@ -82,29 +82,29 @@ public enum ConfigValueType {
 	public static NullableOptional<?> createCompatible(ConfigSection forSection, Object o) {
 		ConfigValueType type = getRawTypeOf(o);
 		if(type != null) return NullableOptional.of(o);
-		List<ObjectMapper<?, ?>> path = calculateCompatiblePath(forSection, Complex.value(o.getClass()), new ArrayList<>());
+		List<ObjectMapper<?, ?>> path = calculateCompatiblePath(forSection, o, Complex.typeOf(o), new ArrayList<>());
 		if(path == null) return NullableOptional.empty();
 		Object val = o;
 		for(ObjectMapper<?, ?> mapper : path) {
-			val = mapper.mapRawObject(forSection, val, forSection::castType);
+				val = mapper.mapRawObject(forSection, val, forSection::castType);
 		}
 		return NullableOptional.of(val);
 	}
 	
-	private static List<ObjectMapper<?, ?>> calculateCompatiblePath(ConfigSection section, Complex<?> clazz, List<Complex<?>> classes) {
+	private static List<ObjectMapper<?, ?>> calculateCompatiblePath(ConfigSection section, Object o, Complex<?> clazz, List<Complex<?>> classes) {
 		if(isConfigPrimitive(clazz)) return new ArrayList<>();
 		classes.add(clazz);
 		Comparator<Map.Entry<ObjectMapper<?, ?>, Integer>> c = Comparator.comparingInt(en -> en.getKey().getClassDepth(clazz));
 		c = c.thenComparingInt(Map.Entry::getValue);
 		List<ObjectMapper<?, ?>> mappers = section.getConfig().getMappers().entrySet().stream()
-				.filter(m -> !classes.contains(m.getKey().getMappedClass()) && m.getKey().canMap(clazz))
+				.filter(m -> !classes.contains(m.getKey().getMappedClass()) && m.getKey().canMap(o, section::castType))
 				.sorted(c)
 				.map(Map.Entry::getKey)
 				.collect(Collectors.toList());
 		List<ObjectMapper<?, ?>> pth = null;
 		for(ObjectMapper<?, ?> mapper : mappers) {
 			if(isConfigPrimitive(mapper.getMappedClass())) return new ArrayList<>(Arrays.asList(mapper));
-			List<ObjectMapper<?, ?>> path = calculateCompatiblePath(section, mapper.getMappedClass(), classes);
+			List<ObjectMapper<?, ?>> path = calculateCompatiblePath(section, mapper.mapRawObject(section, o, section::castType), mapper.getMappedClass(), classes);
 			if(path != null && pth == null /* || (pth != null && path.size() < pth.size())*/) {
 				path.add(0, mapper);
 				pth = path;
