@@ -86,7 +86,7 @@ public enum ConfigValueType {
 		if(path == null) return NullableOptional.empty();
 		Object val = o;
 		for(ObjectMapper<?, ?> mapper : path) {
-				val = mapper.mapRawObject(forSection, val, forSection::castType);
+			val = mapper.mapRawObject(forSection, val, forSection::castType);
 		}
 		return NullableOptional.of(val);
 	}

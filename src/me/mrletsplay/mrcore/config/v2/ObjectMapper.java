@@ -61,18 +61,14 @@ public interface ObjectMapper<E, O> {
 	}
 	
 	public default int getClassDepth(Complex<?> clazz) {
-//		if(!canMap(clazz)) return -1;
 		Class<?> cClass = clazz.getBaseClass();
 		int depth = 0;
 		while(!cClass.isAssignableFrom(getMappingClass().getBaseClass())) {
-			System.out.println(cClass);
 			cClass = cClass.getSuperclass();
 			if(cClass == null) cClass = Object.class;
 			depth++;
 		}
 		return depth;
-		
-//		return Complex.getCommonClass(clazz, getMappingClass());
 	}
 	
 	public static <E, O> ObjectMapper<E, O> create(Class<E> mappingClass, Class<O> mappedClass, BiFunction<ConfigSection, E, O> mappingFunction, BiFunction<ConfigSection, O, E> constructingFunction) {
