@@ -263,15 +263,24 @@ public interface ConfigSection {
 			return NullableOptional.of(typeClass.cast(o));
 		}else {
 			if(!allowComplex) return NullableOptional.empty();
-			List<ObjectMapper<?, ?>> path = calculateCompatiblePath(section, o, Complex.typeOf(o), Complex.value(typeClass), new ArrayList<>());
-			if(path == null) return NullableOptional.empty();
-			Object val = o;
-			for(ObjectMapper<?, ?> m : path) val = m.constructRawObject(section, val, section::castType);
-			return NullableOptional.of(typeClass.cast(val));
+			List<List<ObjectMapper<?, ?>>> paths = calculateCompatiblePaths(section, o, Complex.typeOf(o), Complex.value(typeClass), new ArrayList<>());
+			if(paths.isEmpty()) return NullableOptional.empty();
+			for(List<ObjectMapper<?, ?>> path : paths) {
+				Object val = o;
+				try {
+					for(ObjectMapper<?, ?> mapper : path) {
+						val = mapper.constructRawObject(section, val, section::castPrimitiveType);
+					}
+				}catch(ObjectMappingException e) {
+					continue;
+				}
+				return NullableOptional.of(typeClass.cast(val));
+			}
+			return NullableOptional.empty();
 		}
 	}
 	
-	public static List<ObjectMapper<?, ?>> calculateCompatiblePath(ConfigSection section, Object object, Complex<?> fromClass, Complex<?> toClass, List<Complex<?>> classes) {
+	public static List<List<ObjectMapper<?, ?>>> calculateCompatiblePaths(ConfigSection section, Object object, Complex<?> fromClass, Complex<?> toClass, List<Complex<?>> classes) {
 		if(toClass.equals(fromClass)) return new ArrayList<>();
 		classes.add(fromClass);
 		Comparator<Map.Entry<ObjectMapper<?, ?>, Integer>> c = Comparator.comparingInt(en -> en.getKey().getClassDepth(fromClass));
@@ -281,18 +290,27 @@ public interface ConfigSection {
 				.sorted(c)
 				.map(Map.Entry::getKey)
 				.collect(Collectors.toList());
-		List<ObjectMapper<?, ?>> pth = null;
+		List<List<ObjectMapper<?, ?>>> pths = new ArrayList<>();
 		for(ObjectMapper<?, ?> mapper : mappers) {
-			Object mO = mapper.constructRawObject(section, object, section::castPrimitiveType);
-			if(toClass.cast(mO).isPresent()) return new ArrayList<>(Arrays.asList(mapper));
-			List<ObjectMapper<?, ?>> path = calculateCompatiblePath(section, mO, mapper.getMappingClass(), toClass, classes);
-			if(path != null && pth == null) {
-				path.add(0, mapper);
-				pth = path;
-				break; // Only get the path with the highest priority, not the shortest one
+			Object res;
+			try {
+				res = mapper.constructRawObject(section, object, section::castPrimitiveType);
+			}catch(ObjectMappingException e) {
+				if(mapper.getMappingClass().getFriendlyClassName().equals("me.eglp.gv2.util.base.guild.GuildTempBan")) {
+					e.printStackTrace();
+				}
+				continue;
+			}
+			if(toClass.cast(res).isPresent()) pths.add(new ArrayList<>(Arrays.asList(mapper)));
+			List<List<ObjectMapper<?, ?>>> paths = calculateCompatiblePaths(section, res, mapper.getMappingClass(), toClass, classes);
+			if(!paths.isEmpty()) {
+				for(List<ObjectMapper<?, ?>> pt : paths) {
+					pt.add(0, mapper);
+				}
+				pths.addAll(paths);
 			}
 		}
-		return pth;
+		return pths;
 	}
 	
 	public default <T> NullableOptional<T> castType(Object o, Class<T> clazz) {
@@ -317,7 +335,6 @@ public interface ConfigSection {
 		}else {
 			NullableOptional<T> value = complex.cast(prop.getValue(), this::castType);
 			if(!value.isPresent()) {
-//				System.out.println(prop.getValue() + "/" + complex.cast(prop.getValue()));
 				throw new IncompatibleTypeException("Incompatible types, " + prop.getValue().getClass().getName() + " cannot be cast/formatted to " + complex.getFriendlyClassName());
 			}
 			return value.get();

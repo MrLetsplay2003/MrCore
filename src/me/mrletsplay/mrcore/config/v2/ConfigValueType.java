@@ -82,16 +82,23 @@ public enum ConfigValueType {
 	public static NullableOptional<?> createCompatible(ConfigSection forSection, Object o) {
 		ConfigValueType type = getRawTypeOf(o);
 		if(type != null) return NullableOptional.of(o);
-		List<ObjectMapper<?, ?>> path = calculateCompatiblePath(forSection, o, Complex.typeOf(o), new ArrayList<>());
-		if(path == null) return NullableOptional.empty();
-		Object val = o;
-		for(ObjectMapper<?, ?> mapper : path) {
-			val = mapper.mapRawObject(forSection, val, forSection::castType);
+		List<List<ObjectMapper<?, ?>>> paths = calculateCompatiblePaths(forSection, o, Complex.typeOf(o), new ArrayList<>());
+		if(paths.isEmpty()) return NullableOptional.empty();
+		for(List<ObjectMapper<?, ?>> path : paths) {
+			Object val = o;
+			try {
+				for(ObjectMapper<?, ?> mapper : path) {
+					val = mapper.mapRawObject(forSection, val, forSection::castType);
+				}
+			}catch(ObjectMappingException e) {
+				continue;
+			}
+			return NullableOptional.of(val);
 		}
-		return NullableOptional.of(val);
+		return NullableOptional.empty();
 	}
 	
-	private static List<ObjectMapper<?, ?>> calculateCompatiblePath(ConfigSection section, Object o, Complex<?> clazz, List<Complex<?>> classes) {
+	private static List<List<ObjectMapper<?, ?>>> calculateCompatiblePaths(ConfigSection section, Object o, Complex<?> clazz, List<Complex<?>> classes) {
 		if(isConfigPrimitive(clazz)) return new ArrayList<>();
 		classes.add(clazz);
 		Comparator<Map.Entry<ObjectMapper<?, ?>, Integer>> c = Comparator.comparingInt(en -> en.getKey().getClassDepth(clazz));
@@ -101,17 +108,24 @@ public enum ConfigValueType {
 				.sorted(c)
 				.map(Map.Entry::getKey)
 				.collect(Collectors.toList());
-		List<ObjectMapper<?, ?>> pth = null;
+		List<List<ObjectMapper<?, ?>>> pths = new ArrayList<>();
 		for(ObjectMapper<?, ?> mapper : mappers) {
-			if(isConfigPrimitive(mapper.getMappedClass())) return new ArrayList<>(Arrays.asList(mapper));
-			List<ObjectMapper<?, ?>> path = calculateCompatiblePath(section, mapper.mapRawObject(section, o, section::castType), mapper.getMappedClass(), classes);
-			if(path != null && pth == null /* || (pth != null && path.size() < pth.size())*/) {
-				path.add(0, mapper);
-				pth = path;
-				break; // Only get the path with the highest priority, not the shortest one
+			if(isConfigPrimitive(mapper.getMappedClass())) pths.add(new ArrayList<>(Arrays.asList(mapper)));
+			Object res;
+			try {
+				res = mapper.mapRawObject(section, o, section::castType);
+			}catch(ObjectMappingException e) {
+				continue;
+			}
+			List<List<ObjectMapper<?, ?>>> paths = calculateCompatiblePaths(section, res, mapper.getMappedClass(), classes);
+			if(!paths.isEmpty()) {
+				for(List<ObjectMapper<?, ?>> pt : paths) {
+					pt.add(0, mapper);
+				}
+				pths.addAll(paths);
 			}
 		}
-		return pth;
+		return pths;
 	}
 	
 	public static boolean isConfigPrimitive(Complex<?> typeClass) {

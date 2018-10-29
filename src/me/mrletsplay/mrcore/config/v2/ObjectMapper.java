@@ -20,12 +20,24 @@ public interface ObjectMapper<E, O> {
 		if(!canMap(object, castingFunction)) {
 			throw new IllegalArgumentException("Cannot map object of type " + object.getClass().getName());
 		}
-		return mapObject(config, getMappingClass().cast(object, castingFunction).orElseThrow(() -> new ClassCastException("Can't cast " + object.getClass().getName() + " to " + getMappingClass().getFriendlyClassName())));
+		try {
+			return mapObject(config, getMappingClass().cast(object, castingFunction).orElseThrow(() -> new ObjectMappingException("Can't cast " + object.getClass().getName() + " to " + getMappingClass().getFriendlyClassName())));
+		}catch(ObjectMappingException e) {
+			throw e;
+		}catch(Exception e) {
+			throw new ObjectMappingException(e);
+		}
 	}
 	
 	public default E constructRawObject(ConfigSection config, Object object, CastingFunction castingFunction) {
 		if(!canConstruct(object, castingFunction)) throw new IllegalArgumentException("Cannot construct object of type " + object.getClass().getName());
-		return constructObject(config, getMappedClass().cast(object, castingFunction).orElseThrow(() -> new ClassCastException("Can't cast " + object.getClass().getName() + " to " + getMappingClass().getFriendlyClassName())));
+		try {
+			return constructObject(config, getMappedClass().cast(object, castingFunction).orElseThrow(() -> new ClassCastException("Can't cast " + object.getClass().getName() + " to " + getMappingClass().getFriendlyClassName())));
+		}catch(ObjectMappingException e) {
+			throw e;
+		}catch(Exception e) {
+			throw new ObjectMappingException(e);
+		}
 	}
 	
 	public default boolean canMap(Object object, CastingFunction castingFunction) {
