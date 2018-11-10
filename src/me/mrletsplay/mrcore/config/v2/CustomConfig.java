@@ -109,6 +109,8 @@ public interface CustomConfig extends ConfigSection {
 	
 	public ConfigSection getMainSection();
 	
+	public ConfigSection createEmptySection();
+	
 	public void load(InputStream in) throws ConfigException;
 	
 	public void save(OutputStream out) throws ConfigException;
@@ -120,5 +122,13 @@ public interface CustomConfig extends ConfigSection {
 	public void registerMapper(int priority, ObjectMapper<?, ?> mapper);
 	
 	public Map<ObjectMapper<?, ?>, Integer> getMappers();
+	
+	public default void registerLowLevelMapper(ObjectMapper<?, ?> lowLevelMapper) {
+		registerLowLevelMapper(0, lowLevelMapper);
+	}
+	
+	public void registerLowLevelMapper(int priority, ObjectMapper<?, ?> lowLevelMapper);
+	
+	public Map<ObjectMapper<?, ?>, Integer> getLowLevelMappers();
 	
 }

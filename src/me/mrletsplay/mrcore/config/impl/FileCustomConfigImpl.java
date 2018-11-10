@@ -29,15 +29,17 @@ public class FileCustomConfigImpl implements FileCustomConfig {
 	
 	private File configFile;
 	private ConfigSection mainSection;
+	private Map<ObjectMapper<?, ?>, Integer> lowLevelMappers;
 	private Map<ObjectMapper<?, ?>, Integer> mappers;
 	
 	public FileCustomConfigImpl(File configFile) {
 		this.configFile = configFile;
 		this.mainSection = new DefaultConfigSectionImpl(this);
 		this.mappers = new LinkedHashMap<>();
-		registerMapper(DefaultConfigMappers.JSON_MAPPER);
-		registerMapper(DefaultConfigMappers.MAP_MAPPER);
-		registerMapper(100, DefaultConfigMappers.SECTION_MAPPER);
+		this.lowLevelMappers = new LinkedHashMap<>();
+		registerLowLevelMapper(0, DefaultConfigMappers.JSON_MAPPER);
+		registerLowLevelMapper(100, DefaultConfigMappers.MAP_MAPPER);
+//		registerLowLevelMapper(100, DefaultConfigMappers.SECTION_MAPPER);
 	}
 	
 	@Override
@@ -45,6 +47,11 @@ public class FileCustomConfigImpl implements FileCustomConfig {
 		return mainSection;
 	}
 
+	@Override
+	public ConfigSection createEmptySection() {
+		return new DefaultConfigSectionImpl(this);
+	}
+	
 	@Override
 	public void load(InputStream in) throws ConfigException {
 		try {
@@ -62,11 +69,11 @@ public class FileCustomConfigImpl implements FileCustomConfig {
 			if(!version.equals(VERSION)) throw new IncompatibleConfigVersionException(version, VERSION);
 			if(!p.hasMore()) return;
 			String header = p.readHeader();
+			if(header != null) mainSection.setComment(null, header);
 			if(!p.hasMore()) return;
 			ConfigSectionDescriptor d = p.readSubsection(new Marker(0, 0), 0);
 			mainSection.loadFromMap(d.getProperties());
 			d.getComments().forEach(mainSection::setComment);
-			if(header != null) mainSection.setComment(null, header);
 		}catch(IOException e) {
 			throw new ConfigException("Unexpected IO exception", e);
 		}
@@ -100,7 +107,15 @@ public class FileCustomConfigImpl implements FileCustomConfig {
 	public Map<ObjectMapper<?, ?>, Integer> getMappers() {
 		return mappers;
 	}
+
+	@Override
+	public void registerLowLevelMapper(int priority, ObjectMapper<?, ?> lowLevelMapper) {
+		lowLevelMappers.put(lowLevelMapper, priority);
+	}
 	
-	
+	@Override
+	public Map<ObjectMapper<?, ?>, Integer> getLowLevelMappers() {
+		return lowLevelMappers;
+	}
 	
 }

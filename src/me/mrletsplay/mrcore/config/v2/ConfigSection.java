@@ -1,7 +1,6 @@
 package me.mrletsplay.mrcore.config.v2;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -233,7 +232,7 @@ public interface ConfigSection {
 		json.forEach(this::set);
 	}
 	
-	public static <T> NullableOptional<T> defaultCast(ConfigSection section, Object o, Class<T> typeClass, boolean allowComplex) {
+	public static <T> NullableOptional<T> defaultCast(ConfigSection section, Object o, Class<T> typeClass, Complex<?> exactType, boolean allowComplex) {
 		if(ClassUtils.isPrimitiveTypeClass(typeClass)) throw new IllegalArgumentException("Primitive types are not allowed");
 		if(o == null) return NullableOptional.of(null);
 		if(typeClass.isInstance(o)) return NullableOptional.of(typeClass.cast(o));
@@ -263,62 +262,76 @@ public interface ConfigSection {
 			return NullableOptional.of(typeClass.cast(o));
 		}else {
 			if(!allowComplex) return NullableOptional.empty();
-			List<List<ObjectMapper<?, ?>>> paths = calculateCompatiblePaths(section, o, Complex.typeOf(o), Complex.value(typeClass), new ArrayList<>());
-			if(paths.isEmpty()) return NullableOptional.empty();
-			for(List<ObjectMapper<?, ?>> path : paths) {
-				Object val = o;
+			List<ObjectMapper<?, ?>> llms = section.getConfig().getLowLevelMappers().entrySet().stream()
+					.filter(en -> en.getKey().canConstruct(o, section::castType))
+					.sorted(Comparator.<Map.Entry<ObjectMapper<?, ?>, Integer>>comparingInt(Map.Entry::getValue).reversed())
+					.map(Map.Entry::getKey)
+					.collect(Collectors.toList());
+			for(ObjectMapper<?, ?> om : llms) {
 				try {
-					for(ObjectMapper<?, ?> mapper : path) {
-						val = mapper.constructRawObject(section, val, section::castPrimitiveType);
+					Object c = om.constructRawObject(section, o, section::castType);
+					if(typeClass.isInstance(c)) {
+						NullableOptional<?> t = exactType.cast(c, section::castType);
+						if(t.isPresent()) {
+							return NullableOptional.of(typeClass.cast(c)); // cc -> llm -> ct
+						}
 					}
+					NullableOptional<T> tto = constructTopLevelType(section, c, typeClass, exactType); // First try cc -> llm -> tlm -> ct
+					if(tto.isPresent()) return tto;
 				}catch(ObjectMappingException e) {
 					continue;
 				}
-				return NullableOptional.of(typeClass.cast(val));
 			}
-			return NullableOptional.empty();
+			return constructTopLevelType(section, o, typeClass, exactType); // Then just return cc -> tlm -> ct
 		}
 	}
 	
-	public static List<List<ObjectMapper<?, ?>>> calculateCompatiblePaths(ConfigSection section, Object object, Complex<?> fromClass, Complex<?> toClass, List<Complex<?>> classes) {
-		if(toClass.equals(fromClass)) return new ArrayList<>();
-		classes.add(fromClass);
-		Comparator<Map.Entry<ObjectMapper<?, ?>, Integer>> c = Comparator.comparingInt(en -> en.getKey().getClassDepth(fromClass));
-		c = c.thenComparingInt(Map.Entry::getValue);
-		List<ObjectMapper<?, ?>> mappers = section.getConfig().getMappers().entrySet().stream()
-				.filter(m -> !classes.contains(m.getKey().getMappingClass()) && m.getKey().canConstruct(object, section::castPrimitiveType))
-				.sorted(c)
+	public static <T> NullableOptional<T> constructTopLevelType(ConfigSection section, Object o, Class<T> toClass, Complex<?> toExactType) {
+		List<ObjectMapper<?, ?>> tlms = section.getConfig().getMappers().entrySet().stream()
+				.filter(en -> en.getKey().canConstruct(o, section::castPrimitiveType))
+				.sorted(Comparator.comparingInt(Map.Entry::getValue))
 				.map(Map.Entry::getKey)
 				.collect(Collectors.toList());
-		List<List<ObjectMapper<?, ?>>> pths = new ArrayList<>();
-		for(ObjectMapper<?, ?> mapper : mappers) {
-			Object res;
+		for(ObjectMapper<?, ?> tom : tlms) {
 			try {
-				res = mapper.constructRawObject(section, object, section::castPrimitiveType);
-			}catch(ObjectMappingException e) {
-				if(mapper.getMappingClass().getFriendlyClassName().equals("me.eglp.gv2.util.base.guild.GuildTempBan")) {
-					e.printStackTrace();
+				Object c2 = tom.constructRawObject(section, o, section::castType);
+				if(toClass.isInstance(c2)) {
+					NullableOptional<?> t = toExactType.cast(c2, section::castType);
+					if(t.isPresent()) {
+						return NullableOptional.of(toClass.cast(c2)); // cc -> llm -> ct
+					}
 				}
+			}catch(ObjectMappingException e) {
 				continue;
 			}
-			if(toClass.cast(res).isPresent()) pths.add(new ArrayList<>(Arrays.asList(mapper)));
-			List<List<ObjectMapper<?, ?>>> paths = calculateCompatiblePaths(section, res, mapper.getMappingClass(), toClass, classes);
-			if(!paths.isEmpty()) {
-				for(List<ObjectMapper<?, ?>> pt : paths) {
-					pt.add(0, mapper);
-				}
-				pths.addAll(paths);
-			}
 		}
-		return pths;
+		return NullableOptional.empty();
 	}
 	
-	public default <T> NullableOptional<T> castType(Object o, Class<T> clazz) {
-		return defaultCast(this, o, clazz, true);
+//	public static <T> NullableOptional<T> constructLowLevelType(ConfigSection section, Object o, Complex<T> toClass) {
+//		List<ObjectMapper<?, ?>> llm = section.getConfig().getLowLevelMappers().entrySet().stream()
+//				.filter(en -> en.getKey().canConstruct(o, section::castType))
+//				.sorted(Comparator.comparingInt(Map.Entry::getValue))
+//				.map(Map.Entry::getKey)
+//				.collect(Collectors.toList());
+//		for(ObjectMapper<?, ?> om : llm) {
+//			try {
+//				NullableOptional<T> t = toClass.cast(om.constructRawObject(section, o, section::castType), section::castType);
+//				if(!t.isPresent()) continue;
+//				return t;
+//			}catch(ObjectMappingException e) {
+//				continue;
+//			}
+//		}
+//		return NullableOptional.empty();
+//	}
+	
+	public default <T> NullableOptional<T> castType(Object o, Class<T> clazz, Complex<?> exactType) {
+		return defaultCast(this, o, clazz, exactType, true);
 	}
 	
-	public default <T> NullableOptional<T> castPrimitiveType(Object o, Class<T> clazz) {
-		return defaultCast(this, o, clazz, false);
+	public default <T> NullableOptional<T> castPrimitiveType(Object o, Class<T> clazz, Complex<?> exactType) {
+		return defaultCast(this, o, clazz, exactType, false);
 	}
 	
 	public default ConfigValueType getTypeOf(String key) {

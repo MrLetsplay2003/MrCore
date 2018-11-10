@@ -25,6 +25,7 @@ class DefaultConfigParser {
 			r.revert();
 			if(r.next(2).equals("##")) {
 				rHeader.add(r.readUntil('\n'));
+				if(!r.hasNext()) break;
 			}else {
 				r.revert(sk + 2);
 				break;

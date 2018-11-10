@@ -7,7 +7,7 @@ import java.util.Map;
 
 public interface Complex<T> {
 	
-	public static <T> NullableOptional<T> defaultCast(Object o, Class<T> typeClass) {
+	public static <T> NullableOptional<T> defaultCast(Object o, Class<T> typeClass, Complex<?> exactClass) {
 		if(o == null) return NullableOptional.of(null);
 		if(!typeClass.isInstance(o)) return NullableOptional.empty();
 		return NullableOptional.of(typeClass.cast(o));
@@ -38,6 +38,12 @@ public interface Complex<T> {
 	public Class<?> getBaseClass();
 	
 	public String getFriendlyClassName();
+	
+	public boolean isValue();
+	
+	public boolean isList();
+	
+	public boolean isMap();
 	
 	public static <T> Complex<T> value(Class<T> clazz) {
 		if(ClassUtils.isPrimitiveTypeClass(clazz)) throw new IllegalArgumentException("Primitive types are not allowed");
@@ -123,7 +129,7 @@ public interface Complex<T> {
 		
 		@Override
 		public NullableOptional<T> cast(Object o, CastingFunction castingFunction) {
-			return castingFunction.cast(o, typeClass);
+			return castingFunction.cast(o, typeClass, this);
 		}
 
 		@Override
@@ -156,6 +162,21 @@ public interface Complex<T> {
 		public String toString() {
 			return "Complex[" + getFriendlyClassName() + "]";
 		}
+
+		@Override
+		public boolean isValue() {
+			return true;
+		}
+
+		@Override
+		public boolean isList() {
+			return false;
+		}
+
+		@Override
+		public boolean isMap() {
+			return false;
+		}
 		
 	}
 	
@@ -178,11 +199,10 @@ public interface Complex<T> {
 
 		public NullableOptional<List<T>> cast(Object o, CastingFunction castingFunction, List<T> toList) {
 			if(o == null) return NullableOptional.of(null);
-			NullableOptional<?> list = castingFunction.cast(o, List.class);
+			NullableOptional<?> list = castingFunction.cast(o, List.class, this);
 			if(!list.isPresent()) {
 				return NullableOptional.empty();
 			}
-			
 			List<?> oList = (List<?>) list.get();
 			for(Object e : oList) {
 				NullableOptional<T> c = typeClass.cast(e, castingFunction);
@@ -233,6 +253,21 @@ public interface Complex<T> {
 				return Complex.value(List.class).getCommonClass(other);
 			}
 		}
+
+		@Override
+		public boolean isValue() {
+			return false;
+		}
+
+		@Override
+		public boolean isList() {
+			return true;
+		}
+
+		@Override
+		public boolean isMap() {
+			return false;
+		}
 		
 		@Override
 		public String toString() {
@@ -266,11 +301,10 @@ public interface Complex<T> {
 
 		public NullableOptional<Map<K, V>> cast(Object o, CastingFunction castingFunction, Map<K, V> toMap) {
 			if(o == null) return NullableOptional.of(null);
-			NullableOptional<?> map = castingFunction.cast(o, Map.class);
+			NullableOptional<?> map = castingFunction.cast(o, Map.class, this);
 			if(!map.isPresent()) {
 				return NullableOptional.empty();
 			}
-			
 			Map<?, ?> oMap = (Map<?, ?>) map.get();
 			for(Map.Entry<?, ?> e : oMap.entrySet()) {
 				NullableOptional<K> k = keyClass.cast(e.getKey(), castingFunction);
@@ -325,6 +359,21 @@ public interface Complex<T> {
 			}else {
 				return Complex.value(Map.class).getCommonClass(other);
 			}
+		}
+
+		@Override
+		public boolean isValue() {
+			return false;
+		}
+
+		@Override
+		public boolean isList() {
+			return false;
+		}
+
+		@Override
+		public boolean isMap() {
+			return true;
 		}
 		
 		@Override

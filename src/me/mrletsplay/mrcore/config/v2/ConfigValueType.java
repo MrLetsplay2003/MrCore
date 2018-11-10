@@ -1,6 +1,5 @@
 package me.mrletsplay.mrcore.config.v2;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -82,50 +81,39 @@ public enum ConfigValueType {
 	public static NullableOptional<?> createCompatible(ConfigSection forSection, Object o) {
 		ConfigValueType type = getRawTypeOf(o);
 		if(type != null) return NullableOptional.of(o);
-		List<List<ObjectMapper<?, ?>>> paths = calculateCompatiblePaths(forSection, o, Complex.typeOf(o), new ArrayList<>());
-		if(paths.isEmpty()) return NullableOptional.empty();
-		for(List<ObjectMapper<?, ?>> path : paths) {
-			Object val = o;
-			try {
-				for(ObjectMapper<?, ?> mapper : path) {
-					val = mapper.mapRawObject(forSection, val, forSection::castType);
-				}
-			}catch(ObjectMappingException e) {
-				continue;
-			}
-			return NullableOptional.of(val);
-		}
-		return NullableOptional.empty();
-	}
-	
-	private static List<List<ObjectMapper<?, ?>>> calculateCompatiblePaths(ConfigSection section, Object o, Complex<?> clazz, List<Complex<?>> classes) {
-		if(isConfigPrimitive(clazz)) return new ArrayList<>();
-		classes.add(clazz);
-		Comparator<Map.Entry<ObjectMapper<?, ?>, Integer>> c = Comparator.comparingInt(en -> en.getKey().getClassDepth(clazz));
-		c = c.thenComparingInt(Map.Entry::getValue);
-		List<ObjectMapper<?, ?>> mappers = section.getConfig().getMappers().entrySet().stream()
-				.filter(m -> !classes.contains(m.getKey().getMappedClass()) && m.getKey().canMap(o, section::castType))
-				.sorted(c)
+		List<ObjectMapper<?, ?>> llms = forSection.getConfig().getMappers().entrySet().stream()
+				.filter(en -> en.getKey().canMap(o, forSection::castType))
+				.sorted(Comparator.comparingInt(Map.Entry::getValue))
 				.map(Map.Entry::getKey)
 				.collect(Collectors.toList());
-		List<List<ObjectMapper<?, ?>>> pths = new ArrayList<>();
-		for(ObjectMapper<?, ?> mapper : mappers) {
-			if(isConfigPrimitive(mapper.getMappedClass())) pths.add(new ArrayList<>(Arrays.asList(mapper)));
-			Object res;
+		for(ObjectMapper<?, ?> om : llms) {
 			try {
-				res = mapper.mapRawObject(section, o, section::castType);
+				Object c = om.mapRawObject(forSection, o, forSection::castType);
+				if(isConfigPrimitive(om.getMappedClass())) return NullableOptional.of(c); // ct -> tlm -> cc
+				NullableOptional<?> tto = mapLowLevelType(forSection, c); // First try ct -> tlm -> llm -> ct
+				if(tto.isPresent()) return tto;
 			}catch(ObjectMappingException e) {
 				continue;
 			}
-			List<List<ObjectMapper<?, ?>>> paths = calculateCompatiblePaths(section, res, mapper.getMappedClass(), classes);
-			if(!paths.isEmpty()) {
-				for(List<ObjectMapper<?, ?>> pt : paths) {
-					pt.add(0, mapper);
-				}
-				pths.addAll(paths);
+		}
+		return mapLowLevelType(forSection, o); // Then just return cc -> llm -> ct
+	}
+	
+	public static NullableOptional<?> mapLowLevelType(ConfigSection section, Object o) {
+		List<ObjectMapper<?, ?>> tlms = section.getConfig().getLowLevelMappers().entrySet().stream()
+				.filter(en -> en.getKey().canMap(o, section::castType))
+				.sorted(Comparator.comparingInt(Map.Entry::getValue))
+				.map(Map.Entry::getKey)
+				.collect(Collectors.toList());
+		for(ObjectMapper<?, ?> tom : tlms) {
+			try {
+				Object c2 = tom.mapRawObject(section, o, section::castType);
+				if(isConfigPrimitive(tom.getMappedClass())) return NullableOptional.of(c2);
+			}catch(ObjectMappingException e) {
+				continue;
 			}
 		}
-		return pths;
+		return NullableOptional.empty();
 	}
 	
 	public static boolean isConfigPrimitive(Complex<?> typeClass) {
