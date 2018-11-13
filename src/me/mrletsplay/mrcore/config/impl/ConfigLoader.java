@@ -44,4 +44,34 @@ public class ConfigLoader {
 		return cc;
 	}
 	
+	public static <T extends CustomConfig> T loadConfigFromStream(T config, InputStream stream, boolean closeAfterLoad) {
+		try {
+			config.load(stream);
+			if(closeAfterLoad) stream.close();
+		}catch(IncompatibleConfigVersionException e) {
+			try {
+				config.clear();
+				return ConfigConverter.convertConfig(IOUtils.readAllBytes(stream), config, e.getGivenDefaultVersion(), e.getRequiredDefaultVersion());
+			} catch (IOException e1) {
+				throw new ConfigException(e1);
+			}
+		}catch(IOException e) {
+			throw new ConfigException(e);
+		}
+		return config;
+	}
+	
+	public static <T extends CustomConfig> T loadConfigFromFile(T config, File configFile, boolean closeAfterLoad) {
+		try {
+			config.load(configFile);
+		}catch(IncompatibleConfigVersionException e) {
+			try {
+				return ConfigConverter.convertConfig(IOUtils.readAllBytes(new FileInputStream(configFile)), config, e.getGivenDefaultVersion(), e.getRequiredDefaultVersion());
+			} catch (IOException e1) {
+				throw new ConfigException(e1);
+			}
+		}
+		return config;
+	}
+	
 }
