@@ -40,4 +40,9 @@ public class ObjectMapperImpl<E, O> implements ObjectMapper<E, O>{
 		return constructingFunction.apply(section, mapped);
 	}
 	
+	@Override
+	public String toString() {
+		return "(" + mappingClass.getFriendlyClassName() + " -> " + mappedClass + ")";
+	}
+	
 }

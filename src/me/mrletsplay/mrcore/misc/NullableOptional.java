@@ -70,14 +70,6 @@ public class NullableOptional<T> {
 		if(present) consumer.accept(value);
 	}
 	
-	public static <T> NullableOptional<T> of(T value) {
-		return new NullableOptional<>(true, value);
-	}
-	
-	public static <T> NullableOptional<T> empty() {
-		return new NullableOptional<>(false, null);
-	}
-	
 	@Override
 	public int hashCode() {
 		return present ? value.hashCode() : 0;
@@ -95,6 +87,14 @@ public class NullableOptional<T> {
 	@Override
 	public String toString() {
 		return "NullableOptional" + (present ? "[" + String.valueOf(value) + "]" : "<Empty>");
+	}
+	
+	public static <T> NullableOptional<T> of(T value) {
+		return new NullableOptional<>(true, value);
+	}
+	
+	public static <T> NullableOptional<T> empty() {
+		return new NullableOptional<>(false, null);
 	}
 	
 }

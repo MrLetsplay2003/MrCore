@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import me.mrletsplay.mrcore.misc.Complex;
+import me.mrletsplay.mrcore.misc.ErroringNullableOptional;
 import me.mrletsplay.mrcore.misc.NullableOptional;
 
 public enum ConfigValueType {
@@ -81,18 +82,19 @@ public enum ConfigValueType {
 	public static NullableOptional<?> createCompatible(ConfigSection forSection, Object o) {
 		ConfigValueType type = getRawTypeOf(o);
 		if(type != null) return NullableOptional.of(o);
-		List<ObjectMapper<?, ?>> llms = forSection.getConfig().getMappers().entrySet().stream()
+		List<ObjectMapper<?, ?>> tlms = forSection.getConfig().getMappers().entrySet().stream()
 				.filter(en -> en.getKey().canMap(o, forSection::castType))
 				.sorted(Comparator.comparingInt(Map.Entry::getValue))
 				.map(Map.Entry::getKey)
 				.collect(Collectors.toList());
-		for(ObjectMapper<?, ?> om : llms) {
+		for(ObjectMapper<?, ?> om : tlms) {
 			try {
 				Object c = om.mapRawObject(forSection, o, forSection::castType);
-				if(isConfigPrimitive(om.getMappedClass())) return NullableOptional.of(c); // ct -> tlm -> cc
+				if(isConfigPrimitive(om.getMappedClass())) return ErroringNullableOptional.ofErroring(c); // ct -> tlm -> cc
 				NullableOptional<?> tto = mapLowLevelType(forSection, c); // First try ct -> tlm -> llm -> ct
 				if(tto.isPresent()) return tto;
 			}catch(ObjectMappingException e) {
+				e.printStackTrace();
 				continue;
 			}
 		}
@@ -100,16 +102,17 @@ public enum ConfigValueType {
 	}
 	
 	public static NullableOptional<?> mapLowLevelType(ConfigSection section, Object o) {
-		List<ObjectMapper<?, ?>> tlms = section.getConfig().getLowLevelMappers().entrySet().stream()
+		List<ObjectMapper<?, ?>> llms = section.getConfig().getLowLevelMappers().entrySet().stream()
 				.filter(en -> en.getKey().canMap(o, section::castType))
 				.sorted(Comparator.comparingInt(Map.Entry::getValue))
 				.map(Map.Entry::getKey)
 				.collect(Collectors.toList());
-		for(ObjectMapper<?, ?> tom : tlms) {
+		for(ObjectMapper<?, ?> tom : llms) {
 			try {
 				Object c2 = tom.mapRawObject(section, o, section::castType);
 				if(isConfigPrimitive(tom.getMappedClass())) return NullableOptional.of(c2);
 			}catch(ObjectMappingException e) {
+				e.printStackTrace();
 				continue;
 			}
 		}

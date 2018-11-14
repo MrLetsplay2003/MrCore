@@ -33,5 +33,10 @@ public class JSONObjectMapperImpl<E> implements JSONObjectMapper<E> {
 	public E constructObject(ConfigSection section, JSONObject mapped) {
 		return constructingFunction.apply(section, mapped);
 	}
+	
+	@Override
+	public String toString() {
+		return "(" + mappingClass.getFriendlyClassName() + " -> JSON)";
+	}
 
 }
