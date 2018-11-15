@@ -40,6 +40,16 @@ public interface SubMappable<Self extends SubMappable<Self, T>, T> {
 		return sM;	
 	}
 	
+	public default <Q extends DoubleMapper<Q, Self, T>> DoubleMapper<Q, Self, T> mapDouble(String name, Function<T, Double> getter, BiConsumer<T, Double> setter) {
+		return mapDouble(name, (s, t) -> getter.apply(t), setter == null ? null : (s, t, v) -> setter.accept(t, v));
+	}
+	
+	public default <Q extends DoubleMapper<Q, Self, T>> DoubleMapper<Q, Self, T> mapDouble(String name, BiFunction<ConfigSection, T, Double> getter, TriConsumer<ConfigSection, T, Double> setter) {
+		DoubleMapper<Q, Self, T> sM = new DoubleMapper<>(getSelf(), getter, setter);
+		addMapperElement(name, sM);
+		return sM;	
+	}
+	
 	public default <Q extends EnumMapper<Q, Self, T, E>, E extends Enum<E>> EnumMapper<Q, Self, T, E> mapEnum(Class<E> enumClass, String name, Function<T, E> getter, BiConsumer<T, E> setter) {
 		return mapEnum(enumClass, name, (s, t) -> getter.apply(t), setter == null ? null : (s, t, v) -> setter.accept(t, v));
 	}
