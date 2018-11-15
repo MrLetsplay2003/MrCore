@@ -279,6 +279,7 @@ public interface ConfigSection {
 					NullableOptional<T> tto = constructTopLevelType(section, c, typeClass, exactType); // First try cc -> llm -> tlm -> ct
 					if(tto.isPresent()) return tto;
 				}catch(ObjectMappingException e) {
+					e.printStackTrace();
 					continue;
 				}
 			}
@@ -302,6 +303,7 @@ public interface ConfigSection {
 					}
 				}
 			}catch(ObjectMappingException e) {
+				e.printStackTrace();
 				continue;
 			}
 		}
