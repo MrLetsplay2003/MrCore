@@ -25,6 +25,7 @@ public class IntMapper<Self extends IntMapper<Self, P, T>, P extends SubMappable
 
 	@Override
 	public void applyConstruct(T instance, ConfigSection section, JSONObject json, String key) {
+		if(setter == null) return;
 		int val = json.getInt(key);
 		setter.accept(section, instance, val);
 	}

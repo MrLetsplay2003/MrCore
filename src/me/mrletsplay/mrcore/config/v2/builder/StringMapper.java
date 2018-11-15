@@ -25,6 +25,7 @@ public class StringMapper<Self extends StringMapper<Self, P, T>, P extends SubMa
 
 	@Override
 	public void applyConstruct(T instance, ConfigSection section, JSONObject json, String key) {
+		if(setter == null) return;
 		String val = json.getString(key);
 		setter.accept(section, instance, val);
 	}

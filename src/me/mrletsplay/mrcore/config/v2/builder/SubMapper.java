@@ -36,6 +36,7 @@ public class SubMapper<Self extends SubMapper<Self, P, T, S>, P extends SubMappa
 
 	@Override
 	public void applyConstruct(T instance, ConfigSection section, JSONObject json, String key) {
+		if(setter == null) return;
 		JSONObject obj = json.getJSONObject(key);
 		S inst = constructor.apply(section, obj);
 		for(Map.Entry<String, MapperElement<?, Self, S>> el : elements.entrySet()) {

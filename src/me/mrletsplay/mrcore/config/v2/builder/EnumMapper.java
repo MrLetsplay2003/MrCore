@@ -30,6 +30,7 @@ public class EnumMapper<Self extends EnumMapper<Self, P, T, E>, P extends SubMap
 
 	@Override
 	public void applyConstruct(T instance, ConfigSection section, JSONObject json, String key) {
+		if(setter == null) return;
 		E val = enumValueOf(enumClass, json.getString(key));
 		setter.accept(section, instance, val);
 	}
