@@ -21,7 +21,7 @@ public interface SubMappable<Self extends SubMappable<Self, T>, T> {
 	}
 	
 	public default <Q extends StringMapper<Q, Self, T>> StringMapper<Q, Self, T> mapString(String name, Function<T, String> getter, BiConsumer<T, String> setter) {
-		return mapString(name, (s, t) -> getter.apply(t), (s, t, v) -> setter.accept(t, v));
+		return mapString(name, (s, t) -> getter.apply(t), setter == null ? null : (s, t, v) -> setter.accept(t, v));
 	}
 	
 	public default <Q extends StringMapper<Q, Self, T>> StringMapper<Q, Self, T> mapString(String name, BiFunction<ConfigSection, T, String> getter, TriConsumer<ConfigSection, T, String> setter) {
@@ -31,7 +31,7 @@ public interface SubMappable<Self extends SubMappable<Self, T>, T> {
 	}
 	
 	public default <Q extends IntMapper<Q, Self, T>> IntMapper<Q, Self, T> mapInteger(String name, Function<T, Integer> getter, BiConsumer<T, Integer> setter) {
-		return mapInteger(name, (s, t) -> getter.apply(t), (s, t, v) -> setter.accept(t, v));
+		return mapInteger(name, (s, t) -> getter.apply(t), setter == null ? null : (s, t, v) -> setter.accept(t, v));
 	}
 	
 	public default <Q extends IntMapper<Q, Self, T>> IntMapper<Q, Self, T> mapInteger(String name, BiFunction<ConfigSection, T, Integer> getter, TriConsumer<ConfigSection, T, Integer> setter) {
@@ -41,7 +41,7 @@ public interface SubMappable<Self extends SubMappable<Self, T>, T> {
 	}
 	
 	public default <Q extends EnumMapper<Q, Self, T, E>, E extends Enum<E>> EnumMapper<Q, Self, T, E> mapEnum(Class<E> enumClass, String name, Function<T, E> getter, BiConsumer<T, E> setter) {
-		return mapEnum(enumClass, name, (s, t) -> getter.apply(t), (s, t, v) -> setter.accept(t, v));
+		return mapEnum(enumClass, name, (s, t) -> getter.apply(t), setter == null ? null : (s, t, v) -> setter.accept(t, v));
 	}
 	
 	public default <Q extends EnumMapper<Q, Self, T, E>, E extends Enum<E>> EnumMapper<Q, Self, T, E> mapEnum(Class<E> enumClass, String name, BiFunction<ConfigSection, T, E> getter, TriConsumer<ConfigSection, T, E> setter) {
@@ -51,7 +51,7 @@ public interface SubMappable<Self extends SubMappable<Self, T>, T> {
 	}
 	
 	public default <Q extends SubMapper<Q, Self, T, S>, S> SubMapper<Q, Self, T, S> mapObject(String name, Function<JSONObject, S> constructor, Function<T, S> getter, BiConsumer<T, S> setter) {
-		return mapObject(name, (s, j) -> constructor.apply(j), (s, t) -> getter.apply(t), (s, t, v) -> setter.accept(t, v));
+		return mapObject(name, (s, j) -> constructor.apply(j), (s, t) -> getter.apply(t), setter == null ? null : (s, t, v) -> setter.accept(t, v));
 	}
 	
 	public default <Q extends SubMapper<Q, Self, T, S>, S> SubMapper<Q, Self, T, S> mapObject(String name, BiFunction<ConfigSection, JSONObject, S> constructor, BiFunction<ConfigSection, T, S> getter, TriConsumer<ConfigSection, T, S> setter) {
