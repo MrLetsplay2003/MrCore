@@ -297,19 +297,26 @@ public class GUIUtils {
 		
 	}
 	
-	public static class GUIBuildPageItemEvent extends GUIBuildEvent {
+	public static class GUIBuildPageItemEvent<T> extends GUIBuildEvent {
 
-		private int page, absoluteIndex, relativeIndex;
+		private int page;
+		private List<T> items;
+		private int absoluteIndex, relativeIndex;
 		
-		public GUIBuildPageItemEvent(GUIHolder holder, Player player, Inventory inv, int page, int absoluteIndex, int relativeIndex) {
+		public GUIBuildPageItemEvent(GUIHolder holder, Player player, Inventory inv, int page, List<T> items, int absoluteIndex, int relativeIndex) {
 			super(holder, player, inv);
 			this.page = page;
+			this.items = items;
 			this.absoluteIndex = absoluteIndex;
 			this.relativeIndex = relativeIndex;
 		}
 		
 		public int getPage() {
 			return page;
+		}
+		
+		public List<T> getItems() {
+			return items;
 		}
 		
 		public int getAbsoluteIndex() {
@@ -324,7 +331,7 @@ public class GUIUtils {
 	
 	public static interface ItemSupplier<T> {
 		
-		public GUIElement toGUIElement(GUIBuildPageItemEvent event, T item);
+		public GUIElement toGUIElement(GUIBuildPageItemEvent<T> event, T item);
 		
 		public List<T> getItems(GUIBuildEvent event);
 		
@@ -929,7 +936,7 @@ public class GUIUtils {
 				int end = (items.size()<=start+nSlots)?items.size():start+nSlots;
 				for(int i = start; i < end; i++){
 					T rEl = items.get(i);
-					GUIBuildPageItemEvent ev = new GUIBuildPageItemEvent(holder, p, base, page, i, i - start);
+					GUIBuildPageItemEvent<T> ev = new GUIBuildPageItemEvent<>(holder, p, base, page, items, i, i - start);
 					GUIElement el = supp.toGUIElement(ev, rEl);
 					int slot = slots.get(i-start);
 					base.setItem(slot, el.getItem(event));

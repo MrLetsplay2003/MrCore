@@ -6,8 +6,8 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import me.mrletsplay.mrcore.misc.JSON.JSONArray;
-import me.mrletsplay.mrcore.misc.JSON.JSONObject;
+import me.mrletsplay.mrcore.json.JSONArray;
+import me.mrletsplay.mrcore.json.JSONObject;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 
@@ -47,7 +47,7 @@ public class ExtraChatComponents {
 					JSONArray ench = new JSONArray();
 					for(Map.Entry<Enchantment, Integer> en : meta.getEnchants().entrySet()) {
 						JSONObject e = new JSONObject();
-						e.set("id", en.getKey().getName()); // TODO
+						e.set("id", en.getKey().getName()); // TODO: 1.8 - 1.13
 						e.set("lvl", en.getValue());
 						ench.add(e);
 					}

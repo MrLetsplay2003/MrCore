@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Deprecated
 public class CompactCustomConfig extends CustomConfig {
 	
 	private static final String VERSION = "1.0_compact";

@@ -1,6 +1,6 @@
 package me.mrletsplay.mrcore.api.spiget;
 
-import me.mrletsplay.mrcore.misc.JSON.JSONObject;
+import me.mrletsplay.mrcore.json.JSONObject;
 
 public class SpiGetResourceVersion {
 

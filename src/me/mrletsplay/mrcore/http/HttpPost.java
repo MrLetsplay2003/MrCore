@@ -2,8 +2,10 @@ package me.mrletsplay.mrcore.http;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class HttpPost implements HttpRequest {
 
@@ -48,7 +50,13 @@ public class HttpPost implements HttpRequest {
 	@Override
 	public HttpResult execute() {
 		try {
-			return HttpResult.retrieveFrom(url, "POST", queryParameters, headerParameters, postParameters);
+			byte[] postData = null;
+			if(postParameters.size() > 0) {
+				postData = postParameters.entrySet().stream()
+						.map(e -> HttpUtils.urlEncode(e.getKey()) + "=" + HttpUtils.urlEncode(e.getValue()))
+						.collect(Collectors.joining("&")).getBytes(StandardCharsets.UTF_8);
+			}
+			return HttpResult.retrieveFrom(url, "POST", queryParameters, headerParameters, postData);
 		} catch (IOException e) {
 			throw new HttpException(e);
 		}
@@ -57,7 +65,13 @@ public class HttpPost implements HttpRequest {
 	@Override
 	public InputStream executeAsInputStream() {
 		try {
-			return HttpResult.retrieveAsInputStreamFrom(url, "POST", queryParameters, headerParameters, postParameters);
+			byte[] postData = null;
+			if(postParameters.size() > 0) {
+				postData = postParameters.entrySet().stream()
+						.map(e -> HttpUtils.urlEncode(e.getKey()) + "=" + HttpUtils.urlEncode(e.getValue()))
+						.collect(Collectors.joining("&")).getBytes(StandardCharsets.UTF_8);
+			}
+			return HttpResult.retrieveAsInputStreamFrom(url, "POST", queryParameters, headerParameters, postData);
 		} catch (IOException e) {
 			throw new HttpException(e);
 		}

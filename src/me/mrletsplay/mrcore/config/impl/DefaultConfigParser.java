@@ -1,23 +1,88 @@
 package me.mrletsplay.mrcore.config.impl;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import me.mrletsplay.mrcore.config.v2.ConfigException;
 
-public class DefaultConfigParser {
+class DefaultConfigParser {
 
-	private CharReader r;
+	public CharReader r;
 	
 	public DefaultConfigParser(String[] raw) {
 		r = new CharReader(raw);
 	}
 	
-	public String readPropertyDescriptor() {
+	public String readHeader() {
+		List<String> rHeader = new ArrayList<>();
+		while(true) {
+			int sk = r.skipWhitespacesUntil('\n').length();
+			if(!r.hasNext()) throw new ConfigException("Failed to read header: EOF reached");
+			if(r.next() == '\n') throw new ConfigException("Invalid header", r.currentLine, r.currentIndex);
+			r.revert();
+			if(r.next(2).equals("##")) {
+				rHeader.add(r.readUntil('\n'));
+				if(!r.hasNext()) break;
+			}else {
+				r.revert(sk + 2);
+				break;
+			}
+		}
+		return rHeader.stream().collect(Collectors.joining("\n"));
+	}
+	
+	public String readVersionDescriptor() {
+		r.skipWhitespacesUntil('\n');
+		if(!r.hasNext()) throw new ConfigException("Failed to read property descriptor: EOF reached");
+		if(r.next() == '\n') throw new ConfigException("Invalid version descriptor", r.currentLine, r.currentIndex);
+		r.revert();
+		if(!"###".equals(r.next(3))) throw new ConfigException("Version descriptor expected", r.currentLine, r.currentIndex);
+		r.skipWhitespacesUntil('\n');
+		if(!r.hasNext()) throw new ConfigException("Failed to read property descriptor: EOF reached");
+		if(r.next() == '\n') throw new ConfigException("Invalid version descriptor", r.currentLine, r.currentIndex);
+		r.revert();
+		String vDesc = r.readUntil('\n');
+		String vS = "CustomConfig version: ";
+		if(!vDesc.startsWith(vS)) throw new ConfigException("Invalid version descriptor", r.currentLine, r.currentIndex);
+		return vDesc.substring(vS.length()).trim();
+	}
+	
+	public Object readCommentOrPropertyDescriptor(int indents) {
+		int sk = r.skipWhitespacesUntil('\n').length();
+		if(!r.hasNext()) throw new ConfigException("Failed to read property descriptor: EOF reached");
+		if(r.next() == '\n') throw new ConfigException("Invalid comment/property descriptor", r.currentLine, r.currentIndex);
+		r.revert();
+		if(r.next() == '#') {
+			return r.readUntil('\n');
+		}else {
+			r.revert(sk + 1);
+			return readPropertyDescriptor(indents);
+		}
+	}
+	
+	public PropertyDescriptor readPropertyDescriptor(int indents) {
+		int rIndents = r.skipWhitespacesUntil('\n').length();
+		if(!r.hasNext()) throw new ConfigException("Failed to read property descriptor: EOF reached");
+		if(r.next() == '\n') throw new ConfigException("Invalid property descriptor", r.currentLine, r.currentIndex);
+		r.revert();
+		if(rIndents % 2 != 0) throw new ConfigException("Invalid property descriptor: indents % 2 != 0", r.currentLine, r.currentIndex);
+		Marker s = r.createMarker();
+		if(rIndents / 2 != indents) {
+			r.next(); // FIXME
+			return new PropertyDescriptor(rIndents, "", s);
+		}
 		String d = r.readUntil(':');
 		if(d == null) throw new ConfigException("Failed to read property descriptor: EOF reached");
-		r.skipWhitespaces();
-		return d;
+		if(d.contains("\n")) throw new ConfigException("Invalid property descriptor", r.currentLine, r.currentIndex);
+		return new PropertyDescriptor(rIndents, d, s);
 	}
 	
 	public Object readPropertyValue(int propertyIndents) {
+		r.skipWhitespacesUntil('\n');
+		if(!r.hasNext()) throw new ConfigException("Empty property value", r.currentLine, r.currentIndex);
 		char c = r.next();
 		Object value;
 		if(Character.isDigit(c) || c == '-') {
@@ -26,27 +91,160 @@ public class DefaultConfigParser {
 		}else {
 			switch(c) {
 				case 'n':
-					if(!r.next(3).equals("ull")) throw new ConfigException("Invalid property value", r.currentLine, r.currentIndex);
+					if(!r.next(3).equals("ull")) throw new ConfigException("Invalid property value", r.currentLine, r.currentIndex - 3);
 					value = null;
 					break;
 				case 't':
-					if(!r.next(3).equals("rue")) throw new ConfigException("Invalid property value", r.currentLine, r.currentIndex);
+					if(!r.next(3).equals("rue")) throw new ConfigException("Invalid property value", r.currentLine, r.currentIndex - 3);
 					value = true;
 					break;
 				case 'f':
-					if(!r.next(4).equals("alse")) throw new ConfigException("Invalid property value", r.currentLine, r.currentIndex);
+					if(!r.next(4).equals("alse")) throw new ConfigException("Invalid property value", r.currentLine, r.currentIndex - 4);
 					value = false;
 					break;
 				case '"':
 					r.revert();
 					value = readString();
 					break;
+				case '\'':
+					r.revert();
+					value = readCharacter();
+					break;
+				case '\n':
+					return readListOrSubsection(r.createMarker(), propertyIndents + 1);
 				default:
 					throw new ConfigException("Invalid property value: " + c, r.currentLine, r.currentIndex);
 			}
 		}
 		if(r.hasNext()) {
 			r.skipWhitespacesUntil('\n');
+			r.next();
+			r.skipUntilLastOf('\n');
+			if(r.current() != '\n') throw new ConfigException("Unexpected character '" + r.current() + "'", r.currentLine, r.currentIndex);
+		}
+		return value;
+	}
+	
+	public Object readListOrSubsection(Marker start, int indents) {
+		int d = r.skipWhitespaces().length();
+		switch(r.next()) {
+			case '-':
+				r.revert(d + 1);
+				return readList(start, indents);
+			default:
+				r.revert(d + 1);
+				return readSubsection(start, indents);
+		}
+	}
+	
+	public ConfigSectionDescriptor readSubsection(Marker start, int indents) {
+		ConfigSectionDescriptor section = new ConfigSectionDescriptor();
+		List<String> commentBuffer = new ArrayList<>();
+		while(r.hasNext()) {
+			Object cop = readCommentOrPropertyDescriptor(indents);
+			if(cop instanceof PropertyDescriptor) {
+				PropertyDescriptor s = (PropertyDescriptor) cop;
+				if(s.getIndents() > indents) throw new ConfigException("Invalid amount of indents", s.start.line, s.start.index + 1);
+				if(s.getIndents() < indents) {
+					if(section.properties.isEmpty()) throw new ConfigException("Empty subsection", start.line, start.index);
+					r.revert(s.getRawIndents() + s.getKey().length() + 1);
+					return section;
+				}
+				if(!commentBuffer.isEmpty()) {
+					section.comments.put(s.getKey(), commentBuffer.stream().collect(Collectors.joining("\n")));
+					commentBuffer = new ArrayList<>();
+				}
+				section.properties.put(s.getKey(), readPropertyValue(indents));
+			}else if(cop instanceof String) { // Comment
+				commentBuffer.add((String) cop);
+			}
+		}
+		return section;
+	}
+	
+	public PropertyDescriptor readListEntryDescriptor(int indents) {
+		int ind = r.skipWhitespacesUntil('\n').length();
+		if(!r.hasNext()) throw new ConfigException("Failed to read property descriptor: EOF reached");
+		if(r.next() == '\n') throw new ConfigException("Invalid list entry descriptor", r.currentIndex, r.currentLine);
+		r.revert();
+		if(ind % 2 != 0) throw new ConfigException("Invalid list entry descriptor: indents % 2 != 0", r.currentLine, r.currentIndex);
+		Marker s = r.createMarker();
+		if(ind / 2 != indents) return new PropertyDescriptor(ind, "", s);
+		if(r.next() != '-') throw new ConfigException("Invalid list entry, unexpected character '" + r.current() + "'", r.currentLine, r.currentIndex);
+		return new PropertyDescriptor(ind, "-", s);
+	}
+	
+	public PropertyDescriptor readListClosingBracketDescriptor(int indents) {
+		int ind = r.skipWhitespacesUntil('\n').length();
+		if(!r.hasNext()) throw new ConfigException("Failed to read closing bracket: EOF reached");
+		if(r.next() == '\n') throw new ConfigException("Missing closing bracket", r.currentIndex, r.currentLine);
+		r.revert();
+		if(ind % 2 != 0) throw new ConfigException("Invalid closing bracket: indents % 2 != 0", r.currentLine, r.currentIndex);
+		Marker s = r.createMarker();
+		if(ind / 2 != indents) return new PropertyDescriptor(ind, "", s);
+		if(r.next() != '}') throw new ConfigException("Missing closing bracket, unexpected character '" + r.current() + "'", r.currentLine, r.currentIndex);
+		r.skipWhitespacesUntil('\n');
+		if(r.next() != '\n') throw new ConfigException("Unexpected character '" + r.current() + "'", r.currentLine, r.currentIndex);
+		return new PropertyDescriptor(ind, "}", s);
+	}
+	
+	public List<Object> readList(Marker start, int indents) {
+		List<Object> list = new ArrayList<>();
+		while(r.hasNext()) {
+			PropertyDescriptor s = readListEntryDescriptor(indents);
+			if(s.getIndents() > indents) throw new ConfigException("Invalid amount of indents", r.currentLine, r.currentIndex);
+			if(s.getIndents() < indents) {
+				if(list.isEmpty()) throw new ConfigException("Empty list", start.line, start.index);
+				r.revert(s.getRawIndents() + s.getKey().length());
+				return list;
+			}
+			list.add(readListEntryValue(indents));
+		}
+		return list;
+	}
+	
+	public Object readListEntryValue(int propertyIndents) {
+		r.skipWhitespacesUntil('\n');
+		char c = r.next();
+		if(!r.hasNext()) throw new ConfigException("Empty list entry value", r.currentLine, r.currentIndex);
+		Object value;
+		if(Character.isDigit(c) || c == '-') {
+			r.revert();
+			value = readNumber();
+		}else {
+			switch(c) {
+				case 'n':
+					if(!r.next(3).equals("ull")) throw new ConfigException("Invalid list entry value", r.currentLine, r.currentIndex - 3);
+					value = null;
+					break;
+				case 't':
+					if(!r.next(3).equals("rue")) throw new ConfigException("Invalid list entry value", r.currentLine, r.currentIndex - 3);
+					value = true;
+					break;
+				case 'f':
+					if(!r.next(4).equals("alse")) throw new ConfigException("Invalid list entry value", r.currentLine, r.currentIndex - 4);
+					value = false;
+					break;
+				case '"':
+					r.revert();
+					value = readString();
+					break;
+				case '\'':
+					r.revert();
+					value = readCharacter();
+					break;
+				case '{':
+					if(r.next() != '\n') throw new ConfigException("Invalid list entry value, unexpected character '" + r.current() + "'", r.currentLine, r.currentIndex);
+					Object los = readListOrSubsection(r.createMarker(), propertyIndents + 1);
+					readListClosingBracketDescriptor(propertyIndents);
+					return los;
+				default:
+					throw new ConfigException("Invalid property value: " + c, r.currentLine, r.currentIndex);
+			}
+		}
+		if(r.hasNext()) {
+			r.skipWhitespacesUntil('\n');
+			r.next();
 			r.skipUntilLastOf('\n');
 			if(r.current() != '\n') throw new ConfigException("Unexpected character '" + r.current() + "'", r.currentLine, r.currentIndex);
 		}
@@ -61,16 +259,26 @@ public class DefaultConfigParser {
 			switch(c) {
 				case '"':
 					return sb.toString();
+				case '\\':
+					sb.append(readEscaped());
+					break;
 				default:
-					if(c == '\\') {
-						sb.append(readEscaped());
-					}else {
-						sb.append(c);
-					}
+					sb.append(c);
 					break;
 			}
 		}
 		throw new ConfigException("Missing end of string", r.currentLine, r.currentIndex);
+	}
+	
+	public char readCharacter() {
+		if(r.next() != '\'') throw new UnsupportedOperationException();
+		char c = r.next();
+		switch(c) {
+			case '\\':
+				c = readEscaped();
+		}
+		if(r.next() != '\'') throw new ConfigException("Missing end of string", r.currentLine, r.currentIndex);
+		return c;
 	}
 	
 	public Number readNumber() {
@@ -100,7 +308,7 @@ public class DefaultConfigParser {
 	}
 	
 	private char readEscaped() {
-		if(!r.hasNext()) throw new ConfigException("Failed to read special character: EOF reached");
+		if(!r.hasNext()) throw new ConfigException("Failed to read special character: EOF reached", r.currentLine, r.currentIndex);
 		char c = r.next(); //after the backslash
 		switch(c) {
 			case 'b':
@@ -115,16 +323,15 @@ public class DefaultConfigParser {
 				return '\t';
 			case 'u':
 				String hex = r.next(4);
-				if(hex == null) throw new ConfigException("Failed to read special character: EOF reached");
+				if(hex == null) throw new ConfigException("Failed to read special character: EOF reached", r.currentLine, r.currentIndex);
 				try {
 					int ch = Integer.parseInt(hex, 16);
 					return (char) ch;
 				}catch(NumberFormatException e) {
-					throw new ConfigException("Invalid special char: \\u"+hex, e, r.currentLine, r.currentIndex);
+					throw new ConfigException("Invalid special char: \\u"+hex, e, r.currentLine, r.currentIndex - 5);
 				}
 			case '"':
 			case '\\':
-			case '/':
 			default:
 				return c;
 		}
@@ -134,11 +341,113 @@ public class DefaultConfigParser {
 		return r.hasNextIgnoreWhitespaces();
 	}
 	
-	private static class CharReader {
+	public static class PropertyDescriptor {
 		
-		private int currentLine, currentIndex;
-//		private String string;
-		private String[] lines;
+		private int indents;
+		private String key;
+		private Marker start;
+		
+		public PropertyDescriptor(int indents, String key, Marker start) {
+			this.indents = indents;
+			this.key = key;
+			this.start = start;
+		}
+		
+		public int getRawIndents() {
+			return indents;
+		}
+		
+		public int getIndents() {
+			return indents / 2;
+		}
+		
+		public String getKey() {
+			return key;
+		}
+		
+		public Marker getStart() {
+			return start;
+		}
+		
+	}
+	
+	public static class ConfigSectionDescriptor {
+		
+		private Map<String, Object> properties;
+		private Map<String, String> comments;
+		
+		public ConfigSectionDescriptor() {
+			this.properties = new LinkedHashMap<>();
+			this.comments = new LinkedHashMap<>();
+		}
+		
+		public Map<String, Object> getProperties() {
+			return properties;
+		}
+		
+		public Map<String, String> getComments() {
+			return comments;
+		}
+		
+		public Map<String, ConfigSectionDescriptor> getSubSections() {
+			return properties.entrySet().stream()
+					.filter(en -> en.getValue() instanceof ConfigSectionDescriptor)
+					.collect(Collectors.toMap(en -> en.getKey(), en -> (ConfigSectionDescriptor) en.getValue()));
+		}
+		
+		public Map<String, Object> toPropertyMap() {
+			Map<String, Object> map = new LinkedHashMap<>();
+			for(Map.Entry<String, Object> en : properties.entrySet()) {
+				if(en.getValue() instanceof ConfigSectionDescriptor) {
+					map.put(en.getKey(), ((ConfigSectionDescriptor) en.getValue()).toPropertyMap());
+					continue;
+				}
+				map.put(en.getKey(), en.getValue());
+			}
+			return map;
+		}
+		
+		public Map<String, String> toCommentMap() {
+			Map<String, String> comments2 = new LinkedHashMap<>(comments);
+			getSubSections().forEach((k, v) -> {
+//				comments2.put(k, v.toCommentMap());
+				v.toCommentMap().forEach((ck, cv) -> {
+					comments2.put(k + ck, cv);
+				});
+			});
+			return comments2;
+		}
+		
+		@Override
+		public String toString() {
+			return "[SEC] " + properties;
+		}
+		
+	}
+	
+	public static class Marker {
+		
+		private int line, index;
+		
+		public Marker(int line, int index) {
+			this.line = line;
+			this.index = index;
+		}
+		
+		public int getLine() {
+			return line;
+		}
+		
+		public int getIndex() {
+			return index;
+		}
+		
+	}
+	
+	public static class CharReader {
+		
+		public int currentLine, currentIndex;
+		public String[] lines;
 		
 		public CharReader(String[] lines) {
 			this.lines = lines;
@@ -153,7 +462,7 @@ public class DefaultConfigParser {
 		public char next() {
 			currentIndex ++;
 			if(currentIndex >= lines[currentLine].length()) {
-				if(currentLine == lines.length - 1) throw new RuntimeException("L: " + currentLine);
+				if(currentLine == lines.length - 1) throw new UnsupportedOperationException("Reached EOF");
 				currentLine++;
 				currentIndex = 0;
 			}
@@ -211,7 +520,7 @@ public class DefaultConfigParser {
 				b.append(c);
 				c = next();
 			}
-//			revert();
+			revert();
 			return b.toString();
 		}
 		
@@ -229,11 +538,11 @@ public class DefaultConfigParser {
 			return num;
 		}
 		
-//		public char nextIgnoreWhitespaces() {
-//			char c = next();
-//			while(Character.isWhitespace(c)) c = next();
-//			return c;
-//		}
+		public char nextIgnoreWhitespaces() {
+			char c = next();
+			while(Character.isWhitespace(c)) c = next();
+			return c;
+		}
 		
 //		public CharReader skip(int num) {
 //			currentIndex += num;
@@ -242,24 +551,32 @@ public class DefaultConfigParser {
 //		}
 		
 		public CharReader revert() {
+			if(!hasPrevious()) throw new UnsupportedOperationException("Already at beginning");
 			if(currentIndex == 0) {
+				if(currentLine == 0) {
+					currentIndex = -1;
+					return this;
+				}
 				currentLine --;
-				if(currentLine < 0) throw new RuntimeException();
 				currentIndex = lines[currentLine].length() - 1;
 				return this;
 			}
 			currentIndex --;
-			if(currentIndex < 0) throw new RuntimeException();
+			if(currentIndex < 0) throw new UnsupportedOperationException("Already at beginning");
 			return this;
 		}
 		
-//		public CharReader revert(int num) {
-//			for(int i = 0; i < num; i++) revert();
-//			return this;
-//		}
+		public boolean hasPrevious() {
+			return currentIndex >= 0 || currentLine >= 0;
+		}
+		
+		public CharReader revert(int num) {
+			for(int i = 0; i < num; i++) revert();
+			return this;
+		}
 		
 		public boolean hasNext() {
-			return currentIndex < lines[currentLine].length() - 1 || currentLine < lines.length - 1;
+			return lines.length > 0 && (currentIndex < lines[currentLine].length() - 1 || currentLine < lines.length - 1);
 		}
 		
 		public boolean hasNextIgnoreWhitespaces() {
@@ -271,6 +588,10 @@ public class DefaultConfigParser {
 				}
 			}
 			return false;
+		}
+		
+		public Marker createMarker() {
+			return new Marker(currentLine, currentIndex);
 		}
 		
 	}

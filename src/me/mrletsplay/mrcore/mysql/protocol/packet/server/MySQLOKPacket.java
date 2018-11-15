@@ -46,7 +46,7 @@ public class MySQLOKPacket implements MySQLServerPacket {
 			MySQLReader iReader = new MySQLReader(new ByteArrayInputStream(sessionStateChanges));
 			byte iType = (byte) iReader.read();
 			byte[] iData = iReader.readLengthEncodedString().getBytes();
-			// TODO
+			// TODO: Session state changes
 			if(iType == 0) { // SESSION_TRACK_SYSTEM_VARIABLES
 				MySQLString vName = iReader.readLengthEncodedString();
 				MySQLString vValue = iReader.readLengthEncodedString();

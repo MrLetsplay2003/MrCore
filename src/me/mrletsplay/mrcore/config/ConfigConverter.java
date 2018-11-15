@@ -9,8 +9,9 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import me.mrletsplay.mrcore.bukkitimpl.BukkitCustomConfig;
 import me.mrletsplay.mrcore.http.HttpRequest;
-import me.mrletsplay.mrcore.misc.JSON.JSONObject;
+import me.mrletsplay.mrcore.json.JSONObject;
 
+@Deprecated
 public class ConfigConverter {
 
 	/**

@@ -12,8 +12,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import me.mrletsplay.mrcore.io.IOUtils;
-import me.mrletsplay.mrcore.misc.JSON.JSONArray;
-import me.mrletsplay.mrcore.misc.JSON.JSONObject;
+import me.mrletsplay.mrcore.json.JSONArray;
+import me.mrletsplay.mrcore.json.JSONObject;
 
 public class HttpResult {
 
@@ -64,7 +64,7 @@ public class HttpResult {
 		}
 	}
 	
-	protected static InputStream retrieveAsInputStreamFrom(String url, String method, Map<String, String> queryParams, Map<String, String> headerParams, Map<String, String> postParams) throws IOException {
+	protected static InputStream retrieveAsInputStreamFrom(String url, String method, Map<String, String> queryParams, Map<String, String> headerParams, byte[] postData) throws IOException {
 		if(!queryParams.isEmpty()) {
 			url += queryParams.entrySet().stream()
 					.map(e -> HttpUtils.urlEncode(e.getKey()) + "=" + HttpUtils.urlEncode(e.getValue()))
@@ -74,17 +74,14 @@ public class HttpResult {
 		HttpURLConnection con = (HttpURLConnection) u.openConnection();
 		con.setRequestMethod(method);
 		con.setRequestProperty("charset", "utf-8");
-		byte[] postData = postParams.entrySet().stream()
-				.map(e -> HttpUtils.urlEncode(e.getKey()) + "=" + HttpUtils.urlEncode(e.getValue()))
-				.collect(Collectors.joining("&")).getBytes(StandardCharsets.UTF_8);
 		con.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
-		if(postData.length > 0) {
+		if(postData != null) {
 			con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
 			con.setRequestProperty("Content-Length", Integer.toString(postData.length));
 		}
 		headerParams.forEach(con::setRequestProperty);
 		con.setUseCaches(false);
-		if(postData.length > 0) {
+		if(postData != null) {
 			con.setDoOutput(true);
 			OutputStream out = con.getOutputStream();
 			out.write(postData, 0, postData.length);
@@ -93,7 +90,7 @@ public class HttpResult {
 		return in;
 	}
 	
-	protected static HttpResult retrieveFrom(String url, String method, Map<String, String> queryParams, Map<String, String> headerParams, Map<String, String> postParams) throws IOException {
+	protected static HttpResult retrieveFrom(String url, String method, Map<String, String> queryParams, Map<String, String> headerParams, byte[] postParams) throws IOException {
 		InputStream in = retrieveAsInputStreamFrom(url, method, queryParams, headerParams, postParams);
 		byte[] raw = IOUtils.readAllBytes(in);
 		in.close();

@@ -15,6 +15,7 @@ import me.mrletsplay.mrcore.config.CustomConfig.ConfigSaveProperty;
 import me.mrletsplay.mrcore.config.CustomConfig.InvalidConfigException;
 import me.mrletsplay.mrcore.config.CustomConfig.InvalidConfigVersionException;
 
+@Deprecated
 public class ConfigLoader {
 
 	/**

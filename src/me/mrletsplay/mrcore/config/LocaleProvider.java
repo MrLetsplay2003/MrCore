@@ -7,6 +7,7 @@ import java.io.File;
  * @author MrLetsplay2003
  * @see <a href="https://github.com/MrLetsplay2003/MrCore/wiki/LocaleProvider">LocaleProvider wiki</a>
  */
+@Deprecated
 public class LocaleProvider {
 	
 	private String defaultLocale;

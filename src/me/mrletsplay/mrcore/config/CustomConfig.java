@@ -36,7 +36,9 @@ import me.mrletsplay.mrcore.misc.Complex.ComplexValue;
  * <br>
  * Feel free to use this in your projects however you want (You don't need to credit me)
  * @author MrLetsplay2003
+ * @deprecated Replaced by {@link me.mrletsplay.mrcore.config.v2.CustomConfig}
  */
+@Deprecated
 public class CustomConfig {
 	
 	private static final String VERSION = "1.1";
@@ -1676,7 +1678,6 @@ public class CustomConfig {
 		
 		public boolean containsKey(String key) {
 			return get(key) != null;
-//			return properties.containsKey(key) || subsections.values().stream().anyMatch(s -> s.containsKey(key));
 		}
 		
 		public List<String> getKeys(String key, boolean deep, boolean fullKeys){

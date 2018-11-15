@@ -37,6 +37,15 @@ public interface HttpRequest {
 	 * @throws HttpException If an I/O error occurs while executing the request
 	 */
 	public InputStream executeAsInputStream();
+
+	/**
+	 * Creates a GET request represented by an {@link HttpGet} instance
+	 * @param url The url the request should be sent to
+	 * @return The request
+	 */
+	public static HttpGeneric createGeneric(String requestMethod, String url) {
+		return new HttpGeneric(requestMethod, url);
+	}
 	
 	/**
 	 * Creates a POST request represented by an {@link HttpPost} instance

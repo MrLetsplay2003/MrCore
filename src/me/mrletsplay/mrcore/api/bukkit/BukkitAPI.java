@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import me.mrletsplay.mrcore.http.HttpRequest;
+import me.mrletsplay.mrcore.json.JSONArray;
+import me.mrletsplay.mrcore.json.JSONObject;
 import me.mrletsplay.mrcore.misc.FriendlyException;
-import me.mrletsplay.mrcore.misc.JSON.JSONArray;
-import me.mrletsplay.mrcore.misc.JSON.JSONObject;
 
 public class BukkitAPI {
 	

@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 
-import me.mrletsplay.mrcore.misc.JSON.JSONArray;
-import me.mrletsplay.mrcore.misc.JSON.JSONObject;
+import me.mrletsplay.mrcore.json.JSONArray;
+import me.mrletsplay.mrcore.json.JSONObject;
 import me.mrletsplay.mrcore.misc.FriendlyException;
 
 public class SpiGetResource {
