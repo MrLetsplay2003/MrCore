@@ -682,5 +682,20 @@ public enum VersionedMaterial {
 					)
 				.findFirst().orElse(null);
 	}
+
+	/**
+	 * Finds the corresponding versioned material to its bukkit counterpart
+	 * @param bukkitMaterial The bukkit item's material
+	 * @param bukkitDamage The bukkit item's damage
+	 * @return
+	 */
+	public static VersionedMaterial getByBukkitType(Material bukkitMaterial, short bukkitDamage) {
+		return Arrays.stream(values())
+				.filter(m ->
+						m.getCurrentMaterialDefinition().getMaterial().equals(bukkitMaterial) &&
+						m.getCurrentMaterialDefinition().getDamage() == bukkitDamage
+					)
+				.findFirst().orElse(null);
+	}
 	
 }

@@ -8,7 +8,16 @@ import me.mrletsplay.mrcore.misc.Complex;
 
 public class DefaultConfigMappers {
 
-	public static final ObjectMapper<JSONObject, ConfigSection> JSON_MAPPER = ObjectMapper.create(JSONObject.class, ConfigSection.class,
+	public static final ObjectMapper<JSONObject, ConfigSection> JSON_OBJECT_MAPPER = ObjectMapper.create(JSONObject.class, ConfigSection.class,
+			(c, j) -> {
+				ConfigSection s = new DefaultConfigSectionImpl(c.getConfig());
+				s.loadFromJSON(j);
+				return s;
+			}, (c, s) -> {
+				return s.toJSON();
+			});
+
+	public static final ObjectMapper<JSONObject, ConfigSection> JSON_ARRAY_MAPPER = ObjectMapper.create(JSONObject.class, ConfigSection.class,
 			(c, j) -> {
 				ConfigSection s = new DefaultConfigSectionImpl(c.getConfig());
 				s.loadFromJSON(j);
@@ -25,14 +34,5 @@ public class DefaultConfigMappers {
 			}, (c, s) -> {
 				return s.toMap();
 			});
-	
-//	public static final ObjectMapper<ConfigSection, Map<String, Object>> SECTION_MAPPER = ObjectMapper.create(Complex.value(ConfigSection.class), Complex.map(String.class, Object.class),
-//			(c, j) -> {
-//				return j.toMap();
-//			}, (c, s) -> {
-//				ConfigSection s1 = new DefaultConfigSectionImpl(c.getConfig());
-//				s1.loadFromMap(s);
-//				return s1;
-//			});
 	
 }

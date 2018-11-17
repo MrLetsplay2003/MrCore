@@ -6,6 +6,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import me.mrletsplay.mrcore.config.v2.ConfigSection;
+import me.mrletsplay.mrcore.json.JSONArray;
 import me.mrletsplay.mrcore.json.JSONObject;
 import me.mrletsplay.mrcore.misc.TriConsumer;
 
@@ -56,6 +57,26 @@ public interface SubMappable<Self extends SubMappable<Self, T>, T> {
 	
 	public default <Q extends EnumMapper<Q, Self, T, E>, E extends Enum<E>> EnumMapper<Q, Self, T, E> mapEnum(Class<E> enumClass, String name, BiFunction<ConfigSection, T, E> getter, TriConsumer<ConfigSection, T, E> setter) {
 		EnumMapper<Q, Self, T, E> sM = new EnumMapper<>(getSelf(), enumClass, getter, setter);
+		addMapperElement(name, sM);
+		return sM;	
+	}
+	
+	public default <Q extends JSONArrayMapper<Q, Self, T>> JSONArrayMapper<Q, Self, T> mapJSONArray(String name, Function<T, JSONArray> getter, BiConsumer<T, JSONArray> setter) {
+		return mapJSONArray(name, (s, t) -> getter.apply(t), setter == null ? null : (s, t, v) -> setter.accept(t, v));
+	}
+	
+	public default <Q extends JSONArrayMapper<Q, Self, T>> JSONArrayMapper<Q, Self, T> mapJSONArray(String name, BiFunction<ConfigSection, T, JSONArray> getter, TriConsumer<ConfigSection, T, JSONArray> setter) {
+		JSONArrayMapper<Q, Self, T> sM = new JSONArrayMapper<>(getSelf(), getter, setter);
+		addMapperElement(name, sM);
+		return sM;	
+	}
+	
+	public default <Q extends JSONObjectMapper<Q, Self, T>> JSONObjectMapper<Q, Self, T> mapJSONObject(String name, Function<T, JSONObject> getter, BiConsumer<T, JSONObject> setter) {
+		return mapJSONObject(name, (s, t) -> getter.apply(t), setter == null ? null : (s, t, v) -> setter.accept(t, v));
+	}
+	
+	public default <Q extends JSONObjectMapper<Q, Self, T>> JSONObjectMapper<Q, Self, T> mapJSONObject(String name, BiFunction<ConfigSection, T, JSONObject> getter, TriConsumer<ConfigSection, T, JSONObject> setter) {
+		JSONObjectMapper<Q, Self, T> sM = new JSONObjectMapper<>(getSelf(), getter, setter);
 		addMapperElement(name, sM);
 		return sM;	
 	}

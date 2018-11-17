@@ -37,9 +37,9 @@ public class FileCustomConfigImpl implements FileCustomConfig {
 		this.mainSection = new DefaultConfigSectionImpl(this);
 		this.mappers = new LinkedHashMap<>();
 		this.lowLevelMappers = new LinkedHashMap<>();
-		registerLowLevelMapper(0, DefaultConfigMappers.JSON_MAPPER);
-		registerLowLevelMapper(100, DefaultConfigMappers.MAP_MAPPER);
-//		registerLowLevelMapper(100, DefaultConfigMappers.SECTION_MAPPER);
+		registerLowLevelMapper(0, DefaultConfigMappers.JSON_OBJECT_MAPPER);
+		registerLowLevelMapper(0, DefaultConfigMappers.JSON_ARRAY_MAPPER);
+		registerLowLevelMapper(0, DefaultConfigMappers.MAP_MAPPER);
 	}
 	
 	@Override

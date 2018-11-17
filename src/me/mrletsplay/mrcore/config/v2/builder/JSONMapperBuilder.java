@@ -15,6 +15,10 @@ public class JSONMapperBuilder<Self extends JSONMapperBuilder<Self, T>, T> imple
 	private BiFunction<ConfigSection, JSONObject, T> constructor;
 	private Map<String, MapperElement<?, Self, T>> elements;
 	
+	public JSONMapperBuilder(Class<T> mappingType, BiFunction<ConfigSection, JSONObject, T> constructor) {
+		this(Complex.value(mappingType), constructor);
+	}
+	
 	public JSONMapperBuilder(Complex<T> mappingType, BiFunction<ConfigSection, JSONObject, T> constructor) {
 		this.mappingType = mappingType;
 		this.constructor = constructor;

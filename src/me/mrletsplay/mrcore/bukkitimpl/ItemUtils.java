@@ -34,6 +34,10 @@ public class ItemUtils {
 		return material.getCurrentMaterialDefinition().newStack();
 	}
 	
+	public static ItemStack createItem(VersionedMaterial m, int am) {
+		return createVersioned(m, am);
+	}
+	
 	@SuppressWarnings("deprecation")
 	public static ItemStack createItem(VersionedMaterial m, int am, String name, String... lore) {
 		MaterialDefinition d = m.getCurrentMaterialDefinition();
@@ -97,6 +101,18 @@ public class ItemUtils {
 		me.setLore(s);
 		i.setItemMeta(me);
 		return i;
+	}
+
+	public static void setDisplayName(ItemStack item, String name) {
+		ItemMeta m = item.getItemMeta();
+		m.setDisplayName(name);
+		item.setItemMeta(m);
+	}
+
+	public static void setLore(ItemStack item, List<String> lore) {
+		ItemMeta m = item.getItemMeta();
+		m.setLore(lore);
+		item.setItemMeta(m);
 	}
 
 	public static ItemStack blankBanner(VersionedDyeColor color) {

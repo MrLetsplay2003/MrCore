@@ -12,6 +12,7 @@ public class BukkitCustomConfig extends FileCustomConfigImpl {
 	public BukkitCustomConfig(File configFile) {
 		super(configFile);
 		registerMapper(BukkitConfigMappers.LOCATION_MAPPER);
+		registerMapper(BukkitConfigMappers.ITEM_MAPPER);
 	}
 	
 	public Location getLocation(String key) {
