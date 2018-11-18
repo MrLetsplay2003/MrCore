@@ -41,6 +41,16 @@ public interface SubMappable<Self extends SubMappable<Self, T>, T> {
 		return sM;	
 	}
 	
+	public default <Q extends LongMapper<Q, Self, T>> LongMapper<Q, Self, T> mapLong(String name, Function<T, Long> getter, BiConsumer<T, Long> setter) {
+		return mapLong(name, (s, t) -> getter.apply(t), setter == null ? null : (s, t, v) -> setter.accept(t, v));
+	}
+	
+	public default <Q extends LongMapper<Q, Self, T>> LongMapper<Q, Self, T> mapLong(String name, BiFunction<ConfigSection, T, Long> getter, TriConsumer<ConfigSection, T, Long> setter) {
+		LongMapper<Q, Self, T> sM = new LongMapper<>(getSelf(), getter, setter);
+		addMapperElement(name, sM);
+		return sM;	
+	}
+	
 	public default <Q extends DoubleMapper<Q, Self, T>> DoubleMapper<Q, Self, T> mapDouble(String name, Function<T, Double> getter, BiConsumer<T, Double> setter) {
 		return mapDouble(name, (s, t) -> getter.apply(t), setter == null ? null : (s, t, v) -> setter.accept(t, v));
 	}
