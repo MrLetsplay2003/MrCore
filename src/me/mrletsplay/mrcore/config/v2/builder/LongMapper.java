@@ -26,7 +26,7 @@ public class LongMapper<Self extends LongMapper<Self, P, T>, P extends SubMappab
 	@Override
 	public void applyConstruct(T instance, ConfigSection section, JSONObject json, String key) {
 		if(setter == null) return;
-		long val = json.getInt(key);
+		long val = json.getLong(key);
 		setter.accept(section, instance, val);
 	}
 
