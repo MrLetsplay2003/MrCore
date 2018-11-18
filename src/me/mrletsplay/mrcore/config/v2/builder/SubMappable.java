@@ -61,6 +61,16 @@ public interface SubMappable<Self extends SubMappable<Self, T>, T> {
 		return sM;	
 	}
 	
+	public default <Q extends BooleanMapper<Q, Self, T>> BooleanMapper<Q, Self, T> mapBoolean(String name, Function<T, Boolean> getter, BiConsumer<T, Boolean> setter) {
+		return mapBoolean(name, (s, t) -> getter.apply(t), setter == null ? null : (s, t, v) -> setter.accept(t, v));
+	}
+	
+	public default <Q extends BooleanMapper<Q, Self, T>> BooleanMapper<Q, Self, T> mapBoolean(String name, BiFunction<ConfigSection, T, Boolean> getter, TriConsumer<ConfigSection, T, Boolean> setter) {
+		BooleanMapper<Q, Self, T> sM = new BooleanMapper<>(getSelf(), getter, setter);
+		addMapperElement(name, sM);
+		return sM;	
+	}
+	
 	public default <Q extends EnumMapper<Q, Self, T, E>, E extends Enum<E>> EnumMapper<Q, Self, T, E> mapEnum(Class<E> enumClass, String name, Function<T, E> getter, BiConsumer<T, E> setter) {
 		return mapEnum(enumClass, name, (s, t) -> getter.apply(t), setter == null ? null : (s, t, v) -> setter.accept(t, v));
 	}
