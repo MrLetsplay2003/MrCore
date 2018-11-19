@@ -12,8 +12,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import me.mrletsplay.mrcore.bukkitimpl.ChatUI.UIListener;
 import me.mrletsplay.mrcore.bukkitimpl.GUIUtils.GUIListener;
 import me.mrletsplay.mrcore.bukkitimpl.versioned.NMSVersion;
-import me.mrletsplay.mrcore.config.impl.ConfigLoader;
-import me.mrletsplay.mrcore.config.v2.FileCustomConfig;
+import me.mrletsplay.mrcore.config.ConfigLoader;
+import me.mrletsplay.mrcore.config.FileCustomConfig;
 import me.mrletsplay.mrcore.main.MrCore;
 
 public class MrCorePlugin extends JavaPlugin{

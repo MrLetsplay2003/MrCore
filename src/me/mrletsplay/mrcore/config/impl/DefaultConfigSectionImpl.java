@@ -8,12 +8,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import me.mrletsplay.mrcore.config.v2.ConfigException;
-import me.mrletsplay.mrcore.config.v2.ConfigPath;
-import me.mrletsplay.mrcore.config.v2.ConfigProperty;
-import me.mrletsplay.mrcore.config.v2.ConfigSection;
-import me.mrletsplay.mrcore.config.v2.CustomConfig;
-import me.mrletsplay.mrcore.config.v2.StringifiableConfigSection;
+import me.mrletsplay.mrcore.config.ConfigException;
+import me.mrletsplay.mrcore.config.ConfigPath;
+import me.mrletsplay.mrcore.config.ConfigProperty;
+import me.mrletsplay.mrcore.config.ConfigSection;
+import me.mrletsplay.mrcore.config.CustomConfig;
+import me.mrletsplay.mrcore.config.StringifiableConfigSection;
 
 public class DefaultConfigSectionImpl implements StringifiableConfigSection {
 

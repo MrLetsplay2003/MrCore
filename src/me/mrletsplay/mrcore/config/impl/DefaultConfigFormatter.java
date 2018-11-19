@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import me.mrletsplay.mrcore.config.v2.ConfigSection;
+import me.mrletsplay.mrcore.config.ConfigSection;
 import me.mrletsplay.mrcore.misc.Complex;
 import me.mrletsplay.mrcore.misc.NullableOptional;
 

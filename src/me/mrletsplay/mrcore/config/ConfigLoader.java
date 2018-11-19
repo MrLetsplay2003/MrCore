@@ -1,169 +1,74 @@
 package me.mrletsplay.mrcore.config;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.stream.Collectors;
 
-import me.mrletsplay.mrcore.bukkitimpl.BukkitCustomConfig;
-import me.mrletsplay.mrcore.config.ConfigConverter.ConfigVersion;
-import me.mrletsplay.mrcore.config.CustomConfig.ConfigSaveProperty;
-import me.mrletsplay.mrcore.config.CustomConfig.InvalidConfigException;
-import me.mrletsplay.mrcore.config.CustomConfig.InvalidConfigVersionException;
+import me.mrletsplay.mrcore.config.impl.FileCustomConfigImpl;
+import me.mrletsplay.mrcore.io.IOUtils;
 
-@Deprecated
 public class ConfigLoader {
 
-	/**
-	 * Loads the given file as a CustomConfig<br>
-	 * This method will apply conversion using the {@link ConfigConverter#convertToLatestVersion(String, CustomConfig, ConfigVersion)} method if needed
-	 * @param configFile The file to load
-	 * @param defaultSaveProperties The default save properties (See {@link CustomConfig#CustomConfig(File, ConfigSaveProperty...)})
-	 * @throws InvalidConfigException If an IO error occurs while loading/converting the config
-	 * @return A loaded CustomConfig instance
-	 */
-	public static CustomConfig loadConfig(File configFile, ConfigSaveProperty... defaultSaveProperties) {
-		CustomConfig cc = new CustomConfig(configFile, defaultSaveProperties);
+	public static FileCustomConfig loadFileConfig(File configFile) throws ConfigException {
+		FileCustomConfigImpl cc = new FileCustomConfigImpl(configFile);
 		try {
-			cc.loadConfigSafely();
-			return cc;
-		}catch(InvalidConfigVersionException e) {
+			cc.loadFromFile();
+		}catch(IncompatibleConfigVersionException e) {
 			try {
-				ConfigVersion v = ConfigVersion.getByName(e.getVersion());
-				if(v == null) throw new InvalidConfigVersionException("Invalid version: "+e.getVersion(), null);
-				CustomConfig cfg = ConfigConverter.convertToLatestVersion(
-						Files.readAllLines(configFile.toPath()).stream().collect(Collectors.joining(System.getProperty("line.separator"))),
-						cc,
-						v);
-				cfg.saveConfigSafely();
-				return cfg;
+				return ConfigConverter.convertConfig(IOUtils.readAllBytes(new FileInputStream(configFile)), cc, e.getGivenDefaultVersion(), e.getRequiredDefaultVersion());
 			} catch (IOException e1) {
-				throw new InvalidConfigException("Failed to load config from file", -1);
+				throw new ConfigException(e1);
 			}
 		}
+		return cc;
 	}
 
-	/**
-	 * Loads the given InputStream as a CustomConfig<br>
-	 * The returned CustomConfig instance will be as loaded from a file with a file parameter of null<br>
-	 * This method will apply conversion using the {@link ConfigConverter#convertToLatestVersion(String, CustomConfig, ConfigVersion)} method if needed
-	 * @param in The InputStream to load
-	 * @param defaultSaveProperties The default save properties (See {@link CustomConfig#CustomConfig(File, ConfigSaveProperty...)})
-	 * @throws InvalidConfigException If an IO error occurs while loading/converting the config
-	 * @return A loaded CustomConfig instance
-	 */
-	public static CustomConfig loadConfig(InputStream in, ConfigSaveProperty... defaultSaveProperties) {
-		CustomConfig cc = new CustomConfig((File) null, defaultSaveProperties);
+	public static CustomConfig loadStreamConfig(InputStream stream, boolean closeAfterLoad) throws ConfigException {
+		FileCustomConfigImpl cc = new FileCustomConfigImpl(null);
 		try {
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			byte[] b = new byte[4096];
-			int len;
-			while((len = in.read(b)) > 0) {
-				out.write(b, 0, len);
-			}
+			cc.load(stream);
+			if(closeAfterLoad) stream.close();
+		}catch(IncompatibleConfigVersionException e) {
 			try {
-				cc.loadConfig(new ByteArrayInputStream(out.toByteArray()));
-				return cc;
-			}catch(InvalidConfigVersionException e) {
-				ConfigVersion v = ConfigVersion.getByName(e.getVersion());
-				if(v == null) throw new InvalidConfigVersionException("Invalid version: "+e.getVersion(), null);
-				CustomConfig cfg = ConfigConverter.convertToLatestVersion(
-						new String(out.toByteArray(), StandardCharsets.UTF_8),
-						cc,
-						v);
-				return cfg;
-			}
-		}catch(IOException e2) {
-			throw new InvalidConfigException("Failed to load config from InputStream", -1);
-		}
-	}
-
-	/**
-	 * See {@link #loadConfig(File, ConfigSaveProperty...)}
-	 */
-	public static BukkitCustomConfig loadBukkitConfig(File configFile, ConfigSaveProperty... defaultSaveProperties) {
-		BukkitCustomConfig cc = new BukkitCustomConfig(configFile, defaultSaveProperties);
-		try {
-			return cc.loadConfigSafely();
-		}catch(InvalidConfigVersionException e) {
-			try {
-				ConfigVersion v = ConfigVersion.getByName(e.getVersion());
-				if(v == null) throw new InvalidConfigVersionException("Invalid version: "+e.getVersion(), null);
-				BukkitCustomConfig cfg = (BukkitCustomConfig) new BukkitCustomConfig(configFile).loadDefault(ConfigConverter.convertToLatestVersion(
-						Files.readAllLines(configFile.toPath()).stream().collect(Collectors.joining(System.getProperty("line.separator"))),
-						cc,
-						v) , true);
-				cfg.saveConfigSafely();
-				return cfg;
+				return ConfigConverter.convertConfig(IOUtils.readAllBytes(stream), cc, e.getGivenDefaultVersion(), e.getRequiredDefaultVersion());
 			} catch (IOException e1) {
-				throw new InvalidConfigException("Failed to load config from file", -1);
+				throw new ConfigException(e1);
 			}
+		}catch(IOException e) {
+			throw new ConfigException(e);
 		}
+		return cc;
 	}
-
-	/**
-	 * Loads the given file as a CustomConfig<br>
-	 * This method will apply conversion using the {@link ConfigConverter#convertToLatestVersion(String, CustomConfig, ConfigVersion)} method if needed
-	 * @param configFile The file to load
-	 * @param defaultSaveProperties The default save properties (See {@link CustomConfig#CustomConfig(File, ConfigSaveProperty...)})
-	 * @throws InvalidConfigException If an IO error occurs while loading/converting the config
-	 * @return A loaded CustomConfig instance
-	 */
-	public static CompactCustomConfig loadCompactConfig(File configFile, ConfigSaveProperty... defaultSaveProperties) {
-		CompactCustomConfig cc = new CompactCustomConfig(configFile, defaultSaveProperties);
+	
+	public static <T extends CustomConfig> T loadConfigFromStream(T config, InputStream stream, boolean closeAfterLoad) {
 		try {
-			cc.loadConfigSafely();
-			return cc;
-		}catch(InvalidConfigVersionException e) {
+			config.load(stream);
+			if(closeAfterLoad) stream.close();
+		}catch(IncompatibleConfigVersionException e) {
 			try {
-				ConfigVersion v = ConfigVersion.getByName(e.getVersion());
-				if(v == null) throw new InvalidConfigVersionException("Invalid version: "+e.getVersion(), null);
-				return ConfigConverter.convertToLatestCompactVersion(
-						Files.readAllLines(configFile.toPath()).stream().collect(Collectors.joining(System.getProperty("line.separator"))),
-						cc,
-						v);
+				config.clear();
+				return ConfigConverter.convertConfig(IOUtils.readAllBytes(stream), config, e.getGivenDefaultVersion(), e.getRequiredDefaultVersion());
 			} catch (IOException e1) {
-				throw new InvalidConfigException("Failed to load config from file", -1);
+				throw new ConfigException(e1);
 			}
+		}catch(IOException e) {
+			throw new ConfigException(e);
 		}
+		return config;
 	}
-
-	/**
-	 * Loads the given file as a CustomConfig<br>
-	 * This method will apply conversion using the {@link ConfigConverter#convertToLatestVersion(String, CustomConfig, ConfigVersion)} method if needed
-	 * @param configFile The file to load
-	 * @param defaultSaveProperties The default save properties (See {@link CustomConfig#CustomConfig(File, ConfigSaveProperty...)})
-	 * @throws InvalidConfigException If an IO error occurs while loading/converting the config
-	 * @return A loaded CustomConfig instance
-	 */
-	public static CompactCustomConfig loadCompactConfig(InputStream in, ConfigSaveProperty... defaultSaveProperties) {
-		CompactCustomConfig cc = new CompactCustomConfig((File) null, defaultSaveProperties);
+	
+	public static <T extends CustomConfig> T loadConfigFromFile(T config, File configFile, boolean closeAfterLoad) {
 		try {
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			byte[] b = new byte[4096];
-			int len;
-			while((len = in.read(b)) > 0) {
-				out.write(b, 0, len);
-			}
+			config.load(configFile);
+		}catch(IncompatibleConfigVersionException e) {
 			try {
-				cc.loadConfig(new ByteArrayInputStream(out.toByteArray()));
-				return cc;
-			}catch(InvalidConfigVersionException e) {
-				ConfigVersion v = ConfigVersion.getByName(e.getVersion());
-				if(v == null) throw new InvalidConfigVersionException("Invalid version: "+e.getVersion(), null);
-				CompactCustomConfig cfg = ConfigConverter.convertToLatestCompactVersion(
-						new String(out.toByteArray(), StandardCharsets.UTF_8),
-						cc,
-						v);
-				return cfg;
+				return ConfigConverter.convertConfig(IOUtils.readAllBytes(new FileInputStream(configFile)), config, e.getGivenDefaultVersion(), e.getRequiredDefaultVersion());
+			} catch (IOException e1) {
+				throw new ConfigException(e1);
 			}
-		}catch(IOException e2) {
-			throw new InvalidConfigException("Failed to load config from InputStream", -1);
 		}
+		return config;
 	}
 	
 }

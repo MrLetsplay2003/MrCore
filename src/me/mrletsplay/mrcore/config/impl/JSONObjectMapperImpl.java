@@ -2,8 +2,8 @@ package me.mrletsplay.mrcore.config.impl;
 
 import java.util.function.BiFunction;
 
-import me.mrletsplay.mrcore.config.v2.ConfigSection;
-import me.mrletsplay.mrcore.config.v2.JSONObjectMapper;
+import me.mrletsplay.mrcore.config.ConfigSection;
+import me.mrletsplay.mrcore.config.mapper.JSONObjectMapper;
 import me.mrletsplay.mrcore.json.JSONObject;
 import me.mrletsplay.mrcore.misc.Complex;
 

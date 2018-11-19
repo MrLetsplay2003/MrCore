@@ -1,61 +1,34 @@
 package me.mrletsplay.mrcore.config;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import java.util.Base64;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import me.mrletsplay.mrcore.bukkitimpl.BukkitCustomConfig;
+import me.mrletsplay.mrcore.bukkitimpl.config.BukkitCustomConfig;
 import me.mrletsplay.mrcore.http.HttpRequest;
 import me.mrletsplay.mrcore.json.JSONObject;
 
-@Deprecated
 public class ConfigConverter {
-
-	/**
-	 * This method will convert a given CustomConfig instance to the specified version<br>
-	 * by making a POST request to <a href="http://graphite-official.com/api/mrcore/convert_config.php">The CustomConfig conversion API</a><br>
-	 * This can be used to provide compatability inbetween version changes and thus provides a better experience to the user<br>
-	 * The API will be kept up to date with the latest config versions<br>
-	 * Note: The config version will only be changed when larger changes to the algorithm are made<br>
-	 * Classes extending the CustomConfig with custom saving algorithms will not work with this API<br>
-	 * Customized CustomConfig instances will also not work<br>
-	 * The value returned by this method will always be a non-modified CustomConfig/CompactCustomConfig instance (default comment prefix, spl string, etc.)
-	 * @param config The config to convert
-	 * @param version The {@link ConfigVersion} to convert to
-	 * @throws ConfigConversionException If the config provided is not supported by the API or a conversion error occurs
-	 * @return
-	 */
-	public static CustomConfig convertToLatestVersion(String config, CustomConfig toConfig, ConfigVersion fromVersion) {
-		try {
-			return toConfig.loadConfig(new ByteArrayInputStream(convertVersion(config, fromVersion, ConfigVersion.getCurrentVersion()).getBytes(StandardCharsets.UTF_8)));
-		} catch (IOException e) {
-			throw new ConfigConversionException("Couldn't convert config", e);
-		}
+	
+	public static <T extends CustomConfig> T convertConfig(byte[] config, T toConfig, ConfigVersion fromVersion, ConfigVersion toVersion) {
+		toConfig.load(new ByteArrayInputStream(convertVersion(config, fromVersion, toVersion)));
+		return toConfig;
 	}
 	
-	public static CompactCustomConfig convertToLatestCompactVersion(String config, CompactCustomConfig toConfig, ConfigVersion fromVersion) {
-		try {
-			return (CompactCustomConfig) toConfig.loadConfig(new ByteArrayInputStream(convertVersion(config, fromVersion, ConfigVersion.getCurrentCompactVersion()).getBytes(StandardCharsets.UTF_8)));
-		} catch (IOException e) {
-			throw new ConfigConversionException("Couldn't convert config", e);
-		}
+	public static byte[] convertVersion(byte[] config, ConfigVersion fromVersion, ConfigVersion toVersion) {
+		return convertVersion(config, fromVersion.name, toVersion.name);
 	}
 	
-	public static String convertVersion(String configString, ConfigVersion fromVersion, ConfigVersion toVersion) {
-		return convertVersion(configString, fromVersion.name, toVersion.name);
-	}
-	
-	public static String convertVersion(String configString, String fromVersion, String toVersion) {
-		String getURL = "https://graphite-official.com/api/mrcore/convert_config.php?from_version="+fromVersion+"&to_version="+toVersion;
+	public static byte[] convertVersion(byte[] config, String fromVersion, String toVersion) {
+		String getURL = "http://localhost:8745/api/mrcore/convert_config_v2.php?from_version="+fromVersion+"&to_version="+toVersion;
 		JSONObject result = HttpRequest.createPost(getURL)
-								.setPostParameter("data", configString)
+								.setPostParameter("data", Base64.getEncoder().encodeToString(config))
 								.execute()
 								.asJSONObject();
 		if(result.getBoolean("success")) {
-			return result.getString("data");
+			return Base64.getDecoder().decode(result.getString("data"));
 		}else {
 			throw new ConfigConversionException("Failed to convert config: " + result.getString("error"));
 		}
@@ -70,50 +43,17 @@ public class ConfigConverter {
 	 */
 	public static BukkitCustomConfig convertYaml(YamlConfiguration bukkitConfig, BukkitCustomConfig saveTo) {
 		String getURL = "https://graphite-official.com/api/mrcore/convert_yaml.php";
-		try {
-			String cfgString = bukkitConfig.saveToString();
-			JSONObject result = HttpRequest.createPost(getURL)
-					.setPostParameter("data", cfgString)
-					.execute()
-					.asJSONObject();
-			if(result.getBoolean("success")) {
-				return (BukkitCustomConfig) saveTo.loadConfig(new ByteArrayInputStream(result.getString("data").getBytes(StandardCharsets.UTF_8)));
-			}else {
-				throw new ConfigConversionException("Failed to convert config: " + result.getString("error"));
-			}
-		}catch(IOException e) {
-			throw new ConfigConversionException("Failed to convert config: An IO error occured", e);
+		String cfgString = bukkitConfig.saveToString();
+		JSONObject result = HttpRequest.createPost(getURL)
+				.setPostParameter("data", cfgString)
+				.execute()
+				.asJSONObject();
+		if(result.getBoolean("success")) {
+			saveTo.load(new ByteArrayInputStream(result.getString("data").getBytes(StandardCharsets.UTF_8)));
+			return saveTo;
+		}else {
+			throw new ConfigConversionException("Failed to convert config: " + result.getString("error"));
 		}
-	}
-	
-	/**
-	 * This class is provided as a convenience method when converting between CustomConfig versions
-	 * @author MrLetsplay2003
-	 */
-	public static enum ConfigVersion {
-		
-		v1_0("1.0"),
-		v1_1("1.1"),
-		v1_0_compact("1.0_compact");
-		
-		public final String name;
-		
-		private ConfigVersion(String name) {
-			this.name = name;
-		}
-		
-		public static ConfigVersion getByName(String name) {
-			return Arrays.stream(values()).filter(c -> c.name.equals(name)).findFirst().orElse(null);
-		}
-		
-		public static ConfigVersion getCurrentVersion() {
-			return getByName(CustomConfig.getVersion());
-		}
-		
-		public static ConfigVersion getCurrentCompactVersion() {
-			return getByName(CompactCustomConfig.getVersion());
-		}
-		
 	}
 	
 	public static class ConfigConversionException extends RuntimeException {

@@ -14,14 +14,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import me.mrletsplay.mrcore.config.ConfigException;
+import me.mrletsplay.mrcore.config.ConfigSection;
+import me.mrletsplay.mrcore.config.DefaultConfigMappers;
+import me.mrletsplay.mrcore.config.FileCustomConfig;
+import me.mrletsplay.mrcore.config.IncompatibleConfigVersionException;
 import me.mrletsplay.mrcore.config.impl.DefaultConfigParser.ConfigSectionDescriptor;
 import me.mrletsplay.mrcore.config.impl.DefaultConfigParser.Marker;
-import me.mrletsplay.mrcore.config.v2.ConfigException;
-import me.mrletsplay.mrcore.config.v2.ConfigSection;
-import me.mrletsplay.mrcore.config.v2.DefaultConfigMappers;
-import me.mrletsplay.mrcore.config.v2.FileCustomConfig;
-import me.mrletsplay.mrcore.config.v2.IncompatibleConfigVersionException;
-import me.mrletsplay.mrcore.config.v2.ObjectMapper;
+import me.mrletsplay.mrcore.config.mapper.ObjectMapper;
 
 public class FileCustomConfigImpl implements FileCustomConfig {
 

@@ -38,8 +38,8 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import me.mrletsplay.mrcore.bukkitimpl.ItemUtils;
-import me.mrletsplay.mrcore.config.v2.JSONObjectMapper;
-import me.mrletsplay.mrcore.config.v2.builder.JSONMapperBuilder;
+import me.mrletsplay.mrcore.config.mapper.JSONObjectMapper;
+import me.mrletsplay.mrcore.config.mapper.builder.JSONMapperBuilder;
 import me.mrletsplay.mrcore.json.JSONArray;
 import me.mrletsplay.mrcore.json.JSONObject;
 import me.mrletsplay.mrcore.misc.Complex;

@@ -2,8 +2,8 @@ package me.mrletsplay.mrcore.config.impl;
 
 import java.util.function.BiFunction;
 
-import me.mrletsplay.mrcore.config.v2.ConfigSection;
-import me.mrletsplay.mrcore.config.v2.ObjectMapper;
+import me.mrletsplay.mrcore.config.ConfigSection;
+import me.mrletsplay.mrcore.config.mapper.ObjectMapper;
 import me.mrletsplay.mrcore.misc.Complex;
 
 public class ObjectMapperImpl<E, O> implements ObjectMapper<E, O>{

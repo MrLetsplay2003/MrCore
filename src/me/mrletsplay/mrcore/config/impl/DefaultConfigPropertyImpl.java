@@ -3,11 +3,11 @@ package me.mrletsplay.mrcore.config.impl;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import me.mrletsplay.mrcore.config.ConfigException;
+import me.mrletsplay.mrcore.config.ConfigProperty;
+import me.mrletsplay.mrcore.config.ConfigSection;
+import me.mrletsplay.mrcore.config.ConfigValueType;
 import me.mrletsplay.mrcore.config.impl.DefaultConfigParser.ConfigSectionDescriptor;
-import me.mrletsplay.mrcore.config.v2.ConfigException;
-import me.mrletsplay.mrcore.config.v2.ConfigProperty;
-import me.mrletsplay.mrcore.config.v2.ConfigSection;
-import me.mrletsplay.mrcore.config.v2.ConfigValueType;
 import me.mrletsplay.mrcore.misc.NullableOptional;
 
 public class DefaultConfigPropertyImpl implements ConfigProperty {

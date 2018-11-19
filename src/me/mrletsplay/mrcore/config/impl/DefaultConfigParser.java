@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import me.mrletsplay.mrcore.config.v2.ConfigException;
+import me.mrletsplay.mrcore.config.ConfigException;
 
 class DefaultConfigParser {
 
