@@ -1,9 +1,11 @@
 package me.mrletsplay.mrcore.config;
 
+import java.util.List;
 import java.util.Map;
 
 import me.mrletsplay.mrcore.config.impl.DefaultConfigSectionImpl;
 import me.mrletsplay.mrcore.config.mapper.ObjectMapper;
+import me.mrletsplay.mrcore.json.JSONArray;
 import me.mrletsplay.mrcore.json.JSONObject;
 import me.mrletsplay.mrcore.misc.Complex;
 
@@ -18,13 +20,11 @@ public class DefaultConfigMappers {
 				return s.toJSON();
 			});
 
-	public static final ObjectMapper<JSONObject, ConfigSection> JSON_ARRAY_MAPPER = ObjectMapper.create(JSONObject.class, ConfigSection.class,
+	public static final ObjectMapper<JSONArray, List<Object>> JSON_ARRAY_MAPPER = ObjectMapper.create(Complex.value(JSONArray.class), Complex.list(Object.class),
 			(c, j) -> {
-				ConfigSection s = new DefaultConfigSectionImpl(c.getConfig());
-				s.loadFromJSON(j);
-				return s;
-			}, (c, s) -> {
-				return s.toJSON();
+				return j;
+			}, (c, l) -> {
+				return (JSONArray) ConfigProperty.toJSONCompliant(l);
 			});
 	
 	public static final ObjectMapper<Map<String, Object>, ConfigSection> MAP_MAPPER = ObjectMapper.create(Complex.map(String.class, Object.class), Complex.value(ConfigSection.class),
