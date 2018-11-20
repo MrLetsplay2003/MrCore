@@ -23,7 +23,7 @@ import me.mrletsplay.mrcore.config.impl.DefaultConfigParser.ConfigSectionDescrip
 import me.mrletsplay.mrcore.config.impl.DefaultConfigParser.Marker;
 import me.mrletsplay.mrcore.config.mapper.ObjectMapper;
 
-public class FileCustomConfigImpl implements FileCustomConfig {
+public class DefaultFileCustomConfig implements FileCustomConfig {
 
 	private static final String VERSION = "2.0";
 	
@@ -32,7 +32,7 @@ public class FileCustomConfigImpl implements FileCustomConfig {
 	private Map<ObjectMapper<?, ?>, Integer> lowLevelMappers;
 	private Map<ObjectMapper<?, ?>, Integer> mappers;
 	
-	public FileCustomConfigImpl(File configFile) {
+	public DefaultFileCustomConfig(File configFile) {
 		this.configFile = configFile;
 		this.mainSection = new DefaultConfigSectionImpl(this);
 		this.mappers = new LinkedHashMap<>();

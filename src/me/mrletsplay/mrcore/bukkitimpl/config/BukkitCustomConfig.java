@@ -4,10 +4,10 @@ import java.io.File;
 
 import org.bukkit.Location;
 
-import me.mrletsplay.mrcore.config.impl.FileCustomConfigImpl;
+import me.mrletsplay.mrcore.config.impl.DefaultFileCustomConfig;
 import me.mrletsplay.mrcore.misc.Complex;
 
-public class BukkitCustomConfig extends FileCustomConfigImpl {
+public class BukkitCustomConfig extends DefaultFileCustomConfig {
 
 	public BukkitCustomConfig(File configFile) {
 		super(configFile);

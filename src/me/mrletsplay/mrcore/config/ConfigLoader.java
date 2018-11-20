@@ -5,13 +5,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import me.mrletsplay.mrcore.config.impl.FileCustomConfigImpl;
+import me.mrletsplay.mrcore.config.impl.DefaultFileCustomConfig;
 import me.mrletsplay.mrcore.io.IOUtils;
 
 public class ConfigLoader {
 
 	public static FileCustomConfig loadFileConfig(File configFile) throws ConfigException {
-		FileCustomConfigImpl cc = new FileCustomConfigImpl(configFile);
+		DefaultFileCustomConfig cc = new DefaultFileCustomConfig(configFile);
 		try {
 			cc.loadFromFile();
 		}catch(IncompatibleConfigVersionException e) {
@@ -25,7 +25,7 @@ public class ConfigLoader {
 	}
 
 	public static CustomConfig loadStreamConfig(InputStream stream, boolean closeAfterLoad) throws ConfigException {
-		FileCustomConfigImpl cc = new FileCustomConfigImpl(null);
+		DefaultFileCustomConfig cc = new DefaultFileCustomConfig(null);
 		try {
 			cc.load(stream);
 			if(closeAfterLoad) stream.close();
