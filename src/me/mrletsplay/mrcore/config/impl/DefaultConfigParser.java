@@ -71,7 +71,7 @@ class DefaultConfigParser {
 		if(rIndents % 2 != 0) throw new ConfigException("Invalid property descriptor: indents % 2 != 0", r.currentLine, r.currentIndex);
 		Marker s = r.createMarker();
 		if(rIndents / 2 != indents) {
-			r.next(); // FIXME
+			r.next();
 			return new PropertyDescriptor(rIndents, "", s);
 		}
 		String d = r.readUntil(':');

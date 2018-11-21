@@ -11,37 +11,14 @@ import me.mrletsplay.mrcore.io.IOUtils;
 public class ConfigLoader {
 
 	public static FileCustomConfig loadFileConfig(File configFile) throws ConfigException {
-		DefaultFileCustomConfig cc = new DefaultFileCustomConfig(configFile);
-		try {
-			cc.loadFromFile();
-		}catch(IncompatibleConfigVersionException e) {
-			try {
-				return ConfigConverter.convertConfig(IOUtils.readAllBytes(new FileInputStream(configFile)), cc, e.getGivenDefaultVersion(), e.getRequiredDefaultVersion());
-			} catch (IOException e1) {
-				throw new ConfigException(e1);
-			}
-		}
-		return cc;
+		return loadConfigFromFile(new DefaultFileCustomConfig(configFile), configFile);
 	}
 
 	public static CustomConfig loadStreamConfig(InputStream stream, boolean closeAfterLoad) throws ConfigException {
-		DefaultFileCustomConfig cc = new DefaultFileCustomConfig(null);
-		try {
-			cc.load(stream);
-			if(closeAfterLoad) stream.close();
-		}catch(IncompatibleConfigVersionException e) {
-			try {
-				return ConfigConverter.convertConfig(IOUtils.readAllBytes(stream), cc, e.getGivenDefaultVersion(), e.getRequiredDefaultVersion());
-			} catch (IOException e1) {
-				throw new ConfigException(e1);
-			}
-		}catch(IOException e) {
-			throw new ConfigException(e);
-		}
-		return cc;
+		return loadConfigFromStream(new DefaultFileCustomConfig(null), stream, closeAfterLoad);
 	}
 	
-	public static <T extends CustomConfig> T loadConfigFromStream(T config, InputStream stream, boolean closeAfterLoad) {
+	public static <T extends CustomConfig> T loadConfigFromStream(T config, InputStream stream, boolean closeAfterLoad) throws ConfigException {
 		try {
 			config.load(stream);
 			if(closeAfterLoad) stream.close();
@@ -58,7 +35,7 @@ public class ConfigLoader {
 		return config;
 	}
 	
-	public static <T extends CustomConfig> T loadConfigFromFile(T config, File configFile, boolean closeAfterLoad) {
+	public static <T extends CustomConfig> T loadConfigFromFile(T config, File configFile) throws ConfigException {
 		try {
 			config.load(configFile);
 		}catch(IncompatibleConfigVersionException e) {

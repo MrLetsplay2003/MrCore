@@ -81,9 +81,8 @@ public interface ConfigSection {
 	 * The {@code key} parameter allows for subpaths (e.g. "{@code somepath.somesubpath}")
 	 * @param key The key of the property
 	 * @return The property by that name, {@code null} if none
-	 * @throws ConfigException If the value specified by that key represents a subsection, not a property
 	 */
-	public ConfigProperty getProperty(String key) throws ConfigException;
+	public ConfigProperty getProperty(String key);
 	
 	/**
 	 * Sets a comment in this section.<br>
@@ -135,7 +134,7 @@ public interface ConfigSection {
 	 * Implementations may return an unmodifiable map
 	 * @return A map containing all the properties (excluding subsections) of this section 
 	 */
-	public default Map<String, Object> getRawProperties() {
+	public default Map<String, Object> getPropertyValues() {
 		Map<String, Object> map = new LinkedHashMap<>();
 		for(Map.Entry<String, ConfigProperty> en : getProperties().entrySet()) {
 			map.put(en.getKey(), en.getValue().getValue());
@@ -156,12 +155,34 @@ public interface ConfigSection {
 	}
 	
 	/**
+	 * Checks whether a key is set in this section (the key belongs to either a subsection or a property).<br>
+	 * The {@code key} parameter allows for subpaths (e.g. "{@code somepath.somesubpath}").<br>
+	 * @param key The key of the property/subsection
+	 * @return Whether that key exists or not
+	 */
+	public default boolean isSet(String key) {
+		return !getTypeOf(key).equals(ConfigValueType.UNDEFINED);
+	}
+	
+	/**
 	 * Returns a map containing all the (raw) properties as well as subsections (represented by other {@link Map}s) of this section.<br>
 	 * The Map returned by this function may be passed to {@link #loadFromMap(Map)}
 	 * @return A map containing all the (raw) properties as well as subsections of this section
 	 */
 	public default Map<String, Object> toMap() {
-		Map<String, Object> map = new LinkedHashMap<>(getRawProperties());
+		Map<String, Object> map = new LinkedHashMap<>(getPropertyValues());
+		for(Map.Entry<String, Object> en : map.entrySet()) {
+			if(en.getValue() instanceof List) {
+				List<?> l = ((List<?>) en.getValue()).stream()
+						.map(v -> {
+							if(v instanceof ConfigSection) {
+								return ((ConfigSection) v).toMap();
+							}
+							return v;
+						}).collect(Collectors.toList());
+				map.put(en.getKey(), l);
+			}
+		}
 		for(Entry<String, ConfigSection> sub : getSubsections().entrySet()) {
 			if(!sub.getValue().isEmpty()) map.put(sub.getKey(), sub.getValue().toMap());
 		}
@@ -335,7 +356,13 @@ public interface ConfigSection {
 	public default <T> NullableOptional<T> castPrimitiveType(Object o, Class<T> clazz, Complex<?> exactType) {
 		return defaultCast(this, o, clazz, exactType, false);
 	}
-	
+
+	/**
+	 * Returns the {@link ConfigValueType} of a property/subsection in this section or {@link ConfigValueType#UNDEFINED} if that property/subsection doesn't exist.<br>
+	 * The {@code key} parameter allows for subpaths (e.g. "{@code somepath.somesubpath}").<br>
+	 * @param key The key of the property/subsection
+	 * @return The {@link ConfigValueType} of a property/subsection in this section or {@link ConfigValueType#UNDEFINED} if that property/subsection doesn't exist.
+	 */
 	public default ConfigValueType getTypeOf(String key) {
 		ConfigProperty p = getProperty(key);
 		if(p == null || p.isUndefined()) return ConfigValueType.UNDEFINED;

@@ -2,6 +2,7 @@ package me.mrletsplay.mrcore.config.impl;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -37,14 +38,7 @@ class DefaultConfigFormatter {
 			return;
 		}
 		if(isEmptyProperty(property)) return;
-		if(property instanceof ConfigSection) {
-			ConfigSection s = (ConfigSection) property;
-			Map<String, Object> props = s.toMap();
-			if(!props.isEmpty()) {
-				w.newLine();
-				writeSubsection(indents + 1, props, s.commentsToMap());
-			}
-		}else if(property instanceof List) {
+		if(property instanceof List) {
 			if(!((List<?>) property).isEmpty()) {
 				for(Object o : ((List<?>) property)) {
 					w.newLine();
@@ -60,8 +54,10 @@ class DefaultConfigFormatter {
 			w.write("\'");
 			w.write(escapeChar((char) property));
 			w.write("\'");
-		}else {
+		}else if(property instanceof Number || property instanceof Boolean){
 			w.write(property.toString());
+		}else {
+			throw new IllegalArgumentException("Invalid property value");
 		}
 	}
 	
@@ -84,7 +80,6 @@ class DefaultConfigFormatter {
 			Complex<Map<String, Object>> c = Complex.map(String.class, Object.class);
 			if(p.getValue() != null && c.isInstance(p.getValue())) {
 				w.newLine();
-//				writeSubsection(indents + 1, c.cast(p.getValue()).get(), c.cast(comments.get(p.getKey())).map(en -> en != null ? en : new HashMap<String, String>()).get());
 				Map<String, String> sC = comments.entrySet().stream()
 						.filter(en -> en.getKey() != null && en.getValue() != null && en.getKey().startsWith(p.getKey() + "."))
 						.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -120,7 +115,16 @@ class DefaultConfigFormatter {
 			return;
 		}
 		if(isEmptyProperty(value)) return;
-		if(value instanceof ConfigSection) {
+		Complex<Map<String, Object>> c = Complex.map(String.class, Object.class);
+		if(c.isInstance(value)) {
+			w.write("{");
+			Map<String, Object> props = c.cast(value).get();
+			if(!props.isEmpty()) {
+				w.newLine();
+				writeSubsection(indents + 1, props, new HashMap<>());
+			}
+			w.write(space(indents) + "}");
+		}else if(value instanceof ConfigSection || value instanceof Map) {
 			w.write("{");
 			writePropertyValue(indents, value);
 			w.write(space(indents) + "}");

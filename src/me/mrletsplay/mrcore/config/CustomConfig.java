@@ -106,6 +106,10 @@ public interface CustomConfig extends ConfigSection {
 		return getMainSection().getComment(null);
 	}
 	
+	public default void applyDefaults() {
+		applyDefaults(false);
+	}
+	
 	// Must be implemented
 	
 	public ConfigSection getMainSection();
@@ -115,6 +119,10 @@ public interface CustomConfig extends ConfigSection {
 	public void load(InputStream in) throws ConfigException;
 	
 	public void save(OutputStream out) throws ConfigException;
+	
+	public void addDefault(String key, Object value);
+	
+	public void applyDefaults(boolean override);
 	
 	public default void registerMapper(ObjectMapper<?, ?> mapper) {
 		registerMapper(0, mapper);

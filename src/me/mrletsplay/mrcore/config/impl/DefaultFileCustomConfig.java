@@ -32,11 +32,14 @@ public class DefaultFileCustomConfig implements FileCustomConfig {
 	private Map<ObjectMapper<?, ?>, Integer> lowLevelMappers;
 	private Map<ObjectMapper<?, ?>, Integer> mappers;
 	
+	private Map<String, Object> defaults;
+	
 	public DefaultFileCustomConfig(File configFile) {
 		this.configFile = configFile;
 		this.mainSection = new DefaultConfigSectionImpl(this);
 		this.mappers = new LinkedHashMap<>();
 		this.lowLevelMappers = new LinkedHashMap<>();
+		this.defaults = new LinkedHashMap<>();
 		registerLowLevelMapper(0, DefaultConfigMappers.JSON_OBJECT_MAPPER);
 		registerLowLevelMapper(0, DefaultConfigMappers.JSON_ARRAY_MAPPER);
 		registerLowLevelMapper(0, DefaultConfigMappers.MAP_MAPPER);
@@ -91,6 +94,19 @@ public class DefaultFileCustomConfig implements FileCustomConfig {
 		}catch(IOException e) {
 			throw new ConfigException("Unexpected IO exception", e);
 		}
+	}
+
+	@Override
+	public void addDefault(String key, Object value) {
+		defaults.put(key, value);
+	}
+
+	@Override
+	public void applyDefaults(boolean override) {
+		defaults.forEach((k, v) -> {
+			if(override || !isSet(k)) set(k, v);
+		});
+		defaults.clear();
 	}
 
 	@Override
