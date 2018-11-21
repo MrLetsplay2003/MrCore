@@ -28,7 +28,7 @@ public class MrCorePlugin extends JavaPlugin{
 		getLogger().info("Applying compat for " + nmsv.getFriendlyName() + " / " + nmsv.name());
 		Bukkit.getPluginManager().registerEvents(new GUIListener(), this);
 		getCommand("mrcoreui").setExecutor(new UIListener());
-		config = ConfigLoader.loadFileConfig(new File(getDataFolder(), "config.yml"));
+		config = ConfigLoader.loadFileConfig(new File(getDataFolder(), "config.yml"), true);
 		if(config.getBoolean("versioning.check-update", true, true)) {
 			String version = config.getString("versioning.version-to-use", "latest", true);
 			MrCoreUpdateChecker.checkForUpdate(version);

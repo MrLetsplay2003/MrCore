@@ -10,8 +10,8 @@ import me.mrletsplay.mrcore.io.IOUtils;
 
 public class ConfigLoader {
 
-	public static FileCustomConfig loadFileConfig(File configFile) throws ConfigException {
-		return loadConfigFromFile(new DefaultFileCustomConfig(configFile), configFile);
+	public static FileCustomConfig loadFileConfig(File configFile, boolean saveConverted) throws ConfigException {
+		return loadConfigFromFile(new DefaultFileCustomConfig(configFile), configFile, saveConverted);
 	}
 
 	public static CustomConfig loadStreamConfig(InputStream stream, boolean closeAfterLoad) throws ConfigException {
@@ -35,12 +35,14 @@ public class ConfigLoader {
 		return config;
 	}
 	
-	public static <T extends CustomConfig> T loadConfigFromFile(T config, File configFile) throws ConfigException {
+	public static <T extends CustomConfig> T loadConfigFromFile(T config, File configFile, boolean saveConverted) throws ConfigException {
 		try {
 			config.load(configFile);
 		}catch(IncompatibleConfigVersionException e) {
 			try {
-				return ConfigConverter.convertConfig(IOUtils.readAllBytes(new FileInputStream(configFile)), config, e.getGivenDefaultVersion(), e.getRequiredDefaultVersion());
+				T c =	 ConfigConverter.convertConfig(IOUtils.readAllBytes(new FileInputStream(configFile)), config, e.getGivenDefaultVersion(), e.getRequiredDefaultVersion());
+				if(saveConverted) c.save(configFile);
+				return c;
 			} catch (IOException e1) {
 				throw new ConfigException(e1);
 			}
