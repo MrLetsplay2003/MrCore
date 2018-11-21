@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import me.mrletsplay.mrcore.config.ConfigSection;
 import me.mrletsplay.mrcore.misc.Complex;
 import me.mrletsplay.mrcore.misc.NullableOptional;
 
@@ -123,10 +122,6 @@ class DefaultConfigFormatter {
 				w.newLine();
 				writeSubsection(indents + 1, props, new HashMap<>());
 			}
-			w.write(space(indents) + "}");
-		}else if(value instanceof ConfigSection || value instanceof Map) {
-			w.write("{");
-			writePropertyValue(indents, value);
 			w.write(space(indents) + "}");
 		}else if(value instanceof List) {
 			w.write("{");
