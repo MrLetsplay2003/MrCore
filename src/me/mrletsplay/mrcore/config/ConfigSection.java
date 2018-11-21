@@ -277,8 +277,13 @@ public interface ConfigSection {
 			}else {
 				return NullableOptional.empty();
 			}
-		}else if(typeClass.equals(String.class)
-				|| typeClass.equals(Boolean.class)
+		}else if(typeClass.equals(String.class)) {
+			if(typeClass.isInstance(o)) return NullableOptional.of(typeClass.cast(o));
+			if(o instanceof Number || o instanceof Character) {
+				return NullableOptional.of(typeClass.cast(o.toString()));
+			}
+			return NullableOptional.empty();
+		}else if(typeClass.equals(Boolean.class)
 				|| typeClass.equals(Character.class)
 				|| typeClass.equals(List.class) || typeClass.equals(ConfigSection.class)) {
 			if(!typeClass.isInstance(o)) return NullableOptional.empty();
@@ -330,24 +335,6 @@ public interface ConfigSection {
 		}
 		return NullableOptional.empty();
 	}
-	
-//	public static <T> NullableOptional<T> constructLowLevelType(ConfigSection section, Object o, Complex<T> toClass) {
-//		List<ObjectMapper<?, ?>> llm = section.getConfig().getLowLevelMappers().entrySet().stream()
-//				.filter(en -> en.getKey().canConstruct(o, section::castType))
-//				.sorted(Comparator.comparingInt(Map.Entry::getValue))
-//				.map(Map.Entry::getKey)
-//				.collect(Collectors.toList());
-//		for(ObjectMapper<?, ?> om : llm) {
-//			try {
-//				NullableOptional<T> t = toClass.cast(om.constructRawObject(section, o, section::castType), section::castType);
-//				if(!t.isPresent()) continue;
-//				return t;
-//			}catch(ObjectMappingException e) {
-//				continue;
-//			}
-//		}
-//		return NullableOptional.empty();
-//	}
 	
 	public default <T> NullableOptional<T> castType(Object o, Class<T> clazz, Complex<?> exactType) {
 		return defaultCast(this, o, clazz, exactType, true);

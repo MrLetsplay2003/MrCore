@@ -73,9 +73,9 @@ public class BukkitConfigMappers {
 			(sec, json) -> new ItemStack(Material.valueOf(json.getString("type").toUpperCase()), json.getInt("amount")))
 			.mapString("type", it -> it.getType().name(), null).then()
 			.mapInteger("amount", ItemStack::getAmount, null).then()
-			.mapInteger("durability", i -> (int) i.getDurability(), (i, v) -> i.setDurability(v.shortValue())).then()
-			.mapString("name", i -> i.getItemMeta().getDisplayName(), ItemUtils::setDisplayName).onlyMapIf(ItemStack::hasItemMeta).then()
-			.mapJSONArray("lore", i -> new JSONArray(i.getItemMeta().getLore()), (i, a) -> i.getItemMeta().setLore(Complex.castList(a, String.class).get())).onlyMapIf(ItemStack::hasItemMeta).then()
+			.mapInteger("durability", i -> (int) i.getDurability(), (i, v) -> i.setDurability(v.shortValue())).onlyConstructIfNotNull().then()
+			.mapString("name", i -> i.getItemMeta().getDisplayName(), ItemUtils::setDisplayName).onlyMapIf(ItemStack::hasItemMeta).onlyConstructIfExists().then()
+			.mapJSONArray("lore", i -> new JSONArray(i.getItemMeta().getLore()), (i, a) -> i.getItemMeta().setLore(Complex.castList(a, String.class).get())).onlyMapIf(ItemStack::hasItemMeta).onlyConstructIfNotNull().then()
 			.mapJSONObject("enchantments", i -> {
 				JSONObject o = new JSONObject();
 				for(Map.Entry<Enchantment, Integer> ench : i.getItemMeta().getEnchants().entrySet()) {
@@ -88,11 +88,11 @@ public class BukkitConfigMappers {
 					 m.addEnchant(Enchantment.getByName(k), e.getInt(k), true);
 				 }
 				 i.setItemMeta(m);
-			}).onlyMapIf(ItemStack::hasItemMeta).then()
+			}).onlyMapIf(ItemStack::hasItemMeta).onlyConstructIfNotNull().then()
 			.mapJSONArray("flags",
 					i -> new JSONArray(i.getItemMeta().getItemFlags().stream().map(ItemFlag::name).collect(Collectors.toList())),
 					(i, a) -> a.forEach(f -> i.getItemMeta().addItemFlags(ItemFlag.valueOf(((String) f).toUpperCase()))))
-				.onlyMapIf(ItemStack::hasItemMeta).then()
+				.onlyMapIf(ItemStack::hasItemMeta).onlyConstructIfNotNull().then()
 			.mapJSONObject("banner", i -> {
 				BannerMeta m = (BannerMeta) i.getItemMeta();
 				JSONObject b = new JSONObject();
@@ -115,7 +115,7 @@ public class BukkitConfigMappers {
 					}
 				}
 				i.setItemMeta(m);
-			}).onlyMapIf(i -> i.getItemMeta() instanceof BannerMeta).then()
+			}).onlyMapIf(i -> i.getItemMeta() instanceof BannerMeta).onlyConstructIfNotNull().then()
 			.mapJSONObject("book", i -> {
 				BookMeta m = (BookMeta) i.getItemMeta();
 				JSONObject b = new JSONObject();
@@ -130,7 +130,7 @@ public class BukkitConfigMappers {
 				if(j.has("generation")) m.setGeneration(Generation.valueOf(j.getString("generation").toUpperCase()));
 				if(j.has("title")) m.setTitle(j.getString("title"));
 				if(j.has("pages")) m.setPages(Complex.castList(j.getJSONArray("pages"), String.class).get());
-			}).onlyMapIf(i -> i.getItemMeta() instanceof BookMeta).then()
+			}).onlyMapIf(i -> i.getItemMeta() instanceof BookMeta).onlyConstructIfNotNull().then()
 			.mapJSONObject("enchantment-storage", i -> {
 				EnchantmentStorageMeta m = (EnchantmentStorageMeta) i.getItemMeta();
 				JSONObject o = new JSONObject();
@@ -144,7 +144,7 @@ public class BukkitConfigMappers {
 					m.addStoredEnchant(Enchantment.getByName(k), j.getInt(k), true);
 				}
 				i.setItemMeta(m);
-			}).onlyMapIf(i -> i.getItemMeta() instanceof EnchantmentStorageMeta).then()
+			}).onlyMapIf(i -> i.getItemMeta() instanceof EnchantmentStorageMeta).onlyConstructIfNotNull().then()
 			.mapJSONObject("firework-effect", i -> {
 				FireworkEffectMeta m = (FireworkEffectMeta) i.getItemMeta();
 				JSONObject f = new JSONObject();
@@ -167,7 +167,7 @@ public class BukkitConfigMappers {
 				if(j.has("trail")) b.trail(j.getBoolean("trail"));
 				m.setEffect(b.build());
 				i.setItemMeta(m);
-			}).onlyMapIf(i -> i.getItemMeta() instanceof FireworkEffectMeta).then()
+			}).onlyMapIf(i -> i.getItemMeta() instanceof FireworkEffectMeta).onlyConstructIfNotNull().then()
 			.mapJSONObject("firework", i -> {
 				FireworkMeta m = (FireworkMeta) i.getItemMeta();
 				JSONObject f = new JSONObject();
@@ -202,7 +202,7 @@ public class BukkitConfigMappers {
 					}
 				}
 				i.setItemMeta(m);
-			}).onlyMapIf(i -> i.getItemMeta() instanceof FireworkMeta).then()
+			}).onlyMapIf(i -> i.getItemMeta() instanceof FireworkMeta).onlyConstructIfNotNull().then()
 			.mapJSONObject("leather-armor", i -> {
 				LeatherArmorMeta m = (LeatherArmorMeta) i.getItemMeta();
 				JSONObject l = new JSONObject();
@@ -212,7 +212,7 @@ public class BukkitConfigMappers {
 				LeatherArmorMeta m = (LeatherArmorMeta) i.getItemMeta();
 				if(j.has("color")) m.setColor(Color.fromRGB(Integer.parseInt(j.getString("color"), 16)));
 				i.setItemMeta(m);
-			}).onlyMapIf(i -> i.getItemMeta() instanceof LeatherArmorMeta).then()
+			}).onlyMapIf(i -> i.getItemMeta() instanceof LeatherArmorMeta).onlyConstructIfNotNull().then()
 			.mapJSONObject("map", i -> {
 				MapMeta m = (MapMeta) i.getItemMeta();
 				JSONObject l = new JSONObject();
@@ -226,7 +226,7 @@ public class BukkitConfigMappers {
 				if(j.has("location-name")) m.setLocationName(j.getString("location-name"));
 				if(j.has("map-id")) m.setMapId(j.getInt("map-id"));
 				i.setItemMeta(m);
-			}).onlyMapIf(i -> i.getItemMeta() instanceof MapMeta).then()
+			}).onlyMapIf(i -> i.getItemMeta() instanceof MapMeta).onlyConstructIfNotNull().then()
 			.mapJSONObject("potion", i -> {
 				PotionMeta m = (PotionMeta) i.getItemMeta();
 				JSONObject f = new JSONObject();
@@ -263,7 +263,7 @@ public class BukkitConfigMappers {
 					}
 				}
 				i.setItemMeta(m);
-			}).onlyMapIf(i -> i.getItemMeta() instanceof PotionMeta).then()
+			}).onlyMapIf(i -> i.getItemMeta() instanceof PotionMeta).onlyConstructIfNotNull().then()
 			.mapJSONObject("spawn-egg", i -> {
 				SpawnEggMeta m = (SpawnEggMeta) i.getItemMeta();
 				JSONObject l = new JSONObject();
@@ -273,7 +273,7 @@ public class BukkitConfigMappers {
 				SpawnEggMeta m = (SpawnEggMeta) i.getItemMeta();
 				if(j.has("spawned-type")) m.setSpawnedType(EntityType.valueOf(j.getString("spawned-type").toUpperCase()));
 				i.setItemMeta(m);
-			}).onlyMapIf(i -> i.getItemMeta() instanceof SpawnEggMeta).then()
+			}).onlyMapIf(i -> i.getItemMeta() instanceof SpawnEggMeta).onlyConstructIfNotNull().then()
 			.mapJSONObject("skull", i -> {
 				SkullMeta m = (SkullMeta) i.getItemMeta();
 				JSONObject s = new JSONObject();
@@ -298,7 +298,7 @@ public class BukkitConfigMappers {
 					setRawTexture(m, j.getString("hash"));
 				}
 				i.setItemMeta(m);
-			}).onlyMapIf(i -> i.getItemMeta() instanceof SkullMeta).then()
+			}).onlyMapIf(i -> i.getItemMeta() instanceof SkullMeta).onlyConstructIfNotNull().then()
 			.create();
 	
 	public static void setTexture(SkullMeta im, String url) {

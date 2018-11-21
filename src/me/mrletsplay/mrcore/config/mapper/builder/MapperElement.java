@@ -25,6 +25,10 @@ public interface MapperElement<Self extends MapperElement<Self, P, T>, P extends
 		return onlyConstructIf((t, s, j, k) -> j.has(k) && !j.isOfType(k, JSONType.NULL));
 	}
 	
+	public default Self onlyConstructIfExists() {
+		return onlyConstructIf((t, s, j, k) -> j.has(k));
+	}
+	
 	public QuadPredicate<T, ConfigSection, JSONObject, String> getMappingCondition();
 	
 	public QuadPredicate<T, ConfigSection, JSONObject, String> getConstructingCondition();
