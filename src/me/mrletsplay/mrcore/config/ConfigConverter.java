@@ -28,7 +28,6 @@ public class ConfigConverter {
 								.execute()
 								.asJSONObject();
 		if(result.getBoolean("success")) {
-			System.out.println(new String(Base64.getDecoder().decode(result.getString("data")), StandardCharsets.UTF_8));
 			return Base64.getDecoder().decode(result.getString("data"));
 		}else {
 			throw new ConfigConversionException("Failed to convert config: " + result.getString("error"));
