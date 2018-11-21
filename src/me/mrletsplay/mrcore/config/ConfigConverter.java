@@ -22,7 +22,7 @@ public class ConfigConverter {
 	}
 	
 	public static byte[] convertVersion(byte[] config, String fromVersion, String toVersion) {
-		String getURL = "http://localhost:8745/api/mrcore/convert_config_v2.php?from_version="+fromVersion+"&to_version="+toVersion;
+		String getURL = "https://graphite-official.com/api/mrcore/convert_config_v2.php?from_version="+fromVersion+"&to_version="+toVersion;
 		JSONObject result = HttpRequest.createPost(getURL)
 								.setPostParameter("data", Base64.getEncoder().encodeToString(config))
 								.execute()
