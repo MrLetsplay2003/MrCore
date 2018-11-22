@@ -80,7 +80,7 @@ public class HttpUtils {
 		return b;
 	}
 	
-	public static String urlEncode(String str) {
+	public static String urlEncode(String str) throws HttpException {
 		try {
 			return URLEncoder.encode(str, "UTF-8");
 		} catch (UnsupportedEncodingException e) {

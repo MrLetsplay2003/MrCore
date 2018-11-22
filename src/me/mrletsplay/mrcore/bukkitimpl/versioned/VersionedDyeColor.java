@@ -22,7 +22,7 @@ public enum VersionedDyeColor {
 	CYAN(of("CYAN", NMSVersion.v1_8to1_13())),
 	LIGHT_GRAY(
 			of("SILVER", NMSVersion.v1_8to1_12()),
-			of("LIGHT_GRAY", NMSVersion.V1_13_R1)
+			of("LIGHT_GRAY", NMSVersion.v1_13())
 		),
 	GRAY(of("GRAY", NMSVersion.v1_8to1_13())),
 	PINK(of("PINK", NMSVersion.v1_8to1_13())),

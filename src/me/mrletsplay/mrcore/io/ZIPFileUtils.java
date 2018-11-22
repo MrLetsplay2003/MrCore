@@ -19,7 +19,7 @@ public class ZIPFileUtils {
 	 * @throws IOException If an IO error occurs while zipping the folder
 	 */
 	@Deprecated
-	public static void zipFolder(File file, File zipFile, int compressionLevel) throws IOException{
+	public static void zipFolder(File file, File zipFile, int compressionLevel) throws IOException {
 		if(!zipFile.exists()) {
 			zipFile.getParentFile().mkdirs();
 			zipFile.createNewFile();
@@ -30,7 +30,7 @@ public class ZIPFileUtils {
 		o.close();
 	}
 	
-	private static void addFilesToZip(File f, ZipOutputStream out, int sI) throws IOException{
+	private static void addFilesToZip(File f, ZipOutputStream out, int sI) throws IOException {
 		if(f.isDirectory()){
 			for(File fl : f.listFiles()){
 				addFilesToZip(fl, out, sI);
@@ -53,7 +53,7 @@ public class ZIPFileUtils {
 	 * @param folderOut The folder to unzip into
 	 * @throws IOException If an IO error occurs while unzipping the file
 	 */
-	public static void unzipFile(File zipFile, File folderOut) throws IOException{
+	public static void unzipFile(File zipFile, File folderOut) throws IOException {
 		if(!folderOut.exists()) {
 			folderOut.mkdirs();
 		}

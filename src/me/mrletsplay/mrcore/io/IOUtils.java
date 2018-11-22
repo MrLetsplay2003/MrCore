@@ -22,7 +22,7 @@ public class IOUtils {
 		}
 	}
 	
-	public static void transferSafely(InputStream from, OutputStream to) {
+	public static void transferSafely(InputStream from, OutputStream to) throws FriendlyException {
 		try {
 			transfer(from, to);
 		} catch (IOException e) {
@@ -30,7 +30,7 @@ public class IOUtils {
 		}
 	}
 	
-	public static void transferSafely(InputStream from, OutputStream to, int bufferSize) {
+	public static void transferSafely(InputStream from, OutputStream to, int bufferSize) throws FriendlyException {
 		try {
 			transfer(from, to, bufferSize);
 		} catch (IOException e) {
@@ -44,7 +44,7 @@ public class IOUtils {
 		return bOut.toByteArray();
 	}
 	
-	public static byte[] readAllBytesSafely(InputStream from) {
+	public static byte[] readAllBytesSafely(InputStream from) throws FriendlyException {
 		try {
 			return readAllBytes(from);
 		} catch (IOException e) {
@@ -52,7 +52,7 @@ public class IOUtils {
 		}
 	}
 	
-	public static boolean createFile(File file) {
+	public static boolean createFile(File file) throws FriendlyException {
 		if(file.exists()) return true;
 		file = file.getAbsoluteFile();
 		if(file.getParentFile() != null) file.getParentFile().mkdirs();
