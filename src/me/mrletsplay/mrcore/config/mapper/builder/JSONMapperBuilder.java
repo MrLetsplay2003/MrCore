@@ -1,6 +1,6 @@
 package me.mrletsplay.mrcore.config.mapper.builder;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
 
@@ -22,7 +22,7 @@ public class JSONMapperBuilder<Self extends JSONMapperBuilder<Self, T>, T> imple
 	public JSONMapperBuilder(Complex<T> mappingType, BiFunction<ConfigSection, JSONObject, T> constructor) {
 		this.mappingType = mappingType;
 		this.constructor = constructor;
-		this.elements = new HashMap<>();
+		this.elements = new LinkedHashMap<>();
 	}
 	
 	public JSONObjectMapper<T> create() {

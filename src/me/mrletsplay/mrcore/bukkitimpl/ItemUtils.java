@@ -20,7 +20,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import me.mrletsplay.mrcore.bukkitimpl.versioned.MaterialDefinition;
 import me.mrletsplay.mrcore.bukkitimpl.versioned.VersionedDyeColor;
 import me.mrletsplay.mrcore.bukkitimpl.versioned.VersionedMaterial;
 
@@ -38,10 +37,8 @@ public class ItemUtils {
 		return createVersioned(m, am);
 	}
 	
-	@SuppressWarnings("deprecation")
 	public static ItemStack createItem(VersionedMaterial m, int am, String name, String... lore) {
-		MaterialDefinition d = m.getCurrentMaterialDefinition();
-		ItemStack i = new ItemStack(d.getMaterial(), am, d.getDamage());
+		ItemStack i = createVersioned(m, am);
 		ItemMeta me = i.getItemMeta();
 		if(name!=null) me.setDisplayName(name);
 		me.setLore(Arrays.stream(lore).filter(l -> !l.isEmpty()).collect(Collectors.toList()));

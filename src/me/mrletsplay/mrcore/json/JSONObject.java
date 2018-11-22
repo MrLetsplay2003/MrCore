@@ -1,13 +1,13 @@
 package me.mrletsplay.mrcore.json;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
  * Implementation of a JSON object according to <a href="http://www.json.org/">The JSON Data Interchange Standard</a>
  * @author MrLetsplay2003
  */
-public class JSONObject extends HashMap<String, Object> {
+public class JSONObject extends LinkedHashMap<String, Object> {
 	
 	private static final long serialVersionUID = -7624968898431467371L;
 	
@@ -35,7 +35,7 @@ public class JSONObject extends HashMap<String, Object> {
 	 * @param fromObject The JSONObject to copy
 	 */
 	public JSONObject(JSONObject fromObject) {
-		super(fromObject != null ? fromObject : new HashMap<>());
+		super(fromObject != null ? fromObject : new LinkedHashMap<>());
 	}
 	
 	/**
@@ -44,7 +44,7 @@ public class JSONObject extends HashMap<String, Object> {
 	 * @param fromMap  The Map to copy
 	 */
 	public JSONObject(Map<String, ?> fromMap) {
-		super(fromMap != null ? fromMap : new HashMap<>());
+		super(fromMap != null ? fromMap : new LinkedHashMap<>());
 	}
 	
 	/**

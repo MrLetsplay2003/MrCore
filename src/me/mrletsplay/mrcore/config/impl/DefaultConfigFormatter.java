@@ -2,7 +2,7 @@ package me.mrletsplay.mrcore.config.impl;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -120,7 +120,7 @@ class DefaultConfigFormatter {
 			Map<String, Object> props = c.cast(value).get();
 			if(!props.isEmpty()) {
 				w.newLine();
-				writeSubsection(indents + 1, props, new HashMap<>());
+				writeSubsection(indents + 1, props, new LinkedHashMap<>());
 			}
 			w.write(space(indents) + "}");
 		}else if(value instanceof List) {

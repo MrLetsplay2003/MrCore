@@ -34,10 +34,13 @@ import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.inventory.meta.SpawnEggMeta;
+import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionType;
 
 import me.mrletsplay.mrcore.bukkitimpl.ItemUtils;
+import me.mrletsplay.mrcore.bukkitimpl.versioned.NMSVersion;
 import me.mrletsplay.mrcore.config.mapper.JSONObjectMapper;
 import me.mrletsplay.mrcore.config.mapper.builder.JSONMapperBuilder;
 import me.mrletsplay.mrcore.json.JSONArray;
@@ -70,12 +73,16 @@ public class BukkitConfigMappers {
 	
 	@SuppressWarnings("deprecation")
 	public static final JSONObjectMapper<ItemStack> ITEM_MAPPER = new JSONMapperBuilder<>(ItemStack.class,
-			(sec, json) -> new ItemStack(Material.valueOf(json.getString("type").toUpperCase()), json.getInt("amount")))
+			(sec, json) -> {
+				System.out.println("AY");
+				System.out.println(json.toFancyString());
+				return new ItemStack(Material.valueOf(json.getString("type").toUpperCase()), json.getInt("amount"));
+			})
 			.mapString("type", it -> it.getType().name(), null).then()
 			.mapInteger("amount", ItemStack::getAmount, null).then()
 			.mapInteger("durability", i -> (int) i.getDurability(), (i, v) -> i.setDurability(v.shortValue())).onlyConstructIfNotNull().then()
 			.mapString("name", i -> i.getItemMeta().getDisplayName(), ItemUtils::setDisplayName).onlyMapIf(ItemStack::hasItemMeta).onlyConstructIfExists().then()
-			.mapJSONArray("lore", i -> new JSONArray(i.getItemMeta().getLore()), (i, a) -> i.getItemMeta().setLore(Complex.castList(a, String.class).get())).onlyMapIf(ItemStack::hasItemMeta).onlyConstructIfNotNull().then()
+			.mapJSONArray("lore", i -> new JSONArray(i.getItemMeta().getLore()), (i, a) -> i.getItemMeta().setLore(Complex.castList(a, String.class).get())).onlyMapIf(ItemStack::hasItemMeta).onlyMapIf(i -> i.getItemMeta().hasLore()).onlyConstructIfNotNull().then()
 			.mapJSONObject("enchantments", i -> {
 				JSONObject o = new JSONObject();
 				for(Map.Entry<Enchantment, Integer> ench : i.getItemMeta().getEnchants().entrySet()) {
@@ -96,22 +103,25 @@ public class BukkitConfigMappers {
 			.mapJSONObject("banner", i -> {
 				BannerMeta m = (BannerMeta) i.getItemMeta();
 				JSONObject b = new JSONObject();
-				b.set("color", m.getBaseColor().name());
-				JSONObject patterns = new JSONObject();
+				if(NMSVersion.getCurrentServerVersion().isOlderThan(NMSVersion.V1_13_R1)) b.set("color", m.getBaseColor().name());
+				JSONArray patterns = new JSONArray();
 				for(Pattern p : m.getPatterns()) {
-					b.set(p.getPattern().name(), p.getColor().name());
+					JSONObject pattern = new JSONObject();
+					pattern.set("pattern", p.getPattern().name());
+					pattern.set("color", p.getColor().name());
+					patterns.add(pattern);
 				}
 				b.set("patterns", patterns);
 				return b;
 			}, (i, j) -> {
 				BannerMeta m = (BannerMeta) i.getItemMeta();
-				if(j.has("color")) {
+				if(j.has("color") && NMSVersion.getCurrentServerVersion().isOlderThan(NMSVersion.V1_13_R1)) {
 					m.setBaseColor(DyeColor.valueOf(j.getString("color").toUpperCase()));
 				}
 				if(j.has("patterns")) {
-					JSONObject ps = j.getJSONObject("patterns");
-					for(String pK : ps.keySet()) {
-						m.addPattern(new Pattern(DyeColor.valueOf(ps.getString(pK).toUpperCase()), PatternType.valueOf(ps.getString(pK).toUpperCase())));
+					JSONArray ps = j.getJSONArray("patterns");
+					for(JSONObject pK : Complex.castList(ps, JSONObject.class).get()) {
+						m.addPattern(new Pattern(DyeColor.valueOf(pK.getString("color").toUpperCase()), PatternType.valueOf(pK.getString("pattern").toUpperCase())));
 					}
 				}
 				i.setItemMeta(m);
@@ -216,9 +226,9 @@ public class BukkitConfigMappers {
 			.mapJSONObject("map", i -> {
 				MapMeta m = (MapMeta) i.getItemMeta();
 				JSONObject l = new JSONObject();
-				l.set("color", Integer.toHexString(m.getColor().asRGB()));
-				l.set("location-name", m.getLocationName());
-				l.set("map-id", m.getMapId());
+				if(m.hasColor()) l.set("color", Integer.toHexString(m.getColor().asRGB()));
+				if(m.hasLocationName()) l.set("location-name", m.getLocationName());
+				if(m.hasMapId()) l.set("map-id", m.getMapId());
 				return l;
 			}, (i, j) -> {
 				MapMeta m = (MapMeta) i.getItemMeta();
@@ -230,7 +240,10 @@ public class BukkitConfigMappers {
 			.mapJSONObject("potion", i -> {
 				PotionMeta m = (PotionMeta) i.getItemMeta();
 				JSONObject f = new JSONObject();
-				f.set("color", Integer.toHexString(m.getColor().asRGB()));
+				if(m.hasColor()) f.set("color", Integer.toHexString(m.getColor().asRGB()));
+				f.set("type", m.getBasePotionData().getType().name());
+				f.set("extended", m.getBasePotionData().isExtended());
+				f.set("upgraded", m.getBasePotionData().isUpgraded());
 				if(m.hasCustomEffects()) {
 					JSONArray es = new JSONArray();
 					for(PotionEffect eff : m.getCustomEffects()) {
@@ -243,14 +256,16 @@ public class BukkitConfigMappers {
 						e.set("ambient", eff.isAmbient());
 						es.add(e);
 					}
-					f.set("effects", es);
+					f.set("custom-effects", es);
 				}
 				return f;
 			}, (i, j) -> {
 				PotionMeta m = (PotionMeta) i.getItemMeta();
 				if(j.has("color")) m.setColor(Color.fromRGB(Integer.parseInt(j.getString("color"), 16)));
-				if(j.has("effects")) {
-					JSONArray efs = j.getJSONArray("effects");
+				PotionData d = new PotionData(PotionType.valueOf(j.getString("type")), j.getBoolean("extended"), j.getBoolean("upgraded"));
+				m.setBasePotionData(d);
+				if(j.has("custom-effects")) {
+					JSONArray efs = j.getJSONArray("custom-effects");
 					for(JSONObject e : Complex.castList(efs, JSONObject.class).get()) {
 						PotionEffectType type = PotionEffectType.getByName(e.getString("type"));
 						int duration = j.getInt("duration");
@@ -298,7 +313,10 @@ public class BukkitConfigMappers {
 					setRawTexture(m, j.getString("hash"));
 				}
 				i.setItemMeta(m);
-			}).onlyMapIf(i -> i.getItemMeta() instanceof SkullMeta).onlyConstructIfNotNull().then()
+			}).onlyMapIf(i -> i.getItemMeta() instanceof SkullMeta)
+			.onlyMapIf(i -> NMSVersion.getCurrentServerVersion().isOlderThan(NMSVersion.V1_13_R1))
+			.onlyConstructIf((a, b, c, d) -> NMSVersion.getCurrentServerVersion().isOlderThan(NMSVersion.V1_13_R1))
+			.onlyConstructIfNotNull().then()
 			.create();
 	
 	public static void setTexture(SkullMeta im, String url) {

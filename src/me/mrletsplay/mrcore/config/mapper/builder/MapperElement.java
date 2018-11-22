@@ -20,7 +20,7 @@ public interface MapperElement<Self extends MapperElement<Self, P, T>, P extends
 	}
 
 	public Self onlyConstructIf(QuadPredicate<T, ConfigSection, JSONObject, String> condition);
-	
+
 	public default Self onlyConstructIfNotNull() {
 		return onlyConstructIf((t, s, j, k) -> j.has(k) && !j.isOfType(k, JSONType.NULL));
 	}

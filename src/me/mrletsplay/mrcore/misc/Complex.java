@@ -1,7 +1,7 @@
 package me.mrletsplay.mrcore.misc;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -296,7 +296,7 @@ public interface Complex<T> {
 
 		@Override
 		public NullableOptional<Map<K, V>> cast(Object o, CastingFunction castingFunction) {
-			return cast(o, castingFunction, new HashMap<>());
+			return cast(o, castingFunction, new LinkedHashMap<>());
 		}
 
 		public NullableOptional<Map<K, V>> cast(Object o, CastingFunction castingFunction, Map<K, V> toMap) {

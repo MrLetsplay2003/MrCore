@@ -1,6 +1,6 @@
 package me.mrletsplay.mrcore.config.mapper.builder;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
 
@@ -17,7 +17,7 @@ public class SubMapper<Self extends SubMapper<Self, P, T, S>, P extends SubMappa
 	
 	public SubMapper(P parent, BiFunction<ConfigSection, JSONObject, S> constructor, BiFunction<ConfigSection, T, S> getter, TriConsumer<ConfigSection, T, S> setter) {
 		super(parent);
-		this.elements = new HashMap<>();
+		this.elements = new LinkedHashMap<>();
 		this.constructor = constructor;
 		this.getter = getter;
 		this.setter = setter;

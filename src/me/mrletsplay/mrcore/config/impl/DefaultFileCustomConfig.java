@@ -72,7 +72,7 @@ public class DefaultFileCustomConfig implements FileCustomConfig {
 			if(!version.equals(VERSION)) throw new IncompatibleConfigVersionException(version, VERSION);
 			if(!p.hasMore()) return;
 			String header = p.readHeader();
-			if(header != null) mainSection.setComment(null, header);
+			if(header != null && !header.isEmpty()) mainSection.setComment(null, header);
 			if(!p.hasMore()) return;
 			ConfigSectionDescriptor d = p.readSubsection(new Marker(0, 0), 0);
 			mainSection.loadFromMap(d.getProperties());

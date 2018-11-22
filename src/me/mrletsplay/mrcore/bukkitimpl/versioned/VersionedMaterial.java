@@ -559,6 +559,14 @@ public enum VersionedMaterial {
 	COMMAND_BLOCK(
 			of(new MaterialDefinition("COMMAND"), NMSVersion.v1_8to1_12()),
 			of(new MaterialDefinition("COMMAND_BLOCK"), NMSVersion.v1_13())
+		),
+	GRASS(
+			of(new MaterialDefinition("LONG_GRASS"), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("GRASS"), NMSVersion.v1_13())
+		),
+	GRASS_BLOCK(
+			of(new MaterialDefinition("GRASS"), NMSVersion.v1_8to1_12()),
+			of(new MaterialDefinition("GRASS_BLOCK"), NMSVersion.v1_13())
 		)
 	;
 	
