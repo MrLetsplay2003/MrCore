@@ -412,7 +412,7 @@ class DefaultConfigParser {
 			getSubSections().forEach((k, v) -> {
 //				comments2.put(k, v.toCommentMap());
 				v.toCommentMap().forEach((ck, cv) -> {
-					comments2.put(k + ck, cv);
+					comments2.put(k + "." + ck, cv);
 				});
 			});
 			return comments2;

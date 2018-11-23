@@ -207,7 +207,7 @@ public interface ConfigSection {
 		Map<String, String> map = new LinkedHashMap<>(getComments());
 		for(Entry<String, ConfigSection> sub : getSubsections().entrySet()) {
 			sub.getValue().commentsToMap().forEach((ck, cv) -> {
-				map.put(sub.getKey() + ck, cv);
+				map.put(sub.getKey() + "." + ck, cv);
 			});
 		}
 		return map;
@@ -220,6 +220,7 @@ public interface ConfigSection {
 	 */
 	public default void loadCommentsFromMap(Map<String, String> map) {
 		map.forEach((k, v) -> {
+			System.out.println(k);
 			setComment(k, v);
 		});
 	}
