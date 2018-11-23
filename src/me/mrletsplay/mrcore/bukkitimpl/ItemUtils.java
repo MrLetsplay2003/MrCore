@@ -38,26 +38,20 @@ public class ItemUtils {
 	}
 	
 	public static ItemStack createItem(VersionedMaterial m, int am, String name, String... lore) {
+		return createItem(m, am, name, Arrays.asList(lore));
+	}
+	
+	public static ItemStack createItem(VersionedMaterial m, int am, String name, List<String> lore) {
 		ItemStack i = createVersioned(m, am);
 		ItemMeta me = i.getItemMeta();
 		if(name!=null) me.setDisplayName(name);
-		me.setLore(Arrays.stream(lore).filter(l -> !l.isEmpty()).collect(Collectors.toList()));
+		me.setLore(lore.stream().filter(l -> !l.isEmpty()).collect(Collectors.toList()));
 		i.setItemMeta(me);
 		return i;
 	}
 
-	@SuppressWarnings("deprecation")
 	public static ItemStack createItem(Material m, int am, int dam, String name, String... lore){
-		ItemStack i = new ItemStack(m, am, (short)dam);
-		ItemMeta me = i.getItemMeta();
-		me.setDisplayName(name);
-		List<String> s = new ArrayList<>();
-		for(String l:lore){
-			if(!l.isEmpty()) s.add(l);
-		}
-		me.setLore(s);
-		i.setItemMeta(me);
-		return i;
+		return createItem(m, am, dam, name, Arrays.asList(lore));
 	}
 
 	@SuppressWarnings("deprecation")
@@ -65,37 +59,20 @@ public class ItemUtils {
 		ItemStack i = new ItemStack(m, am, (short)dam);
 		ItemMeta me = i.getItemMeta();
 		me.setDisplayName(name);
-		List<String> s = new ArrayList<>();
-		for(String l:lore){
-			if(!l.isEmpty()) s.add(l);
-		}
-		me.setLore(s);
+		me.setLore(lore.stream().filter(l -> !l.isEmpty()).collect(Collectors.toList()));
 		i.setItemMeta(me);
 		return i;
 	}
 	
 	public static ItemStack createItem(ItemStack it, String name, String... lore){
-		ItemStack i = new ItemStack(it);
-		ItemMeta me = i.getItemMeta();
-		me.setDisplayName(name);
-		List<String> s = new ArrayList<>();
-		for(String l:lore){
-			if(!l.isEmpty()) s.add(l);
-		}
-		me.setLore(s);
-		i.setItemMeta(me); 
-		return i;
+		return createItem(it, name, Arrays.asList(lore));
 	}
 	
 	public static ItemStack createItem(ItemStack it, String name, List<String> lore){
 		ItemStack i = new ItemStack(it);
 		ItemMeta me = i.getItemMeta();
 		me.setDisplayName(name);
-		List<String> s = new ArrayList<>();
-		for(String l:lore){
-			if(!l.isEmpty()) s.add(l);
-		}
-		me.setLore(s);
+		me.setLore(lore.stream().filter(l -> !l.isEmpty()).collect(Collectors.toList()));
 		i.setItemMeta(me);
 		return i;
 	}
@@ -128,7 +105,6 @@ public class ItemUtils {
 		ItemStack i = createVersioned(VersionedMaterial.getBanner(col));
 		BannerMeta m = (BannerMeta)i.getItemMeta();
 		m.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
-//		m.setBaseColor(col);
 		m.addPattern(new Pattern(DyeColor.BLACK, PatternType.RHOMBUS_MIDDLE));
 		DyeColor c = col.getBukkitDyeColor();
 		m.addPattern(new Pattern(c, PatternType.STRIPE_LEFT));
@@ -142,7 +118,6 @@ public class ItemUtils {
 		ItemStack i = createVersioned(VersionedMaterial.getBanner(col));
 		BannerMeta m = (BannerMeta)i.getItemMeta();
 		m.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
-//		m.setBaseColor(col);
 		m.addPattern(new Pattern(DyeColor.BLACK, PatternType.RHOMBUS_MIDDLE));
 		DyeColor c = col.getBukkitDyeColor();
 		m.addPattern(new Pattern(c, PatternType.STRIPE_RIGHT));
@@ -156,7 +131,6 @@ public class ItemUtils {
 		ItemStack i = createVersioned(VersionedMaterial.getBanner(col));
 		BannerMeta m = (BannerMeta)i.getItemMeta();
 		m.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
-//		m.setBaseColor(col);
 		m.addPattern(new Pattern(DyeColor.BLACK, PatternType.STRIPE_TOP));
 		m.addPattern(new Pattern(DyeColor.BLACK, PatternType.STRIPE_BOTTOM));
 		m.addPattern(new Pattern(DyeColor.BLACK, PatternType.STRIPE_RIGHT));
@@ -172,7 +146,6 @@ public class ItemUtils {
 		ItemStack banner = createVersioned(VersionedMaterial.getBanner(baseCol));
 		BannerMeta bMeta = (BannerMeta)banner.getItemMeta();
 		bMeta.setDisplayName(name);
-//		bMeta.setBaseColor(baseCol);
 		for(Pattern p : patterns){
 			bMeta.addPattern(p);
 		}
@@ -289,7 +262,6 @@ public class ItemUtils {
 		LORE(false),
 		ENCHANTS(false),
 		SKULL_OWNER(false),
-//		SKULL_TEXTURE,
 		LEATHER_ARMOR_COLOR(false);
 		
 		public final boolean isParameterCollection;

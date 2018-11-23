@@ -410,7 +410,6 @@ class DefaultConfigParser {
 		public Map<String, String> toCommentMap() {
 			Map<String, String> comments2 = new LinkedHashMap<>(comments);
 			getSubSections().forEach((k, v) -> {
-//				comments2.put(k, v.toCommentMap());
 				v.toCommentMap().forEach((ck, cv) -> {
 					comments2.put(k + "." + ck, cv);
 				});
