@@ -220,7 +220,6 @@ public interface ConfigSection {
 	 */
 	public default void loadCommentsFromMap(Map<String, String> map) {
 		map.forEach((k, v) -> {
-			System.out.println(k);
 			setComment(k, v);
 		});
 	}
