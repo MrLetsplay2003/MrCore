@@ -10,6 +10,14 @@ import me.mrletsplay.mrcore.io.IOUtils;
 
 public class ConfigLoader {
 
+	public static FileCustomConfig loadFileConfig(File configFile) throws ConfigException {
+		return loadFileConfig(configFile, false);
+	}
+
+	public static CustomConfig loadStreamConfig(InputStream stream) throws ConfigException {
+		return loadStreamConfig(stream, false);
+	}
+
 	public static FileCustomConfig loadFileConfig(File configFile, boolean saveConverted) throws ConfigException {
 		return loadConfigFromFile(new DefaultFileCustomConfig(configFile), configFile, saveConverted);
 	}

@@ -33,7 +33,6 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.inventory.meta.SpawnEggMeta;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -130,14 +129,14 @@ public class BukkitConfigMappers {
 				BookMeta m = (BookMeta) i.getItemMeta();
 				JSONObject b = new JSONObject();
 				b.set("author", m.getAuthor());
-				b.set("generation", m.getGeneration().name());
+				if(NMSVersion.getCurrentServerVersion().isNewerThan(NMSVersion.V1_8_R3)) b.set("generation", m.getGeneration().name());
 				b.set("title", m.getTitle());
 				b.set("pages", new JSONArray(m.getPages()));
 				return b;
 			}, (i, j) -> {
 				BookMeta m = (BookMeta) i.getItemMeta();
 				if(j.has("author")) m.setAuthor(j.getString("author"));
-				if(j.has("generation")) m.setGeneration(Generation.valueOf(j.getString("generation").toUpperCase()));
+				if(NMSVersion.getCurrentServerVersion().isNewerThan(NMSVersion.V1_8_R3) && j.has("generation")) m.setGeneration(Generation.valueOf(j.getString("generation").toUpperCase()));
 				if(j.has("title")) m.setTitle(j.getString("title"));
 				if(j.has("pages")) m.setPages(Complex.castList(j.getJSONArray("pages"), String.class).get());
 			}).onlyMapIf(i -> i.getItemMeta() instanceof BookMeta).onlyConstructIfNotNull().then()
@@ -280,15 +279,15 @@ public class BukkitConfigMappers {
 				i.setItemMeta(m);
 			}).onlyMapIf(i -> i.getItemMeta() instanceof PotionMeta).onlyConstructIfNotNull().then()
 			.mapJSONObject("spawn-egg", i -> {
-				SpawnEggMeta m = (SpawnEggMeta) i.getItemMeta();
+				org.bukkit.inventory.meta.SpawnEggMeta m = (org.bukkit.inventory.meta.SpawnEggMeta) i.getItemMeta();
 				JSONObject l = new JSONObject();
 				l.set("spawned-type", m.getSpawnedType().name());
 				return l;
 			}, (i, j) -> {
-				SpawnEggMeta m = (SpawnEggMeta) i.getItemMeta();
+				org.bukkit.inventory.meta.SpawnEggMeta m = (org.bukkit.inventory.meta.SpawnEggMeta) i.getItemMeta();
 				if(j.has("spawned-type")) m.setSpawnedType(EntityType.valueOf(j.getString("spawned-type").toUpperCase()));
 				i.setItemMeta(m);
-			}).onlyMapIf(i -> i.getItemMeta() instanceof SpawnEggMeta).onlyConstructIfNotNull().then()
+			}).onlyMapIf(i -> NMSVersion.getCurrentServerVersion().isNewerThan(NMSVersion.V1_10_R1)).onlyMapIf(i -> i.getItemMeta() instanceof org.bukkit.inventory.meta.SpawnEggMeta).onlyConstructIfNotNull().then()
 			.mapJSONObject("skull", i -> {
 				SkullMeta m = (SkullMeta) i.getItemMeta();
 				JSONObject s = new JSONObject();
