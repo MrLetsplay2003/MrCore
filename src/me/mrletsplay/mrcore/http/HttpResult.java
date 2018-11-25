@@ -73,8 +73,8 @@ public class HttpResult {
 	protected static InputStream retrieveAsInputStreamFrom(String url, String method, Map<String, String> queryParams, Map<String, String> headerParams, byte[] postData) throws IOException {
 		if(!queryParams.isEmpty()) {
 			url += queryParams.entrySet().stream()
-					.map(e -> HttpUtils.urlEncode(e.getKey()) + "=" + HttpUtils.urlEncode(e.getValue()))
-					.collect(Collectors.joining("&", "?", ""));
+				.map(e -> HttpUtils.urlEncode(e.getKey()) + "=" + HttpUtils.urlEncode(e.getValue()))
+				.collect(Collectors.joining("&", "?", ""));
 		}
 		URL u = new URL(url);
 		HttpURLConnection con = (HttpURLConnection) u.openConnection();
