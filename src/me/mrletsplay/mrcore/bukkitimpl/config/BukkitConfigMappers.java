@@ -16,6 +16,7 @@ import org.bukkit.FireworkEffect;
 import org.bukkit.FireworkEffect.Type;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.block.banner.PatternType;
 import org.bukkit.enchantments.Enchantment;
@@ -24,7 +25,6 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.BookMeta;
-import org.bukkit.inventory.meta.BookMeta.Generation;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.FireworkEffectMeta;
 import org.bukkit.inventory.meta.FireworkMeta;
@@ -67,14 +67,12 @@ public class BukkitConfigMappers {
 			.create();
 	
 	/*
-	 * TODO: BlockStateMeta, KnowledgeBookMeta, TropicalFishBucketMeta
+	 * TODO: BlockStateMeta (?), TropicalFishBucketMeta (?)
 	 */
 	
 	@SuppressWarnings("deprecation")
 	public static final JSONObjectMapper<ItemStack> ITEM_MAPPER = new JSONMapperBuilder<>(ItemStack.class,
 			(sec, json) -> {
-				System.out.println("AY");
-				System.out.println(json.toFancyString());
 				return new ItemStack(Material.valueOf(json.getString("type").toUpperCase()), json.getInt("amount"));
 			})
 			.mapString("type", it -> it.getType().name(), null).then()
@@ -136,9 +134,10 @@ public class BukkitConfigMappers {
 			}, (i, j) -> {
 				BookMeta m = (BookMeta) i.getItemMeta();
 				if(j.has("author")) m.setAuthor(j.getString("author"));
-				if(NMSVersion.getCurrentServerVersion().isNewerThan(NMSVersion.V1_8_R3) && j.has("generation")) m.setGeneration(Generation.valueOf(j.getString("generation").toUpperCase()));
+				if(NMSVersion.getCurrentServerVersion().isNewerThan(NMSVersion.V1_8_R3) && j.has("generation")) m.setGeneration(org.bukkit.inventory.meta.BookMeta.Generation.valueOf(j.getString("generation").toUpperCase()));
 				if(j.has("title")) m.setTitle(j.getString("title"));
 				if(j.has("pages")) m.setPages(Complex.castList(j.getJSONArray("pages"), String.class).get());
+				i.setItemMeta(m);
 			}).onlyMapIf(i -> i.getItemMeta() instanceof BookMeta).onlyConstructIfNotNull().then()
 			.mapJSONObject("enchantment-storage", i -> {
 				EnchantmentStorageMeta m = (EnchantmentStorageMeta) i.getItemMeta();
@@ -212,6 +211,26 @@ public class BukkitConfigMappers {
 				}
 				i.setItemMeta(m);
 			}).onlyMapIf(i -> i.getItemMeta() instanceof FireworkMeta).onlyConstructIfNotNull().then()
+			.mapJSONObject("knowledge-book", i -> {
+				org.bukkit.inventory.meta.KnowledgeBookMeta m = (org.bukkit.inventory.meta.KnowledgeBookMeta) i.getItemMeta();
+				JSONObject b = new JSONObject();
+				if(m.hasRecipes()) b.set("recipes", new JSONArray(m.getRecipes().stream().map(k -> k.getNamespace() + ":" + k.getKey()).collect(Collectors.toList())));
+				return b;
+			}, (i, j) -> {
+				org.bukkit.inventory.meta.KnowledgeBookMeta m = (org.bukkit.inventory.meta.KnowledgeBookMeta) i.getItemMeta();
+				if(j.has("recipes")) {
+					JSONArray ps = j.getJSONArray("recipes");
+					for(String pK : Complex.castList(ps, String.class).get()) {
+						String[] k = pK.split(":");
+						m.addRecipe(new NamespacedKey(k[0], k[1]));
+					}
+				}
+				i.setItemMeta(m);
+			})
+			.onlyMapIf(i -> NMSVersion.getCurrentServerVersion().isNewerThanOrEqualTo(NMSVersion.V1_13_R1))
+			.onlyConstructIf((a, b, c, d) -> NMSVersion.getCurrentServerVersion().isNewerThanOrEqualTo(NMSVersion.V1_13_R1))
+			.onlyMapIf(i -> i.getItemMeta() instanceof org.bukkit.inventory.meta.KnowledgeBookMeta)
+			.onlyConstructIfNotNull().then()
 			.mapJSONObject("leather-armor", i -> {
 				LeatherArmorMeta m = (LeatherArmorMeta) i.getItemMeta();
 				JSONObject l = new JSONObject();
