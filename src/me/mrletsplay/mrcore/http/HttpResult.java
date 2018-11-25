@@ -39,21 +39,27 @@ public class HttpResult {
 		return raw;
 	}
 	
-	public void transferTo(OutputStream out) throws IOException {
+	public void transferTo(OutputStream out, boolean autoClose) throws IOException {
 		out.write(raw);
+		if(autoClose) out.close();
 	}
 	
-	public void transferToSafely(OutputStream out) {
+	public void transferToSafely(OutputStream out, boolean autoClose) {
 		try {
-			transferTo(out);
+			transferTo(out, autoClose);
 		} catch (IOException e) {
+				try {
+					if(autoClose) out.close();
+				} catch (IOException e1) {
+					throw new HttpException(e);
+				}
 			throw new HttpException(e);
 		}
 	}
 	
 	public void transferTo(File file) throws IOException {
 		IOUtils.createFile(file);
-		transferTo(new FileOutputStream(file));
+		transferTo(new FileOutputStream(file), true);
 	}
 	
 	public void transferToSafely(File file) {
