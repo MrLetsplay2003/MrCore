@@ -45,8 +45,13 @@ public interface CustomConfig extends ConfigSection {
 		try {
 			IOUtils.createFile(file);
 			FileInputStream in = new FileInputStream(file);
-			load(in);
-			in.close();
+			try {
+				load(in);
+				in.close();
+			}catch(ConfigException e) {
+				in.close();
+				throw e;
+			}
 		}catch(IOException e) {
 			throw new ConfigException(e);
 		}
@@ -56,8 +61,13 @@ public interface CustomConfig extends ConfigSection {
 		try {
 			IOUtils.createFile(file);
 			FileOutputStream out = new FileOutputStream(file);
-			save(out);
-			out.close();
+			try {
+				save(out);
+				out.close();
+			}catch(ConfigException e) {
+				out.close();
+				throw e;
+			}
 		}catch(IOException e) {
 			throw new ConfigException(e);
 		}

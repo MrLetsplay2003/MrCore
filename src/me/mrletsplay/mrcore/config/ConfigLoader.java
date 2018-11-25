@@ -1,5 +1,6 @@
 package me.mrletsplay.mrcore.config;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -27,18 +28,18 @@ public class ConfigLoader {
 	}
 	
 	public static <T extends CustomConfig> T loadConfigFromStream(T config, InputStream stream, boolean closeAfterLoad) throws ConfigException {
+		byte[] b;
 		try {
-			config.load(stream);
+			b = IOUtils.readAllBytes(stream);
 			if(closeAfterLoad) stream.close();
-		}catch(IncompatibleConfigVersionException e) {
-			try {
-				config.clear();
-				return ConfigConverter.convertConfig(IOUtils.readAllBytes(stream), config, e.getGivenDefaultVersion(), e.getRequiredDefaultVersion());
-			} catch (IOException e1) {
-				throw new ConfigException(e1);
-			}
-		}catch(IOException e) {
+		} catch (IOException e) {
 			throw new ConfigException(e);
+		}
+		try {
+			config.load(new ByteArrayInputStream(b));
+		}catch(IncompatibleConfigVersionException e) {
+				config.clear();
+				return ConfigConverter.convertConfig(b, config, e.getGivenDefaultVersion(), e.getRequiredDefaultVersion());
 		}
 		return config;
 	}
