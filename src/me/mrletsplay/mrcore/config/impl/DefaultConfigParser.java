@@ -390,9 +390,12 @@ class DefaultConfigParser {
 		}
 		
 		public Map<String, ConfigSectionDescriptor> getSubSections() {
-			return properties.entrySet().stream()
-					.filter(en -> en.getValue() instanceof ConfigSectionDescriptor)
-					.collect(Collectors.toMap(en -> en.getKey(), en -> (ConfigSectionDescriptor) en.getValue()));
+			Map<String, ConfigSectionDescriptor> d = new LinkedHashMap<>();
+			for(Map.Entry<String, Object> en : properties.entrySet()) {
+				if(!(en.getValue() instanceof ConfigSectionDescriptor)) continue;
+				d.put(en.getKey(), (ConfigSectionDescriptor) en.getValue());
+			}
+			return d;
 		}
 		
 		public Map<String, Object> toPropertyMap() {

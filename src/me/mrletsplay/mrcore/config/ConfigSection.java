@@ -122,9 +122,12 @@ public interface ConfigSection {
 	 * @return A map containing all the properties (excluding subsections) of this section 
 	 */
 	public default Map<String, ConfigProperty> getProperties() {
-		return getAllProperties().entrySet().stream()
-				.filter(en -> !en.getValue().isSubsection())
-				.collect(Collectors.toMap(en -> en.getKey(), en -> en.getValue()));
+		Map<String, ConfigProperty> p = new LinkedHashMap<>();
+		for(Map.Entry<String, ConfigProperty> en : getAllProperties().entrySet()) {
+			if(en.getValue().isSubsection()) continue;
+			p.put(en.getKey(), en.getValue());
+		}
+		return p;
 	}
 	
 	/**
@@ -149,9 +152,12 @@ public interface ConfigSection {
 	 * @return A map containing all the properties (excluding subsections) of this section 
 	 */
 	public default Map<String, ConfigSection> getSubsections() {
-		return getAllProperties().entrySet().stream()
-				.filter(en -> en.getValue().isSubsection())
-				.collect(Collectors.toMap(en -> en.getKey(), en -> (ConfigSection) en.getValue().getValue()));
+		Map<String, ConfigSection> s = new LinkedHashMap<>();
+		for(Map.Entry<String, ConfigProperty> en : getAllProperties().entrySet()) {
+			if(!en.getValue().isSubsection()) continue;
+			s.put(en.getKey(), (ConfigSection) en.getValue().getValue());
+		}
+		return s;
 	}
 	
 	/**
