@@ -100,7 +100,7 @@ public interface Complex<T> {
 	}
 	
 	public static Complex<?> typeOf(Object o) {
-		if(o == null) return Complex.value(Object.class); // TODO
+		if(o == null) return Complex.value(Object.class);
 		if(o instanceof List) {
 			return ComplexList.typeOf((List<?>) o);
 		}else if(o instanceof Map) {
@@ -239,7 +239,7 @@ public interface Complex<T> {
 		}
 		
 		public static ComplexList<?> typeOf(List<?> list) {
-			if(list.isEmpty()) return Complex.list(Object.class); // TODO
+			if(list.isEmpty()) return Complex.list(Object.class);
 			Complex<?>[] c = list.stream().map(Complex::typeOf).toArray(Complex[]::new);
 			return Complex.list(Complex.getCommonClass(c));
 		}
@@ -345,7 +345,7 @@ public interface Complex<T> {
 		}
 		
 		public static ComplexMap<?, ?> typeOf(Map<?, ?> map) {
-			if(map.isEmpty()) return Complex.map(Object.class, Object.class); // TODO
+			if(map.isEmpty()) return Complex.map(Object.class, Object.class);
 			Complex<?> keyType = Complex.getCommonClass(map.keySet().stream().map(Complex::typeOf).toArray(Complex[]::new));
 			Complex<?> valueType = Complex.getCommonClass(map.values().stream().map(Complex::typeOf).toArray(Complex[]::new));
 			return Complex.map(keyType, valueType);
