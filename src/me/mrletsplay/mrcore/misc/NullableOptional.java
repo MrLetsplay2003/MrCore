@@ -19,7 +19,7 @@ public class NullableOptional<T> {
 	private boolean present;
 	private T value;
 	
-	public NullableOptional(boolean present, T value) {
+	protected NullableOptional(boolean present, T value) {
 		this.present = present;
 		this.value = value;
 	}

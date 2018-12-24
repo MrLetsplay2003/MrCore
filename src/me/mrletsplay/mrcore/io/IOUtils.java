@@ -11,7 +11,7 @@ import me.mrletsplay.mrcore.misc.FriendlyException;
 public class IOUtils {
 	
 	public static void transfer(InputStream from, OutputStream to) throws IOException {
-		transfer(from, to, 4096);
+		transfer(from, to, 64);
 	}
 	
 	public static void transfer(InputStream from, OutputStream to, int bufferSize) throws IOException {
@@ -19,6 +19,7 @@ public class IOUtils {
 		int len;
 		while((len = from.read(buf)) > 0) {
 			to.write(buf, 0, len);
+			if(len < bufferSize) break;
 		}
 	}
 	

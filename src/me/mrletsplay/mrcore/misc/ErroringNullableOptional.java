@@ -4,7 +4,7 @@ public class ErroringNullableOptional<T, E extends Throwable> extends NullableOp
 
 	private E exception;
 	
-	public ErroringNullableOptional(boolean present, T value, E error) {
+	protected ErroringNullableOptional(boolean present, T value, E error) {
 		super(present, value);
 	}
 	

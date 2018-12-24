@@ -123,6 +123,15 @@ public class FlagCompound {
 	public boolean hasFlag(Flag flag) {
 		return (compound & flag.getValue()) == flag.getValue();
 	}
+
+	/**
+	 * Checks whether all of the specified flags are set in this flag compound
+	 * @param flags The flags to check
+	 * @return Whether all of the flags are set
+	 */
+	public boolean hasFlags(Flag... flags) {
+		return Arrays.stream(flags).allMatch(this::hasFlags);
+	}
 	
 	/**
 	 * Returns all flags from a given list that are set in this compound
