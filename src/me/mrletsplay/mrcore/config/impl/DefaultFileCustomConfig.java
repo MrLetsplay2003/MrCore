@@ -58,12 +58,14 @@ public class DefaultFileCustomConfig implements FileCustomConfig {
 	@Override
 	public void load(InputStream in) throws ConfigException {
 		try {
+			System.out.println(in.available());
 			BufferedReader r = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
 			List<String> lines = new ArrayList<>();
 			String s;
 			while((s = r.readLine()) != null) {
 				lines.add(s + "\n");
 			}
+			System.out.println(lines.size());
 			DefaultConfigParser p = new DefaultConfigParser(lines.toArray(new String[lines.size()]));
 			if(!p.hasMore()) {
 				return;

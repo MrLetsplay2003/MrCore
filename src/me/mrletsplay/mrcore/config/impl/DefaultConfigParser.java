@@ -267,6 +267,8 @@ class DefaultConfigParser {
 					break;
 			}
 		}
+		System.out.println(r.currentLine);
+		System.out.println(r.lines[r.currentLine]);
 		throw new ConfigException("Missing end of string", r.currentLine, r.currentIndex);
 	}
 	

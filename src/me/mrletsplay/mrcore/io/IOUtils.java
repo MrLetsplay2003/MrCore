@@ -19,7 +19,7 @@ public class IOUtils {
 		int len;
 		while((len = from.read(buf)) > 0) {
 			to.write(buf, 0, len);
-			if(len < bufferSize) break;
+//			if(len < bufferSize) break; TODO
 		}
 	}
 	
