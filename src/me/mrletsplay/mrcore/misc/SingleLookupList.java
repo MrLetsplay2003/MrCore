@@ -32,9 +32,7 @@ public class SingleLookupList<I, E> extends AbstractList<E> implements LookupLis
 	}
 	
 	private void removeMapping(E e) {
-		lookupMap.entrySet().stream()
-			.filter(en -> en.getValue().equals(e))
-			.forEach(en -> lookupMap.remove(en.getKey(), en.getValue()));
+		lookupMap.remove(mappingFunction.apply(e), e);
 	}
 	
 	private void addMapping(E e) {
