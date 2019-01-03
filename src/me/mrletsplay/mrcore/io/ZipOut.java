@@ -64,18 +64,29 @@ public class ZipOut {
 	 * @throws IOException If an I/O error occurs
 	 */
 	public void writeFile(File file) throws IOException {
-		file = file.getAbsoluteFile();
-		addFilesToZip(file, out, file.getAbsolutePath().length() - file.getName().length() - 1);
+		writeFile("", file);
 	}
 	
-	private static void addFilesToZip(File f, ZipOutputStream out, int sI) throws IOException{
+	/**
+	 * Writes a file (possibly a folder) to the zip file<br>
+	 * If the provided file is a folder, a subfolder will be created inside the zip file and all its contents (and possibly subfolders) will be added
+	 * @param file A {@link File} object (can be a folder)
+	 * @param subPath The sub path/folder to write to
+	 * @throws IOException If an I/O error occurs
+	 */
+	public void writeFile(String subPath, File file) throws IOException {
+		file = file.getAbsoluteFile();
+		addFilesToZip(file, out, subPath, file.getAbsolutePath().length() - file.getName().length() - 1);
+	}
+	
+	private static void addFilesToZip(File f, ZipOutputStream out, String subPath, int sI) throws IOException{
 		if(f.isDirectory()){
 			for(File fl : f.listFiles()){
-				addFilesToZip(fl, out, sI);
+				addFilesToZip(fl, out, subPath, sI);
 			}
 		}else{
 			FileInputStream fIn = new FileInputStream(f);
-			out.putNextEntry(new ZipEntry(f.getAbsolutePath().substring(sI + 1)));
+			out.putNextEntry(new ZipEntry(subPath + "/" + f.getAbsolutePath().substring(sI + 1)));
 			byte[] buffer = new byte[4096];
 			int curr;
 			while((curr=fIn.read(buffer))>0){
