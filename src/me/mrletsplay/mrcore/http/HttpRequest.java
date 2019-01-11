@@ -23,6 +23,13 @@ public interface HttpRequest {
 	 * @return This request
 	 */
 	public HttpRequest setHeaderParameter(String key, String value);
+	
+	/**
+	 * Sets the maximum connection timeout for this request
+	 * @param timeout The timeout to set
+	 * @return This request
+	 */
+	public HttpRequest setTimeout(int timeout);
 
 	/**
 	 * Executes the request, reads all bytes and returns the result as an {@link HttpResult}

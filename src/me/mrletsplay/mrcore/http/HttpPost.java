@@ -11,6 +11,7 @@ public class HttpPost implements HttpRequest {
 
 	private String url;
 	private Map<String, String> queryParameters, headerParameters, postParameters;
+	private int timeout;
 
 	/**
 	 * Creates a POST request to the specified url
@@ -46,6 +47,12 @@ public class HttpPost implements HttpRequest {
 		postParameters.put(key, value);
 		return this;
 	}
+	
+	@Override
+	public HttpRequest setTimeout(int timeout) {
+		this.timeout = timeout;
+		return this;
+	}
 
 	@Override
 	public HttpResult execute() {
@@ -56,7 +63,7 @@ public class HttpPost implements HttpRequest {
 						.map(e -> HttpUtils.urlEncode(e.getKey()) + "=" + HttpUtils.urlEncode(e.getValue()))
 						.collect(Collectors.joining("&")).getBytes(StandardCharsets.UTF_8);
 			}
-			return HttpResult.retrieveFrom(url, "POST", queryParameters, headerParameters, postData, false);
+			return HttpResult.retrieveFrom(url, "POST", queryParameters, headerParameters, postData, timeout, false);
 		} catch (IOException e) {
 			throw new HttpException(e);
 		}
@@ -71,7 +78,7 @@ public class HttpPost implements HttpRequest {
 						.map(e -> HttpUtils.urlEncode(e.getKey()) + "=" + HttpUtils.urlEncode(e.getValue()))
 						.collect(Collectors.joining("&")).getBytes(StandardCharsets.UTF_8);
 			}
-			return HttpResult.retrieveFrom(url, "POST", queryParameters, headerParameters, postData, true);
+			return HttpResult.retrieveFrom(url, "POST", queryParameters, headerParameters, postData, timeout, true);
 		} catch (IOException e) {
 			throw new HttpException(e);
 		}
@@ -86,7 +93,7 @@ public class HttpPost implements HttpRequest {
 						.map(e -> HttpUtils.urlEncode(e.getKey()) + "=" + HttpUtils.urlEncode(e.getValue()))
 						.collect(Collectors.joining("&")).getBytes(StandardCharsets.UTF_8);
 			}
-			return HttpResult.retrieveAsInputStreamFrom(url, "POST", queryParameters, headerParameters, postData);
+			return HttpResult.retrieveAsInputStreamFrom(url, "POST", queryParameters, headerParameters, postData, timeout);
 		} catch (IOException e) {
 			throw new HttpException(e);
 		}

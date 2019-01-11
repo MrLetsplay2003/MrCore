@@ -10,6 +10,7 @@ public class HttpGeneric implements HttpRequest {
 	private String requestMethod, url;
 	private Map<String, String> queryParameters, headerParameters;
 	private byte[] content;
+	private int timeout;
 	
 	/**
 	 * Creates a request using the given request method to the specified url
@@ -46,9 +47,15 @@ public class HttpGeneric implements HttpRequest {
 	}
 	
 	@Override
+	public HttpRequest setTimeout(int timeout) {
+		this.timeout = timeout;
+		return this;
+	}
+	
+	@Override
 	public HttpResult execute() {
 		try {
-			return HttpResult.retrieveFrom(url, requestMethod, queryParameters, headerParameters, content, false);
+			return HttpResult.retrieveFrom(url, requestMethod, queryParameters, headerParameters, content, timeout, false);
 		} catch (IOException e) {
 			throw new HttpException(e);
 		}
@@ -57,7 +64,7 @@ public class HttpGeneric implements HttpRequest {
 	@Override
 	public HttpResult executeUntilUnavailable() {
 		try {
-			return HttpResult.retrieveFrom(url, requestMethod, queryParameters, headerParameters, content, true);
+			return HttpResult.retrieveFrom(url, requestMethod, queryParameters, headerParameters, content, timeout, true);
 		} catch (IOException e) {
 			throw new HttpException(e);
 		}
@@ -66,7 +73,7 @@ public class HttpGeneric implements HttpRequest {
 	@Override
 	public InputStream executeAsInputStream() {
 		try {
-			return HttpResult.retrieveAsInputStreamFrom(url, requestMethod, queryParameters, headerParameters, content);
+			return HttpResult.retrieveAsInputStreamFrom(url, requestMethod, queryParameters, headerParameters, content, timeout);
 		} catch (IOException e) {
 			throw new HttpException(e);
 		}

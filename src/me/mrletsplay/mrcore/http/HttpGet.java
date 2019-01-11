@@ -9,6 +9,7 @@ public class HttpGet implements HttpRequest {
 
 	private String url;
 	private Map<String, String> queryParameters, headerParameters;
+	private int timeout;
 	
 	/**
 	 * Creates a GET request to the specified url
@@ -32,11 +33,17 @@ public class HttpGet implements HttpRequest {
 		headerParameters.put(key, value);
 		return this;
 	}
+	
+	@Override
+	public HttpRequest setTimeout(int timeout) {
+		this.timeout = timeout;
+		return this;
+	}
 
 	@Override
 	public HttpResult execute() {
 		try {
-			return HttpResult.retrieveFrom(url, "GET", queryParameters, headerParameters, null, false);
+			return HttpResult.retrieveFrom(url, "GET", queryParameters, headerParameters, null, timeout, false);
 		} catch (IOException e) {
 			throw new HttpException(e);
 		}
@@ -45,7 +52,7 @@ public class HttpGet implements HttpRequest {
 	@Override
 	public HttpResult executeUntilUnavailable() {
 		try {
-			return HttpResult.retrieveFrom(url, "GET", queryParameters, headerParameters, null, true);
+			return HttpResult.retrieveFrom(url, "GET", queryParameters, headerParameters, null, timeout, true);
 		} catch (IOException e) {
 			throw new HttpException(e);
 		}
@@ -54,7 +61,7 @@ public class HttpGet implements HttpRequest {
 	@Override
 	public InputStream executeAsInputStream() {
 		try {
-			return HttpResult.retrieveAsInputStreamFrom(url, "GET", queryParameters, headerParameters, null);
+			return HttpResult.retrieveAsInputStreamFrom(url, "GET", queryParameters, headerParameters, null, timeout);
 		} catch (IOException e) {
 			throw new HttpException(e);
 		}

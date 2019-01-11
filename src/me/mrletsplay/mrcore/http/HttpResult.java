@@ -70,7 +70,7 @@ public class HttpResult {
 		}
 	}
 	
-	protected static InputStream retrieveAsInputStreamFrom(String url, String method, Map<String, String> queryParams, Map<String, String> headerParams, byte[] postData) throws IOException {
+	protected static InputStream retrieveAsInputStreamFrom(String url, String method, Map<String, String> queryParams, Map<String, String> headerParams, byte[] postData, int timeout) throws IOException {
 		if(!queryParams.isEmpty()) {
 			url += queryParams.entrySet().stream()
 				.map(e -> HttpUtils.urlEncode(e.getKey()) + "=" + HttpUtils.urlEncode(e.getValue()))
@@ -87,6 +87,7 @@ public class HttpResult {
 		}
 		headerParams.forEach(con::setRequestProperty);
 		con.setUseCaches(false);
+		con.setConnectTimeout(timeout);
 		if(postData != null) {
 			con.setDoOutput(true);
 			OutputStream out = con.getOutputStream();
@@ -96,8 +97,8 @@ public class HttpResult {
 		return in;
 	}
 	
-	protected static HttpResult retrieveFrom(String url, String method, Map<String, String> queryParams, Map<String, String> headerParams, byte[] postParams, boolean untilUnavailable) throws IOException {
-		InputStream in = retrieveAsInputStreamFrom(url, method, queryParams, headerParams, postParams);
+	protected static HttpResult retrieveFrom(String url, String method, Map<String, String> queryParams, Map<String, String> headerParams, byte[] postParams, int timeout, boolean untilUnavailable) throws IOException {
+		InputStream in = retrieveAsInputStreamFrom(url, method, queryParams, headerParams, postParams, timeout);
 		byte[] raw = untilUnavailable ? IOUtils.readBytesUntilUnavailable(in) : IOUtils.readAllBytes(in);
 		in.close();
 		return new HttpResult(raw);
