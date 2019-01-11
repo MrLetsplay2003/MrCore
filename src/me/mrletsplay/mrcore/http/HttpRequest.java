@@ -25,11 +25,18 @@ public interface HttpRequest {
 	public HttpRequest setHeaderParameter(String key, String value);
 
 	/**
-	 * Executes the request and returns the result as an {@link HttpResult}
+	 * Executes the request, reads all bytes and returns the result as an {@link HttpResult}
 	 * @return The result received after execution
 	 * @throws HttpException If an I/O error occurs while executing the request
 	 */
 	public HttpResult execute();
+
+	/**
+	 * Executes the request, reads all bytes until unavailable and returns the result as an {@link HttpResult}
+	 * @return The result received after execution
+	 * @throws HttpException If an I/O error occurs while executing the request
+	 */
+	public HttpResult executeUntilUnavailable();
 
 	/**
 	 * Executes the request and returns the result as an {@link InputStream}

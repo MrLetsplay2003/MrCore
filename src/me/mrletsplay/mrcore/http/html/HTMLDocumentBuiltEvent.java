@@ -1,15 +1,16 @@
 package me.mrletsplay.mrcore.http.html;
 
-import me.mrletsplay.mrcore.http.event.HttpPageBuildEvent;
+import me.mrletsplay.mrcore.http.event.AbstractHttpEvent;
 import me.mrletsplay.mrcore.http.html.built.HTMLBuiltDocument;
+import me.mrletsplay.mrcore.http.server.HttpServer;
 
-public class HTMLDocumentBuildEvent extends HttpPageBuildEvent {
+public class HTMLDocumentBuiltEvent extends AbstractHttpEvent {
 
 	private HTMLDocument document;
 	private HTMLBuiltDocument builtDocument;
 	
-	public HTMLDocumentBuildEvent(HttpPageBuildEvent event, HTMLDocument document, HTMLBuiltDocument builtDocument) {
-		super(event.getServer(), event.getPageAccessed(), event.getConnectionSocket(), event.getClientHeader());
+	public HTMLDocumentBuiltEvent(HttpServer server, HTMLDocument document, HTMLBuiltDocument builtDocument) {
+		super(server);
 		this.document = document;
 		this.builtDocument = builtDocument;
 	}
@@ -21,5 +22,5 @@ public class HTMLDocumentBuildEvent extends HttpPageBuildEvent {
 	public HTMLBuiltDocument getBuiltDocument() {
 		return builtDocument;
 	}
-
+	
 }

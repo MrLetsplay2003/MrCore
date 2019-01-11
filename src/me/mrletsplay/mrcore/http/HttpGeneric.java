@@ -48,7 +48,16 @@ public class HttpGeneric implements HttpRequest {
 	@Override
 	public HttpResult execute() {
 		try {
-			return HttpResult.retrieveFrom(url, requestMethod, queryParameters, headerParameters, content);
+			return HttpResult.retrieveFrom(url, requestMethod, queryParameters, headerParameters, content, false);
+		} catch (IOException e) {
+			throw new HttpException(e);
+		}
+	}
+	
+	@Override
+	public HttpResult executeUntilUnavailable() {
+		try {
+			return HttpResult.retrieveFrom(url, requestMethod, queryParameters, headerParameters, content, true);
 		} catch (IOException e) {
 			throw new HttpException(e);
 		}

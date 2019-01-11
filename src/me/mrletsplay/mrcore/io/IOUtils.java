@@ -14,12 +14,24 @@ public class IOUtils {
 		transfer(from, to, 4096);
 	}
 	
+	public static void transferUntilUnavailable(InputStream from, OutputStream to) throws IOException {
+		transferUntilUnavailable(from, to, 4096);
+	}
+	
 	public static void transfer(InputStream from, OutputStream to, int bufferSize) throws IOException {
 		byte[] buf = new byte[bufferSize];
 		int len;
 		while((len = from.read(buf)) > 0) {
 			to.write(buf, 0, len);
-//			if(len < bufferSize) break; TODO
+		}
+	}
+	
+	public static void transferUntilUnavailable(InputStream from, OutputStream to, int bufferSize) throws IOException {
+		byte[] buf = new byte[bufferSize];
+		int len;
+		while((len = from.read(buf)) > 0) {
+			to.write(buf, 0, len);
+			if(from.available() == 0) break;
 		}
 	}
 	
@@ -48,6 +60,20 @@ public class IOUtils {
 	public static byte[] readAllBytesSafely(InputStream from) throws FriendlyException {
 		try {
 			return readAllBytes(from);
+		} catch (IOException e) {
+			throw new FriendlyException(e);
+		}
+	}
+	
+	public static byte[] readBytesUntilUnavailable(InputStream from) throws IOException {
+		ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+		transferUntilUnavailable(from, bOut);
+		return bOut.toByteArray();
+	}
+	
+	public static byte[] readBytesUntilUnavailableSafely(InputStream from) {
+		try {
+			return readBytesUntilUnavailable(from);
 		} catch (IOException e) {
 			throw new FriendlyException(e);
 		}

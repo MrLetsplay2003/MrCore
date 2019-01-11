@@ -96,9 +96,9 @@ public class HttpResult {
 		return in;
 	}
 	
-	protected static HttpResult retrieveFrom(String url, String method, Map<String, String> queryParams, Map<String, String> headerParams, byte[] postParams) throws IOException {
+	protected static HttpResult retrieveFrom(String url, String method, Map<String, String> queryParams, Map<String, String> headerParams, byte[] postParams, boolean untilUnavailable) throws IOException {
 		InputStream in = retrieveAsInputStreamFrom(url, method, queryParams, headerParams, postParams);
-		byte[] raw = IOUtils.readAllBytes(in);
+		byte[] raw = untilUnavailable ? IOUtils.readBytesUntilUnavailable(in) : IOUtils.readAllBytes(in);
 		in.close();
 		return new HttpResult(raw);
 	}

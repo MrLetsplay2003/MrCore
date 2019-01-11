@@ -36,7 +36,16 @@ public class HttpGet implements HttpRequest {
 	@Override
 	public HttpResult execute() {
 		try {
-			return HttpResult.retrieveFrom(url, "GET", queryParameters, headerParameters, null);
+			return HttpResult.retrieveFrom(url, "GET", queryParameters, headerParameters, null, false);
+		} catch (IOException e) {
+			throw new HttpException(e);
+		}
+	}
+
+	@Override
+	public HttpResult executeUntilUnavailable() {
+		try {
+			return HttpResult.retrieveFrom(url, "GET", queryParameters, headerParameters, null, true);
 		} catch (IOException e) {
 			throw new HttpException(e);
 		}

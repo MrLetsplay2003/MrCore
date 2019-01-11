@@ -1,7 +1,5 @@
 package me.mrletsplay.mrcore.http.server;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -9,34 +7,29 @@ import java.util.Map;
 public interface HttpServerHeader {
 
 	public String getProtocol();
+	
+	public void setStatusCode(HttpStatusCode statusCode);
 
-	public String getStatusCode();
+	public HttpStatusCode getStatusCode();
 
 	public HttpHeaderFields getFields();
 
-	public byte[] getBody();
-	
-	public default byte[] getBytes() {
-		ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+	public default String asString(int contentLength) {
 		StringBuilder b = new StringBuilder();
-		b.append(getProtocol()).append(" ").append(getStatusCode()).append("\r\n");
+		b.append(getProtocol()).append(" ").append(getStatusCode().getStatusCode()).append(" ").append(getStatusCode().getMessage()).append("\r\n");
 		for(Map.Entry<String, List<String>> en : getFields().getRawFields().entrySet()) {
 			for(String v : en.getValue()) {
 				b.append(en.getKey()).append(": ").append(v).append("\r\n");
 			}
 		}
 		b.append("Content-Type: text/html; charset=UTF-8").append("\r\n");
-		b.append("Content-Length: ").append(getBody().length).append("\r\n");
+		b.append("Content-Length: ").append(contentLength).append("\r\n");
 		b.append("\r\n");
-		try {
-			bOut.write(b.toString().getBytes(StandardCharsets.UTF_8));
-			bOut.write(getBody());
-		} catch (IOException e) {}
-		return bOut.toByteArray();
+		return b.toString();
 	}
-
-	public default String asString() {
-		return new String(getBytes(), StandardCharsets.UTF_8);
+	
+	public default byte[] getBytes(int contentLength) {
+		return asString(contentLength).getBytes(StandardCharsets.UTF_8);
 	}
 
 }

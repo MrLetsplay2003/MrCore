@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 public class HttpRequestPath {
 
 	public static final Pattern
-			PATH_PATTERN = Pattern.compile("(?<path>(?:\\/[^&=?]++))(?:\\?(?<get>[^&=]++=[^&]++(?:\\&[^&=]++=[^&]++)*))?\\z");
+			PATH_PATTERN = Pattern.compile("(?<path>(?:\\/[^&=?]*+))(?:\\?(?<get>[^&=]++=[^&]++(?:\\&[^&=]++=[^&]++)*))?\\z");
 	
 	private String path;
 	private Map<String, String> getParameters;

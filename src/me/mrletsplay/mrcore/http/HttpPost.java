@@ -56,7 +56,22 @@ public class HttpPost implements HttpRequest {
 						.map(e -> HttpUtils.urlEncode(e.getKey()) + "=" + HttpUtils.urlEncode(e.getValue()))
 						.collect(Collectors.joining("&")).getBytes(StandardCharsets.UTF_8);
 			}
-			return HttpResult.retrieveFrom(url, "POST", queryParameters, headerParameters, postData);
+			return HttpResult.retrieveFrom(url, "POST", queryParameters, headerParameters, postData, false);
+		} catch (IOException e) {
+			throw new HttpException(e);
+		}
+	}
+
+	@Override
+	public HttpResult executeUntilUnavailable() {
+		try {
+			byte[] postData = null;
+			if(postParameters.size() > 0) {
+				postData = postParameters.entrySet().stream()
+						.map(e -> HttpUtils.urlEncode(e.getKey()) + "=" + HttpUtils.urlEncode(e.getValue()))
+						.collect(Collectors.joining("&")).getBytes(StandardCharsets.UTF_8);
+			}
+			return HttpResult.retrieveFrom(url, "POST", queryParameters, headerParameters, postData, true);
 		} catch (IOException e) {
 			throw new HttpException(e);
 		}

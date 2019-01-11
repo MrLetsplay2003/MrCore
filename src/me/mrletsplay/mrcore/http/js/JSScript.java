@@ -1,15 +1,52 @@
 package me.mrletsplay.mrcore.http.js;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public interface JSScript {
+import me.mrletsplay.mrcore.http.html.HTMLDocumentBuildEvent;
+import me.mrletsplay.mrcore.http.js.built.JSBuiltFunction;
+import me.mrletsplay.mrcore.http.js.built.JSBuiltScript;
 
-	public List<? extends JSFunction> getFunctions();
+public class JSScript {
 	
-	public void addFunction(JSFunction function);
+	private List<JSFunction> functions;
+	private String body;
 	
-	public void removeFunction(JSFunction function);
+	public JSScript() {
+		this.functions = new ArrayList<>();
+	}
+
+	public List<? extends JSFunction> getFunctions() {
+		return functions;
+	}
 	
-	public String getBody();
+	public void addFunction(JSFunction function) {
+		functions.add(function);
+	}
+	
+	public void removeFunction(JSFunction function) {
+		functions.remove(function);
+	}
+	
+	public void setBody(String body) {
+		this.body = body;
+	}
+	
+	public void appendBody(String body) {
+		this.body += body;
+	}
+	
+	public String getBody() {
+		return body;
+	}
+	
+	public JSBuiltScript build(HTMLDocumentBuildEvent event) {
+		JSBuiltScript bS = new JSBuiltScript(this, body);
+		for(JSFunction f : functions) {
+			JSBuiltFunction bF = f.build(event);
+			if(bF != null) bS.addFunction(bF);
+		}
+		return bS;
+	}
 	
 }
