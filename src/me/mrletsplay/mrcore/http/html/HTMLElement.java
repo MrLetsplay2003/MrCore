@@ -12,6 +12,7 @@ import me.mrletsplay.mrcore.http.css.built.CSSBuiltElement;
 import me.mrletsplay.mrcore.http.css.built.CSSBuiltProperty;
 import me.mrletsplay.mrcore.http.html.built.HTMLBuiltElement;
 import me.mrletsplay.mrcore.http.server.HttpDynamicValue;
+import me.mrletsplay.mrcore.misc.EnumFlagCompound;
 
 public class HTMLElement {
 	
@@ -19,6 +20,7 @@ public class HTMLElement {
 	private Map<String, HttpDynamicValue<HTMLDocumentBuildEvent, String>> attributes;
 	private List<HttpDynamicValue<HTMLDocumentBuildEvent, ? extends HTMLElement>> children;
 	private CSSElement style;
+	private EnumFlagCompound<HTMLFlag> flags;
 
 	public HTMLElement(HttpDynamicValue<HTMLDocumentBuildEvent, String> type) {
 		this.type = type;
@@ -26,6 +28,7 @@ public class HTMLElement {
 		this.style = new CSSElement(null, null);
 		this.attributes = new HashMap<>();
 		this.children = new ArrayList<>();
+		this.flags = EnumFlagCompound.noneOf(HTMLFlag.class);
 	}
 	
 	public HTMLElement(String type) {
@@ -56,12 +59,24 @@ public class HTMLElement {
 		return attributes;
 	}
 	
+	public void addChild(HttpDynamicValue<HTMLDocumentBuildEvent, HTMLElement> child) {
+		children.add(child);
+	}
+	
+	public void addChild(HTMLElement child) {
+		addChild(HttpDynamicValue.of(child));
+	}
+	
 	public List<HttpDynamicValue<HTMLDocumentBuildEvent, ? extends HTMLElement>> getChildren() {
 		return children;
 	}
 	
 	public CSSElement getStyle() {
 		return style;
+	}
+	
+	public EnumFlagCompound<HTMLFlag> getFlags() {
+		return flags;
 	}
 	
 	public HTMLBuiltElement build(HTMLDocumentBuildEvent event) {
@@ -79,7 +94,10 @@ public class HTMLElement {
 		for(HttpDynamicValue<HTMLDocumentBuildEvent, ? extends HTMLElement> en : getChildren()) {
 			Optional<? extends HTMLElement> opt = en.get(event);
 			if(!opt.isPresent() || opt.get() == null) continue;
-			el.addChild(opt.get().build(event));
+			HTMLElement elm = opt.get();
+			HTMLBuiltElement bel = elm.build(event);
+			if(elm.getFlags().hasFlag(HTMLFlag.ELEMENT_REMOVE_IF_EMPTY) && bel.isEmpty()) continue;
+			el.addChild(bel);
 		}
 		Optional<String> cont = content.get(event);
 		if(cont.isPresent()) el.setContent(cont.get());

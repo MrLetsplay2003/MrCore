@@ -9,11 +9,11 @@ import me.mrletsplay.mrcore.http.server.HttpOpenPage;
 import me.mrletsplay.mrcore.http.server.HttpPage;
 import me.mrletsplay.mrcore.http.server.HttpServerHeader;
 
-public class HTMLHttpPage implements HttpPage {
+public class HttpHTMLPage implements HttpPage {
 
 	private HTMLDocument document;
 	
-	public HTMLHttpPage(HTMLDocument document) {
+	public HttpHTMLPage(HTMLDocument document) {
 		this.document = document;
 	}
 	

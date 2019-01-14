@@ -36,7 +36,7 @@ public class JSBuiltScript {
 	public String asString() {
 		StringBuilder b = new StringBuilder();
 		for(JSBuiltFunction f : functions) {
-			b.append(f);
+			b.append(f.asString());
 		}
 		if(body != null) b.append(body);
 		return b.toString();

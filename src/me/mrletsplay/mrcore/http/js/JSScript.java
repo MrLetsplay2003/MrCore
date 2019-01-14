@@ -9,11 +9,18 @@ import me.mrletsplay.mrcore.http.js.built.JSBuiltScript;
 
 public class JSScript {
 	
+	private List<JSClass> classes;
 	private List<JSFunction> functions;
 	private String body;
 	
 	public JSScript() {
+		this.classes = new ArrayList<>();
 		this.functions = new ArrayList<>();
+		this.body = "";
+	}
+	
+	public List<JSClass> getClasses() {
+		return classes;
 	}
 
 	public List<? extends JSFunction> getFunctions() {

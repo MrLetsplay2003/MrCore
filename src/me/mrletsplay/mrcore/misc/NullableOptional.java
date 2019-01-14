@@ -28,7 +28,7 @@ public class NullableOptional<T> {
 		return present;
 	}
 	
-	public T get() {
+	public T get() throws NoSuchElementException {
 		if(!present) throw new NoSuchElementException("No value is present");
 		return value;
 	}

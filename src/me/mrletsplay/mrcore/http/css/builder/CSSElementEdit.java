@@ -5,7 +5,7 @@ import me.mrletsplay.mrcore.http.css.CSSProperty;
 import me.mrletsplay.mrcore.http.html.HTMLDocumentBuildEvent;
 import me.mrletsplay.mrcore.http.server.HttpDynamicValue;
 
-public class CSSElementEdit{
+public class CSSElementEdit {
 
 	private CSSElement element;
 	

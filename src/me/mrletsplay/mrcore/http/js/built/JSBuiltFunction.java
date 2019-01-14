@@ -1,6 +1,7 @@
 package me.mrletsplay.mrcore.http.js.built;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import me.mrletsplay.mrcore.http.js.JSFunction;
 
@@ -36,7 +37,9 @@ public class JSBuiltFunction {
 	
 	public String asString() {
 		StringBuilder b = new StringBuilder();
-		b.append("function ").append(name).append("{");
+		b.append("function ").append(name).append("(");
+		b.append(parameters.stream().collect(Collectors.joining(","))).append(")");
+		b.append("{");
 		b.append(body);
 		b.append("}");
 		return b.toString();

@@ -1,5 +1,6 @@
 package me.mrletsplay.mrcore.http.js;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -13,16 +14,26 @@ public class JSFunction {
 	private HttpDynamicValue<HTMLDocumentBuildEvent, String> name, body;
 	private List<HttpDynamicValue<HTMLDocumentBuildEvent, String>> parameters;
 	
-	public JSFunction(HttpDynamicValue<HTMLDocumentBuildEvent, String> name) {
+	public JSFunction(HttpDynamicValue<HTMLDocumentBuildEvent, String> name, HttpDynamicValue<HTMLDocumentBuildEvent, String> body) {
 		this.name = name;
+		this.body = body;
+		this.parameters = new ArrayList<>();
 	}
 	
-	public JSFunction(String name) {
-		this(HttpDynamicValue.of(name));
+	public JSFunction(String name, HttpDynamicValue<HTMLDocumentBuildEvent, String> body) {
+		this(HttpDynamicValue.of(name), body);
+	}
+	
+	public JSFunction(String name, String body) {
+		this(HttpDynamicValue.of(name), HttpDynamicValue.of(body));
 	}
 
 	public HttpDynamicValue<HTMLDocumentBuildEvent, String> getName() {
 		return name;
+	}
+	
+	public void addParameter(HttpDynamicValue<HTMLDocumentBuildEvent, String> param) {
+		parameters.add(param);
 	}
 	
 	public List<HttpDynamicValue<HTMLDocumentBuildEvent, String>> getParameters() {

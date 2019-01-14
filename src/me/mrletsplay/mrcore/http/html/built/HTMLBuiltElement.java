@@ -68,6 +68,10 @@ public class HTMLBuiltElement {
 		this.content = content;
 	}
 	
+	public boolean isEmpty() {
+		return (content == null || content.isEmpty()) && attributes.isEmpty() && children.isEmpty();
+	}
+	
 	public String asString() {
 		StringBuilder b = new StringBuilder();
 		b.append("<").append(type).append(" ");

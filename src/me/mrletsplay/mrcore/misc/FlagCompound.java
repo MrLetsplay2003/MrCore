@@ -200,6 +200,26 @@ public class FlagCompound {
 		
 		public long getValue();
 		
+		public default boolean hasName() {
+			return getName() != null;
+		}
+		
+	}
+	
+	public static interface EnumFlag<E extends Enum<E> & Flag> extends Flag {
+		
+		public E get();
+		
+		@Override
+		public default String getName() {
+			return get().name();
+		}
+		
+		@Override
+		default long getValue() {
+			return 1 << get().ordinal();
+		}
+		
 	}
 	
 	/**
