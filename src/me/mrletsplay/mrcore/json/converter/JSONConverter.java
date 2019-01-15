@@ -85,8 +85,9 @@ public class JSONConverter {
 				if(param.mustBePresent() && !object.has(vName)) continue c;
 				Object pValue = object.has(vName) ? object.get(vName) : null;
 				JSONListType lParam = p.getAnnotation(JSONListType.class);
-				if(lParam != null) {
-					params.add(decodeList0((JSONArray) pValue, lParam.value()));
+				JSONComplexListType clParam = p.getAnnotation(JSONComplexListType.class);
+				if(lParam != null || clParam != null) {
+					params.add(decodeList0((JSONArray) pValue, lParam, clParam));
 				}else {
 					params.add(decode0(pValue, p.getType()));
 				}
@@ -111,13 +112,14 @@ public class JSONConverter {
 			for(Field f : clazz.getDeclaredFields()) {
 				JSONValue v = f.getAnnotation(JSONValue.class);
 				JSONListType lT = f.getAnnotation(JSONListType.class);
+				JSONComplexListType clT = f.getAnnotation(JSONComplexListType.class);
 				if(v == null) continue;
 				String fName = v.value().isEmpty() ? f.getName() : v.value();
 				if(o.has(fName)) {
 					f.setAccessible(true);
 					try {
-						if(lT != null) {
-							f.set(t, decodeList0(o.getJSONArray(fName), lT.value()));
+						if(lT != null || clT != null) {
+							f.set(t, decodeList0(o.getJSONArray(fName), lT, clT));
 						}else {
 							f.set(t, decode0(o.get(fName), f.getType()));
 						}
@@ -134,12 +136,20 @@ public class JSONConverter {
 		}
 	}
 	
-	private static List<Object> decodeList0(JSONArray value, JSONType type) {
+	private static List<Object> decodeList0(JSONArray value, JSONListType type, JSONComplexListType complexType) {
 		List<Object> list = new ArrayList<>();
 		for(Object o : value) {
-			NullableOptional<Object> v = MiscUtils.callSafely(() -> type.cast(o));
-			if(!v.isPresent()) throw new IllegalArgumentException("Invalid JSON value type, cannot cast " + o.getClass().getName() + " to " + type);
-			list.add(v.get());
+			if(type != null) {
+				NullableOptional<Object> v = MiscUtils.callSafely(() -> type.value().cast(o));
+				if(!v.isPresent()) throw new IllegalArgumentException("Invalid JSON value type, cannot cast " + o.getClass().getName() + " to " + type.value());
+				list.add(v.get());
+			}else {
+				NullableOptional<Class<?>> v = MiscUtils.callSafely(() -> Class.forName(complexType.value()));
+				if(!v.isPresent()) throw new IllegalArgumentException("Cannot find complex type class " + complexType.value());
+				NullableOptional<Object> c = MiscUtils.callSafely(() -> decode0(o, v.get()));
+				if(!c.isPresent()) throw new IllegalArgumentException("Invalid JSON value type, cannot cast " + o.getClass().getName() + " to " + complexType.value());
+				list.add(c.get());
+			}
 		}
 		return list;
 	}
