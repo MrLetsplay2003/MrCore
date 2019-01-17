@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -17,10 +18,16 @@ import me.mrletsplay.mrcore.json.JSONObject;
 
 public class HttpResult {
 
+	private Map<String, List<String>> headerFields;
 	private byte[] raw;
 	
-	public HttpResult(byte[] raw) {
+	public HttpResult(Map<String, List<String>> headerFields, byte[] raw) {
+		this.headerFields = headerFields;
 		this.raw = raw;
+	}
+	
+	public Map<String, List<String>> getHeaderFields() {
+		return headerFields;
 	}
 	
 	public JSONObject asJSONObject() {
@@ -70,7 +77,7 @@ public class HttpResult {
 		}
 	}
 	
-	protected static InputStream retrieveAsInputStreamFrom(String url, String method, Map<String, String> queryParams, Map<String, String> headerParams, byte[] postData, int timeout) throws IOException {
+	protected static HttpURLConnection retrieveRawFrom(String url, String method, Map<String, String> queryParams, Map<String, String> headerParams, byte[] postData, int timeout) throws IOException {
 		if(!queryParams.isEmpty()) {
 			url += queryParams.entrySet().stream()
 				.map(e -> HttpUtils.urlEncode(e.getKey()) + "=" + HttpUtils.urlEncode(e.getValue()))
@@ -93,15 +100,19 @@ public class HttpResult {
 			OutputStream out = con.getOutputStream();
 			out.write(postData, 0, postData.length);
 		}
-		InputStream in = con.getInputStream();
-		return in;
+		return con;
+	}
+	
+	protected static InputStream retrieveAsInputStreamFrom(String url, String method, Map<String, String> queryParams, Map<String, String> headerParams, byte[] postData, int timeout) throws IOException {
+		return retrieveRawFrom(url, method, queryParams, headerParams, postData, timeout).getInputStream();
 	}
 	
 	protected static HttpResult retrieveFrom(String url, String method, Map<String, String> queryParams, Map<String, String> headerParams, byte[] postParams, int timeout, boolean untilUnavailable) throws IOException {
-		InputStream in = retrieveAsInputStreamFrom(url, method, queryParams, headerParams, postParams, timeout);
+		HttpURLConnection con = retrieveRawFrom(url, method, queryParams, headerParams, postParams, timeout);
+		InputStream in = con.getInputStream();
 		byte[] raw = untilUnavailable ? IOUtils.readBytesUntilUnavailable(in) : IOUtils.readAllBytes(in);
 		in.close();
-		return new HttpResult(raw);
+		return new HttpResult(con.getHeaderFields(), raw);
 	}
 	
 }

@@ -4,8 +4,9 @@ public class ErroringNullableOptional<T, E extends Throwable> extends NullableOp
 
 	private E exception;
 	
-	protected ErroringNullableOptional(boolean present, T value, E error) {
+	protected ErroringNullableOptional(boolean present, T value, E exception) {
 		super(present, value);
+		this.exception = exception;
 	}
 	
 	public E getException() {
@@ -22,7 +23,7 @@ public class ErroringNullableOptional<T, E extends Throwable> extends NullableOp
 	}
 	
 	public static <T, E extends Throwable> ErroringNullableOptional<T, E> ofErroring(E exception) {
-		return new ErroringNullableOptional<>(true, null, exception);
+		return new ErroringNullableOptional<>(false, null, exception);
 	}
 	
 	public static <T, E extends Throwable> ErroringNullableOptional<T, E> emptyErroring() {

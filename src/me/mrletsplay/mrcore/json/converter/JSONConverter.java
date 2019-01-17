@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import me.mrletsplay.mrcore.json.JSONArray;
 import me.mrletsplay.mrcore.json.JSONObject;
 import me.mrletsplay.mrcore.json.JSONType;
+import me.mrletsplay.mrcore.misc.ErroringNullableOptional;
 import me.mrletsplay.mrcore.misc.FriendlyException;
 import me.mrletsplay.mrcore.misc.MiscUtils;
 import me.mrletsplay.mrcore.misc.NullableOptional;
@@ -38,7 +39,7 @@ public class JSONConverter {
 			JSONObject obj = new JSONObject();
 			for(Field f : value.getClass().getDeclaredFields()) {
 				JSONValue v = f.getAnnotation(JSONValue.class);
-				if(v == null) continue;
+				if(v == null || !v.encode()) continue;
 				String fName = v.value().isEmpty() ? f.getName() : v.value();
 				f.setAccessible(true);
 				try {
@@ -49,7 +50,7 @@ public class JSONConverter {
 			}
 			for(Method m : value.getClass().getDeclaredMethods()) {
 				JSONValue v = m.getAnnotation(JSONValue.class);
-				if(v == null) continue;
+				if(v == null || !v.encode()) continue;
 				if(m.getParameterCount() != 0) throw new IllegalArgumentException("Method has parameters");
 				String fName = v.value().isEmpty() ? m.getName() : v.value();
 				m.setAccessible(true);
@@ -71,12 +72,11 @@ public class JSONConverter {
 		return clazz.cast(decode0(object, clazz));
 	}
 	
-	@SuppressWarnings("unchecked")
 	private static <T extends JSONConvertible> T createObject0(JSONObject object, Class<T> clazz) {
-		List<Constructor<T>> constrs = Arrays.stream(clazz.getDeclaredConstructors()).filter(c -> c.isAnnotationPresent(JSONConstructor.class)).map(c -> (Constructor<T>) c).collect(Collectors.toList());
+		List<Constructor<?>> constrs = Arrays.stream(clazz.getDeclaredConstructors()).filter(c -> c.isAnnotationPresent(JSONConstructor.class)).collect(Collectors.toList());
 		if(constrs.isEmpty()) throw new IllegalArgumentException("No constructor available");
 		T t = null;
-		c: for(Constructor<T> c : constrs) {
+		c: for(Constructor<?> c : constrs) {
 			List<Object> params = new ArrayList<>();
 			for(Parameter p : c.getParameters()) {
 				JSONParameter param = p.getAnnotation(JSONParameter.class);
@@ -94,9 +94,10 @@ public class JSONConverter {
 			}
 			c.setAccessible(true);
 			try {
-				t = c.newInstance(params.toArray(new Object[params.size()]));
+				t = clazz.cast(c.newInstance(params.toArray(new Object[params.size()])));
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException e) {
+				e.printStackTrace();
 				continue;
 			}
 		}
@@ -113,7 +114,7 @@ public class JSONConverter {
 				JSONValue v = f.getAnnotation(JSONValue.class);
 				JSONListType lT = f.getAnnotation(JSONListType.class);
 				JSONComplexListType clT = f.getAnnotation(JSONComplexListType.class);
-				if(v == null) continue;
+				if(v == null || !v.decode()) continue;
 				String fName = v.value().isEmpty() ? f.getName() : v.value();
 				if(o.has(fName)) {
 					f.setAccessible(true);
@@ -123,9 +124,7 @@ public class JSONConverter {
 						}else {
 							f.set(t, decode0(o.get(fName), f.getType()));
 						}
-					} catch (IllegalArgumentException | IllegalAccessException e) {
-						e.printStackTrace();
-					}
+					} catch (IllegalAccessException ignored) {}
 				}
 			}
 			return t;
@@ -139,16 +138,16 @@ public class JSONConverter {
 	private static List<Object> decodeList0(JSONArray value, JSONListType type, JSONComplexListType complexType) {
 		List<Object> list = new ArrayList<>();
 		for(Object o : value) {
+			if(o == null) list.add(null);
 			if(type != null) {
 				NullableOptional<Object> v = MiscUtils.callSafely(() -> type.value().cast(o));
 				if(!v.isPresent()) throw new IllegalArgumentException("Invalid JSON value type, cannot cast " + o.getClass().getName() + " to " + type.value());
 				list.add(v.get());
 			}else {
-				NullableOptional<Class<?>> v = MiscUtils.callSafely(() -> Class.forName(complexType.value()));
-				if(!v.isPresent()) throw new IllegalArgumentException("Cannot find complex type class " + complexType.value());
-				NullableOptional<Object> c = MiscUtils.callSafely(() -> decode0(o, v.get()));
-				if(!c.isPresent()) throw new IllegalArgumentException("Invalid JSON value type, cannot cast " + o.getClass().getName() + " to " + complexType.value());
-				list.add(c.get());
+				ErroringNullableOptional<Class<?>, ? extends Exception> v = MiscUtils.callSafely(() -> Class.forName(complexType.value()));
+				if(!v.isPresent()) throw new IllegalArgumentException("Cannot find complex type class " + complexType.value(), v.getException());
+				Object obj = decode0(o, v.get());
+				list.add(obj);
 			}
 		}
 		return list;

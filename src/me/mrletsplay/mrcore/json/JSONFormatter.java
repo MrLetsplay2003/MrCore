@@ -96,8 +96,12 @@ public class JSONFormatter {
 	}
 	
 	private static CharSequence escapeString(String string) {
+		if(string == null) return null;
 		StringBuilder escaped = new StringBuilder();
-		string.chars().mapToObj(i -> (char)i).map(c -> escapeChar(c)).forEach(escaped::append);;
+		string.chars()
+			.mapToObj(i -> (char)i)
+			.map(c -> escapeChar(c))
+			.forEach(escaped::append);
 		return escaped;
 	}
 	

@@ -35,7 +35,7 @@ public class GUIUtils {
 		private GUIClosedListener closed;
 		private GUIAction action;
 		private Map<String, Object> properties = new HashMap<>();
-		GUIBuildAction buildAction;
+		protected GUIBuildAction buildAction;
 		
 		/**
 		 * Creates a GUI builder for a single page GUI
@@ -613,11 +613,6 @@ public class GUIUtils {
 			this.holder = holder;
 			this.player = player;
 			this.inv = inv;
-		}
-		
-		@Deprecated
-		public GUIHolder getHolder() {
-			return holder;
 		}
 		
 		public GUIHolder getGUIHolder() {

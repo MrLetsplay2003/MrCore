@@ -11,4 +11,8 @@ public @interface JSONValue {
 
 	public String value() default "";
 	
+	public boolean decode() default true;
+	
+	public boolean encode() default true;
+	
 }
