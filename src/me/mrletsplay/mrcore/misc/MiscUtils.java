@@ -14,7 +14,7 @@ public class MiscUtils {
 		}
 	}
 
-	public static <T> ErroringNullableOptional<Void, ? extends Exception> runSafely(Runnable run) {
+	public static <T> ErroringNullableOptional<Void, ? extends Exception> runSafely(UnsafeRunnable run) {
 		try {
 			run.run();
 			return ErroringNullableOptional.ofErroring((Void) null);
