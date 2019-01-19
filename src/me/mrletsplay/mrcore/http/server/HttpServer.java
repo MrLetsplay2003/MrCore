@@ -39,7 +39,7 @@ public class HttpServer {
 		
 		addPage("/internal/include.js", new HttpFilePage(new File("D:\\Programme_2\\Programmieren\\Eclipse\\Test_Alles-3\\MrCore\\src\\me\\mrletsplay\\mrcore\\http\\server\\jslib.js")));
 		addPage("/internal/callback", (HttpAPICallbackPage) event -> {
-			String mrCoreID = event.getClientHeader().getCookie(MrCoreHTTPConstants.MRCORE_COOKIE_NAME);
+			String mrCoreID = event.getClientHeader().getCookie(MrCoreHTTPConstants.MRCORE_SESSION_COOKIE_NAME);
 			HttpConnection connection = connectionHandler.getConnectionById(mrCoreID);
 			if(connection == null) {
 				JSONObject resp = new JSONObject();
@@ -101,8 +101,7 @@ public class HttpServer {
 				HttpSiteAccessedEvent e = new HttpSiteAccessedEvent(this, pg, con, socket, header, p, new DefaultHttpServerHeader("HTTP/1.1", HttpDefaultStatusCode.OK, new DefaultHttpHeaderFields()));
 				HttpOpenPage page = con.open(e);
 				HttpServerHeader sH = page.getHeader();
-				sH.getFields().add("Set-Cookie", MrCoreHTTPConstants.MRCORE_COOKIE_NAME + "=" + sID);
-//				sH.getFields().add("Set-Cookie", MrCoreHTTPConstants.MRCORE_PAGE_COOKIE_NAME + "=" + page.getPageID()); // TODO page id??????
+				sH.getFields().add("Set-Cookie", MrCoreHTTPConstants.MRCORE_SESSION_COOKIE_NAME + "=" + sID);
 				sH.getFields().set("Connection", "close");
 				socket.getOutputStream().write(sH.getBytes(page.getBody().length));
 				socket.getOutputStream().write(page.getBody());

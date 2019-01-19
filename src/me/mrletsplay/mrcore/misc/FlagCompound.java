@@ -9,6 +9,13 @@ public class FlagCompound {
 	private long compound;
 	
 	/**
+	 * Creates an empty flag compound
+	 */
+	public FlagCompound() {
+		this.compound = 0;
+	}
+	
+	/**
 	 * Creates a flag compound including all the given compounds (combined using OR)
 	 * @param compound The compounds to be included in this compound
 	 */
