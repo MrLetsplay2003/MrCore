@@ -2,16 +2,48 @@ package me.mrletsplay.mrcore.http.server;
 
 import java.net.Socket;
 
-public interface HttpOpenPage {
+import me.mrletsplay.mrcore.http.server.HttpOpenPage;
 
-	public HttpConnection getConnection();
+public class HttpOpenPage {
 
-	public Socket getConnectionSocket();
+	private HttpConnection connection;
+	private Socket connectionSocket;
+	private String pageID;
+	private HttpPage page;
+	private HttpServerHeader header;
+	private byte[] body;
 	
-	public HttpPage getPage();
+	public HttpOpenPage(HttpConnection connection, Socket connectionSocket, String pageID, HttpPage page, HttpServerHeader header, byte[] body) {
+		this.connection = connection;
+		this.connectionSocket = connectionSocket;
+		this.pageID = pageID;
+		this.page = page;
+		this.header = header;
+		this.body = body;
+	}
 	
-	public HttpServerHeader getHeader();
+	public HttpConnection getConnection() {
+		return connection;
+	}
 	
-	public byte[] getBody();
+	public Socket getConnectionSocket() {
+		return connectionSocket;
+	}
 	
+	public String getPageID() {
+		return pageID;
+	}
+	
+	public HttpPage getPage() {
+		return page;
+	}
+	
+	public HttpServerHeader getHeader() {
+		return header;
+	}
+	
+	public byte[] getBody() {
+		return body;
+	}
+
 }

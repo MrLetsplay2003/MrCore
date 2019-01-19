@@ -4,37 +4,36 @@ import java.net.Socket;
 
 import me.mrletsplay.mrcore.http.server.HttpClientHeader;
 import me.mrletsplay.mrcore.http.server.HttpConnection;
-import me.mrletsplay.mrcore.http.server.HttpDefaultStatusCode;
 import me.mrletsplay.mrcore.http.server.HttpPage;
+import me.mrletsplay.mrcore.http.server.HttpRequestPath;
 import me.mrletsplay.mrcore.http.server.HttpServer;
 import me.mrletsplay.mrcore.http.server.HttpServerHeader;
-import me.mrletsplay.mrcore.http.server.impl.DefaultHttpHeaderFields;
-import me.mrletsplay.mrcore.http.server.impl.DefaultHttpServerHeader;
 
 public class HttpSiteAccessedEvent extends AbstractHttpEvent {
 
-	private HttpServerHeader header;
-	private HttpPage pageAccessed;
 	private HttpConnection connection;
+	private HttpPage pageAccessed;
 	private Socket connectionSocket;
 	private HttpClientHeader clientHeader;
+	private HttpRequestPath requestedPath;
+	private HttpServerHeader header;
 	
-	public HttpSiteAccessedEvent(HttpServer server, HttpPage pageAccessed, Socket connectionSocket, HttpClientHeader clientHeader) {
+	public HttpSiteAccessedEvent(HttpServer server, HttpPage pageAccessed, HttpConnection connection, Socket connectionSocket, HttpClientHeader clientHeader, HttpRequestPath requestedPath, HttpServerHeader header) {
 		super(server);
-		this.header = new DefaultHttpServerHeader("HTTP/1.1", HttpDefaultStatusCode.OK, new DefaultHttpHeaderFields());
+		this.connection = connection;
 		this.pageAccessed = pageAccessed;
-	}
-	
-	public HttpServerHeader getHeader() {
-		return header;
-	}
-
-	public HttpPage getPageAccessed() {
-		return pageAccessed;
+		this.connectionSocket = connectionSocket;
+		this.clientHeader = clientHeader;
+		this.requestedPath = requestedPath;
+		this.header = header;
 	}
 	
 	public HttpConnection getConnection() {
 		return connection;
+	}
+	
+	public HttpPage getPageAccessed() {
+		return pageAccessed;
 	}
 	
 	public Socket getConnectionSocket() {
@@ -43,6 +42,14 @@ public class HttpSiteAccessedEvent extends AbstractHttpEvent {
 	
 	public HttpClientHeader getClientHeader() {
 		return clientHeader;
+	}
+	
+	public HttpRequestPath getRequestedPath() {
+		return requestedPath;
+	}
+	
+	public HttpServerHeader getHeader() {
+		return header;
 	}
 	
 }

@@ -39,7 +39,7 @@ public interface HttpClientHeader {
 		Map<String, String> cookies = new LinkedHashMap<>();
 		for(String cookieStr : getFields().get("Cookie")) {
 			for(String cookie : cookieStr.split(";")) {
-				Matcher m = HEADER_COOKIE_PATTERN.matcher(cookieStr);
+				Matcher m = HEADER_COOKIE_PATTERN.matcher(cookie);
 				if(!m.matches()) throw new IllegalArgumentException("Invalid cookie format: " + cookie);
 				cookies.put(m.group("name"), m.group("value"));
 			}

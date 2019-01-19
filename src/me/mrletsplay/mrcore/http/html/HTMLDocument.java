@@ -26,6 +26,12 @@ public class HTMLDocument {
 		addElement(headElement);
 		this.bodyElement = new HTMLElement("body");
 		addElement(bodyElement);
+		HTMLElement scInclEl = new HTMLElement("script");
+		scInclEl.setAttribute("src", "/internal/include.js");
+		headElement.addChild(scInclEl);
+		HTMLElement scInclEl2 = new HTMLElement("script");
+		scInclEl2.setAttribute("src", "https://code.jquery.com/jquery-3.3.1.min.js");
+		headElement.addChild(scInclEl2);
 		this.scriptElement = new HTMLElement("script");
 		scriptElement.getFlags().addFlag(HTMLFlag.ELEMENT_REMOVE_IF_EMPTY);
 		scriptElement.setContent(event -> Optional.of(event.getBuiltDocument().getBuiltScript().asString()));

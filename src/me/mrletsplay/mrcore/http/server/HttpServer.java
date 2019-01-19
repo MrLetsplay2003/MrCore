@@ -1,5 +1,6 @@
 package me.mrletsplay.mrcore.http.server;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -10,10 +11,14 @@ import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import me.mrletsplay.mrcore.http.event.HttpSiteAccessedEvent;
 import me.mrletsplay.mrcore.http.server.impl.DefaultConnectionHandler;
 import me.mrletsplay.mrcore.http.server.impl.DefaultHttpHeaderFields;
 import me.mrletsplay.mrcore.http.server.impl.DefaultHttpServerHeader;
+import me.mrletsplay.mrcore.http.server.impl.HttpAPICallbackPage;
+import me.mrletsplay.mrcore.http.server.impl.HttpFilePage;
 import me.mrletsplay.mrcore.io.IOUtils;
+import me.mrletsplay.mrcore.json.JSONObject;
 
 public class HttpServer {
 
@@ -31,6 +36,20 @@ public class HttpServer {
 		this.executorService = Executors.newScheduledThreadPool(1);
 		this.port = port;
 		this.connectionHandler = new DefaultConnectionHandler(this);
+		
+		addPage("/internal/include.js", new HttpFilePage(new File("D:\\Programme_2\\Programmieren\\Eclipse\\Test_Alles-3\\MrCore\\src\\me\\mrletsplay\\mrcore\\http\\server\\jslib.js")));
+		addPage("/internal/callback", (HttpAPICallbackPage) event -> {
+			String mrCoreID = event.getClientHeader().getCookie(MrCoreHTTPConstants.MRCORE_COOKIE_NAME);
+			HttpConnection connection = connectionHandler.getConnectionById(mrCoreID);
+			if(connection == null) {
+				JSONObject resp = new JSONObject();
+				resp.set("success", false);
+				resp.set("message", "Invalid/expired mrcore session id");
+				return resp;
+			}
+			connection.getOpenPages();
+			return null;
+		});
 	}
 	
 	public void setExecutorService(ScheduledExecutorService executorService) {
@@ -76,14 +95,26 @@ public class HttpServer {
 		System.out.println("REQUEST: " + p.getPath());
 		HttpPage pg = pages.get(p.getPath());
 		
+		
 		if(pg != null) {
-			HttpOpenPage page = con.open(pg, socket, header);
-			HttpServerHeader sH = page.getHeader();
-			sH.getFields().add("Set-Cookie", "mrcore-id=" + sID);
-			sH.getFields().set("Connection", "close");
-			socket.getOutputStream().write(sH.getBytes(page.getBody().length));
-			socket.getOutputStream().write(page.getBody());
+			try {
+				HttpSiteAccessedEvent e = new HttpSiteAccessedEvent(this, pg, con, socket, header, p, new DefaultHttpServerHeader("HTTP/1.1", HttpDefaultStatusCode.OK, new DefaultHttpHeaderFields()));
+				HttpOpenPage page = con.open(e);
+				HttpServerHeader sH = page.getHeader();
+				sH.getFields().add("Set-Cookie", MrCoreHTTPConstants.MRCORE_COOKIE_NAME + "=" + sID);
+//				sH.getFields().add("Set-Cookie", MrCoreHTTPConstants.MRCORE_PAGE_COOKIE_NAME + "=" + page.getPageID()); // TODO page id??????
+				sH.getFields().set("Connection", "close");
+				socket.getOutputStream().write(sH.getBytes(page.getBody().length));
+				socket.getOutputStream().write(page.getBody());
+			} catch (Exception e) {
+				// TODO: Dynamic 404
+				HttpServerHeader sH = new DefaultHttpServerHeader("HTTP/1.1", HttpDefaultStatusCode.INTERNAL_SERVER_ERROR, new DefaultHttpHeaderFields());
+				byte[] body = "<h1>500 Internal error!</h1>".getBytes(StandardCharsets.UTF_8);
+				socket.getOutputStream().write(sH.getBytes(body.length));
+				socket.getOutputStream().write(body);
+			}
 		}else {
+			// TODO: Dynamic 404
 			HttpServerHeader sH = new DefaultHttpServerHeader("HTTP/1.1", HttpDefaultStatusCode.NOT_FOUND, new DefaultHttpHeaderFields());
 			byte[] body = "<h1>404 Not found!</h1>".getBytes(StandardCharsets.UTF_8);
 			socket.getOutputStream().write(sH.getBytes(body.length));

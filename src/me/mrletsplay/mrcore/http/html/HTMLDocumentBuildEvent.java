@@ -9,7 +9,7 @@ public class HTMLDocumentBuildEvent extends HttpPageBuildEvent {
 	private HTMLBuiltDocument builtDocument;
 	
 	public HTMLDocumentBuildEvent(HttpPageBuildEvent event, HTMLDocument document, HTMLBuiltDocument builtDocument) {
-		super(event.getServer(), event.getPageAccessed(), event.getConnectionSocket(), event.getClientHeader());
+		super(event);
 		this.document = document;
 		this.builtDocument = builtDocument;
 	}

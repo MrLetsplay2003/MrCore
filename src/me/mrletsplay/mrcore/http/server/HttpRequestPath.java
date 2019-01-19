@@ -5,10 +5,12 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import me.mrletsplay.mrcore.http.HttpUtils;
+
 public class HttpRequestPath {
 
 	public static final Pattern
-			PATH_PATTERN = Pattern.compile("(?<path>(?:\\/[^&=?]*+))(?:\\?(?<get>[^&=]++=[^&]++(?:\\&[^&=]++=[^&]++)*))?\\z");
+			PATH_PATTERN = Pattern.compile("(?<path>(?:\\/[^&=?]*+))(?:\\?(?<get>[^&=]++(?:=[^&]*+|)(?:\\&[^&=]++(?:=[^&]*+|))*))?\\z");
 	
 	private String path;
 	private Map<String, String> getParameters;
@@ -35,7 +37,7 @@ public class HttpRequestPath {
 		if(get != null) {
 			for(String gP : get.split("&")) {
 				String[] spl = gP.split("=", 2);
-				getParameters.put(spl[0], spl[1]);
+				getParameters.put(spl[0], HttpUtils.urlDecode(spl[1]));
 			}
 		}
 		return new HttpRequestPath(path, getParameters);

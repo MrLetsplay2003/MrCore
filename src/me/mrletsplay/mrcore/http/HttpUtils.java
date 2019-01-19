@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
@@ -83,6 +84,14 @@ public class HttpUtils {
 	public static String urlEncode(String str) throws HttpException {
 		try {
 			return URLEncoder.encode(str, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			throw new HttpException(e);
+		}
+	}
+	
+	public static String urlDecode(String str) throws HttpException {
+		try {
+			return URLDecoder.decode(str, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			throw new HttpException(e);
 		}

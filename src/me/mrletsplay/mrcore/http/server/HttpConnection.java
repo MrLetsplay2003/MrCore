@@ -1,8 +1,10 @@
 package me.mrletsplay.mrcore.http.server;
 
 import java.net.InetAddress;
-import java.net.Socket;
 import java.util.List;
+import java.util.UUID;
+
+import me.mrletsplay.mrcore.http.event.HttpSiteAccessedEvent;
 
 public interface HttpConnection {
 	
@@ -12,8 +14,16 @@ public interface HttpConnection {
 	
 	public String getID();
 	
-	public HttpOpenPage open(HttpPage page, Socket socket, HttpClientHeader clientHeader);
+	public HttpOpenPage open(HttpSiteAccessedEvent event);
 	
-	public List<? extends HttpOpenPage> getOpenPages();
+	public List<HttpOpenPage> getOpenPages();
+	
+	public default HttpOpenPage getOpenPageByID(String pageID) {
+		return getOpenPages().stream().filter(o -> o.getPageID().equals(pageID)).findFirst().orElse(null);
+	}
+	
+	public default String newPageID() {
+		return UUID.randomUUID().toString();
+	}
 	
 }

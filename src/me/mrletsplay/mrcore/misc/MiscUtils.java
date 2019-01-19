@@ -1,5 +1,7 @@
 package me.mrletsplay.mrcore.misc;
 
+import java.util.AbstractMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class MiscUtils {
@@ -19,6 +21,10 @@ public class MiscUtils {
 		}catch(Exception e) {
 			return ErroringNullableOptional.ofErroring(e);
 		}
+	}
+	
+	public static <K, V> Map.Entry<K, V> newMapEntry(K key, V value) {
+		return new AbstractMap.SimpleEntry<>(key, value);
 	}
 	
 }
