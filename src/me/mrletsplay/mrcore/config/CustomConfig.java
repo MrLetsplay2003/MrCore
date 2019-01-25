@@ -130,6 +130,8 @@ public interface CustomConfig extends ConfigSection {
 	
 	public void save(OutputStream out) throws ConfigException;
 	
+	public void addDefaults(CustomConfig defaultConfig);
+	
 	public void addDefault(String key, Object value);
 	
 	public void applyDefaults(boolean override);

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
@@ -708,7 +709,20 @@ public class GUIUtils {
 		 * @return An inventory representation of this GUI
 		 */
 		public Inventory getForPlayer(Player p) {
-			Inventory inv = buildInternally(p, new HashMap<>());
+			Inventory inv = buildInternally(p, null, new HashMap<>());
+			if(builder.buildAction != null && !(this instanceof GUIMultiPage)) builder.buildAction.onBuild(new GUIBuildEvent((GUIHolder) inv.getHolder(), p, inv));
+			return inv;
+		}
+
+		/**
+		 * @deprecated This will set global properties. Use {@link #getForPlayer(Player, Plugin, Map)} instead
+		 * Returns this GUI represented as an inventory for the specified player
+		 * @param p The player this inventory is for (Used in all method calls to GUIElements and similar)
+		 * @return An inventory representation of this GUI
+		 */
+		@Deprecated
+		public Inventory getForPlayer(Player p, Map<String, Object> properties) {
+			Inventory inv = buildInternally(p, null, properties);
 			if(builder.buildAction != null && !(this instanceof GUIMultiPage)) builder.buildAction.onBuild(new GUIBuildEvent((GUIHolder) inv.getHolder(), p, inv));
 			return inv;
 		}
@@ -716,17 +730,23 @@ public class GUIUtils {
 		/**
 		 * Returns this GUI represented as an inventory for the specified player
 		 * @param p The player this inventory is for (Used in all method calls to GUIElements and similar)
+		 * @param pl The plugin to set the properties for
 		 * @return An inventory representation of this GUI
 		 */
-		public Inventory getForPlayer(Player p, Map<String, Object> properties) {
-			Inventory inv = buildInternally(p, properties);
+		public Inventory getForPlayer(Player p, Plugin pl, Map<String, Object> properties) {
+			Inventory inv = buildInternally(p, pl, properties);
 			if(builder.buildAction != null && !(this instanceof GUIMultiPage)) builder.buildAction.onBuild(new GUIBuildEvent((GUIHolder) inv.getHolder(), p, inv));
 			return inv;
 		}
 		
-		protected Inventory buildInternally(Player p, Map<String, Object> properties) {
+		protected Inventory buildInternally(Player p, Plugin pl, Map<String, Object> properties) {
 			Inventory inv;
-			GUIHolder holder = new GUIHolder(this, properties);
+			GUIHolder holder = new GUIHolder(this);
+			if(pl != null) {
+				properties.forEach((k, v) -> holder.setProperty(pl, k, v));
+			}else {
+				properties.forEach(holder::setProperty);
+			}
 			if(builder.isCustomType) {
 				inv = Bukkit.createInventory(holder, builder.invType, builder.title);
 			} else {
@@ -806,16 +826,37 @@ public class GUIUtils {
 		}
 		
 		/**
+		 * Refreshes all (opened) instances of this GUI<br>
+		 * <br>
+		 * This method iterates through every player on the server, sees if they have that specific GUI open<br>
+		 * and, if they do, replaces it with a newly built instance of that GUI using {@link #refreshInstance(Player)}<br>
+		 * @param condition The condition for the GUI to be refreshed
+		 */
+		public void refreshAllInstances(Predicate<GUIHolder> condition) {
+			for(Player player : Bukkit.getOnlinePlayers()) refreshInstance(player, condition);
+		}
+		
+		/**
 		 * Refreshes a specific player's instance of this GUI<br>
 		 * If the player doesn't have an this GUI open, this method will do nothing
 		 * @param player The player to refresh this GUI for
 		 */
 		public void refreshInstance(Player player) {
+			refreshInstance(player, holder -> true);
+		}
+		
+		/**
+		 * Refreshes a specific player's instance of this GUI<br>
+		 * If the player doesn't have an this GUI open, this method will do nothing
+		 * @param player The player to refresh this GUI for
+		 * @param condition The condition for the GUI to be refreshed
+		 */
+		public void refreshInstance(Player player, Predicate<GUIHolder> condition) {
 			if(player.getOpenInventory() != null && player.getOpenInventory().getTopInventory() != null) {
 				Inventory oldInv = player.getOpenInventory().getTopInventory();
 				GUIHolder holder = GUIUtils.getGUIHolder(oldInv);
 				if(holder != null && holder.gui.equals(this)) {
-					openNewInstance(player, oldInv, holder);
+					if(condition.test(holder)) openNewInstance(player, oldInv, holder);
 				}
 			}
 		}
@@ -886,7 +927,7 @@ public class GUIUtils {
 		 * @return An inventory representation for this GUI, null if the page doesn't exist
 		 */
 		public Inventory getForPlayer(Player p, int page) {
-			Inventory inv = buildInternally(p, page, new HashMap<>());
+			Inventory inv = buildInternally(p, page, null, new HashMap<>());
 			if(builder.buildAction != null) builder.buildAction.onBuild(new GUIBuildEvent((GUIHolder) inv.getHolder(), p, inv));
 			return inv;
 		}
@@ -898,6 +939,16 @@ public class GUIUtils {
 		public Inventory getForPlayer(Player p, Map<String, Object> properties) {
 			return getForPlayer(p, 0, properties);
 		}
+
+		/**
+		 * This will return page 0 of the GUI
+		 */
+		@Override
+		public Inventory getForPlayer(Player p, Plugin pl, Map<String, Object> properties) {
+			Inventory inv = buildInternally(p, 0, pl, properties);
+			if(builder.buildAction != null) builder.buildAction.onBuild(new GUIBuildEvent((GUIHolder) inv.getHolder(), p, inv));
+			return inv;
+		}
 		
 		/**
 		 * Returns an inventory representation of the specified page of this GUI for a specified player
@@ -906,13 +957,26 @@ public class GUIUtils {
 		 * @return An inventory representation for this GUI, null if the page doesn't exist
 		 */
 		public Inventory getForPlayer(Player p, int page, Map<String, Object> properties) {
-			Inventory inv = buildInternally(p, page, properties);
+			Inventory inv = buildInternally(p, page, null, properties);
 			if(builder.buildAction != null) builder.buildAction.onBuild(new GUIBuildEvent((GUIHolder) inv.getHolder(), p, inv));
 			return inv;
 		}
 		
-		protected Inventory buildInternally(Player p, int page, Map<String, Object> properties) {
-			Inventory base = super.getForPlayer(p, properties);
+		/**
+		 * Returns an inventory representation of the specified page of this GUI for a specified player
+		 * @param p The player this inventory is for (Used in all method calls to GUIElements and similar)
+		 * @param page The page to be used
+		 * @param pl The plugin to set the properties for
+		 * @return An inventory representation for this GUI, null if the page doesn't exist
+		 */
+		public Inventory getForPlayer(Player p, int page, Plugin pl, Map<String, Object> properties) {
+			Inventory inv = buildInternally(p, page, pl, properties);
+			if(builder.buildAction != null) builder.buildAction.onBuild(new GUIBuildEvent((GUIHolder) inv.getHolder(), p, inv));
+			return inv;
+		}
+		
+		protected Inventory buildInternally(Player p, int page, Plugin pl, Map<String, Object> properties) {
+			Inventory base = super.buildInternally(p, pl, properties);
 			GUIHolder holder = (GUIHolder) base.getHolder();
 			holder.getProperties().put("page", page);
 			List<Integer> slots = builder.customItemSlots;
@@ -1096,6 +1160,17 @@ public class GUIUtils {
 		public GUIHolder(GUI gui, Map<String, Object> properties) {
 			this.gui = gui;
 			this.properties = properties;
+			this.properties.putAll(this.gui.builder.properties);
+		}
+		
+		/**
+		 * Creates a gui holder for the specified GUI<br>
+		 * It will not automatically be registered to the GUI
+		 * @param gui The GUI this holder is for
+		 */
+		public GUIHolder(GUI gui) {
+			this.gui = gui;
+			this.properties = new HashMap<>();
 			this.properties.putAll(this.gui.builder.properties);
 		}
 		

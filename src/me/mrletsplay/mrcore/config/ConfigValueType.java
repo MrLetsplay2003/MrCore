@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import me.mrletsplay.mrcore.config.mapper.ObjectMapper;
 import me.mrletsplay.mrcore.config.mapper.ObjectMappingException;
 import me.mrletsplay.mrcore.misc.Complex;
-import me.mrletsplay.mrcore.misc.ErroringNullableOptional;
 import me.mrletsplay.mrcore.misc.NullableOptional;
 
 public enum ConfigValueType {
@@ -92,7 +91,7 @@ public enum ConfigValueType {
 		for(ObjectMapper<?, ?> om : tlms) {
 			try {
 				Object c = om.mapRawObject(forSection, o, forSection::castType);
-				if(isConfigPrimitive(om.getMappedClass())) return ErroringNullableOptional.ofErroring(c); // ct -> tlm -> cc
+				if(isConfigPrimitive(om.getMappedClass())) return NullableOptional.of(c); // ct -> tlm -> cc
 				NullableOptional<?> tto = mapLowLevelType(forSection, c); // First try ct -> tlm -> llm -> ct
 				if(tto.isPresent()) return tto;
 			}catch(ObjectMappingException e) {

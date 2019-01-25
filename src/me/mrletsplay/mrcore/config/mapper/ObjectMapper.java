@@ -54,7 +54,8 @@ public interface ObjectMapper<E, O> {
 //	}
 	
 	public default boolean canConstruct(Object object, CastingFunction castingFunction) {
-		return getMappedClass().isInstance(object, castingFunction);
+//		return getMappedClass().isInstance(object, castingFunction);
+		return getMappedClass().getBaseClass().isInstance(object);
 	}
 	
 //	public default boolean canConstruct(Class<?> clazz) {

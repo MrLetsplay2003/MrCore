@@ -16,6 +16,7 @@ import java.util.Map;
 
 import me.mrletsplay.mrcore.config.ConfigException;
 import me.mrletsplay.mrcore.config.ConfigSection;
+import me.mrletsplay.mrcore.config.CustomConfig;
 import me.mrletsplay.mrcore.config.DefaultConfigMappers;
 import me.mrletsplay.mrcore.config.FileCustomConfig;
 import me.mrletsplay.mrcore.config.IncompatibleConfigVersionException;
@@ -94,6 +95,11 @@ public class DefaultFileCustomConfig implements FileCustomConfig {
 		}catch(IOException e) {
 			throw new ConfigException("Unexpected IO exception", e);
 		}
+	}
+
+	@Override
+	public void addDefaults(CustomConfig defaultConfig) {
+		defaultConfig.toMap().forEach(this::addDefault);
 	}
 
 	@Override

@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import me.mrletsplay.mrcore.config.ConfigException;
 
-class DefaultConfigParser {
+public class DefaultConfigParser {
 
 	public CharReader r;
 	

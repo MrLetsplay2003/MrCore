@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import me.mrletsplay.mrcore.misc.Complex;
 import me.mrletsplay.mrcore.misc.NullableOptional;
 
-class DefaultConfigFormatter {
+public class DefaultConfigFormatter {
 
 	private BufferedWriter w;
 	

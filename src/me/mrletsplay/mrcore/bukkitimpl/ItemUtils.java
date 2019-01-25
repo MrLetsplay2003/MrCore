@@ -1,10 +1,16 @@
 package me.mrletsplay.mrcore.bukkitimpl;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -22,6 +28,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 
 import me.mrletsplay.mrcore.bukkitimpl.versioned.VersionedDyeColor;
 import me.mrletsplay.mrcore.bukkitimpl.versioned.VersionedMaterial;
+import me.mrletsplay.mrcore.misc.FriendlyException;
 
 public class ItemUtils {
 	
@@ -201,6 +208,65 @@ public class ItemUtils {
 		return p1 != null && p1.equals(p2);
 	}
 	
+	public static void setTexture(SkullMeta im, String url) {
+		try {
+			Class<?> gameProfileClass = Class.forName("com.mojang.authlib.GameProfile");
+			Class<?> propertyClass = Class.forName("com.mojang.authlib.properties.Property");
+			Object gameProfile = gameProfileClass.getConstructor(UUID.class, String.class).newInstance(UUID.randomUUID(), null);
+			Object propertyMap = gameProfileClass.getMethod("getProperties").invoke(gameProfile);
+			propertyMap.getClass().getMethod("put", Object.class, Object.class)
+				.invoke(propertyMap, "textures",
+						propertyClass.getConstructor(String.class, String.class)
+						.newInstance("textures", Base64.getEncoder().encodeToString(("{textures:{SKIN:{url:\""+url+"\"}}}").getBytes())));
+			Field profileField = im.getClass().getDeclaredField("profile");
+			profileField.setAccessible(true);
+			profileField.set(im, gameProfile);
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | NoSuchFieldException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void setRawTexture(SkullMeta im, String raw) {
+		try {
+			Class<?> gameProfileClass = Class.forName("com.mojang.authlib.GameProfile");
+			Class<?> propertyClass = Class.forName("com.mojang.authlib.properties.Property");
+			Object gameProfile = gameProfileClass.getConstructor(UUID.class, String.class).newInstance(UUID.randomUUID(), null);
+			Object propertyMap = gameProfileClass.getMethod("getProperties").invoke(gameProfile);
+			propertyMap.getClass().getMethod("put", Object.class, Object.class)
+				.invoke(propertyMap, "textures",
+						propertyClass.getConstructor(String.class, String.class)
+						.newInstance("textures", raw));
+			Field profileField = im.getClass().getDeclaredField("profile");
+			profileField.setAccessible(true);
+			profileField.set(im, gameProfile);
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | NoSuchFieldException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static String getTexture(SkullMeta im) {
+		try {
+			Field profileField = im.getClass().getDeclaredField("profile");
+			profileField.setAccessible(true);
+			Object gameProfile = profileField.get(im);
+			if(gameProfile != null) {
+				Object propertyMap = gameProfile.getClass().getMethod("getProperties").invoke(gameProfile);
+				Collection<?> propertyCollection = (Collection<?>) propertyMap.getClass().getMethod("get", Object.class).invoke(propertyMap, "textures");
+				Iterator<?> propertyIterator = propertyCollection.iterator();
+				
+				if(propertyIterator.hasNext()) {
+					Object property = propertyIterator.next();
+					String rawTexture = new String(Base64.getDecoder().decode(((String)property.getClass().getMethod("getValue").invoke(property)).getBytes()));
+					String texture = rawTexture.substring("{\"textures\":{\"SKIN\":{\"url\":\"".length(), rawTexture.length() - "\"}}}".length());
+					return texture;
+				}
+			}
+			return null;
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | NoSuchFieldException e) {
+			throw new FriendlyException(e);
+		}
+}
+	
 	public static class ComparisonResult {
 		
 		private List<ComparisonParameter> matches, doesntMatch;
@@ -219,11 +285,11 @@ public class ItemUtils {
 		}
 		
 		public boolean matches(ComparisonParameter... params) {
-			return Arrays.stream(params).allMatch(p -> matches(p));
+			return Arrays.stream(params).allMatch(this::matches);
 		}
 		
 		public boolean matchesExplicitly(ComparisonParameter... params) {
-			return Arrays.stream(params).allMatch(p -> matchesExplicitly(p));
+			return Arrays.stream(params).allMatch(this::matchesExplicitly);
 		}
 		
 		public boolean matches(ComparisonParameter param) {

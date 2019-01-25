@@ -49,7 +49,7 @@ public class ConfigLoader {
 			config.load(configFile);
 		}catch(IncompatibleConfigVersionException e) {
 			try {
-				T c =	 ConfigConverter.convertConfig(IOUtils.readAllBytes(new FileInputStream(configFile)), config, e.getGivenDefaultVersion(), e.getRequiredDefaultVersion());
+				T c = ConfigConverter.convertConfig(IOUtils.readAllBytes(new FileInputStream(configFile)), config, e.getGivenDefaultVersion(), e.getRequiredDefaultVersion());
 				if(saveConverted) c.save(configFile);
 				return c;
 			} catch (IOException e1) {
