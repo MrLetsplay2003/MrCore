@@ -9,6 +9,10 @@ public class ErroringNullableOptional<T, E extends Throwable> extends NullableOp
 		this.exception = exception;
 	}
 	
+	public boolean hasErrored() {
+		return exception != null;
+	}
+	
 	public E getException() {
 		if(isPresent()) throw new IllegalStateException("Value is present");
 		return exception;
