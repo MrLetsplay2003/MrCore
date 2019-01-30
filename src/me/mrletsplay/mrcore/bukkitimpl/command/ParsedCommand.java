@@ -6,12 +6,14 @@ public class ParsedCommand {
 
 	private EasyCommand command;
 	private String raw;
+	private String label;
 	private CommandArgument[] args;
 	private List<ParsedCommandFlag<?>> flags;
 	
-	public ParsedCommand(EasyCommand command, String raw, CommandArgument[] args, List<ParsedCommandFlag<?>> flags) {
+	public ParsedCommand(EasyCommand command, String raw, String label, CommandArgument[] args, List<ParsedCommandFlag<?>> flags) {
 		this.command = command;
 		this.raw = raw;
+		this.label = label;
 		this.args = args;
 		this.flags = flags;
 	}
@@ -22,6 +24,10 @@ public class ParsedCommand {
 	
 	public String getRaw() {
 		return raw;
+	}
+	
+	public String getLabel() {
+		return label;
 	}
 	
 	public CommandArgument[] getArgs() {

@@ -1,8 +1,6 @@
 package me.mrletsplay.mrcore.bukkitimpl;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -13,10 +11,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import me.mrletsplay.mrcore.bukkitimpl.ChatUI.UIListener;
 import me.mrletsplay.mrcore.bukkitimpl.GUIUtils.GUIListener;
-import me.mrletsplay.mrcore.bukkitimpl.command.CommandFlag;
-import me.mrletsplay.mrcore.bukkitimpl.command.CommandInvokedEvent;
-import me.mrletsplay.mrcore.bukkitimpl.command.DefaultCommandValueType;
-import me.mrletsplay.mrcore.bukkitimpl.command.EasyCommand;
 import me.mrletsplay.mrcore.bukkitimpl.versioned.NMSVersion;
 import me.mrletsplay.mrcore.config.ConfigLoader;
 import me.mrletsplay.mrcore.config.FileCustomConfig;
@@ -40,18 +34,6 @@ public class MrCorePlugin extends JavaPlugin{
 			MrCoreUpdateChecker.checkForUpdate(version);
 		}
 		config.saveToFile();
-		getCommand("mrcoredebug").setExecutor(new EasyCommand("mrcoredebug") {
-			
-			@Override
-			public void action(CommandInvokedEvent event) {
-				event.getSender().sendMessage(event.getParsedCommand().getFlags().stream().map(f -> f.getFlag().getName() + " => " + f.getValue()).collect(Collectors.toList()).toString());
-				event.getSender().sendMessage(Arrays.toString(event.getArgs()));
-			}
-		}
-		.registerFlag(new CommandFlag<>("a", true, DefaultCommandValueType.INT))
-		.registerFlag(new CommandFlag<>("b", false, null))
-		.registerFlag(new CommandFlag<>("c", true, DefaultCommandValueType.STRING))
-		);
 		getLogger().info("And MrCore is on board as well! :wave:");
 	}
 	

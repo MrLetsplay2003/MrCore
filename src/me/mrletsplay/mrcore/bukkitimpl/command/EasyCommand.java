@@ -11,6 +11,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import me.mrletsplay.mrcore.misc.ErroringNullableOptional;
 import net.md_5.bungee.api.ChatColor;
@@ -120,10 +121,31 @@ public abstract class EasyCommand implements CommandExecutor {
 		return registeredFlags;
 	}
 	
+	public EasyCommand getSubCommand(String name) {
+		return subCommands.stream()
+				.filter(s -> s.getName().equalsIgnoreCase(name) || s.getAliases().stream().anyMatch(a -> a.equalsIgnoreCase(name)))
+				.findFirst().orElse(null);
+	}
+	
+	public EasyCommand registerFor(JavaPlugin plugin) {
+		if(parent != null) throw new IllegalStateException("Command is not parent command");
+		plugin.getCommand(name).setExecutor(this);
+		return this;
+	}
+	
+	public String getFullName() {
+		return parent != null ? parent.getFullName() + " " + name : name;
+	}
+	
 	public abstract void action(CommandInvokedEvent event);
 	
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+		if(args.length > 0) {
+			EasyCommand sC = getSubCommand(args[0]);
+			if(sC != null) return sC.onCommand(sender, command, args[0], Arrays.stream(args).skip(1).toArray(String[]::new));
+		}
+		System.out.println("No sub! @ " + name);
 		String argsString = Arrays.stream(args).collect(Collectors.joining(" "));
 		ErroringNullableOptional<ParsedCommand, CommandParsingException> c = CommandParser.parse(this, label, argsString);
 		if(!c.isPresent()) {
@@ -148,10 +170,10 @@ public abstract class EasyCommand implements CommandExecutor {
 				
 				TextComponent tryAgain = new TextComponent("[Try again]");
 				tryAgain.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Reenteer your previous input").color(ChatColor.YELLOW).create()));
-				tryAgain.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/" + label + " " + argsString));
+				tryAgain.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/" + getFullName() + " " + argsString));
 				tryAgain.setColor(ChatColor.YELLOW);
 				
-				((Player) sender).spigot().sendMessage(new ComponentBuilder("/" + label).color(ChatColor.GRAY)
+				((Player) sender).spigot().sendMessage(new ComponentBuilder("/" + getFullName()).color(ChatColor.GRAY)
 						.append(new TextComponent(" "))
 						.append(prevC)
 						.append(fC)

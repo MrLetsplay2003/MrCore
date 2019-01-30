@@ -38,7 +38,7 @@ public class CommandParser {
 		if(lastEnd != rawArgs.length()) {
 			return ErroringNullableOptional.ofErroring(new CommandParsingException("Invalid input format", lastEnd, rawArgs.length() - lastEnd));
 		}
-		return ErroringNullableOptional.ofErroring(new ParsedCommand(command, label, args.toArray(new CommandArgument[args.size()]), flags));
+		return ErroringNullableOptional.ofErroring(new ParsedCommand(command, label, label + " " + rawArgs, args.toArray(new CommandArgument[args.size()]), flags));
 	}
 	
 	private static String unescapeQuoted(String str) {
