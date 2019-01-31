@@ -70,6 +70,11 @@ public class NullableOptional<T> {
 		if(present) consumer.accept(value);
 	}
 	
+	public <X extends Throwable> ErroringNullableOptional<T, X> asErroring(Supplier<X> exceptionSupplier) {
+		if(present) return ErroringNullableOptional.ofErroring(value);
+		return ErroringNullableOptional.ofErroring(exceptionSupplier.get());
+	}
+	
 	@Override
 	public int hashCode() {
 		return present ? value.hashCode() : 0;

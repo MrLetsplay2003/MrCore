@@ -30,15 +30,16 @@ public class CommandParser {
 				if(!flag.needsValue() && fValue != null && op.equals(" ")) lastEnd -= fValue.length() + 1;
 				flags.add(r.get());
 			}else { // Normal arg
+				String unstripped = m.group("argq") != null ? "\"" + m.group("argq") + "\"" : m.group("arguq");
 				String arg = m.group("argq") != null ? unescapeQuoted(m.group("argq")) : m.group("arguq");
-				args.add(new CommandArgument(arg));
+				args.add(new CommandArgument(unstripped, arg));
 			}
 			m = m.region(lastEnd, rawArgs.length());
 		}
 		if(lastEnd != rawArgs.length()) {
 			return ErroringNullableOptional.ofErroring(new CommandParsingException("Invalid input format", lastEnd, rawArgs.length() - lastEnd));
 		}
-		return ErroringNullableOptional.ofErroring(new ParsedCommand(command, label, label + " " + rawArgs, args.toArray(new CommandArgument[args.size()]), flags));
+		return ErroringNullableOptional.ofErroring(new ParsedCommand(command, label + " " + rawArgs, label, args.toArray(new CommandArgument[args.size()]), flags));
 	}
 	
 	private static String unescapeQuoted(String str) {

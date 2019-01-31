@@ -125,7 +125,7 @@ public class DefaultConfigFormatter {
 			w.write(space(indents) + "}");
 		}else if(value instanceof List) {
 			w.write("{");
-			writePropertyValue(indents, value);
+			writePropertyValue(indents + 1, value);
 			w.newLine();
 			w.write(space(indents) + "}");
 		}else {
