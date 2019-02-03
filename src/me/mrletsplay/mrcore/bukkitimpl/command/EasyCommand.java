@@ -256,7 +256,7 @@ public abstract class EasyCommand implements CommandExecutor, TabCompleter {
 	
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		if(args.length > 0) {
+		if(args.length > 1) {
 			EasyCommand sC = getSubCommand(args[0]);
 			if(sC != null) return sC.onTabComplete(sender, command, args[0], Arrays.stream(args).skip(1).toArray(String[]::new));
 		}
