@@ -1,5 +1,6 @@
 package me.mrletsplay.mrcore.bukkitimpl.command;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class ParsedCommand {
@@ -46,6 +47,10 @@ public class ParsedCommand {
 	
 	public List<ParsedCommandFlag<?>> getFlags() {
 		return flags;
+	}
+	
+	public int getRawArgStringIndex(int argIndex) {
+		return Arrays.stream(args).limit(argIndex).mapToInt(a -> a.getRaw().length() + 1).sum();
 	}
 	
 }

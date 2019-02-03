@@ -16,10 +16,11 @@ public class MySQLNative41PasswordAuth implements MySQLAuthPluginBase {
 	}
 
 	@Override
-	public void handleFurtherProcessing(MySQLServerConnection con) throws IOException {} // No further processing required
-	
+	public void handleFurtherProcessing(MySQLServerConnection con) throws IOException {
+	} // No further processing required
+
 	private byte[] createNative41AuthResponse(byte[] randomChallenge, String password) {
-        // SHA1( password ) XOR SHA1( "20-bytes random data from server" <concat> SHA1( SHA1( password ) ) )
+		// SHA1( password ) XOR SHA1( "20-bytes random data from server" <concat> SHA1( SHA1( password ) ) )
 		try {
 			MessageDigest digest = MessageDigest.getInstance("SHA-1");
 			byte[] pwBytes = digest.digest(password.getBytes(StandardCharsets.UTF_8));
@@ -27,7 +28,7 @@ public class MySQLNative41PasswordAuth implements MySQLAuthPluginBase {
 			System.arraycopy(randomChallenge, 0, rightSeed, 0, 20);
 			System.arraycopy(digest.digest(pwBytes), 0, rightSeed, 20, 20);
 			byte[] right = digest.digest(rightSeed);
-			for(int i = 0; i < pwBytes.length; i++) {
+			for (int i = 0; i < pwBytes.length; i++) {
 				pwBytes[i] ^= right[i];
 			}
 			return pwBytes;

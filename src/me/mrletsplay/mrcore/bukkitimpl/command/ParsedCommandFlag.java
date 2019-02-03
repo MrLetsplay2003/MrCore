@@ -5,9 +5,9 @@ public class ParsedCommandFlag<T> {
 	private CommandFlag<T> flag;
 	private T value;
 	
-	public ParsedCommandFlag(CommandFlag<T> flag, T value) {
+	public ParsedCommandFlag(CommandFlag<T> flag, String value) {
 		this.flag = flag;
-		this.value = value;
+		this.value = value != null ? flag.getValueType().parse(value).get() : null;
 	}
 	
 	public CommandFlag<T> getFlag() {
