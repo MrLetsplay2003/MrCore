@@ -2,8 +2,6 @@ package me.mrletsplay.mrcore.http.server;
 
 import java.net.Socket;
 
-import me.mrletsplay.mrcore.http.server.HttpOpenPage;
-
 public class HttpOpenPage {
 
 	private HttpConnection connection;
