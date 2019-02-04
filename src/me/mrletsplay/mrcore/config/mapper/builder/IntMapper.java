@@ -6,7 +6,7 @@ import me.mrletsplay.mrcore.config.ConfigSection;
 import me.mrletsplay.mrcore.json.JSONObject;
 import me.mrletsplay.mrcore.misc.TriConsumer;
 
-public class IntMapper<Self extends IntMapper<Self, P, T>, P extends SubMappable<P, T>, T> extends BasicMapper<Self, P, T> {
+public class IntMapper<S extends IntMapper<S, P, T>, P extends SubMappable<P, T>, T> extends BasicMapper<S, P, T> {
 
 	private BiFunction<ConfigSection, T, Integer> getter;
 	private TriConsumer<ConfigSection, T, Integer> setter;

@@ -6,7 +6,7 @@ import me.mrletsplay.mrcore.config.ConfigSection;
 import me.mrletsplay.mrcore.json.JSONObject;
 import me.mrletsplay.mrcore.misc.TriConsumer;
 
-public class BooleanMapper<Self extends BooleanMapper<Self, P, T>, P extends SubMappable<P, T>, T> extends BasicMapper<Self, P, T> {
+public class BooleanMapper<S extends BooleanMapper<S, P, T>, P extends SubMappable<P, T>, T> extends BasicMapper<S, P, T> {
 
 	private BiFunction<ConfigSection, T, Boolean> getter;
 	private TriConsumer<ConfigSection, T, Boolean> setter;

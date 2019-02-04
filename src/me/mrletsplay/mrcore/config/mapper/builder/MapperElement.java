@@ -7,25 +7,25 @@ import me.mrletsplay.mrcore.json.JSONObject;
 import me.mrletsplay.mrcore.json.JSONType;
 import me.mrletsplay.mrcore.misc.QuadPredicate;
 
-public interface MapperElement<Self extends MapperElement<Self, P, T>, P extends SubMappable<P, T>, T> {
+public interface MapperElement<S extends MapperElement<S, P, T>, P extends SubMappable<P, T>, T> {
 
 	public void applyMap(T instance, ConfigSection section, JSONObject json, String key);
 	
 	public void applyConstruct(T instance, ConfigSection section, JSONObject json, String key);
 
-	public Self onlyMapIf(QuadPredicate<T, ConfigSection, JSONObject, String> condition);
+	public S onlyMapIf(QuadPredicate<T, ConfigSection, JSONObject, String> condition);
 
-	public default Self onlyMapIf(Predicate<T> condition) {
+	public default S onlyMapIf(Predicate<T> condition) {
 		return onlyMapIf((t, s, j, k) -> condition.apply(t));
 	}
 
-	public Self onlyConstructIf(QuadPredicate<T, ConfigSection, JSONObject, String> condition);
+	public S onlyConstructIf(QuadPredicate<T, ConfigSection, JSONObject, String> condition);
 
-	public default Self onlyConstructIfNotNull() {
+	public default S onlyConstructIfNotNull() {
 		return onlyConstructIf((t, s, j, k) -> j.has(k) && !j.isOfType(k, JSONType.NULL));
 	}
 	
-	public default Self onlyConstructIfExists() {
+	public default S onlyConstructIfExists() {
 		return onlyConstructIf((t, s, j, k) -> j.has(k));
 	}
 	
@@ -34,8 +34,8 @@ public interface MapperElement<Self extends MapperElement<Self, P, T>, P extends
 	public QuadPredicate<T, ConfigSection, JSONObject, String> getConstructingCondition();
 	
 	@SuppressWarnings("unchecked")
-	public default Self getSelf() {
-		return (Self) this;
+	public default S getSelf() {
+		return (S) this;
 	}
 	
 	public P then();

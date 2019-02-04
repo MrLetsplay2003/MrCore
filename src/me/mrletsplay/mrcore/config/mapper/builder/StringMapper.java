@@ -6,7 +6,7 @@ import me.mrletsplay.mrcore.config.ConfigSection;
 import me.mrletsplay.mrcore.json.JSONObject;
 import me.mrletsplay.mrcore.misc.TriConsumer;
 
-public class StringMapper<Self extends StringMapper<Self, P, T>, P extends SubMappable<P, T>, T> extends BasicMapper<Self, P, T> {
+public class StringMapper<S extends StringMapper<S, P, T>, P extends SubMappable<P, T>, T> extends BasicMapper<S, P, T> {
 
 	private BiFunction<ConfigSection, T, String> getter;
 	private TriConsumer<ConfigSection, T, String> setter;

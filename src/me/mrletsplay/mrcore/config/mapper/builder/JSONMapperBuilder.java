@@ -9,11 +9,11 @@ import me.mrletsplay.mrcore.config.mapper.JSONObjectMapper;
 import me.mrletsplay.mrcore.json.JSONObject;
 import me.mrletsplay.mrcore.misc.Complex;
 
-public class JSONMapperBuilder<Self extends JSONMapperBuilder<Self, T>, T> implements SubMappable<Self, T> {
+public class JSONMapperBuilder<S extends JSONMapperBuilder<S, T>, T> implements SubMappable<S, T> {
 
 	private Complex<T> mappingType;
 	private BiFunction<ConfigSection, JSONObject, T> constructor;
-	private Map<String, MapperElement<?, Self, T>> elements;
+	private Map<String, MapperElement<?, S, T>> elements;
 	
 	public JSONMapperBuilder(Class<T> mappingType, BiFunction<ConfigSection, JSONObject, T> constructor) {
 		this(Complex.value(mappingType), constructor);
@@ -29,7 +29,7 @@ public class JSONMapperBuilder<Self extends JSONMapperBuilder<Self, T>, T> imple
 		return JSONObjectMapper.create(mappingType,
 				(section, t) -> {
 					JSONObject json = new JSONObject();
-					for(Map.Entry<String, MapperElement<?, Self, T>> el : elements.entrySet()) {
+					for(Map.Entry<String, MapperElement<?, S, T>> el : elements.entrySet()) {
 						if(el.getValue().getMappingCondition() != null && !el.getValue().getMappingCondition().test(t, section, json, el.getKey())) continue;
 						el.getValue().applyMap(t, section, json, el.getKey());
 					}
@@ -37,7 +37,7 @@ public class JSONMapperBuilder<Self extends JSONMapperBuilder<Self, T>, T> imple
 				},
 				(section, json) -> {
 					T t = constructor.apply(section, json);
-					for(Map.Entry<String, MapperElement<?, Self, T>> el : elements.entrySet()) {
+					for(Map.Entry<String, MapperElement<?, S, T>> el : elements.entrySet()) {
 						if(el.getValue().getConstructingCondition() != null && !el.getValue().getConstructingCondition().test(t, section, json, el.getKey())) continue;
 						el.getValue().applyConstruct(t, section, json, el.getKey());
 					}
@@ -46,12 +46,12 @@ public class JSONMapperBuilder<Self extends JSONMapperBuilder<Self, T>, T> imple
 	}
 
 	@Override
-	public <Q extends MapperElement<Q, Self, T>> void addMapperElement(String key, MapperElement<Q, Self, T> element) {
+	public <Q extends MapperElement<Q, S, T>> void addMapperElement(String key, MapperElement<Q, S, T> element) {
 		elements.put(key, element);
 	}
 
 	@Override
-	public Map<String, MapperElement<?, Self, T>> getElements() {
+	public Map<String, MapperElement<?, S, T>> getElements() {
 		return elements;
 	}
 	

@@ -47,11 +47,9 @@ public class MrCoreBukkitImpl {
 			plugin.getLogger().info("Loaded MrCore successfully");
 			
 			if(oldProtocol != null) System.setProperty("https.protocols", oldProtocol);
-			return;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return;
 	}
 	
 	private static void download(URL url, File file) {

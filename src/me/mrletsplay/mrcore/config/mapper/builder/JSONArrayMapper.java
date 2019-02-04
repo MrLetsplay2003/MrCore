@@ -7,7 +7,7 @@ import me.mrletsplay.mrcore.json.JSONArray;
 import me.mrletsplay.mrcore.json.JSONObject;
 import me.mrletsplay.mrcore.misc.TriConsumer;
 
-public class JSONArrayMapper<Self extends JSONArrayMapper<Self, P, T>, P extends SubMappable<P, T>, T> extends BasicMapper<Self, P, T> {
+public class JSONArrayMapper<S extends JSONArrayMapper<S, P, T>, P extends SubMappable<P, T>, T> extends BasicMapper<S, P, T> {
 
 	private BiFunction<ConfigSection, T, JSONArray> getter;
 	private TriConsumer<ConfigSection, T, JSONArray> setter;

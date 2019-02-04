@@ -9,7 +9,7 @@ import me.mrletsplay.mrcore.json.JSONObject;
 import me.mrletsplay.mrcore.misc.FriendlyException;
 import me.mrletsplay.mrcore.misc.TriConsumer;
 
-public class EnumMapper<Self extends EnumMapper<Self, P, T, E>, P extends SubMappable<P, T>, T, E extends Enum<E>> extends BasicMapper<Self, P,T> {
+public class EnumMapper<S extends EnumMapper<S, P, T, E>, P extends SubMappable<P, T>, T, E extends Enum<E>> extends BasicMapper<S, P,T> {
 
 	private Class<E> enumClass;
 	private BiFunction<ConfigSection, T, E> getter;

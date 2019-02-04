@@ -4,7 +4,7 @@ import me.mrletsplay.mrcore.config.ConfigSection;
 import me.mrletsplay.mrcore.json.JSONObject;
 import me.mrletsplay.mrcore.misc.QuadPredicate;
 
-public abstract class BasicMapper<Self extends BasicMapper<Self, P, T>, P extends SubMappable<P, T>, T> implements MapperElement<Self, P, T> {
+public abstract class BasicMapper<S extends BasicMapper<S, P, T>, P extends SubMappable<P, T>, T> implements MapperElement<S, P, T> {
 
 	private P parent;
 	private QuadPredicate<T, ConfigSection, JSONObject, String> mappingCondition, constructingCondition;
@@ -19,7 +19,7 @@ public abstract class BasicMapper<Self extends BasicMapper<Self, P, T>, P extend
 	}
 	
 	@Override
-	public Self onlyMapIf(QuadPredicate<T, ConfigSection, JSONObject, String> condition) {
+	public S onlyMapIf(QuadPredicate<T, ConfigSection, JSONObject, String> condition) {
 		if(this.mappingCondition == null) {
 			this.mappingCondition = condition;
 		}else {
@@ -29,7 +29,7 @@ public abstract class BasicMapper<Self extends BasicMapper<Self, P, T>, P extend
 	}
 	
 	@Override
-	public Self onlyConstructIf(QuadPredicate<T, ConfigSection, JSONObject, String> condition) {
+	public S onlyConstructIf(QuadPredicate<T, ConfigSection, JSONObject, String> condition) {
 		if(this.constructingCondition == null) {
 			this.constructingCondition = condition;
 		}else {
