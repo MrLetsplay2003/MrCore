@@ -297,8 +297,9 @@ public abstract class EasyCommand implements CommandExecutor, TabCompleter {
 						case FLAG_VALUE:
 							CommandFlagValueElement vE = (CommandFlagValueElement) el;
 							return vE.getOperator().equals("=") ? "-" + vE.getFlag().getName() + "=" + co : co;
+						default:
+							return "";
 					}
-					return "";
 				}).collect(Collectors.toList());
 	}
 	

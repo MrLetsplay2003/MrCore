@@ -34,14 +34,14 @@ public class CommandParser {
 				String op = m.group("op");
 				if(fName.isEmpty()) {
 					if(op != null || !isTabComplete) return ErroringNullableOptional.ofErroring(new CommandParsingException("Flag must have a name", m.regionStart(), 1));
-					if(m.start() + 1 == rawArgs.length() && !del.equals(" ")) {
+					if(m.start() + 1 == rawArgs.length() && !" ".equals(del)) {
 						element = new CommandFlagElement("");
 						break;
 					}
 				}
 				CommandFlag<?> flag = command.getRegisteredFlag(fName);
 				if(flag == null) {
-					if(isTabComplete && (m.start() + fName.length() + 1 == rawArgs.length()) && !del.equals(" ")) {
+					if(isTabComplete && (m.start() + fName.length() + 1 == rawArgs.length()) && !" ".equals(del)) {
 						element = new CommandFlagElement(fName);
 						break;
 					}
@@ -52,10 +52,10 @@ public class CommandParser {
 				if(flag.needsValue()) {
 					if(fValue == null) {
 						if(isTabComplete && m.end() == rawArgs.length()) {
-							if(op == null && del.equals(" ")) {
+							if(op == null && " ".equals(del)) {
 								element = new CommandFlagValueElement("", flag, " ", m.group("fvalueq") != null, needsClosingQuote);
 								break;
-							}else if(!del.equals(" ") && op == null) {
+							}else if(!" ".equals(del) && op == null) {
 								element = new CommandFlagElement(fName);
 								break;
 							}else {
@@ -65,7 +65,7 @@ public class CommandParser {
 						}
 						return ErroringNullableOptional.ofErroring(new CommandParsingException("The flag \"" + fName + "\" needs a value", m.start(), fName.length() + 1));
 					}
-					if(isTabComplete && lastEnd == rawArgs.length() && !del.equals(" ")) {
+					if(isTabComplete && lastEnd == rawArgs.length() && !" ".equals(del)) {
 						element = new CommandFlagValueElement(fValue, flag, op, m.group("fvalueq") != null, needsClosingQuote);
 						break;
 					}
@@ -75,11 +75,9 @@ public class CommandParser {
 					flags.add(new ParsedCommandFlag<>(flag, fValue));
 				}else {
 					if(op != null && op.equals("=") && fValue != null) return ErroringNullableOptional.ofErroring(new CommandParsingException("Flag \"" + fName + "\" doesn't need a value", m.start() + fName.length() + 2, m.group("fvaluer").length()));
-					if(isTabComplete && m.end() == rawArgs.length()) {
-						if(op == null && !del.equals(" ")) {
-							element = new CommandFlagElement(fName);
-							break;
-						}
+					if(isTabComplete && m.end() == rawArgs.length() && op == null && !" ".equals(del)) {
+						element = new CommandFlagElement(fName);
+						break;
 					}
 					flags.add(new ParsedCommandFlag<>(flag, null));
 				}
@@ -90,7 +88,7 @@ public class CommandParser {
 				if(arg == null) return ErroringNullableOptional.ofErroring(new CommandParsingException("Empty argument", m.start(), m.end() - m.start()));
 				boolean needsClosingQuote = m.group("argq") != null && !m.group("argr").endsWith("\"");
 				if(isTabComplete && lastEnd == rawArgs.length()) {
-					if(m.group("del").equals(" ")) {
+					if(" ".equals(del)) {
 						element = new CommandArgumentElement("", args.size() + 1, false, false);
 						break;
 					}else {
