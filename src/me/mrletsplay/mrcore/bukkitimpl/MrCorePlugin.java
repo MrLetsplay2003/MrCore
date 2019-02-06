@@ -11,11 +11,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import me.mrletsplay.mrcore.bukkitimpl.ChatUI.UIListener;
 import me.mrletsplay.mrcore.bukkitimpl.GUIUtils.GUIListener;
-import me.mrletsplay.mrcore.bukkitimpl.command.CommandFlag;
-import me.mrletsplay.mrcore.bukkitimpl.command.CommandInvokedEvent;
-import me.mrletsplay.mrcore.bukkitimpl.command.DefaultCommandValueType;
-import me.mrletsplay.mrcore.bukkitimpl.command.EasyCommand;
-import me.mrletsplay.mrcore.bukkitimpl.command.completion.CommandTabCompletions;
 import me.mrletsplay.mrcore.bukkitimpl.versioned.NMSVersion;
 import me.mrletsplay.mrcore.config.ConfigLoader;
 import me.mrletsplay.mrcore.config.FileCustomConfig;
@@ -38,46 +33,6 @@ public class MrCorePlugin extends JavaPlugin{
 			String version = config.getString("versioning.version-to-use", "latest", true);
 			MrCoreUpdateChecker.checkForUpdate(version);
 		}
-		
-		EasyCommand c = new EasyCommand("mrcoredebug") {
-			
-			@Override
-			public void action(CommandInvokedEvent event) {
-				event.getSender().sendMessage("Hello there!");
-				event.getSender().sendMessage(event.getParsedCommand().getRaw());
-			}
-		}
-		.registerFlag(new CommandFlag<>("aflag", true, DefaultCommandValueType.STRING))
-		.registerFlag(new CommandFlag<>("bflag", true, DefaultCommandValueType.INT))
-		.registerFlag(new CommandFlag<>("cflag", false, null))
-		.setTabCompleter(event -> {
-			System.out.println(event.getElementToComplete());
-			CommandTabCompletions t = new CommandTabCompletions();
-			switch(event.getElementToComplete().getType()) {
-				case ARGUMENT:
-					t.addCompletion("arg1");
-					t.addCompletion("arg2");
-					break;
-				case FLAG_NAME:
-//					t.addCompletion("fname");
-//					t.addCompletion("aflag");
-					break;
-				case FLAG_VALUE:
-					t.addCompletion("fval");
-					t.addCompletion("1");
-					break;
-				default:
-					break;
-			}
-			return t;
-		});
-		
-
-		c.addSubCommand("subcommand", event -> {
-			event.getSender().sendMessage("Why tho?");
-		});
-		c.registerFor(this);
-		
 		config.saveToFile();
 		getLogger().info("And MrCore is on board as well! :wave:");
 	}
