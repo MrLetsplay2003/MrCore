@@ -16,7 +16,7 @@ public class ConstantPoolInvokeDynamicEntry extends AbstractConstantPoolEntry {
 
 	@Override
 	public ConstantPoolTag getTag() {
-		return ConstantPoolTag.METHOD_TYPE;
+		return ConstantPoolTag.INVOKE_DYNAMIC;
 	}
 	
 	public int getBootstrapMethodAttributeIndex() {

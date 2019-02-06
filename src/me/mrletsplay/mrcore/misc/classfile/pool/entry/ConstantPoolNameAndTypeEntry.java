@@ -15,7 +15,7 @@ public class ConstantPoolNameAndTypeEntry extends AbstractConstantPoolEntry {
 	
 	@Override
 	public ConstantPoolTag getTag() {
-		return ConstantPoolTag.LONG;
+		return ConstantPoolTag.NAME_AND_TYPE;
 	}
 	
 	public ConstantPoolUTF8Entry getName() {

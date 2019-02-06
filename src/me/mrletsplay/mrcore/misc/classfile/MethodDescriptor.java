@@ -10,15 +10,12 @@ import me.mrletsplay.mrcore.misc.EnumFlagCompound;
 
 public class MethodDescriptor {
 
-
-	
 	private static final Pattern PATTERN_METHOD_SIGNATURE = Pattern.compile("\\((?<types>(.)*)\\)(?<return>(.)+)");
 	
 	private String name;
 	private EnumFlagCompound<MethodAccessFlag> accessFlags;
 	private ParameterDescriptor[] parameterDescriptors;
 	private TypeDescriptor returnType;
-	
 	
 	public MethodDescriptor(String name, EnumFlagCompound<MethodAccessFlag> accessFlags, String methodSignature) {
 		this.name = name;

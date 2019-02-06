@@ -5,15 +5,18 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import me.mrletsplay.mrcore.misc.classfile.ClassFile;
+import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolUTF8Entry;
 
 public abstract class AbstractDefaultAttribute implements DefaultAttribute {
 
 	private ClassFile classFile;
+	private ConstantPoolUTF8Entry name;
 	private byte[] info;
 	private DataInputStream input;
 	
-	public AbstractDefaultAttribute(ClassFile classFile, byte[] info) throws IOException {
+	public AbstractDefaultAttribute(ClassFile classFile, ConstantPoolUTF8Entry name, byte[] info) throws IOException {
 		this.classFile = classFile;
+		this.name = name;
 		this.info = info;
 		this.input = new DataInputStream(new ByteArrayInputStream(info));
 	}
@@ -23,8 +26,17 @@ public abstract class AbstractDefaultAttribute implements DefaultAttribute {
 	}
 	
 	@Override
+	public ConstantPoolUTF8Entry getName() {
+		return name;
+	}
+	
+	@Override
 	public ClassFile getClassFile() {
 		return classFile;
+	}
+	
+	public void setInfo(byte[] info) {
+		this.info = info;
 	}
 	
 	@Override

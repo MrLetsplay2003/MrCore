@@ -1,10 +1,12 @@
 package me.mrletsplay.mrcore.misc.classfile;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -12,7 +14,9 @@ import java.util.stream.Collectors;
 import me.mrletsplay.mrcore.misc.EnumFlagCompound;
 import me.mrletsplay.mrcore.misc.classfile.attribute.Attribute;
 import me.mrletsplay.mrcore.misc.classfile.attribute.AttributeCode;
+import me.mrletsplay.mrcore.misc.classfile.attribute.AttributeLocalVariableTable;
 import me.mrletsplay.mrcore.misc.classfile.attribute.AttributeRaw;
+import me.mrletsplay.mrcore.misc.classfile.attribute.AttributeStackMapTable;
 import me.mrletsplay.mrcore.misc.classfile.attribute.DefaultAttributeType;
 import me.mrletsplay.mrcore.misc.classfile.pool.ConstantPool;
 import me.mrletsplay.mrcore.misc.classfile.pool.ConstantPoolTag;
@@ -140,19 +144,19 @@ public class ClassFile {
 		int aNameIdx = in.readUnsignedShort();
 		byte[] info = new byte[in.readInt()];
 		in.read(info);
-		return parseAttribute(new AttributeRaw(this, aNameIdx, info));
+		return parseAttribute(new AttributeRaw(this, pool.getEntry(aNameIdx).as(ConstantPoolUTF8Entry.class), info));
 	}
 	
 	private Attribute parseAttribute(AttributeRaw attr) throws IOException {
 		DefaultAttributeType defType = DefaultAttributeType.getByName(attr.getNameString());
 		if(defType == null) return attr;
 		switch(defType) {
+			case CODE:
+				return new AttributeCode(this, attr.getName(), attr.getInfo());
 			case ANNOTATION_DEFAULT:
 				break;
 			case BOOTSTRAP_METHODS:
 				break;
-			case CODE:
-				return new AttributeCode(this, attr.getInfo());
 			case CONSTANT_VALUE:
 				break;
 			case DEPRECATED:
@@ -165,8 +169,8 @@ public class ClassFile {
 				break;
 			case LINE_NUMBER_TABLE:
 				break;
-			case LOCAL_VARIABLE_TYPE:
-				break;
+			case LOCAL_VARIABLE_TABLE:
+				return new AttributeLocalVariableTable(this, attr.getName(), attr.getInfo());
 			case LOCAL_VARIABLE_TYPE_TABLE:
 				break;
 			case RUNTIME_INVISIBLE_ANNOTATIONS:
@@ -184,7 +188,7 @@ public class ClassFile {
 			case SOURCE_FILE:
 				break;
 			case STACK_MAP_TABLE:
-				break;
+				return new AttributeStackMapTable(this, attr.getName(), attr.getInfo());
 			case SYNTHETIC:
 				break;
 		}
@@ -241,6 +245,155 @@ public class ClassFile {
 	
 	public Attribute getAttribute(DefaultAttributeType type) {
 		return Arrays.stream(attributes).filter(a -> a.getNameString().equals(type.getName())).findFirst().orElse(null);
+	}
+	
+	public void write(OutputStream out) throws IOException {
+		DataOutputStream dOut = new DataOutputStream(out);
+		dOut.writeInt(0xCAFEBABE);
+		dOut.writeShort(minorVersion);
+		dOut.writeShort(majorVersion);
+		dOut.writeShort(constantPool.getSize() + 1);
+		for(ConstantPoolEntry en : constantPool.getEntries()) {
+			if(en == null) continue;
+			writeConstantPoolEntry(dOut, constantPool, en);
+		}
+		dOut.writeShort((int) accessFlags.getCompound());
+		dOut.writeShort(constantPool.indexOf(thisClass));
+		dOut.writeShort(constantPool.indexOf(superClass));
+		dOut.writeShort(interfaces.length);
+		for(ConstantPoolClassEntry en : interfaces) {
+			dOut.writeShort(constantPool.indexOf(en));
+		}
+		dOut.writeShort(fields.length);
+		for(ClassField f : fields) {
+			dOut.writeShort((int) f.getAccessFlags().getCompound());
+			dOut.writeShort(constantPool.indexOf(f.getName()));
+			dOut.writeShort(constantPool.indexOf(f.getDescriptor()));
+			dOut.writeShort(f.getAttributes().length);
+			for(Attribute a : f.getAttributes()) {
+				writeAttribute(dOut, constantPool, a);
+			}
+		}
+		dOut.writeShort(methods.length);
+		for(ClassMethod m : methods) {
+			dOut.writeShort((int) m.getAccessFlags().getCompound());
+			dOut.writeShort(constantPool.indexOf(m.getName()));
+			dOut.writeShort(constantPool.indexOf(m.getDescriptor()));
+			dOut.writeShort(m.getAttributes().length);
+			for(Attribute a : m.getAttributes()) {
+				writeAttribute(dOut, constantPool, a);
+			}
+		}
+		dOut.writeShort(attributes.length);
+		for(Attribute a : attributes) {
+			writeAttribute(dOut, constantPool, a);
+		}
+	}
+	
+	public void writeConstantPoolEntry(DataOutputStream dOut, ConstantPool pool, ConstantPoolEntry entry) throws IOException {
+		dOut.writeByte(entry.getTag().getValue());
+		switch(entry.getTag()) {
+			case CLASS:
+			{
+				ConstantPoolClassEntry en = (ConstantPoolClassEntry) entry;
+				dOut.writeShort(pool.indexOf(en.getName()));
+				break;
+			}
+			case FIELD_REF:
+			{
+				ConstantPoolFieldRefEntry en = (ConstantPoolFieldRefEntry) entry;
+				dOut.writeShort(pool.indexOf(en.getClassInfo()));
+				dOut.writeShort(pool.indexOf(en.getNameAndType()));
+				break;
+			}
+			case METHOD_REF:
+			{
+				ConstantPoolMethodRefEntry en = (ConstantPoolMethodRefEntry) entry;
+				dOut.writeShort(pool.indexOf(en.getClassInfo()));
+				dOut.writeShort(pool.indexOf(en.getNameAndType()));
+				break;
+			}
+			case INTERFACE_METHOD_REF:
+			{
+				ConstantPoolInterfaceMethodRefEntry en = (ConstantPoolInterfaceMethodRefEntry) entry;
+				dOut.writeShort(pool.indexOf(en.getClassInfo()));
+				dOut.writeShort(pool.indexOf(en.getNameAndType()));
+				break;
+			}
+			case STRING:
+			{
+				ConstantPoolStringEntry en = (ConstantPoolStringEntry) entry;
+				dOut.writeShort(pool.indexOf(en.getString()));
+				break;
+			}
+			case INTEGER:
+			{
+				ConstantPoolIntegerEntry en = (ConstantPoolIntegerEntry) entry;
+				dOut.writeInt(en.getValue());
+				break;
+			}
+			case FLOAT:
+			{
+				ConstantPoolFloatEntry en = (ConstantPoolFloatEntry) entry;
+				dOut.writeFloat(en.getValue());
+				break;
+			}
+			case LONG:
+			{
+				ConstantPoolLongEntry en = (ConstantPoolLongEntry) entry;
+				dOut.writeLong(en.getValue());
+				break;
+			}
+			case DOUBLE:
+			{
+				ConstantPoolDoubleEntry en = (ConstantPoolDoubleEntry) entry;
+				dOut.writeDouble(en.getValue());
+				break;
+			}
+			case NAME_AND_TYPE:
+			{
+				ConstantPoolNameAndTypeEntry en = (ConstantPoolNameAndTypeEntry) entry;
+				dOut.writeShort(pool.indexOf(en.getName()));
+				dOut.writeShort(pool.indexOf(en.getDescriptor()));
+				break;
+			}
+			case UTF_8:
+			{
+				ConstantPoolUTF8Entry en = (ConstantPoolUTF8Entry) entry;
+				byte[] bs = en.getValue().getBytes(StandardCharsets.UTF_8);
+				dOut.writeShort(bs.length);
+				dOut.write(bs);
+				break;
+			}
+			case METHOD_HANDLE:
+			{
+				ConstantPoolMethodHandleEntry en = (ConstantPoolMethodHandleEntry) entry;
+				dOut.writeByte(en.getReferenceType().getKind());
+				dOut.writeShort(pool.indexOf(en.getReference()));
+				break;
+			}
+			case METHOD_TYPE:
+			{
+				ConstantPoolMethodTypeEntry en = (ConstantPoolMethodTypeEntry) entry;
+				dOut.writeShort(pool.indexOf(en.getDescriptor()));
+				break;
+			}
+			case INVOKE_DYNAMIC:
+			{
+				ConstantPoolInvokeDynamicEntry en = (ConstantPoolInvokeDynamicEntry) entry;
+				dOut.writeShort(en.getBootstrapMethodAttributeIndex());
+				dOut.writeShort(pool.indexOf(en.getNameAndType()));
+				break;
+			}
+			default:
+				throw new RuntimeException();
+		}
+	}
+	
+	public void writeAttribute(DataOutputStream dOut, ConstantPool pool, Attribute attr) throws IOException {
+		dOut.writeShort(pool.indexOf(attr.getName()));
+		dOut.writeInt(attr.getInfo().length);
+		dOut.write(attr.getInfo());
 	}
 	
 	@Override

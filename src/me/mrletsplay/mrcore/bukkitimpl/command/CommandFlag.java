@@ -24,4 +24,11 @@ public class CommandFlag<T> {
 		return valueType;
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		if(!(obj instanceof CommandFlag<?>)) return false;
+		CommandFlag<?> other = (CommandFlag<?>) obj;
+		return name.equals(other.name);
+	}
+	
 }

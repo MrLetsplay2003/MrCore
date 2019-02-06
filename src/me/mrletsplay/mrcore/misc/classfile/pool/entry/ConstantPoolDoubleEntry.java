@@ -14,7 +14,7 @@ public class ConstantPoolDoubleEntry extends AbstractConstantPoolEntry {
 	
 	@Override
 	public ConstantPoolTag getTag() {
-		return ConstantPoolTag.LONG;
+		return ConstantPoolTag.DOUBLE;
 	}
 	
 	@Override

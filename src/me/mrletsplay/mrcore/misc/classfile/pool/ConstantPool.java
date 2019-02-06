@@ -23,4 +23,23 @@ public class ConstantPool {
 		return entries;
 	}
 	
+	public int appendEntry(ConstantPoolEntry entry) {
+		ConstantPoolEntry[] nEns = new ConstantPoolEntry[entries.length + 1];
+		System.arraycopy(entries, 0, nEns, 0, entries.length);
+		nEns[entries.length] = entry;
+		entries = nEns;
+		return entries.length;
+	}
+	
+	public int getSize() {
+		return entries.length;
+	}
+	
+	public int indexOf(ConstantPoolEntry entry) {
+		for(int i = 0; i < entries.length; i++) {
+			if(entries[i].equals(entry)) return i + 1;
+		}
+		throw new IllegalArgumentException("Entry not in constant pool");
+	}
+	
 }

@@ -32,7 +32,15 @@ public class CommandInvokedEvent {
 		return parsedCommand.isFlagPresent(flag);
 	}
 	
+	public boolean isFlagPresent(String flag) {
+		return parsedCommand.isFlagPresent(flag);
+	}
+	
 	public <T> ParsedCommandFlag<T> getFlag(CommandFlag<T> flag) {
+		return parsedCommand.getFlag(flag);
+	}
+	
+	public ParsedCommandFlag<?> getFlag(String flag) {
 		return parsedCommand.getFlag(flag);
 	}
 	

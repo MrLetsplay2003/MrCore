@@ -6,17 +6,18 @@ import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolUTF8Entry;
 public class AttributeRaw implements Attribute {
 
 	private ClassFile classFile;
-	private int nameIndex;
+	private ConstantPoolUTF8Entry name;
 	private byte[] info;
 	
-	public AttributeRaw(ClassFile classFile, int nameIndex, byte[] info) {
+	public AttributeRaw(ClassFile classFile, ConstantPoolUTF8Entry name, byte[] info) {
 		this.classFile = classFile;
-		this.nameIndex = nameIndex;
+		this.name = name;
 		this.info = info;
 	}
 	
+	@Override
 	public ConstantPoolUTF8Entry getName() {
-		return classFile.getConstantPool().getEntry(nameIndex).as(ConstantPoolUTF8Entry.class);
+		return name;
 	}
 	
 	@Override
@@ -32,6 +33,11 @@ public class AttributeRaw implements Attribute {
 	@Override
 	public ClassFile getClassFile() {
 		return classFile;
+	}
+	
+	@Override
+	public Attribute[] getAttributes() {
+		throw new UnsupportedOperationException();
 	}
 	
 }

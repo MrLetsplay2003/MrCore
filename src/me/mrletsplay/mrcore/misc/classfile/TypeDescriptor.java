@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import me.mrletsplay.mrcore.misc.PrimitiveType;
+
 public class TypeDescriptor {
 	
 	private String rawDescriptor, className;
@@ -78,6 +80,30 @@ public class TypeDescriptor {
 	
 	public boolean isPrimitive() {
 		return isPrimitive;
+	}
+	
+	public PrimitiveType getPrimitiveType() {
+		if(!isPrimitive) return PrimitiveType.OBJECT;
+		switch (className) {
+			case "boolean":
+				return PrimitiveType.BOOLEAN;
+			case "char":
+				return PrimitiveType.CHAR;
+			case "byte":
+				return PrimitiveType.BYTE;
+			case "short":
+				return PrimitiveType.SHORT;
+			case "int":
+				return PrimitiveType.INT;
+			case "long":
+				return PrimitiveType.LONG;
+			case "double":
+				return PrimitiveType.DOUBLE;
+			case "float":
+				return PrimitiveType.FLOAT;
+			default:
+				return null;
+		}
 	}
 	
 	public TypeDescriptor getArrayType() {

@@ -15,7 +15,7 @@ public enum DefaultAttributeType {
 	SOURCE_FILE("SourceFile"),
 	SOURCE_DEBUG_EXCEPTION("SourceDebugException"),
 	LINE_NUMBER_TABLE("LineNumberTable"),
-	LOCAL_VARIABLE_TYPE("LocalVariableType"),
+	LOCAL_VARIABLE_TABLE("LocalVariableTable"),
 	LOCAL_VARIABLE_TYPE_TABLE("LocalVariableTypeTable"),
 	DEPRECATED("Deprecated"),
 	RUNTIME_VISIBLE_ANNOTATIONS("RuntimeVisibleAnnotations"),

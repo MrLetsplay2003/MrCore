@@ -39,10 +39,19 @@ public class ParsedCommand {
 		return getFlag(flag) != null;
 	}
 	
+	public boolean isFlagPresent(String flag) {
+		return getFlag(flag) != null;
+	}
+	
 	@SuppressWarnings("unchecked")
 	public <T> ParsedCommandFlag<T> getFlag(CommandFlag<T> flag) {
 		ParsedCommandFlag<?> flg = flags.stream().filter(p -> p.getFlag().equals(flag)).findFirst().orElse(null);
 		return (ParsedCommandFlag<T>) flg;
+	}
+	
+	public ParsedCommandFlag<?> getFlag(String flag) {
+		ParsedCommandFlag<?> flg = flags.stream().filter(p -> p.getFlag().getName().equals(flag)).findFirst().orElse(null);
+		return flg;
 	}
 	
 	public List<ParsedCommandFlag<?>> getFlags() {
