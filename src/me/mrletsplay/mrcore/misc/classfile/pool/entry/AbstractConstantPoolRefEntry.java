@@ -13,8 +13,16 @@ public abstract class AbstractConstantPoolRefEntry extends AbstractConstantPoolE
 		this.nameAndTypeIndex = nameAndTypeIndex;
 	}
 	
+	public int getClassIndex() {
+		return classIndex;
+	}
+	
 	public ConstantPoolClassEntry getClassInfo() {
 		return getConstantPool().getEntry(classIndex).as(ConstantPoolClassEntry.class);
+	}
+	
+	public int getNameAndTypeIndex() {
+		return nameAndTypeIndex;
 	}
 	
 	public ConstantPoolNameAndTypeEntry getNameAndType() {

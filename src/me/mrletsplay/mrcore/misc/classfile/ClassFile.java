@@ -400,7 +400,7 @@ public class ClassFile {
 	public String toString() {
 		StringBuilder res = new StringBuilder();
 		res.append(accessFlags.getApplicable().stream().map(a -> a.getName()).collect(Collectors.joining(" "))).append(" class ")
-			.append(new TypeDescriptor(thisClass.getName().getValue()).getFriendlyName()).append(" extends ").append(new TypeDescriptor(superClass.getName().getValue()).getFriendlyName());
+			.append(TypeDescriptor.parse(thisClass.getName().getValue()).getFriendlyName()).append(" extends ").append(TypeDescriptor.parse(superClass.getName().getValue()).getFriendlyName());
 		if(interfaces.length > 0) {
 			res.append(" implements ").append(Arrays.stream(interfaces).map(i -> TypeDescriptor.parse(i.getName().getValue()).getFriendlyName()).collect(Collectors.joining(", ")));
 		}

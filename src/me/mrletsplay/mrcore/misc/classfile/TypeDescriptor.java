@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import me.mrletsplay.mrcore.misc.ClassUtils;
 import me.mrletsplay.mrcore.misc.PrimitiveType;
 
 public class TypeDescriptor {
@@ -11,7 +12,7 @@ public class TypeDescriptor {
 	private String rawDescriptor, className;
 	private boolean isPrimitive;
 	
-	public TypeDescriptor(String rawDescriptor) {
+	private TypeDescriptor(String rawDescriptor) {
 		this.rawDescriptor = rawDescriptor;
 		if(rawDescriptor.endsWith(";")) rawDescriptor = rawDescriptor.substring(0, rawDescriptor.length() - 1);
 		rawDescriptor = rawDescriptor.replace('/', '.');
@@ -66,6 +67,18 @@ public class TypeDescriptor {
 		}
 	}
 	
+	private TypeDescriptor(Class<?> clazz) {
+		this.className = clazz.getName();
+		this.isPrimitive = ClassUtils.isPrimitiveTypeClass(clazz);
+		if(!isPrimitive && !clazz.isArray()) {
+			this.rawDescriptor = "L" + className.replace('.', '/') + ";";
+		}else if(clazz.isArray()){
+			this.rawDescriptor = className.replace('.', '/');
+		}else {
+			this.rawDescriptor = PrimitiveType.getByPrimitiveClass(clazz).getSignatureName();
+		}
+	}
+	
 	public String getClassName() {
 		return className;
 	}
@@ -102,7 +115,7 @@ public class TypeDescriptor {
 			case "float":
 				return PrimitiveType.FLOAT;
 			default:
-				return null;
+				throw new IllegalStateException("Invalid primitive type class");
 		}
 	}
 	
@@ -111,7 +124,7 @@ public class TypeDescriptor {
 		return new TypeDescriptor(className.substring(1));
 	}
 	
-	protected Class<?> toClass() throws ClassNotFoundException {
+	public Class<?> toClass() throws ClassNotFoundException {
 		switch(className) {
 			case "boolean":
 				return boolean.class;
@@ -155,6 +168,10 @@ public class TypeDescriptor {
 	
 	public static TypeDescriptor parse(String rawDescriptor) {
 		return new TypeDescriptor(rawDescriptor);
+	}
+	
+	public static TypeDescriptor of(Class<?> typeClass) {
+		return new TypeDescriptor(typeClass);
 	}
 	
 	public static List<TypeDescriptor> parseMulti(String multi) {

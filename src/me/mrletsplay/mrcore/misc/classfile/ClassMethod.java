@@ -27,6 +27,10 @@ public class ClassMethod {
 		return accessFlags;
 	}
 	
+	public boolean isConstructor() {
+		return getName().getValue().equals("<init>");
+	}
+	
 	public ConstantPoolUTF8Entry getName() {
 		return classFile.getConstantPool().getEntry(nameIndex).as(ConstantPoolUTF8Entry.class);
 	}

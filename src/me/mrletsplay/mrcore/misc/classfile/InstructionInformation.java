@@ -12,6 +12,14 @@ public class InstructionInformation {
 		this.information = information;
 	}
 	
+	public InstructionInformation(Instruction instruction, byte information) {
+		this(instruction, new byte[] {information});
+	}
+	
+	public InstructionInformation(Instruction instruction) {
+		this(instruction, new byte[0]);
+	}
+	
 	public Instruction getInstruction() {
 		return instruction;
 	}

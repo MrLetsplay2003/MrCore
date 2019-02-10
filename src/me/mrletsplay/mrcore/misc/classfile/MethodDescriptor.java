@@ -24,13 +24,14 @@ public class MethodDescriptor {
 		if(!m.matches()) throw new IllegalArgumentException("Invalid method signature");
 		List<TypeDescriptor> parameterTypeDescriptors = TypeDescriptor.parseMulti(m.group("types"));
 		parameterDescriptors = parameterTypeDescriptors.stream().map(t -> new ParameterDescriptor(t)).toArray(ParameterDescriptor[]::new);
-		returnType = new TypeDescriptor(m.group("return"));
+		returnType = TypeDescriptor.parse(m.group("return"));
 	}
 	
 	public MethodDescriptor(String name, TypeDescriptor returnType, ParameterDescriptor... parameterDescriptors) {
 		this.name = name;
 		this.parameterDescriptors = parameterDescriptors;
 		this.returnType = returnType;
+		this.accessFlags = EnumFlagCompound.noneOf(MethodAccessFlag.class);
 	}
 	
 	public boolean isConstructor() {
@@ -43,6 +44,10 @@ public class MethodDescriptor {
 	
 	public ParameterDescriptor[] getParameterDescriptors() {
 		return parameterDescriptors;
+	}
+	
+	public String getParameterSignature() {
+		return Arrays.stream(parameterDescriptors).map(p -> p.getParameterType().getRawDescriptor()).collect(Collectors.joining());
 	}
 	
 	public TypeDescriptor getReturnType() {

@@ -18,8 +18,16 @@ public class ConstantPoolNameAndTypeEntry extends AbstractConstantPoolEntry {
 		return ConstantPoolTag.NAME_AND_TYPE;
 	}
 	
+	public int getNameIndex() {
+		return nameIndex;
+	}
+	
 	public ConstantPoolUTF8Entry getName() {
 		return getConstantPool().getEntry(nameIndex).as(ConstantPoolUTF8Entry.class);
+	}
+	
+	public int getDescriptorIndex() {
+		return descriptorIndex;
 	}
 	
 	public ConstantPoolUTF8Entry getDescriptor() {

@@ -51,7 +51,7 @@ public class ClassField {
 	@Override
 	public String toString() {
 		return new StringBuilder().append(accessFlags.getApplicable().stream().map(a -> a.getName()).collect(Collectors.joining(" "))).append(" ")
-				.append(new TypeDescriptor(getDescriptor().getValue()).getFriendlyName()).append(" ")
+				.append(TypeDescriptor.parse(getDescriptor().getValue()).getFriendlyName()).append(" ")
 				.append(getName().getValue()).toString();
 	}
 	

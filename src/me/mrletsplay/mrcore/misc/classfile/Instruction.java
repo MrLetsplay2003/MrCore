@@ -7,7 +7,7 @@ public enum Instruction {
 
 	AALOAD(0x32, 0),
 	AASTORE(0x53, 0),
-	AACONST_NULL(0x1, 0),
+	ACONST_NULL(0x1, 0),
 	ALOAD(0x19, 1),
 	ALOAD_0(0x2a, 0),
 	ALOAD_1(0x2b, 0),

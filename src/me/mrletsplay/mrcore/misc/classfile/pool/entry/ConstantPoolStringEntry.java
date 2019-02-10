@@ -17,6 +17,10 @@ public class ConstantPoolStringEntry extends AbstractConstantPoolEntry {
 		return ConstantPoolTag.STRING;
 	}
 	
+	public int getStringIndex() {
+		return stringIndex;
+	}
+	
 	public ConstantPoolUTF8Entry getString() {
 		return getConstantPool().getEntry(stringIndex).as(ConstantPoolUTF8Entry.class);
 	}
