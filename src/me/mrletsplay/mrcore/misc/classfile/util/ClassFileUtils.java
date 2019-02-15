@@ -191,6 +191,7 @@ public class ClassFileUtils {
 		
 		for(ClassMethod m : file.getMethods()) {
 			if(m.isConstructor()) continue;
+			if(m.getMethodDescriptor().getReturnType().isVoid()) continue;
 			String sig = "(" + getMethodDescriptor(handlerMethod).getParameterSignature() + ")V";
 			redirectMethodExecutionNamed(file, m, toClass.getName().replace('.', '/'), handlerMethod.getName(), sig);
 		}

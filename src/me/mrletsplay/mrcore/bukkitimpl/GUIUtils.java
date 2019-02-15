@@ -1130,6 +1130,7 @@ public class GUIUtils {
 		
 	}
 	
+	@Deprecated
 	public static class GUIHolderPropertyMap extends HashMap<String, Object> {
 
 		private static final long serialVersionUID = 8608526183300903401L;

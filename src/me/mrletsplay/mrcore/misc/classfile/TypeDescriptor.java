@@ -95,6 +95,10 @@ public class TypeDescriptor {
 		return isPrimitive;
 	}
 	
+	public boolean isVoid() {
+		return className.equals("void");
+	}
+	
 	public PrimitiveType getPrimitiveType() {
 		if(!isPrimitive) return PrimitiveType.OBJECT;
 		switch (className) {
