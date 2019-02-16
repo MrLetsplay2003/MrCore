@@ -19,16 +19,13 @@ public class MultiBlockStructureListener implements Listener {
 
 	@EventHandler
 	private void onBlockPlaced(BlockPlaceEvent event) {
-		Material m = event.getBlock().getType();
-		event.getBlock().setType(Material.AIR);
-		for(Map.Entry<MultiBlockStructure, List<Consumer<MultiBlockStructureBrokenEvent>>> en : brokenListeners.entrySet()) {
-			BuiltMultiBlockStructure bM = en.getKey().checkAt(event.getBlock().getLocation());
-			if(bM != null) {
-				MultiBlockStructureBrokenEvent ev = new MultiBlockStructureBrokenEvent(event, bM, event.getPlayer());
-				en.getValue().forEach(c -> c.accept(ev));
-			}
-		}
-		event.getBlock().setType(m);
+//		for(Map.Entry<MultiBlockStructure, List<Consumer<MultiBlockStructureBrokenEvent>>> en : brokenListeners.entrySet()) { TODO: Detect when structure is destroyed by placing a block
+//			BuiltMultiBlockStructure bM = en.getKey().checkAt(event.getBlock().getLocation());
+//			if(bM != null) {
+//				MultiBlockStructureBrokenEvent ev = new MultiBlockStructureBrokenEvent(event, bM, event.getPlayer());
+//				en.getValue().forEach(c -> c.accept(ev));
+//			}
+//		}
 		for(Map.Entry<MultiBlockStructure, List<Consumer<MultiBlockStructureCreatedEvent>>> en : createdListeners.entrySet()) {
 			if(en.getKey().getLayers().stream().anyMatch(l -> l.getTypeMappings().values().contains(event.getBlock().getType()))) {
 				BuiltMultiBlockStructure b = en.getKey().checkAt(event.getBlock().getLocation());

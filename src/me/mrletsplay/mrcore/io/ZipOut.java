@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -19,6 +20,8 @@ import me.mrletsplay.mrcore.misc.FriendlyException;
  * @author MrLetsplay2003
  */
 public class ZipOut {
+	
+	public static final Consumer<File> EMPTY_HANDLER = f -> {};
 	
 	private ZipOutputStream out;
 
@@ -68,7 +71,18 @@ public class ZipOut {
 	 * @throws IOException If an I/O error occurs
 	 */
 	public void writeFile(File file) throws IOException {
-		writeFile(file, new ArrayList<>());
+		writeFile(file, EMPTY_HANDLER);
+	}
+	
+	/**
+	 * Writes a file (possibly a folder) to the zip file<br>
+	 * If the provided file is a folder, a subfolder will be created inside the zip file and all its contents (and possibly subfolders) will be added
+	 * @param file A {@link File} object (can be a folder)
+	 * @param fileHandler A handler function which gets called when a file is being added
+	 * @throws IOException If an I/O error occurs
+	 */
+	public void writeFile(File file, Consumer<File> fileHandler) throws IOException {
+		writeFile(file, new ArrayList<>(), fileHandler);
 	}
 	
 	/**
@@ -79,7 +93,19 @@ public class ZipOut {
 	 * @throws IOException If an I/O error occurs
 	 */
 	public void writeFile(File file, List<File> exceptions) throws IOException {
-		writeFile("", file, exceptions);
+		writeFile(file, exceptions, EMPTY_HANDLER);
+	}
+	
+	/**
+	 * Writes a file (possibly a folder) to the zip file<br>
+	 * If the provided file is a folder, a subfolder will be created inside the zip file and all its contents (and possibly subfolders) will be added
+	 * @param file A {@link File} object (can be a folder)
+	 * @param exceptions Files to exclude
+	 * @param fileHandler A handler function which gets called when a file is being added
+	 * @throws IOException If an I/O error occurs
+	 */
+	public void writeFile(File file, List<File> exceptions, Consumer<File> fileHandler) throws IOException {
+		writeFile("", file, exceptions, fileHandler);
 	}
 	
 	/**
@@ -91,18 +117,32 @@ public class ZipOut {
 	 * @throws IOException If an I/O error occurs
 	 */
 	public void writeFile(String subPath, File file, List<File> exceptions) throws IOException {
-		file = file.getAbsoluteFile();
-		addFilesToZip(file, out, subPath, absFilePath(file).length() - file.getName().length() - 1, exceptions);
+		writeFile(subPath, file, exceptions, EMPTY_HANDLER);
 	}
 	
-	private static void addFilesToZip(File f, ZipOutputStream out, String subPath, int sI, List<File> exceptions) throws IOException{
+	/**
+	 * Writes a file (possibly a folder) to the zip file<br>
+	 * If the provided file is a folder, a subfolder will be created inside the zip file and all its contents (and possibly subfolders) will be added
+	 * @param file A {@link File} object (can be a folder)
+	 * @param subPath The sub path/folder to write to
+	 * @param exceptions Files to exclude
+	 * @param fileHandler A handler function which gets called when a file is being added
+	 * @throws IOException If an I/O error occurs
+	 */
+	public void writeFile(String subPath, File file, List<File> exceptions, Consumer<File> fileHandler) throws IOException {
+		file = file.getAbsoluteFile();
+		addFilesToZip(file, out, subPath, absFilePath(file).length() - file.getName().length() - 1, exceptions, fileHandler);
+	}
+	
+	private static void addFilesToZip(File f, ZipOutputStream out, String subPath, int sI, List<File> exceptions, Consumer<File> fileHandler) throws IOException{
 		if(f.isDirectory()){
 			if(isException(f, exceptions)) return;
 			for(File fl : f.listFiles()){
-				addFilesToZip(fl, out, subPath, sI, exceptions);
+				addFilesToZip(fl, out, subPath, sI, exceptions, fileHandler);
 			}
 		}else{
 			if(isException(f, exceptions)) return;
+			fileHandler.accept(f);
 			FileInputStream fIn = new FileInputStream(f);
 			out.putNextEntry(new ZipEntry((subPath.isEmpty() ? "" : subPath + "/") + absFilePath(f).substring(sI + 1)));
 			byte[] buffer = new byte[4096];
