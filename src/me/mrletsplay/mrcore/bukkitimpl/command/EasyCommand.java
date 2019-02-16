@@ -39,7 +39,7 @@ public abstract class EasyCommand implements CommandExecutor, TabCompleter {
 	private EasyCommand parent;
 	private String name;
 	private List<String> aliases;
-	private String permission, description, usage;
+	private String permission, description, usage; // TODO: description + usage currently unused
 	private List<EasyCommand> subCommands;
 	private List<CommandFlag<?>> registeredFlags;
 	private CommandExecutionProperties executionProperties;
@@ -189,6 +189,10 @@ public abstract class EasyCommand implements CommandExecutor, TabCompleter {
 		if(args.length > 0) {
 			EasyCommand sC = getSubCommand(args[0]);
 			if(sC != null) return sC.onCommand(sender, command, args[0], Arrays.stream(args).skip(1).toArray(String[]::new));
+		}
+		if(!sender.hasPermission(permission)) {
+			sendErrorMessage(sender, new CommandExecutionException("No permission", -1, -1), null);
+			return true;
 		}
 		String argsString = Arrays.stream(args).collect(Collectors.joining(" "));
 		if(getEffectiveExecutionProperties().getAllowSubCommands().get()) {
