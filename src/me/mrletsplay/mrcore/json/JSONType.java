@@ -90,6 +90,10 @@ public enum JSONType {
 	}
 	
 	public static Object castJSONValueTo(Object value, Class<?> clazz) {
+		return castJSONValueTo(value, clazz, true);
+	}
+	
+	public static Object castJSONValueTo(Object value, Class<?> clazz, boolean strict) {
 		if(clazz.equals(JSONArray.class)) {
 			return (JSONArray) value;
 		}else if(clazz.equals(Boolean.class) || clazz.equals(boolean.class)) {
@@ -105,7 +109,7 @@ public enum JSONType {
 		}else if(clazz.equals(JSONObject.class)) {
 			return (JSONObject) value;
 		}else if(clazz.equals(String.class)) {
-			return (String) value;
+			return strict ? (String) value : value.toString();
 		}
 		throw new IllegalArgumentException("Invalid class provided");
 	}

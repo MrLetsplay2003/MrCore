@@ -129,7 +129,7 @@ public class JSONConverter {
 			}
 			return t;
 		}else {
-			NullableOptional<Object> v = MiscUtils.callSafely(() -> JSONType.castJSONValueTo(value, clazz));
+			NullableOptional<Object> v = MiscUtils.callSafely(() -> JSONType.castJSONValueTo(value, clazz, false));
 			if(!v.isPresent()) throw new IllegalArgumentException("Invalid JSON value type: " + clazz);
 			return v.get();
 		}
