@@ -3,6 +3,8 @@ package me.mrletsplay.mrcore.json;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import me.mrletsplay.mrcore.misc.NullableOptional;
+
 /**
  * Implementation of a JSON object according to <a href="http://www.json.org/">The JSON Data Interchange Standard</a>
  * @author MrLetsplay2003
@@ -137,6 +139,76 @@ public class JSONObject extends LinkedHashMap<String, Object> {
 	 */
 	public JSONArray getJSONArray(String key) {
 		return (JSONArray) get(key);
+	}
+	
+	/**
+	 * Gets a property from this JSON object wrapped inside a {@link NullableOptional}<br>
+	 * If the given key can't be found, {@link NullableOptional#empty()} is returned<br>
+	 * <br>
+	 * The opt[type] methods return their type respectively<br>
+	 * If a type can not be converted, a {@link ClassCastException} is thrown
+	 * @param key The key of the property
+	 * @return The value of the property wrapped inside a {@link NullableOptional}
+	 */
+	public NullableOptional<Object> opt(String key) {
+		if(!containsKey(key)) return NullableOptional.empty();
+		return NullableOptional.of(get(key));
+	}
+	
+	/**
+	 * @see #opt(String)
+	 */
+	public NullableOptional<String> optString(String key) {
+		return opt(key).map(e -> (String) e);
+	}
+
+	/**
+	 * @see #opt(String)
+	 */
+	public NullableOptional<Boolean> optBoolean(String key) {
+		return opt(key).map(e -> (Boolean) e);
+	}
+
+	/**
+	 * @see #opt(String)
+	 */
+	public NullableOptional<Number> optNumber(String key) {
+		return opt(key).map(e -> (Number) e);
+	}
+
+	/**
+	 * @see #opt(String)
+	 */
+	public NullableOptional<Integer> optInt(String key) {
+		return optNumber(key).map(n -> n.intValue());
+	}
+
+	/**
+	 * @see #opt(String)
+	 */
+	public NullableOptional<Long> optLong(String key) {
+		return optNumber(key).map(n -> n.longValue());
+	}
+
+	/**
+	 * @see #opt(String)
+	 */
+	public NullableOptional<Double> optDouble(String key) {
+		return optNumber(key).map(n -> n.doubleValue());
+	}
+
+	/**
+	 * @see #opt(String)
+	 */
+	public NullableOptional<JSONObject> optJSONObject(String key) {
+		return opt(key).map(e -> (JSONObject) e);
+	}
+
+	/**
+	 * @see #opt(String)
+	 */
+	public NullableOptional<JSONArray> optJSONArray(String key) {
+		return opt(key).map(e -> (JSONArray) e);
 	}
 
 	public boolean isOfType(String key, JSONType type) {

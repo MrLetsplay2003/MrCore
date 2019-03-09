@@ -110,7 +110,7 @@ public class ClassFileUtils {
 		codeAttr.getCode().replace(ByteCode.of(nInstr));
 	}
 	
-	private static int getOrAppendUTF8(ClassFile file, String utf8) {
+	public static int getOrAppendUTF8(ClassFile file, String utf8) {
 		int enInd = Arrays.stream(file.getConstantPool().getEntries())
 				.filter(e -> e instanceof ConstantPoolUTF8Entry && ((ConstantPoolUTF8Entry) e).getValue().equals(utf8))
 				.map(e -> file.getConstantPool().indexOf(e))
@@ -121,7 +121,7 @@ public class ClassFileUtils {
 		return enInd;
 	}
 	
-	private static int getOrAppendString(ClassFile file, int stringInd) {
+	public static int getOrAppendString(ClassFile file, int stringInd) {
 		int enInd = Arrays.stream(file.getConstantPool().getEntries())
 				.filter(e -> e instanceof ConstantPoolStringEntry && ((ConstantPoolStringEntry) e).getStringIndex() == stringInd)
 				.map(e -> file.getConstantPool().indexOf(e))
@@ -143,7 +143,7 @@ public class ClassFileUtils {
 //		return enInd;
 //	}
 	
-	private static int getOrAppendClass(ClassFile file, int nameIndex) {
+	public static int getOrAppendClass(ClassFile file, int nameIndex) {
 		int enInd = Arrays.stream(file.getConstantPool().getEntries())
 				.filter(e -> e instanceof ConstantPoolClassEntry && ((ConstantPoolClassEntry) e).getNameIndex() == nameIndex)
 				.map(e -> file.getConstantPool().indexOf(e))
@@ -154,7 +154,7 @@ public class ClassFileUtils {
 		return enInd;
 	}
 	
-	private static int getOrAppendNameAndType(ClassFile file, int nameIndex, int descIndex) {
+	public static int getOrAppendNameAndType(ClassFile file, int nameIndex, int descIndex) {
 		int enInd = Arrays.stream(file.getConstantPool().getEntries())
 				.filter(e -> e instanceof ConstantPoolNameAndTypeEntry && ((ConstantPoolNameAndTypeEntry) e).getNameIndex() == nameIndex && ((ConstantPoolNameAndTypeEntry) e).getDescriptorIndex() == descIndex)
 				.map(e -> file.getConstantPool().indexOf(e))
@@ -165,7 +165,7 @@ public class ClassFileUtils {
 		return enInd;
 	}
 	
-	private static int getOrAppendMethodRef(ClassFile file, int clInd, int ntInd) {
+	public static int getOrAppendMethodRef(ClassFile file, int clInd, int ntInd) {
 		int enInd = Arrays.stream(file.getConstantPool().getEntries())
 				.filter(e -> e instanceof ConstantPoolMethodRefEntry && ((ConstantPoolMethodRefEntry) e).getClassIndex() == clInd && ((ConstantPoolMethodRefEntry) e).getNameAndTypeIndex() == ntInd)
 				.map(e -> file.getConstantPool().indexOf(e))
@@ -220,7 +220,7 @@ public class ClassFileUtils {
 		return dc;
 	}
 	
-	private static byte[] getShortBytes(int val) {
+	public static byte[] getShortBytes(int val) {
 		byte[] bt = new byte[2];
 		bt[0] = (byte) ((val >> 8) & 0xFF);
 		bt[1] = (byte) (val & 0xFF);
@@ -230,14 +230,14 @@ public class ClassFileUtils {
 	private static InstructionInformation getInfo(TypeDescriptor type, byte paramIdx) {
 		PrimitiveType t = type.getPrimitiveType();
 		if(t == null) throw new IllegalArgumentException("Can't have void type for parameter");
-		return new InstructionInformation(getInstruction(type), new byte[] {paramIdx});
+		return new InstructionInformation(getLoadInstruction(type), new byte[] {paramIdx});
 	}
 	
 	private static List<InstructionInformation> getInfo2(TypeDescriptor type, byte paramIdx, int iInd, int dInd, int fInd, int lInd, int byInd, int boInd, int cInd, int sInd) {
 		PrimitiveType t = type.getPrimitiveType();
 		if(t == null) throw new IllegalArgumentException("Can't have void type for parameter");
 		List<InstructionInformation> inf = new ArrayList<>();
-		inf.add(new InstructionInformation(getInstruction(type), new byte[] {paramIdx}));
+		inf.add(new InstructionInformation(getLoadInstruction(type), new byte[] {paramIdx}));
 		switch(type.getPrimitiveType()) {
 			case INT:
 				inf.add(new InstructionInformation(Instruction.INVOKESTATIC, getShortBytes(iInd)));
@@ -269,7 +269,7 @@ public class ClassFileUtils {
 		return inf;
 	}
 	
-	private static Instruction getInstruction(TypeDescriptor type) {
+	public static Instruction getLoadInstruction(TypeDescriptor type) {
 		switch(type.getPrimitiveType()) {
 			case BOOLEAN:
 			case BYTE:
