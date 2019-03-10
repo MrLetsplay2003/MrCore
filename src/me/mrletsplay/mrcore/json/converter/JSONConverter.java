@@ -37,6 +37,7 @@ public class JSONConverter {
 			return arr;
 		}else if(value instanceof JSONConvertible) {
 			JSONObject obj = new JSONObject();
+			((JSONConvertible) value).preSerialize(obj);
 			for(Field f : value.getClass().getDeclaredFields()) {
 				JSONValue v = f.getAnnotation(JSONValue.class);
 				if(v == null || !v.encode()) continue;
@@ -109,7 +110,8 @@ public class JSONConverter {
 		if(value == null) return null;
 		if(JSONConvertible.class.isAssignableFrom(clazz)) {
 			JSONObject o = (JSONObject) value;
-			Object t = createObject0(o, clazz.asSubclass(JSONConvertible.class));
+			JSONConvertible t = createObject0(o, clazz.asSubclass(JSONConvertible.class));
+			t.preDeserialize(o);
 			for(Field f : clazz.getDeclaredFields()) {
 				JSONValue v = f.getAnnotation(JSONValue.class);
 				JSONListType lT = f.getAnnotation(JSONListType.class);

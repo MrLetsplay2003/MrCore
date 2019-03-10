@@ -118,6 +118,8 @@ public class TypeDescriptor {
 				return PrimitiveType.DOUBLE;
 			case "float":
 				return PrimitiveType.FLOAT;
+			case "void":
+				return PrimitiveType.VOID;
 			default:
 				throw new IllegalStateException("Invalid primitive type class");
 		}

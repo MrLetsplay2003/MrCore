@@ -8,4 +8,8 @@ public interface JSONConvertible {
 		return JSONConverter.encodeObject(this);
 	}
 	
+	public default void preSerialize(JSONObject object) {};
+	
+	public default void preDeserialize(JSONObject object) {};
+	
 }
