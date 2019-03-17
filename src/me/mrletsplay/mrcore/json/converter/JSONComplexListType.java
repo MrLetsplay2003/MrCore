@@ -9,6 +9,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface JSONComplexListType {
 
-	public String value();
+	public Class<? extends JSONConvertible> value();
 	
 }

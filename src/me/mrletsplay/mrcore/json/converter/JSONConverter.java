@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 import me.mrletsplay.mrcore.json.JSONArray;
 import me.mrletsplay.mrcore.json.JSONObject;
 import me.mrletsplay.mrcore.json.JSONType;
-import me.mrletsplay.mrcore.misc.ErroringNullableOptional;
 import me.mrletsplay.mrcore.misc.FriendlyException;
 import me.mrletsplay.mrcore.misc.MiscUtils;
 import me.mrletsplay.mrcore.misc.NullableOptional;
@@ -75,7 +74,7 @@ public class JSONConverter {
 	
 	private static <T extends JSONConvertible> T createObject0(JSONObject object, Class<T> clazz) {
 		List<Constructor<?>> constrs = Arrays.stream(clazz.getDeclaredConstructors()).filter(c -> c.isAnnotationPresent(JSONConstructor.class)).collect(Collectors.toList());
-		if(constrs.isEmpty()) throw new IllegalArgumentException("No constructor available");
+		if(constrs.isEmpty()) throw new IllegalArgumentException("No constructor available for class " + clazz);
 		T t = null;
 		c: for(Constructor<?> c : constrs) {
 			List<Object> params = new ArrayList<>();
@@ -146,9 +145,9 @@ public class JSONConverter {
 				if(!v.isPresent()) throw new IllegalArgumentException("Invalid JSON value type, cannot cast " + o.getClass().getName() + " to " + type.value());
 				list.add(v.get());
 			}else {
-				ErroringNullableOptional<Class<?>, ? extends Exception> v = MiscUtils.callSafely(() -> Class.forName(complexType.value()));
-				if(!v.isPresent()) throw new IllegalArgumentException("Cannot find complex type class " + complexType.value(), v.getException());
-				Object obj = decode0(o, v.get());
+//				ErroringNullableOptional<Class<?>, ? extends Exception> v = MiscUtils.callSafely(() -> Class.forName(complexType.value()));
+//				if(!v.isPresent()) throw new IllegalArgumentException("Cannot find complex type class " + complexType.value(), v.getException());
+				Object obj = decode0(o, complexType.value());
 				list.add(obj);
 			}
 		}
