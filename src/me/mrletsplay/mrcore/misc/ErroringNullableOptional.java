@@ -1,5 +1,7 @@
 package me.mrletsplay.mrcore.misc;
 
+import java.util.function.Function;
+
 public class ErroringNullableOptional<T, E extends Throwable> extends NullableOptional<T> {
 
 	private E exception;
@@ -16,6 +18,10 @@ public class ErroringNullableOptional<T, E extends Throwable> extends NullableOp
 	public E getException() {
 		if(isPresent()) throw new IllegalStateException("Value is present");
 		return exception;
+	}
+	
+	public <X extends Throwable> T orElseThrowOther(Function<E, X> exceptionSupplier) throws X {
+		return orElseThrow(() -> exceptionSupplier.apply(exception));
 	}
 	
 	public T orElseThrowException() throws E {
