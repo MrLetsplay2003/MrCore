@@ -278,7 +278,7 @@ public class GUIUtils {
 					public void onAction(GUIElementActionEvent event) {
 						int pg = GUIMultiPage.getPage(event.getInventory());
 						GUIMultiPage<?> guiMP = (GUIMultiPage<?>) event.getGUI();
-						Inventory nPage = guiMP.getForPlayer(event.getPlayer(), pg+diff);
+						Inventory nPage = guiMP.getForPlayer(event.getPlayer(), pg + diff, event.getGUIHolder().getProperties());
 						if(nPage!=null) event.getPlayer().openInventory(nPage);
 						event.setCancelled(true);
 					}
