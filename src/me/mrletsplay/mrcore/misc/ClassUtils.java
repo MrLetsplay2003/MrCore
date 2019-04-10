@@ -14,4 +14,15 @@ public class ClassUtils {
 		return PRIMITIVE_TYPE_CLASSES.contains(clazz);
 	}
 	
+	public static Class<?> getArrayBaseClass(Class<?> arrayClass) {
+		while(arrayClass.isArray()) arrayClass = arrayClass.getComponentType();
+		return arrayClass;
+	}
+	
+	public static int getArrayDimensions(Class<?> arrayClass) {
+		int d = 0;
+		while(arrayClass.isArray()) d++;
+		return d;
+	}
+	
 }

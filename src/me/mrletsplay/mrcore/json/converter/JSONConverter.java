@@ -1,5 +1,6 @@
 package me.mrletsplay.mrcore.json.converter;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -61,11 +62,21 @@ public class JSONConverter {
 				}
 			}
 			return obj;
+		}else if(value instanceof JSONPrimitiveConvertible) {
+			return ((JSONPrimitiveConvertible) value).toJSONPrimitive();
+		}else if(value instanceof Object[]) {
+			return encodeArray0((Object[]) value);
 		}else {
 			JSONType t = JSONType.typeOf(value);
 			if(t == null) throw new IllegalArgumentException("Object of type " + value.getClass() + " is not a valid JSON value");
 			return value;
 		}
+	}
+	
+	private static JSONArray encodeArray0(Object[] array) {
+		JSONArray arr = new JSONArray();
+		for(Object v : array) arr.add(encode0(v));
+		return arr;
 	}
 	
 	public static <T extends JSONConvertible> T decodeObject(JSONObject object, Class<T> clazz) {
@@ -97,11 +108,28 @@ public class JSONConverter {
 				t = clazz.cast(c.newInstance(params.toArray(new Object[params.size()])));
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException e) {
-				e.printStackTrace();
 				continue;
 			}
 		}
-		if(t == null) throw new IllegalArgumentException("No suitable constructor found for class " + clazz.getName());
+		if(t == null) throw new IllegalArgumentException("No suitable/working constructor found for class " + clazz.getName());
+		return t;
+	}
+	
+	private static <T extends JSONPrimitiveConvertible> T createPrimitive0(Class<T> clazz) {
+		List<Constructor<?>> constrs = Arrays.stream(clazz.getDeclaredConstructors()).filter(c -> c.isAnnotationPresent(JSONConstructor.class)).collect(Collectors.toList());
+		if(constrs.isEmpty()) throw new IllegalArgumentException("No constructor available for class " + clazz);
+		T t = null;
+		for(Constructor<?> c : constrs) {
+			if(c.getParameterCount() > 0) continue;
+			c.setAccessible(true);
+			try {
+				t = clazz.cast(c.newInstance());
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException e) {
+				continue;
+			}
+		}
+		if(t == null) throw new IllegalArgumentException("No suitable/working constructor found for class " + clazz.getName());
 		return t;
 	}
 	
@@ -129,6 +157,17 @@ public class JSONConverter {
 				}
 			}
 			return t;
+		}else if(JSONPrimitiveConvertible.class.isAssignableFrom(clazz)) {
+			JSONPrimitiveConvertible p = createPrimitive0(clazz.asSubclass(JSONPrimitiveConvertible.class));
+			p.deserialize(value);
+			return p;
+		}else if(clazz.isArray()) {
+			JSONArray arr = (JSONArray) value;
+			Object a = Array.newInstance(clazz.getComponentType(), arr.size());
+			for(int i = 0; i < arr.size(); i++) {
+				Array.set(a, i, decode0(arr.get(i), clazz.getComponentType()));
+			}
+			return a;
 		}else {
 			NullableOptional<Object> v = MiscUtils.callSafely(() -> JSONType.castJSONValueTo(value, clazz, false));
 			if(!v.isPresent()) throw new IllegalArgumentException("Invalid JSON value type: " + clazz);
