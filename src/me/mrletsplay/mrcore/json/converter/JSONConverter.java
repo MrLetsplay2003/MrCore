@@ -23,16 +23,20 @@ public class JSONConverter {
 	private JSONConverter() {}
 	
 	public static JSONObject encodeObject(JSONConvertible convertible) {
-		return (JSONObject) encode0(convertible);
+		return encodeObject(convertible, true);
 	}
 	
-	private static Object encode0(Object value) {
+	public static JSONObject encodeObject(JSONConvertible convertible, boolean includeClass) {
+		return (JSONObject) encode0(convertible, includeClass);
+	}
+	
+	private static Object encode0(Object value, boolean includeClass) {
 		if(value == null) return null;
 		if(value instanceof List<?>) {
 			List<?> l = (List<?>) value;
 			JSONArray arr = new JSONArray();
 			for(Object o : l) {
-				arr.add(encode0(o));
+				arr.add(encode0(o, includeClass));
 			}
 			return arr;
 		}else if(value instanceof JSONConvertible) {
@@ -44,7 +48,7 @@ public class JSONConverter {
 				String fName = v.value().isEmpty() ? f.getName() : v.value();
 				f.setAccessible(true);
 				try {
-					obj.set(fName, encode0(f.get(value)));
+					obj.set(fName, encode0(f.get(value), includeClass));
 				} catch (IllegalArgumentException | IllegalAccessException e) {
 					throw new FriendlyException(e);
 				}
@@ -56,16 +60,17 @@ public class JSONConverter {
 				String fName = v.value().isEmpty() ? m.getName() : v.value();
 				m.setAccessible(true);
 				try {
-					obj.set(fName, encode0(m.invoke(value)));
+					obj.set(fName, encode0(m.invoke(value), includeClass));
 				} catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
 					throw new FriendlyException(e);
 				}
 			}
+			if(includeClass) obj.set("_class", value.getClass().getName());
 			return obj;
 		}else if(value instanceof JSONPrimitiveConvertible) {
 			return ((JSONPrimitiveConvertible) value).toJSONPrimitive();
 		}else if(value instanceof Object[]) {
-			return encodeArray0((Object[]) value);
+			return encodeArray0((Object[]) value, includeClass);
 		}else {
 			JSONType t = JSONType.typeOf(value);
 			if(t == null) throw new IllegalArgumentException("Object of type " + value.getClass() + " is not a valid JSON value");
@@ -73,9 +78,9 @@ public class JSONConverter {
 		}
 	}
 	
-	private static JSONArray encodeArray0(Object[] array) {
+	private static JSONArray encodeArray0(Object[] array, boolean includeClass) {
 		JSONArray arr = new JSONArray();
-		for(Object v : array) arr.add(encode0(v));
+		for(Object v : array) arr.add(encode0(v, includeClass));
 		return arr;
 	}
 	
@@ -137,9 +142,16 @@ public class JSONConverter {
 		if(value == null) return null;
 		if(JSONConvertible.class.isAssignableFrom(clazz)) {
 			JSONObject o = (JSONObject) value;
-			JSONConvertible t = createObject0(o, clazz.asSubclass(JSONConvertible.class));
+			Class<? extends JSONConvertible> jClass = clazz.asSubclass(JSONConvertible.class);
+			if(o.isOfType("_class", JSONType.STRING)) {
+				try {
+					Class<?> nClass = Class.forName(o.getString("_class"));
+					if(JSONConvertible.class.isAssignableFrom(nClass)) jClass = nClass.asSubclass(JSONConvertible.class);
+				} catch (ClassNotFoundException ignored) {}
+			}
+			JSONConvertible t = createObject0(o, jClass);
 			t.preDeserialize(o);
-			for(Field f : clazz.getDeclaredFields()) {
+			for(Field f : jClass.getDeclaredFields()) {
 				JSONValue v = f.getAnnotation(JSONValue.class);
 				JSONListType lT = f.getAnnotation(JSONListType.class);
 				JSONComplexListType clT = f.getAnnotation(JSONComplexListType.class);

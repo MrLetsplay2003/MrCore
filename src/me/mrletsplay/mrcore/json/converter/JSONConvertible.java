@@ -5,7 +5,11 @@ import me.mrletsplay.mrcore.json.JSONObject;
 public interface JSONConvertible {
 
 	public default JSONObject toJSON() {
-		return JSONConverter.encodeObject(this);
+		return toJSON(true);
+	}
+
+	public default JSONObject toJSON(boolean includeClass) {
+		return JSONConverter.encodeObject(this, includeClass);
 	}
 	
 	public default void preSerialize(JSONObject object) {};
