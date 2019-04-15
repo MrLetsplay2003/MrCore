@@ -102,8 +102,9 @@ public class JSONConverter {
 				Object pValue = object.has(vName) ? object.get(vName) : null;
 				JSONListType lParam = p.getAnnotation(JSONListType.class);
 				JSONComplexListType clParam = p.getAnnotation(JSONComplexListType.class);
-				if(lParam != null || clParam != null) {
-					params.add(decodeList0((JSONArray) pValue, lParam, clParam));
+				JSONPrimitiveListType prParam = p.getAnnotation(JSONPrimitiveListType.class);
+				if(lParam != null || clParam != null || prParam != null) {
+					params.add(decodeList0((JSONArray) pValue, lParam, clParam, prParam));
 				}else {
 					params.add(decode0(pValue, p.getType()));
 				}
@@ -155,13 +156,14 @@ public class JSONConverter {
 				JSONValue v = f.getAnnotation(JSONValue.class);
 				JSONListType lT = f.getAnnotation(JSONListType.class);
 				JSONComplexListType clT = f.getAnnotation(JSONComplexListType.class);
+				JSONPrimitiveListType prT = f.getAnnotation(JSONPrimitiveListType.class);
 				if(v == null || !v.decode()) continue;
 				String fName = v.value().isEmpty() ? f.getName() : v.value();
 				if(o.has(fName)) {
 					f.setAccessible(true);
 					try {
-						if(lT != null || clT != null) {
-							f.set(t, decodeList0(o.getJSONArray(fName), lT, clT));
+						if(lT != null || clT != null || prT != null) {
+							f.set(t, decodeList0(o.getJSONArray(fName), lT, clT, prT));
 						}else {
 							f.set(t, decode0(o.get(fName), f.getType()));
 						}
@@ -187,7 +189,7 @@ public class JSONConverter {
 		}
 	}
 	
-	private static List<Object> decodeList0(JSONArray value, JSONListType type, JSONComplexListType complexType) {
+	private static List<Object> decodeList0(JSONArray value, JSONListType type, JSONComplexListType complexType, JSONPrimitiveListType primitiveType) {
 		if(value == null) return null;
 		List<Object> list = new ArrayList<>();
 		for(Object o : value) {
@@ -196,8 +198,11 @@ public class JSONConverter {
 				NullableOptional<Object> v = MiscUtils.callSafely(() -> type.value().cast(o));
 				if(!v.isPresent()) throw new IllegalArgumentException("Invalid JSON value type, cannot cast " + o.getClass().getName() + " to " + type.value());
 				list.add(v.get());
-			}else {
+			}else if(complexType != null){
 				Object obj = decode0(o, complexType.value());
+				list.add(obj);
+			}else {
+				Object obj = decode0(o, primitiveType.value());
 				list.add(obj);
 			}
 		}
