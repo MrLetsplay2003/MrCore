@@ -90,7 +90,7 @@ public class JSONConverter {
 	
 	private static <T extends JSONConvertible> T createObject0(JSONObject object, Class<T> clazz) {
 		List<Constructor<?>> constrs = Arrays.stream(clazz.getDeclaredConstructors()).filter(c -> c.isAnnotationPresent(JSONConstructor.class)).collect(Collectors.toList());
-		if(constrs.isEmpty()) throw new IllegalArgumentException("No constructor available for class " + clazz);
+		if(constrs.isEmpty()) throw new IllegalArgumentException("No constructor available for class " + clazz.getName());
 		T t = null;
 		c: for(Constructor<?> c : constrs) {
 			List<Object> params = new ArrayList<>();
@@ -123,7 +123,7 @@ public class JSONConverter {
 	
 	private static <T extends JSONPrimitiveConvertible> T createPrimitive0(Class<T> clazz) {
 		List<Constructor<?>> constrs = Arrays.stream(clazz.getDeclaredConstructors()).filter(c -> c.isAnnotationPresent(JSONConstructor.class)).collect(Collectors.toList());
-		if(constrs.isEmpty()) throw new IllegalArgumentException("No constructor available for class " + clazz);
+		if(constrs.isEmpty()) throw new IllegalArgumentException("No constructor available for class " + clazz.getName());
 		T t = null;
 		for(Constructor<?> c : constrs) {
 			if(c.getParameterCount() > 0) continue;
