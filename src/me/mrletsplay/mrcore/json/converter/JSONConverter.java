@@ -84,11 +84,15 @@ public class JSONConverter {
 		return arr;
 	}
 	
-	public static <T extends JSONConvertible> T decodeObject(JSONObject object, Class<T> clazz) {
-		return clazz.cast(decode0(object, clazz));
+	public static <T extends JSONConvertible> T decodeObject(JSONObject object, Class<T> clazz, ClassLoader loader) {
+		return clazz.cast(decode0(object, clazz, loader));
 	}
 	
-	private static <T extends JSONConvertible> T createObject0(JSONObject object, Class<T> clazz) {
+	public static <T extends JSONConvertible> T decodeObject(JSONObject object, Class<T> clazz) {
+		return decodeObject(object, clazz, JSONConverter.class.getClassLoader());
+	}
+	
+	private static <T extends JSONConvertible> T createObject0(JSONObject object, Class<T> clazz, ClassLoader loader) {
 		List<Constructor<?>> constrs = Arrays.stream(clazz.getDeclaredConstructors()).filter(c -> c.isAnnotationPresent(JSONConstructor.class)).collect(Collectors.toList());
 		if(constrs.isEmpty()) throw new IllegalArgumentException("No constructor available for class " + clazz.getName());
 		T t = null;
@@ -104,9 +108,9 @@ public class JSONConverter {
 				JSONComplexListType clParam = p.getAnnotation(JSONComplexListType.class);
 				JSONPrimitiveListType prParam = p.getAnnotation(JSONPrimitiveListType.class);
 				if(lParam != null || clParam != null || prParam != null) {
-					params.add(decodeList0((JSONArray) pValue, lParam, clParam, prParam));
+					params.add(decodeList0((JSONArray) pValue, loader, lParam, clParam, prParam));
 				}else {
-					params.add(decode0(pValue, p.getType()));
+					params.add(decode0(pValue, p.getType(), loader));
 				}
 			}
 			c.setAccessible(true);
@@ -139,18 +143,18 @@ public class JSONConverter {
 		return t;
 	}
 	
-	private static Object decode0(Object value, Class<?> clazz) {
+	private static Object decode0(Object value, Class<?> clazz, ClassLoader loader) {
 		if(value == null) return null;
 		if(JSONConvertible.class.isAssignableFrom(clazz)) {
 			JSONObject o = (JSONObject) value;
 			Class<? extends JSONConvertible> jClass = clazz.asSubclass(JSONConvertible.class);
 			if(o.isOfType("_class", JSONType.STRING)) {
 				try {
-					Class<?> nClass = Class.forName(o.getString("_class"));
+					Class<?> nClass = Class.forName(o.getString("_class"), true, loader);
 					if(JSONConvertible.class.isAssignableFrom(nClass)) jClass = nClass.asSubclass(JSONConvertible.class);
 				} catch (ClassNotFoundException ignored) {}
 			}
-			JSONConvertible t = createObject0(o, jClass);
+			JSONConvertible t = createObject0(o, jClass, loader);
 			t.preDeserialize(o);
 			for(Field f : jClass.getDeclaredFields()) {
 				JSONValue v = f.getAnnotation(JSONValue.class);
@@ -163,9 +167,9 @@ public class JSONConverter {
 					f.setAccessible(true);
 					try {
 						if(lT != null || clT != null || prT != null) {
-							f.set(t, decodeList0(o.getJSONArray(fName), lT, clT, prT));
+							f.set(t, decodeList0(o.getJSONArray(fName), loader, lT, clT, prT));
 						}else {
-							f.set(t, decode0(o.get(fName), f.getType()));
+							f.set(t, decode0(o.get(fName), f.getType(), loader));
 						}
 					} catch (IllegalAccessException ignored) {}
 				}
@@ -179,7 +183,7 @@ public class JSONConverter {
 			JSONArray arr = (JSONArray) value;
 			Object a = Array.newInstance(clazz.getComponentType(), arr.size());
 			for(int i = 0; i < arr.size(); i++) {
-				Array.set(a, i, decode0(arr.get(i), clazz.getComponentType()));
+				Array.set(a, i, decode0(arr.get(i), clazz.getComponentType(), loader));
 			}
 			return a;
 		}else {
@@ -189,7 +193,7 @@ public class JSONConverter {
 		}
 	}
 	
-	private static List<Object> decodeList0(JSONArray value, JSONListType type, JSONComplexListType complexType, JSONPrimitiveListType primitiveType) {
+	private static List<Object> decodeList0(JSONArray value, ClassLoader loader, JSONListType type, JSONComplexListType complexType, JSONPrimitiveListType primitiveType) {
 		if(value == null) return null;
 		List<Object> list = new ArrayList<>();
 		for(Object o : value) {
@@ -199,10 +203,10 @@ public class JSONConverter {
 				if(!v.isPresent()) throw new IllegalArgumentException("Invalid JSON value type, cannot cast " + o.getClass().getName() + " to " + type.value());
 				list.add(v.get());
 			}else if(complexType != null){
-				Object obj = decode0(o, complexType.value());
+				Object obj = decode0(o, complexType.value(), loader);
 				list.add(obj);
 			}else {
-				Object obj = decode0(o, primitiveType.value());
+				Object obj = decode0(o, primitiveType.value(), loader);
 				list.add(obj);
 			}
 		}
