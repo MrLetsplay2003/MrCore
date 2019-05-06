@@ -2,30 +2,26 @@ package me.mrletsplay.mrcore.misc;
 
 import java.util.function.Function;
 
-public class ErroringNullableOptional<T, E extends Throwable> extends NullableOptional<T> {
+public class ErroringNullableOptional<T, E extends Throwable> extends DualNullableOptional<T, E> {
 
-	private E exception;
-	
 	protected ErroringNullableOptional(boolean present, T value, E exception) {
-		super(present, value);
-		this.exception = exception;
+		super(present, value, exception);
 	}
 	
 	public boolean hasErrored() {
-		return exception != null;
+		return !isPresent();
 	}
 	
 	public E getException() {
-		if(isPresent()) throw new IllegalStateException("Value is present");
-		return exception;
+		return getOther();
 	}
 	
 	public <X extends Throwable> T orElseThrowOther(Function<E, X> exceptionSupplier) throws X {
-		return orElseThrow(() -> exceptionSupplier.apply(exception));
+		return orElseThrow(() -> exceptionSupplier.apply(getOther()));
 	}
 	
 	public T orElseThrowException() throws E {
-		return orElseThrow(() -> exception);
+		return orElseThrow(() -> getOther());
 	}
 	
 	public static <T, E extends Throwable> ErroringNullableOptional<T, E> ofErroring(T value) {
