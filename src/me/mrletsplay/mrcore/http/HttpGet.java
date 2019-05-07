@@ -14,7 +14,7 @@ public class HttpGet implements HttpRequest {
 	/**
 	 * Creates a GET request to the specified url
 	 * @param url The url this request should be sent to
-	 * @see {@link HttpRequest#createGet(String)}
+	 * @see HttpRequest#createGet(String)
 	 */
 	public HttpGet(String url) {
 		this.url = url;

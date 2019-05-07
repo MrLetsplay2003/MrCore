@@ -29,7 +29,7 @@ public class ChatUtils {
 //			if(bc instanceof TextComponent) {
 //				TextComponent tc = (TextComponent) bc;
 //				String text = tc.getText();
-//				int lastIndex = text.lastIndexOf('ง');
+//				int lastIndex = text.lastIndexOf('ยง');
 //				if(lastIndex != -1) {
 //					return null;
 //				}

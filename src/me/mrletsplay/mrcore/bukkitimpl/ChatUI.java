@@ -111,7 +111,7 @@ public class ChatUI {
 		 * @param key The element key
 		 * @param layout The layout string to use
 		 * @return This UIBuilderMultiPage instance
-		 * @see {@link UIBuilder#addElement(String, UIElement)}
+		 * @see UIBuilder#addElement(String, UIElement)
 		 */
 		public UIBuilderMultiPage<T> addNextPageElement(String key, UIElement layout){
 			return addElement(key, layout.setAction(new UIElementAction() {
@@ -140,7 +140,7 @@ public class ChatUI {
 		 * @param key The element key
 		 * @param layout The layout to use
 		 * @return This UIBuilderMultiPage instance
-		 * @see {@link UIBuilder#addElement(String, UIElement)}
+		 * @see UIBuilder#addElement(String, UIElement)
 		 */
 		public UIBuilderMultiPage<T> addPreviousPageElement(String key, UIElement layout){
 			return addElement(key, layout.setAction(new UIElementAction() {
@@ -371,7 +371,7 @@ public class ChatUI {
 		/**
 		 * Constructs a UI element
 		 * @param text The static text layout to use
-		 * @see {@link StaticUIElement}
+		 * @see StaticUIElement
 		 */
 		public StaticUIElement(String text) {
 			this.layout = new BaseComponent[] {new TextComponent(text)};
@@ -380,7 +380,7 @@ public class ChatUI {
 		/**
 		 * Constructs a UI element
 		 * @param layout The static layout to use
-		 * @see {@link StaticUIElement}
+		 * @see StaticUIElement
 		 */
 		public StaticUIElement(BaseComponent... layout) {
 			this.layout = layout;
@@ -558,7 +558,7 @@ public class ChatUI {
 		 * Builds the UI into a chat message using {@link #getForPlayer(Player)} and sends it if the return result isn't null
 		 * @param p The player to build the UI with
 		 * @return The UIMessage instance returned by {@link #getForPlayer(Player)}
-		 * @see {@link UI#getForPlayer(Player)}
+		 * @see UI#getForPlayer(Player)
 		 */
 		public UIMessage sendToPlayer(Player p) {
 			UIMessage uim = getForPlayer(p);

@@ -10,7 +10,7 @@ public class NumberUtils {
 	 * @param value The number to round
 	 * @param places The number of decimals to round to
 	 * @return The number rounded to the specified amount of decimals
-	 * @throws IllegalArgumentException - If the specified amount of decimals is < 0
+	 * @throws IllegalArgumentException - If the specified amount of decimals is less than 0
 	 */
 	public static double round(double value, int places) {
 	    if (places < 0) throw new IllegalArgumentException("Can't have a negative amount of decimal places");

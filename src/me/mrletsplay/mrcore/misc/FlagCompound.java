@@ -37,7 +37,7 @@ public class FlagCompound {
 
 	/**
 	 * Creates a flag compound including all the given flags (combined using OR)
-	 * @param flags The flags to be included in this compound
+	 * @param compound The flags to be included in this compound
 	 */
 	public FlagCompound(FlagCompound... compound) {
 		for(FlagCompound l : compound) {

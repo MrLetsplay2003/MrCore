@@ -25,7 +25,7 @@ public class HttpUtils {
 	 * @return An InputStream to that given url
 	 * @throws IOException If an IO error occurs while making the request
 	 * @deprecated Has been replaced by {@link HttpPost}
-	 * @see {@link HttpRequest#createPost(String)}
+	 * @see HttpRequest#createPost(String)
 	 */
 	@Deprecated
 	public static InputStream httpPost(URL url, String... params) throws IOException {
@@ -53,7 +53,7 @@ public class HttpUtils {
 	 * @return An InputStream to that given url
 	 * @throws IOException If an IO error occurs while making the request
 	 * @deprecated Has been replaced by {@link HttpGet}
-	 * @see {@link HttpRequest#createGet(String)}
+	 * @see HttpRequest#createGet(String)
 	 */
 	@Deprecated
 	public static InputStream httpGet(URL url, String... params) throws IOException {
@@ -69,7 +69,8 @@ public class HttpUtils {
 	 * @return The amount of bytes downloaded
 	 * @throws IOException If an IO error occurs while downloading the file
 	 * @deprecated Replaced by {@link HttpResult#transferTo(File)}
-	 * @see {@link HttpRequest#createGet(String)}, {@link HttpResult#transferToSafely(File)}
+	 * @see HttpRequest#createGet(String)
+	 * @see HttpResult#transferToSafely(File)
 	 */
 	@Deprecated
 	public static long download(URL url, File file) throws IOException {

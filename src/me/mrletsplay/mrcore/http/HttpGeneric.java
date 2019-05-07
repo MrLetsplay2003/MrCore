@@ -14,8 +14,9 @@ public class HttpGeneric implements HttpRequest {
 	
 	/**
 	 * Creates a request using the given request method to the specified url
+	 * @param requestMethod The request method to use
 	 * @param url The url this request should be sent to
-	 * @see {@link HttpRequest#createGet(String)}
+	 * @see HttpRequest#createGet(String)
 	 */
 	public HttpGeneric(String requestMethod, String url) {
 		this.requestMethod = requestMethod;

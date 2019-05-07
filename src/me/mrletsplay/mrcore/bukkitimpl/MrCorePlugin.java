@@ -68,7 +68,7 @@ public class MrCorePlugin extends JavaPlugin{
 				if(args.length == 1) return sendCommandHelp(sender, null);
 				sendCommandHelp(sender, args[1]);
 			}else if(args[0].equalsIgnoreCase("version")) {
-				sender.sendMessage("§6MrCore version: §r"+MrCore.getVersion());
+				sender.sendMessage("Â§6MrCore version: Â§r"+MrCore.getVersion());
 			}else {
 				sendCommandHelp(sender, null);
 			}
@@ -78,11 +78,11 @@ public class MrCorePlugin extends JavaPlugin{
 	}
 	
 	private boolean sendCommandHelp(CommandSender sender, String topic) {
-		sender.sendMessage("§7§lMrCore §r§8| §cHelp");
+		sender.sendMessage("Â§7Â§lMrCore Â§rÂ§8| Â§cHelp");
 		if(topic == null) {
-			sender.sendMessage("§6/mrcore version §b- Shows the current version");
+			sender.sendMessage("Â§6/mrcore version Â§b- Shows the current version");
 		}else {
-			sender.sendMessage("§cUnknown topic");
+			sender.sendMessage("Â§cUnknown topic");
 		}
 		return true;
 	}

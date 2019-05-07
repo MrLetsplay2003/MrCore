@@ -4,7 +4,6 @@ public enum ConfigFlag {
 
 	/**
 	 * When saving the config, all config properties will be sorted alphabetically<br>
-	 * This is only available to non-external configs (as stated by {@link CustomConfig#isExternal()})
 	 */
 	SORT_ALPHABETICALLY,
 	

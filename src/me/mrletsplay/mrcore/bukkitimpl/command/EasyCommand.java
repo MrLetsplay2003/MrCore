@@ -214,7 +214,7 @@ public abstract class EasyCommand implements CommandExecutor, TabCompleter {
 	
 	private void sendErrorMessage(CommandSender sender, CommandException e, String argsString) {
 		if(sender instanceof Player) {
-			sender.sendMessage("§cAn error occured while executing the command: §7" + e.getMessage());
+			sender.sendMessage("Â§cAn error occured while executing the command: Â§7" + e.getMessage());
 			if(e.getIndex() >= 0) {
 				sender.sendMessage("");
 				String prev = argsString.substring(0, e.getIndex());
@@ -248,13 +248,13 @@ public abstract class EasyCommand implements CommandExecutor, TabCompleter {
 						.create());
 			}
 		}else {
-			sender.sendMessage("§cAn error occured while parsing the command: §7" + e.getMessage());
+			sender.sendMessage("Â§cAn error occured while parsing the command: Â§7" + e.getMessage());
 			if(e.getIndex() >= 0) {
 				sender.sendMessage("");
 				String prev = argsString.substring(0, e.getIndex());
 				String f = argsString.substring(e.getIndex(), e.getIndex() + e.getLength());
 				String after = argsString.substring(e.getIndex() + e.getLength());
-				sender.sendMessage("§7" + getFullName() + " " + prev + "§c" + f + "§r" + after);
+				sender.sendMessage("Â§7" + getFullName() + " " + prev + "Â§c" + f + "Â§r" + after);
 				sender.sendMessage(StringUtils.repeat("-", getFullName().length() + e.getIndex() + 1) + StringUtils.repeat("^", e.getLength()) + " There is an error here");
 			}
 		}

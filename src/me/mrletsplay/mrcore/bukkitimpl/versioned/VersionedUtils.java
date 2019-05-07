@@ -9,7 +9,7 @@ import me.mrletsplay.mrcore.bukkitimpl.ItemUtils;
 public class VersionedUtils {
 
 	/**
-	 * @see {@link ItemUtils#createItem(VersionedMaterial, int, String, String...)}
+	 * @see ItemUtils#createItem(VersionedMaterial, int, String, String...)
 	 */
 	public static ItemStack createItem(VersionedMaterial material, int amount, String name, String... lore) {
 		return ItemUtils.createItem(material, amount, name, lore);

@@ -70,7 +70,8 @@ public class LocaleProvider {
 	 * Note: This will not happen if your defaults contain every message
 	 * @param mode The null mode to use
 	 * @return This LocaleProvider instance
-	 * @see {@link LocaleNullMode} and {@link Locale#getMessage(String)}
+	 * @see LocaleNullMode
+	 * @see Locale#getMessage(String)
 	 */
 	public LocaleProvider useNullMode(LocaleNullMode mode) {
 		this.nullMode = mode;
@@ -180,7 +181,7 @@ public class LocaleProvider {
 		}
 		
 		/**
-		 * @return The custom locale folder specified in {@link #CustomLocaleProvider(File)}
+		 * @return The custom locale folder specified in {@link CustomLocaleProvider#CustomLocaleProvider(File) CustomLocaleProvider(File)}
 		 */
 		public File getCustomLocaleFolder() {
 			return customLocaleFolder;

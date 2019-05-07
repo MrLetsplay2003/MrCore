@@ -39,12 +39,12 @@ public enum ConfigValueType {
 	BOOLEAN(Boolean.class),
 	
 	/**
-	 * Java Type: {@code Number} (stored as {@code Long}) -> {@code Byte}, {@code Short}, {@code Integer}, {@code Long}
+	 * Java Type: {@code Number} (stored as {@code Long}) -&gt; {@code Byte}, {@code Short}, {@code Integer}, {@code Long}
 	 */
 	NUMBER(Number.class, Byte.class, Short.class, Integer.class, Long.class),
 	
 	/**
-	 * Java Type: {@code Number} (stored as {@code Double}) -> {@code Float}, {@code Double}
+	 * Java Type: {@code Number} (stored as {@code Double}) -&gt; {@code Float}, {@code Double}
 	 */
 	DECIMAL(Number.class, Float.class, Double.class),
 	

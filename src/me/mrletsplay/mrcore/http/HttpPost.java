@@ -16,7 +16,7 @@ public class HttpPost implements HttpRequest {
 	/**
 	 * Creates a POST request to the specified url
 	 * @param url The url this request should be sent to
-	 * @see {@link HttpRequest#createPost(String)}
+	 * @see HttpRequest#createPost(String)
 	 */
 	public HttpPost(String url) {
 		this.url = url;

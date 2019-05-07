@@ -28,10 +28,10 @@ public interface ConfigSection {
 	public CustomConfig getConfig();
 	
 	/**
-	 * Returns a map containing all the properties & subsections of this section.<br>
+	 * Returns a map containing all the properties and subsections of this section.<br>
 	 * The values of this map may contain all {@link ConfigValueType valid value types}, including other ConfigSection instances.<br>
 	 * Implementations may return an unmodifiable map
-	 * @return A map containing all the properties & subsections of this section
+	 * @return A map containing all the properties and subsections of this section
 	 */
 	public Map<String, ConfigProperty> getAllProperties();
 	
@@ -71,8 +71,6 @@ public interface ConfigSection {
 	/**
 	 * Clears this section.<br>
 	 * Every property in this section will be unset
-	 * @param key The key of the property
-	 * @param value The value of the property
 	 */
 	public void clear();
 	
@@ -196,9 +194,9 @@ public interface ConfigSection {
 	}
 	
 	/**
-	 * Sets all the values & subsections (represented by other {@link Map}s) of the specified map in this subsection.<br>
+	 * Sets all the values and subsections (represented by other {@link Map}s) of the specified map in this subsection.<br>
 	 * Any map created by {@link #toMap()} may be passed to this function
-	 * @param map A map containing all the values & subsections
+	 * @param map A map containing all the values and subsections
 	 */
 	public default void loadFromMap(Map<String, Object> map) {
 		map.forEach(this::set);
@@ -220,9 +218,9 @@ public interface ConfigSection {
 	}
 	
 	/**
-	 * Sets all the comments & subsections' comments (represented by other {@link Map}s) of the specified map in this subsection.<br>
+	 * Sets all the comments and subsections' comments (represented by other {@link Map}s) of the specified map in this subsection.<br>
 	 * Any map created by {@link #commentsToMap()} may be passed to this function
-	 * @param map A map containing all the comments & subsections' comments
+	 * @param map A map containing all the comments and subsections' comments
 	 */
 	public default void loadCommentsFromMap(Map<String, String> map) {
 		map.forEach((k, v) -> {
@@ -253,9 +251,9 @@ public interface ConfigSection {
 	}
 	
 	/**
-	 * Sets all the values & subsections (represented by other {@link JSONObject}s) of the specified JSONObject in this subsection.<br>
+	 * Sets all the values and subsections (represented by other {@link JSONObject}s) of the specified JSONObject in this subsection.<br>
 	 * Any JSONObject created by {@link #toJSON()} may be passed to this function
-	 * @param map A JSONObject containing all the values & subsections
+	 * @param json A JSONObject containing all the values and subsections
 	 */
 	public default void loadFromJSON(JSONObject json) {
 		json.forEach(this::set);
