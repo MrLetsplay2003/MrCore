@@ -85,8 +85,9 @@ public enum JSONType {
 				return (JSONObject) value;
 			case STRING:
 				return (String) value;
+			default:
+				throw new IllegalStateException("Type not handled!");
 		}
-		throw new IllegalStateException("Type not handled!");
 	}
 	
 	public static Object castJSONValueTo(Object value, Class<?> clazz) {

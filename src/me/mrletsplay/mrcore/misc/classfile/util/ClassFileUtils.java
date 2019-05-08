@@ -96,7 +96,8 @@ public class ClassFileUtils {
 		nInstr.add(new InstructionInformation(Instruction.BIPUSH, (byte) method.getMethodDescriptor().getParameterDescriptors().length));
 		nInstr.add(new InstructionInformation(Instruction.ANEWARRAY, getShortBytes(objClInd)));
 		
-		byte i = 0, idx = 0;
+		byte i = 0;
+		byte idx = 0;
 		for(ParameterDescriptor p : method.getMethodDescriptor().getParameterDescriptors()) {
 			nInstr.add(new InstructionInformation(Instruction.DUP));
 			nInstr.add(new InstructionInformation(Instruction.BIPUSH, idx++));

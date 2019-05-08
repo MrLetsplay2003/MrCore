@@ -1,5 +1,7 @@
 package me.mrletsplay.mrcore.json;
 
+import me.mrletsplay.mrcore.misc.FriendlyException;
+
 /**
  * Provides methods for parsing JSON strings into objects
  * @author MrLetsplay2003
@@ -207,7 +209,7 @@ public class JSONParser {
 		
 		public CharReader revert(int num) {
 			currentIndex -= num;
-			if(currentIndex < 0) throw new RuntimeException();
+			if(currentIndex < 0) throw new FriendlyException("Illegal reader move");
 			return this;
 		}
 		

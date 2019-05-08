@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import me.mrletsplay.mrcore.misc.EnumFlagCompound;
+import me.mrletsplay.mrcore.misc.FriendlyException;
 import me.mrletsplay.mrcore.misc.classfile.attribute.Attribute;
 import me.mrletsplay.mrcore.misc.classfile.attribute.AttributeCode;
 import me.mrletsplay.mrcore.misc.classfile.attribute.AttributeLocalVariableTable;
@@ -102,9 +103,7 @@ public class ClassFile {
 	private ConstantPoolEntry readConstantPoolEntry(ConstantPool pool, DataInputStream in) throws IOException {
 		int uByte = in.readUnsignedByte();
 		ConstantPoolTag tag = ConstantPoolTag.getByValue(uByte);
-		if(tag == null) {
-			throw new IllegalArgumentException("Invalid constant pool (Invalid type: 0x" + Integer.toHexString(uByte) + ")");
-		}
+		if(tag == null) throw new IllegalArgumentException("Invalid constant pool (Invalid type: 0x" + Integer.toHexString(uByte) + ")");
 		switch(tag) {
 			case CLASS:
 				return new ConstantPoolClassEntry(constantPool, in.readUnsignedShort());
@@ -136,8 +135,9 @@ public class ClassFile {
 				return new ConstantPoolMethodTypeEntry(pool, in.readUnsignedShort());
 			case INVOKE_DYNAMIC:
 				return new ConstantPoolInvokeDynamicEntry(pool, in.readUnsignedShort(), in.readUnsignedShort());
+			default:
+				throw new FriendlyException("Unhandled constant pool tag");
 		}
-		throw new RuntimeException();
 	}
 	
 	public Attribute readAttribute(ConstantPool pool, DataInputStream in) throws IOException {

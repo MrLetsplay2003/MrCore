@@ -15,8 +15,9 @@ public class ClassUtils {
 	}
 	
 	public static Class<?> getArrayBaseClass(Class<?> arrayClass) {
-		while(arrayClass.isArray()) arrayClass = arrayClass.getComponentType();
-		return arrayClass;
+		Class<?> cl = arrayClass;
+		while(cl.isArray()) cl = cl.getComponentType();
+		return cl;
 	}
 	
 	public static int getArrayDimensions(Class<?> arrayClass) {

@@ -3,6 +3,7 @@ package me.mrletsplay.mrcore.misc.classfile.attribute.stackmap;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import me.mrletsplay.mrcore.misc.FriendlyException;
 import me.mrletsplay.mrcore.misc.classfile.pool.ConstantPool;
 
 public interface StackMapFrame {
@@ -31,8 +32,9 @@ public interface StackMapFrame {
 				return new StackMapSameLocals1StackItemFrame(pool, tag, dIn);
 			case SAME_LOCALS_1_STACK_ITEM_FRAME_EXTENDED:
 				return new StackMapSameLocals1StackItemFrameExtended(pool, tag, dIn);
+			default:
+				throw new FriendlyException("Unhandled stack map frame type");	
 		}
-		throw new RuntimeException();
 	}
 	
 }
