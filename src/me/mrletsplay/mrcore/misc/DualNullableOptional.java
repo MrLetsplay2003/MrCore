@@ -14,6 +14,11 @@ public class DualNullableOptional<T, A> extends NullableOptional<T> {
 		return other;
 	}
 	
+	@Override
+	public String toString() {
+		return isPresent() ? "DualNullableOptional<present>[" + get() + "]" : "DualNullableOptional<absent>[" + getOther() + "]";
+	}
+	
 	public static <T, A> DualNullableOptional<T, A> ofDual(T value) {
 		return new DualNullableOptional<>(true, value, null);
 	}
