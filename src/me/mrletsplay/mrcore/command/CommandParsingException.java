@@ -19,8 +19,7 @@ public class CommandParsingException extends FriendlyException {
 	}
 	
 	public void send(CommandSender sender) {
-		sender.sendMessage("Exception: " + getMessage());
-		printStackTrace();
+		sender.sendMessage("Error: " + getMessage());
 	}
 	
 }

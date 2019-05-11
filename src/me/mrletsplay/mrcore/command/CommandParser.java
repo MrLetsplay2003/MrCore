@@ -17,7 +17,7 @@ import me.mrletsplay.mrcore.misc.NullableOptional;
 public class CommandParser {
 	
 	private static final Pattern
-		COMMAND_NAME_FORMAT = compile("(?<name>[a-zA-Z-_0-9]*)"),
+		COMMAND_NAME_FORMAT = compile("(?<name>[a-zA-Z-_0-9?]*)"),
 		SHORT_OPTION_FORMAT = compile("(?<soption>-(?<name>[a-zA-Z-_0-9]*))"),
 		LONG_OPTION_FORMAT = compile("(?<loption>--(?<name>[a-zA-Z-_0-9]*))"),
 		ARGUMENT_FORMAT = compile("(?<arg>\"(?<avq>[^\\n\\r\\t\"]*)(?<cq>\")?|(?<av>(?:[^\\n\\r\\t\"\\\\ ]|\\\\[^\\n\\r\\t])+))");

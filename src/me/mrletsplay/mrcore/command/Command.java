@@ -1,6 +1,7 @@
 package me.mrletsplay.mrcore.command;
 
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 public interface Command {
 	
@@ -19,6 +20,13 @@ public interface Command {
 	}
 	
 	public String getDescription();
+	
+	public default void sendCommandInfo(CommandSender sender) {
+		sender.sendMessage("Command: " + getName());
+		sender.sendMessage("Description: " + getDescription());
+		sender.sendMessage("");
+		sender.sendMessage("Available options: " + getOptions().stream().map(o -> "--" + o.getLongName()).collect(Collectors.joining(", ")));
+	}
 	
 	public void action(CommandInvokedEvent event);
 	
