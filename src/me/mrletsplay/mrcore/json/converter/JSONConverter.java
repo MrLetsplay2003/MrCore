@@ -8,7 +8,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import me.mrletsplay.mrcore.json.JSONArray;
@@ -42,7 +45,7 @@ public class JSONConverter {
 		}else if(value instanceof JSONConvertible) {
 			JSONObject obj = new JSONObject();
 			((JSONConvertible) value).preSerialize(obj);
-			for(Field f : value.getClass().getDeclaredFields()) {
+			for(Field f : getFields(value.getClass())) {
 				JSONValue v = f.getAnnotation(JSONValue.class);
 				if(v == null || !v.encode()) continue;
 				String fName = v.value().isEmpty() ? f.getName() : v.value();
@@ -53,7 +56,7 @@ public class JSONConverter {
 					throw new FriendlyException(e);
 				}
 			}
-			for(Method m : value.getClass().getDeclaredMethods()) {
+			for(Method m : getMethods(value.getClass())) {
 				JSONValue v = m.getAnnotation(JSONValue.class);
 				if(v == null || !v.encode()) continue;
 				if(m.getParameterCount() != 0) throw new IllegalArgumentException("Method has parameters");
@@ -76,6 +79,31 @@ public class JSONConverter {
 			if(t == null) throw new IllegalArgumentException("Object of type " + value.getClass() + " is not a valid JSON value");
 			return value;
 		}
+	}
+	
+	private static Set<Field> getFields(Class<?> clz) {
+		if(!JSONConvertible.class.isAssignableFrom(clz)) return Collections.emptySet();
+		Set<Field> fs = new HashSet<>();
+		Class<?> cls = clz;
+		while(!cls.equals(Object.class)) {
+			fs.addAll(Arrays.asList(cls.getDeclaredFields()));
+			cls = cls.getSuperclass();
+			if(cls == null) break;
+		}
+		return fs;
+	}
+	
+	private static Set<Method> getMethods(Class<?> clz) {
+		if(!JSONConvertible.class.isAssignableFrom(clz)) return Collections.emptySet();
+		Set<Method> fs = new HashSet<>();
+		Class<?> cls = clz;
+		while(!cls.equals(Object.class)) {
+			fs.addAll(Arrays.asList(cls.getDeclaredMethods()));
+			Arrays.stream(cls.getInterfaces()).forEach(i -> fs.addAll(getMethods(i)));
+			cls = cls.getSuperclass();
+			if(cls == null) break;
+		}
+		return fs;
 	}
 	
 	private static JSONArray encodeArray0(Object[] array, boolean includeClass) {
@@ -156,7 +184,7 @@ public class JSONConverter {
 			}
 			JSONConvertible t = createObject0(o, jClass, loader);
 			t.preDeserialize(o);
-			for(Field f : jClass.getDeclaredFields()) {
+			for(Field f : getFields(jClass)) {
 				JSONValue v = f.getAnnotation(JSONValue.class);
 				JSONListType lT = f.getAnnotation(JSONListType.class);
 				JSONComplexListType clT = f.getAnnotation(JSONComplexListType.class);
