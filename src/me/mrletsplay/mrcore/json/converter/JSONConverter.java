@@ -179,7 +179,9 @@ public class JSONConverter {
 			if(o.isOfType("_class", JSONType.STRING)) {
 				try {
 					Class<?> nClass = Class.forName(o.getString("_class"), true, loader);
-					if(JSONConvertible.class.isAssignableFrom(nClass)) jClass = nClass.asSubclass(JSONConvertible.class);
+					if(JSONConvertible.class.isAssignableFrom(nClass)) {
+						jClass = nClass.asSubclass(JSONConvertible.class);
+					}
 				} catch (ClassNotFoundException ignored) {}
 			}
 			JSONConvertible t = createObject0(o, jClass, loader);
