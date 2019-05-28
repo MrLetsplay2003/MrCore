@@ -22,7 +22,13 @@ public abstract class AbstractAutoUpdateable implements AutoUpdateable {
 	@Override
 	public boolean hasChanged() {
 		Map<Field, Object> vs = getCurrentValues();
-		return changed || !vs.keySet().stream().allMatch(k -> Objects.deepEquals(vs.get(k), values.get(k))); // TODO: array changes
+		return changed || !vs.keySet().stream().allMatch(k -> {
+			Object
+				vN = vs.get(k),
+				vO = values.get(k);
+			if(vN instanceof Updateable && ((Updateable) vN).hasChanged()) return false;
+			return Objects.deepEquals(vN, vO);
+		});
 	}
 	
 	@Override
