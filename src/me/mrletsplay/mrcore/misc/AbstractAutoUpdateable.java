@@ -1,6 +1,7 @@
 package me.mrletsplay.mrcore.misc;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -34,6 +35,9 @@ public abstract class AbstractAutoUpdateable implements AutoUpdateable {
 	@Override
 	public void resetChanged() {
 		values = getCurrentValues();
+		for(Object e : values.entrySet())
+			if(e instanceof Updateable)
+				((Updateable) e).resetChanged();
 		changed = false;
 	}
 	
@@ -43,7 +47,17 @@ public abstract class AbstractAutoUpdateable implements AutoUpdateable {
 			if(!f.isAnnotationPresent(UpdateableField.class)) return;
 			f.setAccessible(true);
 			try {
-				fs.put(f, f.get(this));
+				Object v = f.get(this);
+				if(v instanceof Cloneable) {
+					try {
+						Method m = ClassUtils.getDeclaredMethodRecursively(v.getClass(), "clone");
+						m.setAccessible(true);
+						v = m.invoke(v);
+					}catch(Exception ignored) {
+						ignored.printStackTrace();
+					}
+				}
+				fs.put(f, v);
 			} catch (IllegalArgumentException | IllegalAccessException e) {
 				throw new FriendlyException("Failed to get value for field " + f, e);
 			}

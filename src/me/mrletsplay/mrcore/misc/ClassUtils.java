@@ -1,6 +1,7 @@
 package me.mrletsplay.mrcore.misc;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -38,6 +39,19 @@ public class ClassUtils {
 			if(cls == null) break;
 		}
 		return fs;
+	}
+	
+	public static Method getDeclaredMethodRecursively(Class<?> clz, String name, Class<?>... parameterTypes) throws NoSuchMethodException, SecurityException {
+		Class<?> cls = clz;
+		while(true) {
+			try {
+				return cls.getDeclaredMethod(name, parameterTypes);
+			}catch(NoSuchMethodException ignored) {}
+			if(cls.equals(Object.class)) break;
+			cls = cls.getSuperclass();
+			if(cls == null) break;
+		}
+		throw new NoSuchMethodException("Couldn't find method \"" + name + "\" in class " + clz.getName() + " or any of its superclasses");
 	}
 	
 }
