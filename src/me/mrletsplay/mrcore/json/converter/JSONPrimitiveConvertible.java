@@ -4,6 +4,4 @@ public interface JSONPrimitiveConvertible {
 
 	public Object toJSONPrimitive();
 	
-	public void deserialize(Object primitive);
-	
 }

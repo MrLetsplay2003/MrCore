@@ -120,6 +120,10 @@ public class JSONConverter {
 		return decodeObject(object, clazz, JSONConverter.class.getClassLoader());
 	}
 	
+	public static <T extends JSONPrimitiveConvertible> T decodePrimitive(Object object, Class<T> clazz) {
+		return decodePrimitive0(clazz, object);
+	}
+	
 	private static <T extends JSONConvertible> T createObject0(JSONObject object, Class<T> clazz, ClassLoader loader) {
 		List<Constructor<?>> constrs = Arrays.stream(clazz.getDeclaredConstructors()).filter(c -> c.isAnnotationPresent(JSONConstructor.class)).collect(Collectors.toList());
 		if(constrs.isEmpty()) throw new IllegalArgumentException("No constructor available for class " + clazz.getName());
@@ -153,22 +157,34 @@ public class JSONConverter {
 		return t;
 	}
 	
-	private static <T extends JSONPrimitiveConvertible> T createPrimitive0(Class<T> clazz) {
-		List<Constructor<?>> constrs = Arrays.stream(clazz.getDeclaredConstructors()).filter(c -> c.isAnnotationPresent(JSONConstructor.class)).collect(Collectors.toList());
-		if(constrs.isEmpty()) throw new IllegalArgumentException("No constructor available for class " + clazz.getName());
-		T t = null;
-		for(Constructor<?> c : constrs) {
-			if(c.getParameterCount() > 0) continue;
-			c.setAccessible(true);
+	private static <T extends JSONPrimitiveConvertible> T decodePrimitive0(Class<T> clazz, Object value) {
+//		List<Constructor<?>> constrs = Arrays.stream(clazz.getDeclaredConstructors()).filter(c -> c.isAnnotationPresent(JSONConstructor.class)).collect(Collectors.toList());
+//		if(constrs.isEmpty()) throw new IllegalArgumentException("No constructor available for class " + clazz.getName());
+//		T t = null;
+//		for(Constructor<?> c : constrs) {
+//			if(c.getParameterCount() > 0) continue;
+//			c.setAccessible(true);
+//			try {
+//				t = clazz.cast(c.newInstance());
+//			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+//					| InvocationTargetException e) {
+//				continue;
+//			}
+//		}
+//		if(t == null) throw new IllegalArgumentException("No suitable/working constructor found for class " + clazz.getName());
+//		return t;
+		
+		try {
+			Method voM = clazz.getMethod("decodePrimitive", Object.class);
+			voM.setAccessible(true);
 			try {
-				t = clazz.cast(c.newInstance());
-			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-					| InvocationTargetException e) {
-				continue;
+				return clazz.cast(voM.invoke(null, value));
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				throw new IllegalArgumentException("Failed to invoke decodePrimitive method", e);
 			}
+		} catch (NoSuchMethodException | SecurityException e) {
+			throw new IllegalArgumentException("Class " + clazz.getName() + " doesn't have the static method decodePrimitive(Object)", e);
 		}
-		if(t == null) throw new IllegalArgumentException("No suitable/working constructor found for class " + clazz.getName());
-		return t;
 	}
 	
 	private static Object decode0(Object value, Class<?> clazz, ClassLoader loader) {
@@ -206,9 +222,10 @@ public class JSONConverter {
 			}
 			return t;
 		}else if(JSONPrimitiveConvertible.class.isAssignableFrom(clazz)) {
-			JSONPrimitiveConvertible p = createPrimitive0(clazz.asSubclass(JSONPrimitiveConvertible.class));
-			p.deserialize(value);
-			return p;
+//			JSONPrimitiveConvertible p = createPrimitive0(clazz.asSubclass(JSONPrimitiveConvertible.class));
+//			p.deserialize(value);
+//			return p;
+			return decodePrimitive0(clazz.asSubclass(JSONPrimitiveConvertible.class), value);
 		}else if(clazz.isArray()) {
 			JSONArray arr = (JSONArray) value;
 			Object a = Array.newInstance(clazz.getComponentType(), arr.size());
