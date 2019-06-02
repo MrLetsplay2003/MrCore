@@ -95,6 +95,7 @@ public enum JSONType {
 	}
 	
 	public static Object castJSONValueTo(Object value, Class<?> clazz, boolean strict) {
+		if(!strict && clazz.equals(Object.class)) return value;
 		if(clazz.equals(JSONArray.class)) {
 			return (JSONArray) value;
 		}else if(clazz.equals(Boolean.class) || clazz.equals(boolean.class)) {
