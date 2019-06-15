@@ -1,8 +1,12 @@
 package me.mrletsplay.mrcore.misc;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class Probability {
 	
@@ -19,8 +23,20 @@ public class Probability {
 			els.put(new DoubleRange(sum, sum += el.probability), el);
 		}
 		double val = r.nextDouble() * sum;
-		ProbabilityElement<T> el = els.entrySet().stream().filter(e -> e.getKey().contains(val)).map(e -> e.getValue()).findFirst().orElse(null);
+		ProbabilityElement<T> el = els.entrySet().stream().filter(e -> e.getKey().contains(val)).map(Map.Entry::getValue).findFirst().orElse(null);
 		return el;
+	}
+	
+	public static <T> List<ProbabilityElement<T>> chooseMultiple(List<ProbabilityElement<T>> elements, int baseline) {
+		return chooseMultiple(elements, baseline, DEFAULT_RANDOM);
+	}
+
+	public static <T> List<ProbabilityElement<T>> chooseMultiple(List<ProbabilityElement<T>> elements, int baseline, Random r){
+		List<ProbabilityElement<T>> ps = new ArrayList<>();
+		for(ProbabilityElement<T> e : elements) {
+			if(r.nextDouble() * baseline <= e.probability) ps.add(e);
+		}
+		return ps;
 	}
 	
 	public static <T> T chooseValue(List<ProbabilityElement<T>> elements) {
@@ -30,6 +46,17 @@ public class Probability {
 	public static <T> T chooseValue(List<ProbabilityElement<T>> elements, Random r) {
 		ProbabilityElement<T> elC = choose(elements, r);
 		return elC != null ? elC.element : null;
+	}
+	
+	public static <T> List<T> chooseMultipleValues(List<ProbabilityElement<T>> elements, int baseline) {
+		return chooseMultipleValues(elements, baseline, DEFAULT_RANDOM);
+	}
+	
+	public static <T> List<T> chooseMultipleValues(List<ProbabilityElement<T>> elements, int baseline, Random r) {
+		return chooseMultiple(elements, baseline, r).stream()
+				.filter(Objects::nonNull)
+				.map(ProbabilityElement::getElement)
+				.collect(Collectors.toList());
 	}
 	
 	private static class DoubleRange {
@@ -55,6 +82,14 @@ public class Probability {
 		public ProbabilityElement(T  element, double probability) {
 			this.element = element;
 			this.probability = probability;
+		}
+		
+		public double getProbability() {
+			return probability;
+		}
+		
+		public T getElement() {
+			return element;
 		}
 		
 	}

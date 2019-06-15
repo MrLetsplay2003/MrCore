@@ -23,7 +23,10 @@ public class JSONParser {
 	 */
 	public static Object parse(String source) {
 		if(source == null) return null;
-		return readGeneric(new CharReader(source));
+		CharReader r = new CharReader(source);
+		Object v = readGeneric(r);
+		if(r.nextIgnoreWhitespaces() != '\0') throw new JSONParseException("Didn't reach string end after parsed object", r.currentIndex);
+		return v;
 	}
 	
 	private static JSONObject readObject(CharReader reader) {
