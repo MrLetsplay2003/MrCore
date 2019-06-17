@@ -11,7 +11,18 @@ import me.mrletsplay.mrcore.misc.NullableOptional;
 
 public final class DefaultCommandValueType {
 
-	public static final CommandValueType<Integer> INTEGER = new Impl<Integer>(s -> MiscUtils.callSafely(() -> Integer.parseInt(s)), "-1");
+	public static final CommandValueType<Integer> INTEGER = new Impl<>(s -> MiscUtils.callSafely(() -> Integer.parseInt(s)), "-1");
+	public static final CommandValueType<Boolean> BOOLEAN = new Impl<>(s -> {
+		if(s == null) return NullableOptional.empty();
+		switch(s.toLowerCase()) {
+			case "true":
+				return NullableOptional.of(true);
+			case "false":
+				return NullableOptional.of(false);
+			default:
+				return NullableOptional.empty();
+		}
+	}, "true", "false");
 
 	private DefaultCommandValueType() {}
 	

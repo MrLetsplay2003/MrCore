@@ -5,15 +5,17 @@ import me.mrletsplay.mrcore.command.CommandValueType;
 
 public final class DefaultCommandOption {
 
-	public static final CommandOption<Void> HELP = new Impl<>("h", "help", false, null);
+	public static final CommandOption<?> HELP = createCommandOption("h", "help");
 	
 	private DefaultCommandOption() {}
 	
-	public static CommandOption<?> createCommandOption(String shortName, String longName) {
+	public static CommandOption<?> createCommandOption(String shortName, String longName) throws IllegalArgumentException {
+		if(shortName.length() != 1) throw new IllegalArgumentException("shortName needs to be 1 character long");
 		return new Impl<>(shortName, longName, false, null);
 	}
 	
-	public static <T> CommandOption<T> createCommandOption(String shortName, String longName, CommandValueType<T> type) {
+	public static <T> CommandOption<T> createCommandOption(String shortName, String longName, CommandValueType<T> type) throws IllegalArgumentException {
+		if(shortName.length() != 1) throw new IllegalArgumentException("shortName needs to be 1 character long");
 		return new Impl<>(shortName, longName, true, type);
 	}
 	

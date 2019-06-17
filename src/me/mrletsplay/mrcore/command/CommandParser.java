@@ -22,11 +22,11 @@ public class CommandParser {
 		LONG_OPTION_FORMAT = compile("(?<loption>--(?<name>[a-zA-Z-_0-9]*))"),
 		ARGUMENT_FORMAT = compile("(?<arg>\"(?<avq>[^\\n\\r\\t\"]*)(?<cq>\")?|(?<av>(?:[^\\n\\r\\t\"\\\\ ]|\\\\[^\\n\\r\\t])+))");
 	
-	public static ParsedCommand parse(CommandProvider provider, String commandLine) {
+	public static ParsedCommand parse(CommandProvider provider, String commandLine) throws CommandParsingException {
 		return parse0(provider, commandLine, false).get();
 	}
 	
-	public static List<String> tabComplete(CommandProvider provider, String commandLine) {
+	public static List<String> tabComplete(CommandProvider provider, String commandLine) throws CommandParsingException {
 		DualNullableOptional<ParsedCommand, List<String>> p = parse0(provider, commandLine, true);
 		return p.isPresent() ? new ArrayList<>() : p.getOther();
 	}
