@@ -16,8 +16,9 @@ public enum NMSVersion {
 	V1_12_R1("MC 1.12", "v1_12_R1"),
 	V1_13_R1("MC 1.13 Release 1", "v1_13_R1"),
 	V1_13_R2("MC 1.13 Release 2", "v1_13_R2"),
+	V1_14_R1("MC 1.14 Release 1", "v1_14_R1"),
 	/**
-	 * Represents any unknown version of Spigot. This may include any version older than 1.8R1 or newer than 1.13R2
+	 * Represents any unknown version of Spigot. This may include any version older than 1.8R1 or newer than 1.14R1
 	 */
 	UNKNOWN("Unknown", "Unknown version");
 	
@@ -79,53 +80,67 @@ public enum NMSVersion {
 	 * @return An array containing all the versions between the boundaries
 	 */
 	public static NMSVersion[] range(NMSVersion startVersion, NMSVersion endVersion) {
-		return Arrays.stream(values()).filter(o -> o.ordinal() >= startVersion.ordinal() && o.ordinal() <= endVersion.ordinal()).toArray(NMSVersion[]::new);
+		return Arrays.stream(values())
+				.filter(o -> o.ordinal() >= startVersion.ordinal() && o.ordinal() <= endVersion.ordinal())
+				.toArray(NMSVersion[]::new);
 	}
 	
 	/**
+	 * @deprecated Use {@link NMSRelease#getVersions()} instead
 	 * Returns an array of all the 1.8 versions.<br>
 	 * @return An array containing all the 1.8 versions
 	 */
+	@Deprecated
 	public static NMSVersion[] v1_8() {
 		return new NMSVersion[] {V1_8_R1, V1_8_R2, V1_8_R3};
 	}
 
 	/**
+	 * @deprecated Use {@link NMSRelease#getVersions()} instead
 	 * Returns an array of all the 1.9 versions.<br>
 	 * @return An array containing all the 1.9 versions
 	 */
+	@Deprecated
 	public static NMSVersion[] v1_9() {
 		return new NMSVersion[] {V1_9_R1, V1_9_R2};
 	}
 
 	/**
+	 * @deprecated Use {@link NMSRelease#versionsTo(NMSRelease)} instead
 	 * Returns an array of all the versions from 1.8 to 1.12.<br>
 	 * @return An array containing all the 1.8-1.12 versions
 	 */
+	@Deprecated
 	public static NMSVersion[] v1_8to1_12() {
 		return range(NMSVersion.V1_8_R1, NMSVersion.V1_12_R1);
 	}
 
 	/**
+	 * @deprecated Use {@link NMSRelease#versionsTo(NMSRelease)} instead
 	 * Returns an array of all the versions from 1.9 to 1.12.<br>
 	 * @return An array containing all the 1.9-1.12 versions
 	 */
+	@Deprecated
 	public static NMSVersion[] v1_9to1_12() {
 		return range(NMSVersion.V1_9_R1, NMSVersion.V1_12_R1);
 	}
 
 	/**
+	 * @deprecated Use {@link NMSRelease#versionsTo(NMSRelease)} instead
 	 * Returns an array of all the versions from 1.8 to 1.13.<br>
 	 * @return An array containing all the 1.8-1.13 versions
 	 */
+	@Deprecated
 	public static NMSVersion[] v1_8to1_13() {
 		return range(NMSVersion.V1_8_R1, NMSVersion.V1_13_R2);
 	}
 
 	/**
+	 * @deprecated Use {@link NMSRelease#getVersions()} instead
 	 * Returns an array of all the 1.13 versions.<br>
 	 * @return An array containing all the 1.13 versions
 	 */
+	@Deprecated
 	public static NMSVersion[] v1_13() {
 		return new NMSVersion[] {V1_13_R1, V1_13_R2};
 	}

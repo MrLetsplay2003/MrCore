@@ -1,5 +1,9 @@
 package me.mrletsplay.mrcore.bukkitimpl.versioned;
 
+import static me.mrletsplay.mrcore.bukkitimpl.versioned.NMSRelease.V1_12;
+import static me.mrletsplay.mrcore.bukkitimpl.versioned.NMSRelease.V1_14;
+import static me.mrletsplay.mrcore.bukkitimpl.versioned.NMSRelease.V1_8;
+
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -13,25 +17,25 @@ import org.bukkit.DyeColor;
  */
 public enum VersionedDyeColor {
 
-	BLACK(of("BLACK", NMSVersion.v1_8to1_13())),
-	RED(of("RED", NMSVersion.v1_8to1_13())),
-	GREEN(of("GREEN", NMSVersion.v1_8to1_13())),
-	BROWN(of("BROWN", NMSVersion.v1_8to1_13())),
-	BLUE(of("BLUE", NMSVersion.v1_8to1_13())),
-	PURPLE(of("PURPLE", NMSVersion.v1_8to1_13())),
-	CYAN(of("CYAN", NMSVersion.v1_8to1_13())),
+	BLACK(of("BLACK", V1_8.versionsTo(V1_14))),
+	RED(of("RED", V1_8.versionsTo(V1_14))),
+	GREEN(of("GREEN", V1_8.versionsTo(V1_14))),
+	BROWN(of("BROWN", V1_8.versionsTo(V1_14))),
+	BLUE(of("BLUE", V1_8.versionsTo(V1_14))),
+	PURPLE(of("PURPLE", V1_8.versionsTo(V1_14))),
+	CYAN(of("CYAN", V1_8.versionsTo(V1_14))),
 	LIGHT_GRAY(
-			of("SILVER", NMSVersion.v1_8to1_12()),
-			of("LIGHT_GRAY", NMSVersion.v1_13())
+			of("SILVER", V1_8.versionsTo(V1_12)),
+			of("LIGHT_GRAY", V1_14.getVersions())
 		),
-	GRAY(of("GRAY", NMSVersion.v1_8to1_13())),
-	PINK(of("PINK", NMSVersion.v1_8to1_13())),
-	LIME(of("LIME", NMSVersion.v1_8to1_13())),
-	YELLOW(of("YELLOW", NMSVersion.v1_8to1_13())),
-	LIGHT_BLUE(of("LIGHT_BLUE", NMSVersion.v1_8to1_13())),
-	MAGENTA(of("MAGENTA", NMSVersion.v1_8to1_13())),
-	ORANGE(of("ORANGE", NMSVersion.v1_8to1_13())),
-	WHITE(of("WHITE", NMSVersion.v1_8to1_13()));
+	GRAY(of("GRAY", V1_8.versionsTo(V1_14))),
+	PINK(of("PINK", V1_8.versionsTo(V1_14))),
+	LIME(of("LIME", V1_8.versionsTo(V1_14))),
+	YELLOW(of("YELLOW", V1_8.versionsTo(V1_14))),
+	LIGHT_BLUE(of("LIGHT_BLUE", V1_8.versionsTo(V1_14))),
+	MAGENTA(of("MAGENTA", V1_8.versionsTo(V1_14))),
+	ORANGE(of("ORANGE", V1_8.versionsTo(V1_14))),
+	WHITE(of("WHITE", V1_8.versionsTo(V1_14)));
 	
 	private Map<NMSVersion, String> definitions;
 	

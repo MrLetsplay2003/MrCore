@@ -1,5 +1,6 @@
 package me.mrletsplay.mrcore.bukkitimpl.versioned;
 
+import static me.mrletsplay.mrcore.bukkitimpl.versioned.NMSRelease.*;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,54 +11,54 @@ import org.bukkit.Sound;
 public enum VersionedSound {
 
 	BLOCK_NOTE_BLOCK_HARP(
-			of("NOTE_PIANO", NMSVersion.v1_8()),
-			of("BLOCK_NOTE_HARP", NMSVersion.range(NMSVersion.V1_9_R1, NMSVersion.V1_12_R1)),
-			of("BLOCK_NOTE_BLOCK_HARP", NMSVersion.v1_13())
+			of("NOTE_PIANO", V1_8.getVersions()),
+			of("BLOCK_NOTE_HARP", V1_9.versionsTo(V1_12)),
+			of("BLOCK_NOTE_BLOCK_HARP", V1_13.versionsTo(V1_14))
 		),
 	BLOCK_NOTE_BLOCK_BASS(
-			of("NOTE_BASS_GUITAR", NMSVersion.v1_8()),
-			of("BLOCK_NOTE_BASS", NMSVersion.range(NMSVersion.V1_9_R1, NMSVersion.V1_12_R1)),
-			of("BLOCK_NOTE_BLOCK_BASS", NMSVersion.v1_13())
+			of("NOTE_BASS_GUITAR", V1_8.getVersions()),
+			of("BLOCK_NOTE_BASS", V1_9.versionsTo(V1_12)),
+			of("BLOCK_NOTE_BLOCK_BASS", V1_13.versionsTo(V1_14))
 		),
 	BLOCK_NOTE_BLOCK_BASEDRUM(
-			of("NOTE_BASS_DRUM", NMSVersion.v1_8()),
-			of("BLOCK_NOTE_BASEDRUM", NMSVersion.range(NMSVersion.V1_9_R1, NMSVersion.V1_12_R1)),
-			of("BLOCK_NOTE_BLOCK_BASEDRUM", NMSVersion.v1_13())
+			of("NOTE_BASS_DRUM", V1_8.getVersions()),
+			of("BLOCK_NOTE_BASEDRUM", V1_9.versionsTo(V1_12)),
+			of("BLOCK_NOTE_BLOCK_BASEDRUM", V1_13.versionsTo(V1_14))
 		),
 	BLOCK_NOTE_BLOCK_SNARE(
-			of("NOTE_SNARE_DRUM", NMSVersion.v1_8()),
-			of("BLOCK_NOTE_SNARE", NMSVersion.range(NMSVersion.V1_9_R1, NMSVersion.V1_12_R1)),
-			of("BLOCK_NOTE_BLOCK_SNARE", NMSVersion.v1_13())
+			of("NOTE_SNARE_DRUM", V1_8.getVersions()),
+			of("BLOCK_NOTE_SNARE", V1_9.versionsTo(V1_12)),
+			of("BLOCK_NOTE_BLOCK_SNARE", V1_13.versionsTo(V1_14))
 		),
 	BLOCK_NOTE_BLOCK_HAT(
-			of("NOTE_STICKS", NMSVersion.v1_8()),
-			of("BLOCK_NOTE_HAT", NMSVersion.range(NMSVersion.V1_9_R1, NMSVersion.V1_12_R1)),
-			of("BLOCK_NOTE_BLOCK_HAT", NMSVersion.v1_13())
+			of("NOTE_STICKS", V1_8.getVersions()),
+			of("BLOCK_NOTE_HAT", V1_9.versionsTo(V1_12)),
+			of("BLOCK_NOTE_BLOCK_HAT", V1_13.versionsTo(V1_14))
 		),
 	BLOCK_NOTE_BLOCK_PLING(
-			of("NOTE_PLING", NMSVersion.v1_8()),
-			of("BLOCK_NOTE_PLING", NMSVersion.range(NMSVersion.V1_9_R1, NMSVersion.V1_12_R1)),
-			of("BLOCK_NOTE_BLOCK_PLING", NMSVersion.v1_13())
+			of("NOTE_PLING", V1_8.getVersions()),
+			of("BLOCK_NOTE_PLING", V1_9.versionsTo(V1_12)),
+			of("BLOCK_NOTE_BLOCK_PLING", V1_13.versionsTo(V1_14))
 		),
 	BLOCK_NOTE_BLOCK_GUITAR(
-			of("BLOCK_NOTE_GUITAR", NMSVersion.V1_12_R1),
-			of("BLOCK_NOTE_BLOCK_GUITAR", NMSVersion.v1_13())
+			of("BLOCK_NOTE_GUITAR", V1_12.getVersions()),
+			of("BLOCK_NOTE_BLOCK_GUITAR", V1_13.versionsTo(V1_14))
 		),
 	BLOCK_NOTE_BLOCK_FLUTE(
-			of("BLOCK_NOTE_FLUTE", NMSVersion.V1_12_R1),
-			of("BLOCK_NOTE_BLOCK_FLUTE", NMSVersion.v1_13())
+			of("BLOCK_NOTE_FLUTE", V1_12.getVersions()),
+			of("BLOCK_NOTE_BLOCK_FLUTE", V1_13.versionsTo(V1_14))
 		),
 	BLOCK_NOTE_BLOCK_BELL(
-			of("BLOCK_NOTE_BELL", NMSVersion.V1_12_R1),
-			of("BLOCK_NOTE_BLOCK_BELL", NMSVersion.v1_13())
+			of("BLOCK_NOTE_BELL", V1_12.getVersions()),
+			of("BLOCK_NOTE_BLOCK_BELL", V1_13.versionsTo(V1_14))
 		),
 	BLOCK_NOTE_BLOCK_CHIME(
-			of("BLOCK_NOTE_CHIME", NMSVersion.V1_12_R1),
-			of("BLOCK_NOTE_BLOCK_CHIME", NMSVersion.v1_13())
+			of("BLOCK_NOTE_CHIME", V1_12.getVersions()),
+			of("BLOCK_NOTE_BLOCK_CHIME", V1_13.versionsTo(V1_14))
 		),
 	BLOCK_NOTE_BLOCK_XYLOPHONE(
-			of("BLOCK_NOTE_XYLOPHONE", NMSVersion.V1_12_R1),
-			of("BLOCK_NOTE_BLOCK_XYLOPHONE", NMSVersion.v1_13())
+			of("BLOCK_NOTE_XYLOPHONE", V1_12.getVersions()),
+			of("BLOCK_NOTE_BLOCK_XYLOPHONE", V1_13.versionsTo(V1_14))
 		);
 	
 	private Map<NMSVersion, String> definitions;
