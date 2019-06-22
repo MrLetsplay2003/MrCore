@@ -17,6 +17,7 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -1044,6 +1045,15 @@ public class GUIUtils {
 	 * @author MrLetsplay2003
 	 */
 	public static class GUIListener implements Listener {
+		
+		@EventHandler
+		public void onInvDrag(InventoryDragEvent e) {
+			if(e.getInventory() == null) return;
+			if(getGUI(e.getInventory()) != null) {
+				e.setCancelled(true);
+				return;
+			}
+		}
 		
 		@SuppressWarnings("unchecked")
 		@EventHandler
