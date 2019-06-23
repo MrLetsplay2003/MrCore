@@ -1,15 +1,12 @@
 package me.mrletsplay.mrcore.bukkitimpl;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.text.ParseException;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
+import me.mrletsplay.mrcore.http.HttpRequest;
+import me.mrletsplay.mrcore.json.JSONArray;
+import me.mrletsplay.mrcore.json.JSONObject;
 import me.mrletsplay.mrcore.main.MrCore;
 
 public class MrCoreUpdateChecker {
@@ -29,8 +26,8 @@ public class MrCoreUpdateChecker {
 	
 	private static String getLatestVersion() {
 		try {
-			JSONObject release = (JSONObject) new JSONParser().parse(new InputStreamReader(new URL("https://api.github.com/repos/MrLetsplay2003/MrCore/releases/latest").openStream()));
-			return (String) release.get("tag_name");
+			JSONObject release = HttpRequest.createGet("https://api.github.com/repos/MrLetsplay2003/MrCore/releases/latest").execute().asJSONObject();
+			return release.getString("tag_name");
 		}catch(Exception e) {
 			return null;
 		}
@@ -39,11 +36,11 @@ public class MrCoreUpdateChecker {
 	private static String getDownloadLink(String version) throws MalformedURLException, IOException, ParseException {
 		JSONObject release = null;
 		if(version.equalsIgnoreCase("latest")) {
-			release = (JSONObject) new JSONParser().parse(new InputStreamReader(new URL("https://api.github.com/repos/MrLetsplay2003/MrCore/releases/latest").openStream()));
+			release = HttpRequest.createGet("https://api.github.com/repos/MrLetsplay2003/MrCore/releases/latest").execute().asJSONObject();
 		}else {
-			JSONArray releases = (JSONArray) new JSONParser().parse(new InputStreamReader(new URL("https://api.github.com/repos/MrLetsplay2003/MrCore/releases").openStream()));
+			JSONArray releases = HttpRequest.createGet("https://api.github.com/repos/MrLetsplay2003/MrCore/releases").execute().asJSONArray();
 			for(int i = 0; i < releases.size(); i++) {
-				JSONObject rel = (JSONObject) releases.get(i);
+				JSONObject rel = releases.getJSONObject(i);
 				if(rel.get("tag_name").equals(version)) {
 					release = rel;
 					break;
@@ -53,9 +50,9 @@ public class MrCoreUpdateChecker {
 				throw new IllegalArgumentException("The specified version ("+version+") doesn't exist");
 			}
 		}
-		JSONArray assets = (JSONArray) release.get("assets");
-		JSONObject asset = (JSONObject) assets.get(0); // The attached MrCore.jar file
-		String downloadL = (String) asset.get("browser_download_url");
+		JSONArray assets = release.getJSONArray("assets");
+		JSONObject asset = assets.getJSONObject(0); // The attached MrCore.jar file
+		String downloadL = asset.getString("browser_download_url");
 		return downloadL;
 	}
 	

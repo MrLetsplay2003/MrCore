@@ -1,17 +1,20 @@
 package me.mrletsplay.mrcore.bukkitimpl;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.StandardCharsets;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import me.mrletsplay.mrcore.json.JSONParser;
 
 public class MrCoreBukkitImpl {
 	
@@ -35,7 +38,15 @@ public class MrCoreBukkitImpl {
 				plugin.getLogger().info("A file named \""+mrCoreFile.getName()+"\" already exists, assuming that MrCore was already loaded");
 				return;
 			}
-			JSONObject release = (JSONObject) new JSONParser().parse(new InputStreamReader(new URL("https://api.github.com/repos/MrLetsplay2003/MrCore/releases/latest").openStream()));
+			InputStream in = new URL("https://api.github.com/repos/MrLetsplay2003/MrCore/releases/latest").openStream();
+			ByteArrayOutputStream bo = new ByteArrayOutputStream();
+			byte[] buf = new byte[1024];
+			int len;
+			while((len = in.read(buf)) > 0) {
+				bo.write(buf, 0, len);
+			}
+			in.close();
+			JSONObject release = (JSONObject) JSONParser.parse(new String(bo.toByteArray(), StandardCharsets.UTF_8));
 			JSONArray assets = (JSONArray) release.get("assets");
 			JSONObject asset = (JSONObject) assets.get(0); // The attached MrCore.jar file
 			String downloadL = (String) asset.get("browser_download_url");
