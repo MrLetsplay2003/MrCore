@@ -16,7 +16,7 @@ public class MrCoreUpdateChecker {
 		if(!MrCore.getVersion().equals(absoluteVersion)) {
 			try {
 				String newestLink = getDownloadLink(version);
-				MrCorePlugin.pl.getLogger().info("The current version ("+MrCore.getVersion()+") does not match the required one ("+version+"/"+absoluteVersion+")");
+				MrCorePlugin.pl.getLogger().info("The current version (" + MrCore.getVersion() + ") does not match the configured one (" + version + "/" + absoluteVersion + ")");
 				MrCorePlugin.pl.getLogger().info("You can download the required version here: "+newestLink);
 			} catch (IOException | ParseException e) {
 				e.printStackTrace();
