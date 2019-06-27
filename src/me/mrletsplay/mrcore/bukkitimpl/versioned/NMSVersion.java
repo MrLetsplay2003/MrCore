@@ -4,6 +4,8 @@ import java.util.Arrays;
 
 import org.bukkit.Bukkit;
 
+import me.mrletsplay.mrcore.bukkitimpl.MrCorePlugin;
+
 public enum NMSVersion {
 
 	V1_8_R1("MC 1.8 Release 1", "v1_8_R1"),
@@ -63,7 +65,16 @@ public enum NMSVersion {
 	
 	static {
 		String vRaw = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-		CURRENT_VERSION = Arrays.stream(values()).filter(v -> v.version.equalsIgnoreCase(vRaw)).findFirst().orElse(UNKNOWN);
+		NMSVersion ver = Arrays.stream(values()).filter(v -> v.version.equalsIgnoreCase(vRaw)).findFirst().orElse(UNKNOWN);
+		String v = MrCorePlugin.getMrCoreConfig().getNMSVersion();
+		if(!v.equalsIgnoreCase("auto")) {
+			try {
+				ver = NMSVersion.valueOf(v.toUpperCase());
+			}catch(IllegalArgumentException e) {
+				MrCorePlugin.getInstance().getLogger().warning("Invalid NMS version \"" + v + "\" in config, falling back to default (" + ver + ")");
+			}
+		}
+		CURRENT_VERSION = ver;
 	}
 	
 	/**

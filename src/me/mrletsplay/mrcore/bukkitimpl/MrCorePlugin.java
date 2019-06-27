@@ -13,34 +13,35 @@ import me.mrletsplay.mrcore.bukkitimpl.ChatUI.UIListener;
 import me.mrletsplay.mrcore.bukkitimpl.GUIUtils.GUIListener;
 import me.mrletsplay.mrcore.bukkitimpl.multiblock.MultiBlockStructureListener;
 import me.mrletsplay.mrcore.bukkitimpl.versioned.NMSVersion;
-import me.mrletsplay.mrcore.config.ConfigLoader;
-import me.mrletsplay.mrcore.config.FileCustomConfig;
 import me.mrletsplay.mrcore.main.MrCore;
 
 public class MrCorePlugin extends JavaPlugin{
 	
-	private static FileCustomConfig config;
+	private static MrCoreConfig config;
 	public static JavaPlugin pl;
 	
 	@Override
 	public void onEnable() {
 		pl = this;
+		config = new MrCoreConfig();
 		NMSVersion nmsv = NMSVersion.getCurrentServerVersion();
 		getLogger().info("Applying compat for " + nmsv.getFriendlyName() + " / " + nmsv.name());
 		Bukkit.getPluginManager().registerEvents(new GUIListener(), this);
 		Bukkit.getPluginManager().registerEvents(new MultiBlockStructureListener(), this);
 		getCommand("mrcoreui").setExecutor(new UIListener());
-		config = ConfigLoader.loadFileConfig(new File(getDataFolder(), "config.yml"), true);
-		if(config.getBoolean("versioning.check-update", true, true)) {
-			String version = config.getString("versioning.version-to-use", "latest", true);
+		if(config.isUpdateCheckEnabled()) {
+			String version = config.getVersionToUse();
 			MrCoreUpdateChecker.checkForUpdate(version);
 		}
-		config.saveToFile();
 		getLogger().info("And MrCore is on board as well! :wave:");
 	}
 	
 	public static JavaPlugin getInstance() {
 		return pl;
+	}
+	
+	public static MrCoreConfig getMrCoreConfig() {
+		return config;
 	}
 	
 	public static File getBaseFolder() {
