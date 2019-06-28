@@ -12,6 +12,9 @@ import me.mrletsplay.mrcore.json.JSONObject;
 
 public class ConfigConverter {
 	
+	private static final String API_URL = "https://graphite-official.com";
+//	private static final String API_URL = "http://localhost";
+	
 	public static <T extends CustomConfig> T convertConfig(byte[] config, T toConfig, ConfigVersion fromVersion, ConfigVersion toVersion) {
 		toConfig.load(new ByteArrayInputStream(convertVersion(config, fromVersion, toVersion)));
 		return toConfig;
@@ -22,7 +25,7 @@ public class ConfigConverter {
 	}
 	
 	public static byte[] convertVersion(byte[] config, String fromVersion, String toVersion) {
-		String getURL = "https://graphite-official.com/api/mrcore/convert_config_v2.php?from_version="+fromVersion+"&to_version="+toVersion;
+		String getURL = API_URL + "/api/mrcore/convert_config_v2.php?from_version="+fromVersion+"&to_version="+toVersion;
 		JSONObject result = HttpRequest.createPost(getURL)
 								.setPostParameter("data", Base64.getEncoder().encodeToString(config))
 								.execute()
@@ -42,7 +45,7 @@ public class ConfigConverter {
 	 * @return The <code>saveTo</code> parameter with the properties set to the ones of the bukkit config
 	 */
 	public static BukkitCustomConfig convertYaml(YamlConfiguration bukkitConfig, BukkitCustomConfig saveTo) {
-		String getURL = "https://graphite-official.com/api/mrcore/convert_yaml.php";
+		String getURL = API_URL + "/api/mrcore/convert_yaml.php";
 		String cfgString = bukkitConfig.saveToString();
 		JSONObject result = HttpRequest.createPost(getURL)
 				.setPostParameter("data", cfgString)
