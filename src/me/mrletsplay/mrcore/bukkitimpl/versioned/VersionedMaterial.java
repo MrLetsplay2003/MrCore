@@ -109,7 +109,7 @@ public enum VersionedMaterial {
 	BLACK_BANNER(
 			new BannerDefinition(VersionedDyeColor.BLACK),
 			of(new MaterialDefinition("BANNER"), V1_8.versionsTo(V1_12)),
-			of(new MaterialDefinition("WHITE_BANNER", 0), V1_13.versionsTo(V1_14))
+			of(new MaterialDefinition("BLACK_BANNER", 0), V1_13.versionsTo(V1_14))
 		),
 	RED_BANNER(
 			new BannerDefinition(VersionedDyeColor.RED),
