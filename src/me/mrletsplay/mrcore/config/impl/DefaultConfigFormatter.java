@@ -98,13 +98,9 @@ public class DefaultConfigFormatter {
 	private boolean isEmptyProperty(Object o) {
 		if(o == null) return false;
 		Complex<Map<String, Object>> c = Complex.map(String.class, Object.class);
-//		Complex<List<Object>> c2 = Complex.list(Object.class);
 		NullableOptional<Map<String, Object>> mC = c.cast(o);
-//		NullableOptional<List<Object>> lC = c2.cast(o);
 		if(mC.isPresent()) {
 			return mC.get().isEmpty();
-//		}else if(lC.isPresent()){
-//			return lC.get().isEmpty();
 		}else {
 			return false;
 		}
