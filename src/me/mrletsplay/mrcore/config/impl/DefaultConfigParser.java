@@ -1,6 +1,7 @@
 package me.mrletsplay.mrcore.config.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -109,6 +110,10 @@ public class DefaultConfigParser {
 				case '\'':
 					r.revert();
 					value = readCharacter();
+					break;
+				case '[':
+					if(r.next() != ']') throw new ConfigException("Invalid property value", r.currentLine, r.currentIndex - 1);
+					value = Collections.emptyList();
 					break;
 				case '\n':
 					return readListOrSubsection(r.createMarker(), propertyIndents + 1);

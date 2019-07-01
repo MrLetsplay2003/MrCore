@@ -74,6 +74,8 @@ public class JSONConverter {
 			return ((JSONPrimitiveConvertible) value).toJSONPrimitive();
 		}else if(value instanceof Object[]) {
 			return encodeArray0((Object[]) value, includeClass);
+		}else if(value instanceof Enum<?>) {
+			return ((Enum<?>) value).name();
 		}else {
 			JSONType t = JSONType.typeOf(value);
 			if(t == null) throw new IllegalArgumentException("Object of type " + value.getClass() + " is not a valid JSON value");
@@ -222,9 +224,6 @@ public class JSONConverter {
 			}
 			return t;
 		}else if(JSONPrimitiveConvertible.class.isAssignableFrom(clazz)) {
-//			JSONPrimitiveConvertible p = createPrimitive0(clazz.asSubclass(JSONPrimitiveConvertible.class));
-//			p.deserialize(value);
-//			return p;
 			return decodePrimitive0(clazz.asSubclass(JSONPrimitiveConvertible.class), value);
 		}else if(clazz.isArray()) {
 			JSONArray arr = (JSONArray) value;
@@ -233,6 +232,12 @@ public class JSONConverter {
 				Array.set(a, i, decode0(arr.get(i), clazz.getComponentType(), loader));
 			}
 			return a;
+		}else if(Enum.class.isAssignableFrom(clazz)) {
+			try {
+				return clazz.getMethod("valueOf", String.class).invoke(null, (String) value);
+			} catch (Exception e) {
+				throw new IllegalArgumentException("Failed to get enum value", e);
+			}
 		}else {
 			NullableOptional<Object> v = MiscUtils.callSafely(() -> JSONType.castJSONValueTo(value, clazz, false));
 			if(!v.isPresent()) throw new IllegalArgumentException("Invalid JSON value type: " + clazz);
