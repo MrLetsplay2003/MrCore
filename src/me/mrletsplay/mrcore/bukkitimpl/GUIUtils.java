@@ -853,13 +853,15 @@ public class GUIUtils {
 		 * @param condition The condition for the GUI to be refreshed
 		 */
 		public void refreshInstance(Player player, Predicate<GUIHolder> condition) {
-			if(player.getOpenInventory() != null && player.getOpenInventory().getTopInventory() != null) {
-				Inventory oldInv = player.getOpenInventory().getTopInventory();
-				GUIHolder holder = GUIUtils.getGUIHolder(oldInv);
-				if(holder != null && holder.gui.equals(this)) {
-					if(condition.test(holder)) openNewInstance(player, oldInv, holder);
+			Bukkit.getScheduler().runTask(MrCorePlugin.getInstance(), () -> {
+				if(player.getOpenInventory() != null && player.getOpenInventory().getTopInventory() != null) {
+					Inventory oldInv = player.getOpenInventory().getTopInventory();
+					GUIHolder holder = GUIUtils.getGUIHolder(oldInv);
+					if(holder != null && holder.gui.equals(this)) {
+						if(condition.test(holder)) openNewInstance(player, oldInv, holder);
+					}
 				}
-			}
+			});
 		}
 		
 		public void closeAllInstances() {
