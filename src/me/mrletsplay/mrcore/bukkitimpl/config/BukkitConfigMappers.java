@@ -378,8 +378,8 @@ public class BukkitConfigMappers {
 				ItemMeta m = (ItemMeta) ConfigurationSerialization.deserializeObject(j);
 				i.setItemMeta(m);
 			})
-			.onlyMapIf(i -> NMSVersion.getCurrentServerVersion().isNewerThanOrEqualTo(NMSRelease.V1_8.getLastVersion()))
-			.onlyConstructIf((a, b, c, d) -> NMSVersion.getCurrentServerVersion().isNewerThanOrEqualTo(NMSRelease.V1_8.getLastVersion()))
+			.onlyMapIf(i -> NMSVersion.getCurrentServerVersion().isNewerThanOrEqualTo(NMSVersion.V1_9_R1))
+			.onlyConstructIf((a, b, c, d) -> NMSVersion.getCurrentServerVersion().isNewerThanOrEqualTo(NMSVersion.V1_9_R1))
 			.onlyMapIf(i -> i.getItemMeta() instanceof org.bukkit.inventory.meta.BlockStateMeta)
 			.onlyConstructIfNotNull().then()
 			.create();
