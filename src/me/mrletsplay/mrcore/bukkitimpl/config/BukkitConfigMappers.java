@@ -100,7 +100,7 @@ public class BukkitConfigMappers {
 			.mapJSONObject("banner", i -> {
 				BannerMeta m = (BannerMeta) i.getItemMeta();
 				JSONObject b = new JSONObject();
-				if(NMSVersion.getCurrentServerVersion().isOlderThan(NMSVersion.V1_13_R1)) b.set("color", m.getBaseColor().name());
+//				if(NMSVersion.getCurrentServerVersion().isOlderThan(NMSVersion.V1_9_R1)) b.set("color", m.getBaseColor().name());
 				JSONArray patterns = new JSONArray();
 				for(Pattern p : m.getPatterns()) {
 					JSONObject pattern = new JSONObject();
