@@ -40,7 +40,6 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 
 import me.mrletsplay.mrcore.bukkitimpl.ItemUtils;
-import me.mrletsplay.mrcore.bukkitimpl.versioned.NMSRelease;
 import me.mrletsplay.mrcore.bukkitimpl.versioned.NMSVersion;
 import me.mrletsplay.mrcore.config.mapper.JSONObjectMapper;
 import me.mrletsplay.mrcore.config.mapper.builder.JSONMapperBuilder;
