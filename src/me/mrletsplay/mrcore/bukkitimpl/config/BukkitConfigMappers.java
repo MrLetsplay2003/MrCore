@@ -19,6 +19,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.block.banner.PatternType;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemFlag;
@@ -39,6 +40,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 
 import me.mrletsplay.mrcore.bukkitimpl.ItemUtils;
+import me.mrletsplay.mrcore.bukkitimpl.versioned.NMSRelease;
 import me.mrletsplay.mrcore.bukkitimpl.versioned.NMSVersion;
 import me.mrletsplay.mrcore.config.mapper.JSONObjectMapper;
 import me.mrletsplay.mrcore.config.mapper.builder.JSONMapperBuilder;
@@ -69,8 +71,8 @@ public class BukkitConfigMappers {
 	/*
 	 * TODO: BlockStateMeta (?), TropicalFishBucketMeta (?)
 	 */
-	
-	@SuppressWarnings("deprecation")
+
+@SuppressWarnings("deprecation")
 	public static final JSONObjectMapper<ItemStack> ITEM_MAPPER = new JSONMapperBuilder<>(ItemStack.class,
 			(sec, json) -> {
 				return new ItemStack(Material.valueOf(json.getString("type").toUpperCase()), json.getInt("amount"));
@@ -334,6 +336,51 @@ public class BukkitConfigMappers {
 			}).onlyMapIf(i -> i.getItemMeta() instanceof SkullMeta)
 			.onlyMapIf(i -> NMSVersion.getCurrentServerVersion().isOlderThan(NMSVersion.V1_13_R1))
 			.onlyConstructIf((a, b, c, d) -> NMSVersion.getCurrentServerVersion().isOlderThan(NMSVersion.V1_13_R1))
+			.onlyConstructIfNotNull().then()
+			.mapJSONObject("crossbow", (s, i) -> {
+				org.bukkit.inventory.meta.CrossbowMeta m = (org.bukkit.inventory.meta.CrossbowMeta) i.getItemMeta();
+				JSONObject b = new JSONObject();
+				if(m.hasChargedProjectiles()) b.set("charged-projectiles", new JSONArray(m.getChargedProjectiles().stream().map(k -> s.castType(s, JSONObject.class, Complex.value(JSONObject.class))).collect(Collectors.toList())));
+				return b;
+			}, (s, i, j) -> {
+				org.bukkit.inventory.meta.KnowledgeBookMeta m = (org.bukkit.inventory.meta.KnowledgeBookMeta) i.getItemMeta();
+				if(j.has("recipes")) {
+					JSONArray ps = j.getJSONArray("recipes");
+					for(String pK : Complex.castList(ps, String.class).get()) {
+						String[] k = pK.split(":");
+						m.addRecipe(new NamespacedKey(k[0], k[1]));
+					}
+				}
+				i.setItemMeta(m);
+			})
+			.onlyMapIf(i -> NMSVersion.getCurrentServerVersion().isNewerThanOrEqualTo(NMSVersion.V1_13_R1))
+			.onlyConstructIf((a, b, c, d) -> NMSVersion.getCurrentServerVersion().isNewerThanOrEqualTo(NMSVersion.V1_13_R1))
+			.onlyMapIf(i -> i.getItemMeta() instanceof org.bukkit.inventory.meta.CrossbowMeta)
+			.onlyConstructIfNotNull().then()
+			.mapJSONObject("tropical-fish-bucket", (s, i) -> {
+				JSONObject o = new JSONObject(i.getItemMeta().serialize());
+				o.set("==", "ItemMeta");
+				return new JSONObject(o);
+			}, (s, i, j) -> {
+				j.set("fish-variant", j.getInt("fish-variant")); // Cast to int
+				ItemMeta m = (ItemMeta) ConfigurationSerialization.deserializeObject(j);
+				i.setItemMeta(m);
+			})
+			.onlyMapIf(i -> NMSVersion.getCurrentServerVersion().isNewerThanOrEqualTo(NMSVersion.V1_13_R1))
+			.onlyConstructIf((a, b, c, d) -> NMSVersion.getCurrentServerVersion().isNewerThanOrEqualTo(NMSVersion.V1_13_R1))
+			.onlyMapIf(i -> i.getItemMeta() instanceof org.bukkit.inventory.meta.TropicalFishBucketMeta)
+			.onlyConstructIfNotNull().then()
+			.mapJSONObject("block-state", (s, i) -> {
+				JSONObject o = new JSONObject(i.getItemMeta().serialize());
+				o.set("==", "ItemMeta");
+				return new JSONObject(o);
+			}, (s, i, j) -> {
+				ItemMeta m = (ItemMeta) ConfigurationSerialization.deserializeObject(j);
+				i.setItemMeta(m);
+			})
+			.onlyMapIf(i -> NMSVersion.getCurrentServerVersion().isNewerThanOrEqualTo(NMSRelease.V1_8.getLastVersion()))
+			.onlyConstructIf((a, b, c, d) -> NMSVersion.getCurrentServerVersion().isNewerThanOrEqualTo(NMSRelease.V1_8.getLastVersion()))
+			.onlyMapIf(i -> i.getItemMeta() instanceof org.bukkit.inventory.meta.BlockStateMeta)
 			.onlyConstructIfNotNull().then()
 			.create();
 	
