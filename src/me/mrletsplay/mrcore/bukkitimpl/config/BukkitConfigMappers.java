@@ -67,11 +67,7 @@ public class BukkitConfigMappers {
 			.mapDouble("yaw", l -> (double) l.getYaw(), null).then()
 			.create();
 	
-	/*
-	 * TODO: BlockStateMeta (?), TropicalFishBucketMeta (?)
-	 */
-
-@SuppressWarnings("deprecation")
+	@SuppressWarnings("deprecation")
 	public static final JSONObjectMapper<ItemStack> ITEM_MAPPER = new JSONMapperBuilder<>(ItemStack.class,
 			(sec, json) -> {
 				return new ItemStack(Material.valueOf(json.getString("type").toUpperCase()), json.getInt("amount"));
@@ -271,7 +267,7 @@ public class BukkitConfigMappers {
 						e.set("duration", eff.getDuration());
 						e.set("type", eff.getType().getName());
 						e.set("particles", eff.hasParticles());
-						e.set("icon", eff.hasIcon());
+						if(NMSVersion.getCurrentServerVersion().isNewerThanOrEqualTo(NMSVersion.V1_13_R1)) e.set("icon", eff.hasIcon());
 						e.set("ambient", eff.isAmbient());
 						es.add(e);
 					}
