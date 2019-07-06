@@ -45,6 +45,7 @@ import me.mrletsplay.mrcore.config.mapper.JSONObjectMapper;
 import me.mrletsplay.mrcore.config.mapper.builder.JSONMapperBuilder;
 import me.mrletsplay.mrcore.json.JSONArray;
 import me.mrletsplay.mrcore.json.JSONObject;
+import me.mrletsplay.mrcore.json.JSONType;
 import me.mrletsplay.mrcore.misc.Complex;
 import me.mrletsplay.mrcore.misc.FriendlyException;
 
@@ -307,7 +308,11 @@ public class BukkitConfigMappers {
 				org.bukkit.inventory.meta.SpawnEggMeta m = (org.bukkit.inventory.meta.SpawnEggMeta) i.getItemMeta();
 				if(j.has("spawned-type")) m.setSpawnedType(EntityType.valueOf(j.getString("spawned-type").toUpperCase()));
 				i.setItemMeta(m);
-			}).onlyMapIf(i -> NMSVersion.getCurrentServerVersion().isNewerThan(NMSVersion.V1_10_R1)).onlyMapIf(i -> i.getItemMeta() instanceof org.bukkit.inventory.meta.SpawnEggMeta).onlyConstructIfNotNull().then()
+			})
+			.onlyMapIf(i -> NMSVersion.getCurrentServerVersion().isNewerThan(NMSVersion.V1_10_R1))
+			.onlyMapIf(i -> NMSVersion.getCurrentServerVersion().isOlderThan(NMSVersion.V1_13_R1))
+			.onlyMapIf(i -> i.getItemMeta() instanceof org.bukkit.inventory.meta.SpawnEggMeta)
+			.onlyConstructIfNotNull().then()
 			.mapJSONObject("skull", i -> {
 				SkullMeta m = (SkullMeta) i.getItemMeta();
 				JSONObject s = new JSONObject();
@@ -361,7 +366,7 @@ public class BukkitConfigMappers {
 				o.set("==", "ItemMeta");
 				return new JSONObject(o);
 			}, (s, i, j) -> {
-				j.set("fish-variant", j.getInt("fish-variant")); // Cast to int
+				if(j.isOfType("fish-variant", JSONType.INTEGER)) j.set("fish-variant", j.getInt("fish-variant")); // Cast to int
 				ItemMeta m = (ItemMeta) ConfigurationSerialization.deserializeObject(j);
 				i.setItemMeta(m);
 			})

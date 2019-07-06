@@ -148,6 +148,20 @@ public class ItemUtils {
 		i.setItemMeta(m);
 		return i;
 	}
+
+	public static ItemStack plus(VersionedDyeColor col) {
+		ItemStack i = ItemUtils.blankBanner(col);
+		BannerMeta m = (BannerMeta) i.getItemMeta();
+		m.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+		m.addPattern(new Pattern(DyeColor.BLACK, PatternType.STRIPE_MIDDLE));
+		m.addPattern(new Pattern(DyeColor.BLACK, PatternType.STRIPE_CENTER));
+		DyeColor c = col.getBukkitDyeColor();
+		m.addPattern(new Pattern(c, PatternType.BORDER));
+		m.addPattern(new Pattern(c, PatternType.STRIPE_TOP));
+		m.addPattern(new Pattern(c, PatternType.STRIPE_BOTTOM));
+		i.setItemMeta(m);
+		return i;
+	}
 	
 	public static ItemStack createBanner(String name, VersionedDyeColor baseCol, Pattern... patterns){
 		ItemStack banner = createVersioned(VersionedMaterial.getBanner(baseCol));

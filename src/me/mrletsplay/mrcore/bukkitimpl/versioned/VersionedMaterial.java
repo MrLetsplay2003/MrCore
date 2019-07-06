@@ -542,6 +542,10 @@ public enum VersionedMaterial {
 			of(new MaterialDefinition("DIAMOND_SPADE"), V1_8.versionsTo(V1_12)),
 			of(new MaterialDefinition("DIAMOND_SHOVEL"), V1_13.versionsTo(V1_14))
 		),
+	SKELETON_SKULL(
+			of(new MaterialDefinition("SKULL_ITEM", 0), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("SKELETON_SKULL"), V1_13.versionsTo(V1_14))
+		),
 	WITHER_SKELETON_SKULL(
 			of(new MaterialDefinition("SKULL_ITEM", 1), V1_8.versionsTo(V1_12)),
 			of(new MaterialDefinition("WITHER_SKELETON_SKULL"), V1_13.versionsTo(V1_14))
