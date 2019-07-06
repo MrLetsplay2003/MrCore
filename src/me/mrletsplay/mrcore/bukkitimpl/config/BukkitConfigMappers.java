@@ -287,9 +287,13 @@ public class BukkitConfigMappers {
 						int amplifier = j.getInt("amplifier");
 						boolean ambient = true, particles = true, icon = true;
 						if(e.has("ambient")) ambient = e.getBoolean("ambient");
-						if(e.has("particles")) ambient = e.getBoolean("particles");
-						if(e.has("icon")) ambient = e.getBoolean("icon");
-						m.addCustomEffect(new PotionEffect(type, duration, amplifier, ambient, particles, icon), true);
+						if(e.has("particles")) particles = e.getBoolean("particles");
+						if(e.has("icon")) icon = e.getBoolean("icon");
+						if(NMSVersion.getCurrentServerVersion().isNewerThanOrEqualTo(NMSVersion.V1_13_R1)) {
+							m.addCustomEffect(new PotionEffect(type, duration, amplifier, ambient, particles, icon), true);
+						}else {
+							m.addCustomEffect(new PotionEffect(type, duration, amplifier, ambient, particles), true);
+						}
 					}
 				}
 				i.setItemMeta(m);
