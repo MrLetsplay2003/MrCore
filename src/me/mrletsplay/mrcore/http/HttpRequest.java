@@ -53,7 +53,7 @@ public interface HttpRequest {
 	public InputStream executeAsInputStream();
 
 	/**
-	 * Creates a GET request represented by an {@link HttpGet} instance
+	 * Creates a generic request represented by an {@link HttpGeneric} instance
 	 * @param requestMethod The request method to use
 	 * @param url The url the request should be sent to
 	 * @return The request
