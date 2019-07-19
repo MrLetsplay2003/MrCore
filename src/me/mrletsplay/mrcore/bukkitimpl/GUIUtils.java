@@ -853,7 +853,7 @@ public class GUIUtils {
 		 * @param condition The condition for the GUI to be refreshed
 		 */
 		public void refreshInstance(Player player, Predicate<GUIHolder> condition) {
-			Bukkit.getScheduler().runTask(MrCorePlugin.getInstance(), () -> {
+			Bukkit.getScheduler().runTaskLater(MrCorePlugin.getInstance(), () -> {
 				if(player.getOpenInventory() != null && player.getOpenInventory().getTopInventory() != null) {
 					Inventory oldInv = player.getOpenInventory().getTopInventory();
 					GUIHolder holder = GUIUtils.getGUIHolder(oldInv);
@@ -861,7 +861,7 @@ public class GUIUtils {
 						if(condition.test(holder)) openNewInstance(player, oldInv, holder);
 					}
 				}
-			});
+			}, 1);
 		}
 		
 		public void closeAllInstances() {
@@ -878,6 +878,7 @@ public class GUIUtils {
 			}
 		}
 		
+		// TODO: force synchronous access
 		public List<Player> getAllOpenInstances() {
 			return Bukkit.getOnlinePlayers().stream().filter(p -> hasOpenInstance(p)).collect(Collectors.toList());
 		}
