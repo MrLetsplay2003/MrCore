@@ -16,7 +16,6 @@ import org.bukkit.FireworkEffect;
 import org.bukkit.FireworkEffect.Type;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.block.banner.PatternType;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
@@ -41,6 +40,8 @@ import org.bukkit.potion.PotionType;
 
 import me.mrletsplay.mrcore.bukkitimpl.ItemUtils;
 import me.mrletsplay.mrcore.bukkitimpl.versioned.NMSVersion;
+import me.mrletsplay.mrcore.bukkitimpl.versioned.item.VersionedCrossbowMeta;
+import me.mrletsplay.mrcore.config.ConfigValueType;
 import me.mrletsplay.mrcore.config.mapper.JSONObjectMapper;
 import me.mrletsplay.mrcore.config.mapper.builder.JSONMapperBuilder;
 import me.mrletsplay.mrcore.json.JSONArray;
@@ -210,23 +211,15 @@ public class BukkitConfigMappers {
 				i.setItemMeta(m);
 			}).onlyMapIf(i -> i.getItemMeta() instanceof FireworkMeta).onlyConstructIfNotNull().then()
 			.mapJSONObject("knowledge-book", i -> {
-				org.bukkit.inventory.meta.KnowledgeBookMeta m = (org.bukkit.inventory.meta.KnowledgeBookMeta) i.getItemMeta();
-				JSONObject b = new JSONObject();
-				if(m.hasRecipes()) b.set("recipes", new JSONArray(m.getRecipes().stream().map(k -> k.getNamespace() + ":" + k.getKey()).collect(Collectors.toList())));
-				return b;
+				JSONObject o = new JSONObject(i.getItemMeta().serialize());
+				o.set("==", "ItemMeta");
+				return new JSONObject(o);
 			}, (i, j) -> {
-				org.bukkit.inventory.meta.KnowledgeBookMeta m = (org.bukkit.inventory.meta.KnowledgeBookMeta) i.getItemMeta();
-				if(j.has("recipes")) {
-					JSONArray ps = j.getJSONArray("recipes");
-					for(String pK : Complex.castList(ps, String.class).get()) {
-						String[] k = pK.split(":");
-						m.addRecipe(new NamespacedKey(k[0], k[1]));
-					}
-				}
+				ItemMeta m = (ItemMeta) ConfigurationSerialization.deserializeObject(j);
 				i.setItemMeta(m);
 			})
-			.onlyMapIf(i -> NMSVersion.getCurrentServerVersion().isNewerThanOrEqualTo(NMSVersion.V1_13_R1))
-			.onlyConstructIf((a, b, c, d) -> NMSVersion.getCurrentServerVersion().isNewerThanOrEqualTo(NMSVersion.V1_13_R1))
+			.onlyMapIf(i -> NMSVersion.getCurrentServerVersion().isNewerThanOrEqualTo(NMSVersion.V1_12_R1))
+			.onlyConstructIf((a, b, c, d) -> NMSVersion.getCurrentServerVersion().isNewerThanOrEqualTo(NMSVersion.V1_12_R1))
 			.onlyMapIf(i -> i.getItemMeta() instanceof org.bukkit.inventory.meta.KnowledgeBookMeta)
 			.onlyConstructIfNotNull().then()
 			.mapJSONObject("leather-armor", i -> {
@@ -342,30 +335,27 @@ public class BukkitConfigMappers {
 			.onlyConstructIf((a, b, c, d) -> NMSVersion.getCurrentServerVersion().isOlderThan(NMSVersion.V1_13_R1))
 			.onlyConstructIfNotNull().then()
 			.mapJSONObject("crossbow", (s, i) -> {
-				org.bukkit.inventory.meta.CrossbowMeta m = (org.bukkit.inventory.meta.CrossbowMeta) i.getItemMeta();
+				VersionedCrossbowMeta m = new VersionedCrossbowMeta(i.getItemMeta());
 				JSONObject b = new JSONObject();
-				if(m.hasChargedProjectiles()) b.set("charged-projectiles", new JSONArray(m.getChargedProjectiles().stream().map(k -> s.castType(s, JSONObject.class, Complex.value(JSONObject.class))).collect(Collectors.toList())));
+				if(m.hasChargedProjectiles()) b.set("charged-projectiles", new JSONArray(m.getChargedProjectiles().stream().map(k -> ConfigValueType.createCompatible(s, k).get()).collect(Collectors.toList())));
 				return b;
 			}, (s, i, j) -> {
-				org.bukkit.inventory.meta.KnowledgeBookMeta m = (org.bukkit.inventory.meta.KnowledgeBookMeta) i.getItemMeta();
-				if(j.has("recipes")) {
-					JSONArray ps = j.getJSONArray("recipes");
-					for(String pK : Complex.castList(ps, String.class).get()) {
-						String[] k = pK.split(":");
-						m.addRecipe(new NamespacedKey(k[0], k[1]));
-					}
+				VersionedCrossbowMeta m = new VersionedCrossbowMeta(i.getItemMeta());
+				if(j.has("charged-projectiles")) {
+					JSONArray ps = j.getJSONArray("charged-projectiles");
+					m.setChargedProjectiles(Complex.castList(ps, JSONObject.class).get().stream().map(p -> s.castType(p, ItemStack.class, Complex.value(ItemStack.class)).get()).collect(Collectors.toList()));
 				}
-				i.setItemMeta(m);
+				i.setItemMeta(m.getBukkit());
 			})
-			.onlyMapIf(i -> NMSVersion.getCurrentServerVersion().isNewerThanOrEqualTo(NMSVersion.V1_13_R1))
-			.onlyConstructIf((a, b, c, d) -> NMSVersion.getCurrentServerVersion().isNewerThanOrEqualTo(NMSVersion.V1_13_R1))
-			.onlyMapIf(i -> i.getItemMeta() instanceof org.bukkit.inventory.meta.CrossbowMeta)
+			.onlyMapIf(i -> NMSVersion.getCurrentServerVersion().isNewerThanOrEqualTo(NMSVersion.V1_14_R1))
+			.onlyConstructIf((a, b, c, d) -> NMSVersion.getCurrentServerVersion().isNewerThanOrEqualTo(NMSVersion.V1_14_R1))
+			.onlyMapIf(i -> VersionedCrossbowMeta.isInstance(i.getItemMeta()))
 			.onlyConstructIfNotNull().then()
-			.mapJSONObject("tropical-fish-bucket", (s, i) -> {
+			.mapJSONObject("tropical-fish-bucket", i -> {
 				JSONObject o = new JSONObject(i.getItemMeta().serialize());
 				o.set("==", "ItemMeta");
 				return new JSONObject(o);
-			}, (s, i, j) -> {
+			}, (i, j) -> {
 				if(j.isOfType("fish-variant", JSONType.INTEGER)) j.set("fish-variant", j.getInt("fish-variant")); // Cast to int
 				ItemMeta m = (ItemMeta) ConfigurationSerialization.deserializeObject(j);
 				i.setItemMeta(m);
@@ -374,11 +364,11 @@ public class BukkitConfigMappers {
 			.onlyConstructIf((a, b, c, d) -> NMSVersion.getCurrentServerVersion().isNewerThanOrEqualTo(NMSVersion.V1_13_R1))
 			.onlyMapIf(i -> i.getItemMeta() instanceof org.bukkit.inventory.meta.TropicalFishBucketMeta)
 			.onlyConstructIfNotNull().then()
-			.mapJSONObject("block-state", (s, i) -> {
+			.mapJSONObject("block-state", i -> {
 				JSONObject o = new JSONObject(i.getItemMeta().serialize());
 				o.set("==", "ItemMeta");
 				return new JSONObject(o);
-			}, (s, i, j) -> {
+			}, (i, j) -> {
 				ItemMeta m = (ItemMeta) ConfigurationSerialization.deserializeObject(j);
 				i.setItemMeta(m);
 			})
