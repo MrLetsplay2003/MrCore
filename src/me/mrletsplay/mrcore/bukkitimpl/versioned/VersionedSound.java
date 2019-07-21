@@ -59,7 +59,23 @@ public enum VersionedSound {
 	BLOCK_NOTE_BLOCK_XYLOPHONE(
 			of("BLOCK_NOTE_XYLOPHONE", V1_12.getVersions()),
 			of("BLOCK_NOTE_BLOCK_XYLOPHONE", V1_13.versionsTo(V1_14))
-		);
+		),
+	BLOCK_NOTE_BLOCK_IRON_XYLOPHONE(
+			of("BLOCK_NOTE_BLOCK_IRON_XYLOPHONE", V1_14.getVersions())
+		),
+	BLOCK_NOTE_BLOCK_COW_BELL(
+			of("BLOCK_NOTE_BLOCK_COW_BELL", V1_14.getVersions())
+		),
+	BLOCK_NOTE_BLOCK_DIDGERIDOO(
+			of("BLOCK_NOTE_BLOCK_DIDGERIDOO", V1_14.getVersions())
+		),
+	BLOCK_NOTE_BLOCK_BIT(
+			of("BLOCK_NOTE_BLOCK_BIT", V1_14.getVersions())
+		),
+	BLOCK_NOTE_BLOCK_BANJO(
+			of("BLOCK_NOTE_BLOCK_BANJO", V1_14.getVersions())
+		),
+	;
 	
 	private Map<NMSVersion, String> definitions;
 	
@@ -78,11 +94,20 @@ public enum VersionedSound {
 	}
 	
 	public String getBukkitName(NMSVersion version) {
+		if(!definitions.containsKey(version)) throw new UnsupportedVersionException("Unsupported version " + version.name() + " for sound " + name());
 		return definitions.get(version);
 	}
 	
 	public String getCurrentBukkitName() {
 		return getBukkitName(NMSVersion.getCurrentServerVersion());
+	}
+	
+	public boolean isAvailableForCurrentVersion() {
+		return isAvailableForVersion(NMSVersion.getCurrentServerVersion());
+	}
+	
+	public boolean isAvailableForVersion(NMSVersion version) {
+		return definitions.containsKey(version);
 	}
 	
 	@SuppressWarnings("unchecked")

@@ -616,6 +616,7 @@ public enum VersionedMaterial {
 	 * @return The {@link MaterialDefinition} for that version, null if none / not available for that version
 	 */
 	public MaterialDefinition getMaterialDefinition(NMSVersion version) {
+		if(!definitions.containsKey(version)) throw new UnsupportedVersionException("Unsupported version " + version.name() + " for material " + name());
 		return definitions.get(version);
 	}
 	
@@ -631,7 +632,7 @@ public enum VersionedMaterial {
 	}
 	
 	public boolean isAvailableForVersion(NMSVersion version) {
-		return getMaterialDefinition(version) != null;
+		return definitions.containsKey(version);
 	}
 	
 	@SuppressWarnings("unchecked")
