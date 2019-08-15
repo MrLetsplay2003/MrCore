@@ -80,7 +80,6 @@ public class BukkitConfigMappers {
 			.mapString("name", i -> i.getItemMeta().getDisplayName(), ItemUtils::setDisplayName).onlyMapIf(ItemStack::hasItemMeta).onlyConstructIfExists().then()
 			.mapJSONArray("lore", i -> new JSONArray(i.getItemMeta().getLore()), (i, a) -> i.getItemMeta().setLore(Complex.castList(a, String.class).get())).onlyMapIf(ItemStack::hasItemMeta).onlyMapIf(i -> i.getItemMeta().hasLore()).onlyConstructIfNotNull().then()
 			.mapJSONObject("enchantments", i -> {
-				System.out.println(i.getItemMeta().getItemFlags());
 				JSONObject o = new JSONObject();
 				for(Map.Entry<Enchantment, Integer> ench : i.getItemMeta().getEnchants().entrySet()) {
 					o.put(ench.getKey().getName(), ench.getValue());
