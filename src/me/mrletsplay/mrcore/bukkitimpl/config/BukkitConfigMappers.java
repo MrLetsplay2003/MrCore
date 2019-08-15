@@ -80,6 +80,7 @@ public class BukkitConfigMappers {
 			.mapString("name", i -> i.getItemMeta().getDisplayName(), ItemUtils::setDisplayName).onlyMapIf(ItemStack::hasItemMeta).onlyConstructIfExists().then()
 			.mapJSONArray("lore", i -> new JSONArray(i.getItemMeta().getLore()), (i, a) -> i.getItemMeta().setLore(Complex.castList(a, String.class).get())).onlyMapIf(ItemStack::hasItemMeta).onlyMapIf(i -> i.getItemMeta().hasLore()).onlyConstructIfNotNull().then()
 			.mapJSONObject("enchantments", i -> {
+				System.out.println(i.getItemMeta().getItemFlags());
 				JSONObject o = new JSONObject();
 				for(Map.Entry<Enchantment, Integer> ench : i.getItemMeta().getEnchants().entrySet()) {
 					o.put(ench.getKey().getName(), ench.getValue());
@@ -96,10 +97,30 @@ public class BukkitConfigMappers {
 					i -> new JSONArray(i.getItemMeta().getItemFlags().stream().map(ItemFlag::name).collect(Collectors.toList())),
 					(i, a) -> a.forEach(f -> i.getItemMeta().addItemFlags(ItemFlag.valueOf(((String) f).toUpperCase()))))
 				.onlyMapIf(ItemStack::hasItemMeta).onlyConstructIfNotNull().then()
+			.mapBoolean("unbreakable", i -> {
+				if(NMSVersion.getCurrentServerVersion().isOlderThan(NMSVersion.V1_13_R1))
+					return i.getItemMeta().spigot().isUnbreakable();
+				return i.getItemMeta().isUnbreakable();
+			}, (i, v) -> {
+				ItemMeta m = i.getItemMeta();
+				if(NMSVersion.getCurrentServerVersion().isOlderThan(NMSVersion.V1_13_R1)) {
+					m.spigot().setUnbreakable(v);
+					return;
+				}
+				 m.setUnbreakable(v);
+				i.setItemMeta(m);
+			})
+				.onlyMapIf(ItemStack::hasItemMeta)
+				.onlyConstructIfNotNull()
+				.then()
+			.mapInteger("custom-model-data", i -> i.getItemMeta().getCustomModelData(), (i, v) -> i.getItemMeta().setCustomModelData(v))
+				.onlyMapIf(i -> NMSVersion.getCurrentServerVersion().isNewerThanOrEqualTo(NMSVersion.V1_14_R1))
+				.onlyMapIf(i -> i.hasItemMeta() && i.getItemMeta().hasCustomModelData())
+				.onlyConstructIfNotNull()
+				.then()
 			.mapJSONObject("banner", i -> {
 				BannerMeta m = (BannerMeta) i.getItemMeta();
 				JSONObject b = new JSONObject();
-//				if(NMSVersion.getCurrentServerVersion().isOlderThan(NMSVersion.V1_9_R1)) b.set("color", m.getBaseColor().name());
 				JSONArray patterns = new JSONArray();
 				for(Pattern p : m.getPatterns()) {
 					JSONObject pattern = new JSONObject();
