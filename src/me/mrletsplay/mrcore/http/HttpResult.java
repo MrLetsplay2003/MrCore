@@ -18,15 +18,26 @@ import me.mrletsplay.mrcore.json.JSONObject;
 
 public class HttpResult {
 
+	private boolean success;
 	private Map<String, List<String>> headerFields;
 	private byte[] raw;
+	private IOException exception;
+	private String errorResponse;
 	
 	public HttpResult(Map<String, List<String>> headerFields, byte[] raw) {
+		this.success = true;
 		this.headerFields = headerFields;
 		this.raw = raw;
 	}
 	
+	public HttpResult(IOException exception, String errorResponse) {
+		this.success = false;
+		this.exception = exception;
+		this.errorResponse = errorResponse;
+	}
+	
 	public Map<String, List<String>> getHeaderFields() {
+		requireSuccessful();
 		return headerFields;
 	}
 	
@@ -39,15 +50,16 @@ public class HttpResult {
 	}
 	
 	public String asString() {
-		return new String(raw, StandardCharsets.UTF_8);
+		return new String(asRaw(), StandardCharsets.UTF_8);
 	}
 	
 	public byte[] asRaw() {
+		requireSuccessful();
 		return raw;
 	}
 	
 	public void transferTo(OutputStream out, boolean autoClose) throws IOException {
-		out.write(raw);
+		out.write(asRaw());
 		if(autoClose) out.close();
 	}
 	
@@ -65,6 +77,7 @@ public class HttpResult {
 	}
 	
 	public void transferTo(File file) throws IOException {
+		requireSuccessful();
 		IOUtils.createFile(file);
 		transferTo(new FileOutputStream(file), true);
 	}
@@ -75,6 +88,18 @@ public class HttpResult {
 		} catch (IOException e) {
 			throw new HttpException(e);
 		}
+	}
+	
+	public void requireSuccessful() throws IllegalStateException {
+		if(!success) throw new IllegalStateException("Request was unsuccessful", exception);
+	}
+	
+	public String getErrorResponse() {
+		return errorResponse;
+	}
+	
+	public IOException getException() {
+		return exception;
 	}
 	
 	protected static HttpURLConnection retrieveRawFrom(String url, String method, Map<String, String> queryParams, Map<String, String> headerParams, byte[] postData, int timeout) throws IOException {
@@ -109,10 +134,15 @@ public class HttpResult {
 	
 	protected static HttpResult retrieveFrom(String url, String method, Map<String, String> queryParams, Map<String, String> headerParams, byte[] postParams, int timeout, boolean untilUnavailable) throws IOException {
 		HttpURLConnection con = retrieveRawFrom(url, method, queryParams, headerParams, postParams, timeout);
-		InputStream in = con.getInputStream();
-		byte[] raw = untilUnavailable ? IOUtils.readBytesUntilUnavailable(in) : IOUtils.readAllBytes(in);
-		in.close();
-		return new HttpResult(con.getHeaderFields(), raw);
+		try {
+			InputStream in = con.getInputStream();
+			byte[] raw = untilUnavailable ? IOUtils.readBytesUntilUnavailable(in) : IOUtils.readAllBytes(in);
+			in.close();
+			return new HttpResult(con.getHeaderFields(), raw);
+		} catch(IOException e) {
+			String resp = new String(IOUtils.readAllBytesSafely(con.getErrorStream()));
+			return new HttpResult(e, resp);
+		}
 	}
 	
 }
