@@ -60,6 +60,7 @@
     	<groupId>org.json</groupId>
     	<artifactId>json</artifactId>
     	<version>LATEST</version>
+    	<scope>provided</scope>
     </dependency>
   </dependencies>
 </project>
