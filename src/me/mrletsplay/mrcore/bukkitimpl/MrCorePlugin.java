@@ -10,7 +10,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import me.mrletsplay.mrcore.bukkitimpl.ChatUI.UIListener;
-import me.mrletsplay.mrcore.bukkitimpl.GUIUtils.GUIListener;
+import me.mrletsplay.mrcore.bukkitimpl.gui.GUI;
+import me.mrletsplay.mrcore.bukkitimpl.gui.GUIListener;
 import me.mrletsplay.mrcore.bukkitimpl.multiblock.MultiBlockStructureListener;
 import me.mrletsplay.mrcore.bukkitimpl.versioned.NMSVersion;
 import me.mrletsplay.mrcore.main.MrCore;
@@ -20,6 +21,7 @@ public class MrCorePlugin extends JavaPlugin{
 	private static MrCoreConfig config;
 	public static JavaPlugin pl;
 	
+	@SuppressWarnings("deprecation")
 	@Override
 	public void onEnable() {
 		pl = this;
@@ -27,6 +29,7 @@ public class MrCorePlugin extends JavaPlugin{
 		NMSVersion nmsv = NMSVersion.getCurrentServerVersion();
 		getLogger().info("Applying compat for " + nmsv.getFriendlyName() + " / " + nmsv.name());
 		Bukkit.getPluginManager().registerEvents(new GUIListener(), this);
+		Bukkit.getPluginManager().registerEvents(new GUIUtils.GUIListener(), this);
 		Bukkit.getPluginManager().registerEvents(new MultiBlockStructureListener(), this);
 		getCommand("mrcoreui").setExecutor(new UIListener());
 		if(config.isUpdateCheckEnabled()) {
@@ -48,13 +51,14 @@ public class MrCorePlugin extends JavaPlugin{
 		return getInstance().getDataFolder();
 	}
 	
+	@SuppressWarnings("deprecation")
 	@Override
 	public void onDisable() {
 		// Close all GUIs because them staying open would cause bugs
 		for(Player p : Bukkit.getOnlinePlayers()) {
 			if(p.getOpenInventory() != null && p.getOpenInventory().getTopInventory() != null) {
 				Inventory inv = p.getOpenInventory().getTopInventory();
-				if(GUIUtils.getGUI(inv) != null) p.closeInventory();
+				if(GUIUtils.getGUI(inv) != null || GUI.getGUI(inv) != null) p.closeInventory();
 			}
 		}
 		

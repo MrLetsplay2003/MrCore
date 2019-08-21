@@ -24,6 +24,7 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
+@Deprecated
 public class GUIUtils {
 	
 	public static class GUIBuilder {
