@@ -3,6 +3,7 @@ package me.mrletsplay.mrcore.bukkitimpl.ui;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -33,7 +34,7 @@ public class UIListener implements CommandExecutor {
 			p.sendMessage("Invalid instance");
 			return true;
 		}
-		HashMap<String, UIElement> elements = (HashMap<String, UIElement>) instance.getProperties().get("elements");
+		Map<String, UIElement> elements = (Map<String, UIElement>) instance.getProperties().get("elements");
 		UIElement el = elements.get(elID);
 		if(el == null) {
 			p.sendMessage("Invalid element");

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 import me.mrletsplay.mrcore.bukkitimpl.ui.event.UIBuildEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -27,17 +28,47 @@ public class UI {
 	}
 	
 	/**
+	 * @deprecated This will set global properties. Use {@link #getForPlayer(Player, Plugin, Map)} instead
+	 * Returns this UI represented as a UI message for the specified player
+	 * @param p The player this UIMessage is for (Used in all method calls to UIElements and similar)
+	 * @return A UIMessage representation of this UI
+	 */
+	@Deprecated
+	public UIMessage getForPlayer(Player p, Map<String, Object> properties) {
+		return buildInternally(p, null, properties);
+	}
+
+	/**
+	 * Returns this UI represented as a UI message for the specified player
+	 * @param p The player this UIMessage is for (Used in all method calls to UIElements and similar)
+	 * @param pl The plugin to set the properties for
+	 * @return A UIMessage representation of this UI
+	 */
+	public UIMessage getForPlayer(Player p, Plugin pl, Map<String, Object> properties) {
+		return buildInternally(p, pl, properties);
+	}
+	
+	/**
 	 * Creates the UI for a specific player and parses it into a chat message
 	 * @param p The player to get this UI for/to be passed to all underlying functions
 	 * @return An {@link UIMessage} instance which can be sent to a player
 	 */
 	public UIMessage getForPlayer(Player p) {
+		return buildInternally(p, null, new HashMap<>());
+	}
+	
+	private UIMessage buildInternally(Player p, Plugin pl, Map<String, Object> properties) {
 		Map<String, UIElement> elements = new HashMap<>();
 		builder.getElements().forEach(elements::put);
 		String instanceID = id+"_"+(lInsID++);
 		Map<String, Object> props = new HashMap<>(builder.getProperties());
 		props.put("elements", elements);
 		UIInstance instance = new UIInstance(instanceID, this, props, p);
+		if(pl != null) {
+			properties.forEach((k, v) -> instance.setProperty(pl, k, v));
+		}else {
+			properties.forEach(instance::setProperty);
+		}
 		UIMessage uiMessage = new UIMessage(instance);
 		UIBuildEvent e = new UIBuildEvent(instance, p);
 		for(UILayoutElement el : builder.getLayout().getElements()) {
