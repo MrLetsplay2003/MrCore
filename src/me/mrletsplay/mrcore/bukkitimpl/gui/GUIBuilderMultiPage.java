@@ -16,7 +16,7 @@ import me.mrletsplay.mrcore.bukkitimpl.gui.event.GUIElementActionEvent;
 public class GUIBuilderMultiPage<T> extends GUIBuilder {
 
 	private List<Integer> pageSlots;
-	private ItemSupplier<T> supplier;
+	private GUIItemSupplier<T> supplier;
 	
 	/**
 	 * Creates a GUI builder for a multi page GUI
@@ -62,16 +62,16 @@ public class GUIBuilderMultiPage<T> extends GUIBuilder {
 	}
 	
 	/**
-	 * Sets the {@link ItemSupplier} for this multi page GUI
+	 * Sets the {@link GUIItemSupplier} for this multi page GUI
 	 * @param supplier The supplier to use
 	 * @return This GUIBuilderMultiPage instance
 	 */
-	public GUIBuilderMultiPage<T> setSupplier(ItemSupplier<T> supplier){
+	public GUIBuilderMultiPage<T> setSupplier(GUIItemSupplier<T> supplier){
 		this.supplier = supplier;
 		return this;
 	}
 	
-	public ItemSupplier<T> getSupplier() {
+	public GUIItemSupplier<T> getSupplier() {
 		return supplier;
 	}
 	

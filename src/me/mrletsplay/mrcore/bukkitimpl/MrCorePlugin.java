@@ -9,10 +9,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import me.mrletsplay.mrcore.bukkitimpl.ChatUI.UIListener;
 import me.mrletsplay.mrcore.bukkitimpl.gui.GUI;
 import me.mrletsplay.mrcore.bukkitimpl.gui.GUIListener;
 import me.mrletsplay.mrcore.bukkitimpl.multiblock.MultiBlockStructureListener;
+import me.mrletsplay.mrcore.bukkitimpl.ui.UIListener;
 import me.mrletsplay.mrcore.bukkitimpl.versioned.NMSVersion;
 import me.mrletsplay.mrcore.main.MrCore;
 
@@ -32,6 +32,7 @@ public class MrCorePlugin extends JavaPlugin{
 		Bukkit.getPluginManager().registerEvents(new GUIUtils.GUIListener(), this);
 		Bukkit.getPluginManager().registerEvents(new MultiBlockStructureListener(), this);
 		getCommand("mrcoreui").setExecutor(new UIListener());
+		getCommand("mrcorelegacyui").setExecutor(new ChatUI.UIListener());
 		if(config.isUpdateCheckEnabled()) {
 			String version = config.getVersionToUse();
 			MrCoreUpdateChecker.checkForUpdate(version);

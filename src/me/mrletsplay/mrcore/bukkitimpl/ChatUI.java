@@ -16,6 +16,7 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 
+@Deprecated
 public class ChatUI {
 	
 	private static long lastID = 0;
@@ -638,7 +639,7 @@ public class ChatUI {
 			if(element.hoverText != null)
 				Arrays.stream(tcs).forEach(tc -> tc.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(element.hoverText).create())));
 			if(element.action != null)
-				Arrays.stream(tcs).forEach(tc -> tc.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/mrcoreui "+instanceID+" "+elementID)));
+				Arrays.stream(tcs).forEach(tc -> tc.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/mrcorelegacyui "+instanceID+" "+elementID)));
 			return tcs;
 		}
 		
@@ -703,7 +704,7 @@ public class ChatUI {
 		@SuppressWarnings("unchecked")
 		@Override
 		public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-			if(!command.getName().equals("mrcoreui")) return true;
+			if(!command.getName().equals("mrcorelegacyui")) return true;
 			if(!(sender instanceof Player)) {
 				sender.sendMessage("UIs are only available to players");
 				return true;

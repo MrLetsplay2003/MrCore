@@ -92,7 +92,7 @@ public class GUIMultiPage<T> extends GUI {
 		
 		GUIBuildEvent event = new GUIBuildEvent(holder, p, base);
 		
-		ItemSupplier<T> supp = builder.getSupplier();
+		GUIItemSupplier<T> supp = builder.getSupplier();
 		List<T> items = supp.getItems(event);
 		
 		Map<Integer, GUIElement> elSlots = new HashMap<>();
