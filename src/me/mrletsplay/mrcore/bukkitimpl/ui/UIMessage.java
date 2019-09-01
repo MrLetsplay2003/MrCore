@@ -1,12 +1,12 @@
 package me.mrletsplay.mrcore.bukkitimpl.ui;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.entity.Player;
 
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 
 public class UIMessage {
 	
@@ -24,21 +24,21 @@ public class UIMessage {
 	 */
 	public List<BaseComponent[]> buildMessage() {
 		List<BaseComponent[]> lines = new ArrayList<>();
-		ComponentBuilder cb = new ComponentBuilder("");
+		List<BaseComponent> line = new ArrayList<>();
 		for(Object o : messageElements) {
 			if(o instanceof BaseComponent) {
-				cb.append((BaseComponent) o);
+				line.add((BaseComponent) o);
 			}else if(o instanceof BaseComponent[]) {
-				cb.append((BaseComponent[]) o);
+				line.addAll(Arrays.asList((BaseComponent[]) o));
 			}else if(o instanceof UILayoutElement) {
 				UILayoutElement el = (UILayoutElement) o;
 				if(el.getType().equals(UILayoutElementType.NEWLINE)) {
-					lines.add(cb.create());
-					cb = new ComponentBuilder("");
+					lines.add(line.toArray(new BaseComponent[line.size()]));
+					line = new ArrayList<>();
 				}
 			}
 		}
-		lines.add(cb.create());
+		lines.add(line.toArray(new BaseComponent[line.size()]));
 		return lines;
 	}
 	
@@ -47,7 +47,7 @@ public class UIMessage {
 	}
 	
 	/**
-	 * Builds this message usigng {@link #buildMessage()} and sends it to the specified player
+	 * Builds this message using {@link #buildMessage()} and sends it to the specified player
 	 * @param p The player to send the message to
 	 */
 	public void sendToPlayer(Player p) {

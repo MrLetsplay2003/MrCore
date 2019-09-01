@@ -96,4 +96,8 @@ public class UIInstance {
 		return player;
 	}
 	
+	public void destroy() {
+		UIListener.instances.remove(id, this);
+	}
+	
 }

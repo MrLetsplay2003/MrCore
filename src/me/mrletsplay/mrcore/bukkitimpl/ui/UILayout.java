@@ -2,6 +2,8 @@ package me.mrletsplay.mrcore.bukkitimpl.ui;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This class is used by UIs to define a basic, flexible layout which will then be parsed into the final chat message<br>
@@ -50,6 +52,31 @@ public class UILayout {
 	public UILayout newLine() {
 		elements.add(new UILayoutElement(UILayoutElementType.NEWLINE));
 		return this;
+	}
+	
+	private static final Pattern TOKEN_PATTERN = Pattern.compile("\\{(?<token>.+?)\\}");
+	
+	public static UILayout of(String formatString) {
+		UILayout layout = new UILayout();
+		String rest = formatString;
+		Matcher m;
+		while((m = TOKEN_PATTERN.matcher(rest)).find()) {
+			String pre = rest.substring(0, m.start());
+			appendText(layout, pre);
+			layout.addElement(m.group("token"));
+			rest = rest.substring(m.end());
+		}
+		appendText(layout, rest);
+		return layout;
+	}
+	
+	private static void appendText(UILayout layout, String text) {
+		String[] lines = text.split("\n", -1);
+		layout.addText(lines[0]);
+		for(int i = 1; i < lines.length; i++) {
+			layout.newLine();
+			layout.addText(lines[i]);
+		}
 	}
 	
 }
