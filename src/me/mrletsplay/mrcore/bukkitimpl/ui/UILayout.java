@@ -54,7 +54,7 @@ public class UILayout {
 		return this;
 	}
 	
-	private static final Pattern TOKEN_PATTERN = Pattern.compile("\\{(?<token>.+?)\\}");
+	private static final Pattern TOKEN_PATTERN = Pattern.compile("(?<!\\\\)\\{(?<token>.+?)\\}");
 	
 	public static UILayout of(String formatString) {
 		UILayout layout = new UILayout();
