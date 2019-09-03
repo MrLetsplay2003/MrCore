@@ -77,12 +77,14 @@ public class MySQLReader {
 		int len = read();
 		if(len <= 0xfb) {
 			return len;
+//		}else if(len == 0xfb) { // NULL value of ResultSetRow?
+//			return 0xfb;
 		}else if(len == 0xfc) {
 			return fromByteArray(read(2));
 		}else if(len == 0xfd) {
 			return fromByteArray(read(3));
 		}else if(len == 0xfe) {
-			return fromByteArray(read(4));
+			return fromByteArray(read(8));
 		}else {
 			return -1L;
 		}
