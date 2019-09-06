@@ -23,6 +23,7 @@ public final class DefaultCommandValueType {
 				return NullableOptional.empty();
 		}
 	}, "true", "false");
+	public static final CommandValueType<String> STRING = new Impl<>(NullableOptional::of, "test");
 
 	private DefaultCommandValueType() {}
 	

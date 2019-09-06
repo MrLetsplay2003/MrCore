@@ -5,6 +5,10 @@ import java.util.stream.Collectors;
 
 public interface Command {
 	
+	public void setParent(Command parent);
+	
+	public Command getParent();
+	
 	public String getName();
 	
 	public Collection<String> getAliases();
@@ -20,6 +24,14 @@ public interface Command {
 	}
 	
 	public String getDescription();
+	
+	public Collection<Command> getSubCommands();
+	
+	public default Command getSubCommand(String label) {
+		return getSubCommands().stream()
+				.filter(c -> c.getName().equals(label) || c.getAliases().contains(label))
+				.findFirst().orElse(null);
+	}
 	
 	public default void sendCommandInfo(CommandSender sender) {
 		sender.sendMessage("Command: " + getName());

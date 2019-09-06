@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import me.mrletsplay.mrcore.misc.DualNullableOptional;
 import me.mrletsplay.mrcore.misc.NullableOptional;
 
+@Deprecated
 public class CommandParser {
 	
 	private static final Pattern

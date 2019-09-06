@@ -7,15 +7,26 @@ import me.mrletsplay.mrcore.command.impl.DefaultCommandOption;
 
 public abstract class AbstractCommand implements Command {
 	
+	private Command parent;
 	private String name;
 	private List<String> aliases;
 	private List<CommandOption<?>> options;
 	private String description;
-
+	private List<Command> subCommands;
+	
 	public AbstractCommand(String name) {
 		this.name = name;
 		this.aliases = new ArrayList<>();
 		this.options = new ArrayList<>();
+		this.subCommands = new ArrayList<>();
+	}
+	
+	public void setParent(Command parent) {
+		this.parent = parent;
+	}
+	
+	public Command getParent() {
+		return parent;
 	}
 	
 	@Override
@@ -48,6 +59,15 @@ public abstract class AbstractCommand implements Command {
 	@Override
 	public String getDescription() {
 		return description;
+	}
+	
+	public void addSubCommand(Command subCommand) {
+		subCommand.setParent(this);
+		subCommands.add(subCommand);
+	}
+	
+	public List<Command> getSubCommands() {
+		return subCommands;
 	}
 	
 	public static CommandOption<?> createCommandOption(String shortName, String longName) {
