@@ -34,7 +34,21 @@ public class CommandParser {
 	
 	private CommandParser() {}
 	
-	public static ParserToken<ParsedCommand> parseCommand(CommandProvider provider, MutableString commandLine, boolean tabComplete) {
+	public static ParserToken<ParsedCommand> parse(CommandProvider provider, String commandLine, boolean tabComplete) throws CommandParsingException {
+		return parseCommand(provider, new MutableString(commandLine), tabComplete);
+	}
+	
+	public static ParsedCommand parseCommand(CommandProvider provider, String commandLine) throws CommandParsingException {
+		return parseCommand(provider, new MutableString(commandLine), false).getValue();
+	}
+	
+	public static List<String> tabComplete(CommandProvider provider, String commandLine) throws CommandParsingException {
+		ParserToken<ParsedCommand> token = parseCommand(provider, new MutableString(commandLine), true);
+		if(token.isComplete()) return Collections.emptyList();
+		return token.getCompletions();
+	}
+	
+	private static ParserToken<ParsedCommand> parseCommand(CommandProvider provider, MutableString commandLine, boolean tabComplete) {
 		String origCommandLine = commandLine.toString();
 		ParserToken<Command> cmd = readCommand(provider, commandLine, tabComplete);
 		if(cmd == null) throw new CommandParsingException("Invalid command name", 0);
