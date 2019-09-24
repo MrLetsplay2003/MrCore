@@ -50,6 +50,14 @@
 			</resource>
 		</resources>
 	</build>
+	
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<url>https://maven.pkg.github.com/MrLetsplay2003/MrCore/</url>
+			<name>GitHub Package Manager</name>
+		</repository>
+	</distributionManagement>
 
 	<profiles>
 		<profile>
