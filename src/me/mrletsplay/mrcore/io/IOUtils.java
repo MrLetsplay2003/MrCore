@@ -90,5 +90,16 @@ public class IOUtils {
 		}
 		return false;
 	}
+	
+	public static void deleteFile(File file) throws FriendlyException {
+		if(!file.exists()) return;
+		if(file.isDirectory()) {
+			for(File f : file.listFiles()) {
+				deleteFile(f);
+			}
+		}else {
+			file.delete();
+		}
+	}
 
 }
