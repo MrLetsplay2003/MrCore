@@ -5,11 +5,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-//TODO: Add/Update methods
 public class StringUtils {
 
 	/**
-	 * 
+	 * Calculates the similarity between two strings
 	 * @param string A string
 	 * @param other Another string
 	 * @param ignoreCase Whether case sensitivity should be ignored while comparing the strings

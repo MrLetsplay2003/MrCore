@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>MrCore</groupId>
 	<artifactId>MrCore</artifactId>
-	<version>2.0b13</version>
+	<version>2.0</version>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<plugins>
@@ -40,6 +40,21 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>me.eglp.gv2.main.Graphite</mainClass>
+						</manifest>
+					</archive>
+					<excludes>
+						<exclude>**/_test</exclude>
+						<exclude>**/_test/*</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
 		</plugins>
 		<resources>
 			<resource>
@@ -50,7 +65,7 @@
 			</resource>
 		</resources>
 	</build>
-	
+
 	<distributionManagement>
 		<repository>
 			<id>github</id>

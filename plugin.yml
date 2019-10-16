@@ -1,7 +1,7 @@
 main: me.mrletsplay.mrcore.bukkitimpl.MrCorePlugin
 name: MrCore_BukkitImpl
-version: 2.0b13
-api-version: 1.13
+version: "2.0"
+api-version: "1.13"
 author: MrLetsplay2003
 
 commands:

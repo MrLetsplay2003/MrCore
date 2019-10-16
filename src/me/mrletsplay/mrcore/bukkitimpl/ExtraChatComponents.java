@@ -11,6 +11,12 @@ import me.mrletsplay.mrcore.json.JSONObject;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 
+/**
+ * Warning: This class is not yet fully compatible with MC 1.13+
+ * @author MrLetsplay2003
+ * @since 1.9.4
+ *
+ */
 public class ExtraChatComponents {
 	
 	/**
@@ -31,7 +37,6 @@ public class ExtraChatComponents {
 		@SuppressWarnings("deprecation")
 		public BaseComponent[] toBase() {
 			JSONObject o = new JSONObject();
-//			MaterialLookup lookup = MaterialLookup.byMaterial(item.getType());
 			o.set("id", item.getType().getId());
 			o.set("Count", item.getAmount());
 			if(item.hasItemMeta()) {

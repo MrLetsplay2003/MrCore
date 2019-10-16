@@ -879,7 +879,6 @@ public class GUIUtils {
 			}
 		}
 		
-		// TODO: force synchronous access
 		public List<Player> getAllOpenInstances() {
 			return Bukkit.getOnlinePlayers().stream().filter(p -> hasOpenInstance(p)).collect(Collectors.toList());
 		}

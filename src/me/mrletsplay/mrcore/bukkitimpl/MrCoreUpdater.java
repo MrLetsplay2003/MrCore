@@ -10,6 +10,13 @@ import me.mrletsplay.mrcore.json.JSONArray;
 import me.mrletsplay.mrcore.json.JSONObject;
 import me.mrletsplay.mrcore.main.MrCore;
 
+/**
+ * Currently deprecated because it's unused/not fully implemented
+ * @author MrLetsplay2003
+ * @since 1.9.4
+ *
+ */
+@Deprecated
 public class MrCoreUpdater {
 
 	//TODO: This is just a concept idea, nothing solid
