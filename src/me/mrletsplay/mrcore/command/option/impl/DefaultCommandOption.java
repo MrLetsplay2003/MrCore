@@ -1,7 +1,7 @@
-package me.mrletsplay.mrcore.command.impl;
+package me.mrletsplay.mrcore.command.option.impl;
 
-import me.mrletsplay.mrcore.command.CommandOption;
 import me.mrletsplay.mrcore.command.CommandValueType;
+import me.mrletsplay.mrcore.command.option.CommandOption;
 
 public final class DefaultCommandOption {
 

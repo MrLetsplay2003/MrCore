@@ -1,4 +1,6 @@
-package me.mrletsplay.mrcore.command;
+package me.mrletsplay.mrcore.command.option;
+
+import me.mrletsplay.mrcore.command.CommandValueType;
 
 public interface CommandOption<T> {
 	

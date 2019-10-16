@@ -1,6 +1,9 @@
-package me.mrletsplay.mrcore.command;
+package me.mrletsplay.mrcore.command.parser;
 
 import java.util.Map;
+
+import me.mrletsplay.mrcore.command.Command;
+import me.mrletsplay.mrcore.command.option.CommandOption;
 
 public class ParsedCommand {
 

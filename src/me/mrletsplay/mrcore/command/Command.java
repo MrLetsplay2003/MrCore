@@ -1,7 +1,12 @@
 package me.mrletsplay.mrcore.command;
 
+import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.stream.Collectors;
+
+import me.mrletsplay.mrcore.command.option.CommandOption;
+import me.mrletsplay.mrcore.command.properties.CommandProperties;
+import me.mrletsplay.mrcore.misc.FriendlyException;
 
 public interface Command {
 	
@@ -20,10 +25,12 @@ public interface Command {
 	}
 	
 	public default CommandOption<?> getShortOption(String name) {
-		return getOptions().stream().filter(o -> o.getShortName().equals(name)).findFirst().orElse(null);
+		return getOptions().stream().filter(o -> o.getShortName() != null && o.getShortName().equals(name)).findFirst().orElse(null);
 	}
 	
 	public String getDescription();
+	
+	public CommandProperties getProperties();
 	
 	public Collection<Command> getSubCommands();
 	
@@ -31,6 +38,14 @@ public interface Command {
 		return getSubCommands().stream()
 				.filter(c -> c.getName().equals(label) || c.getAliases().contains(label))
 				.findFirst().orElse(null);
+	}
+	
+	public default <T extends Annotation> T getAnnotation(Class<T> type) {
+		try {
+			return getClass().getMethod("action", CommandInvokedEvent.class).getAnnotation(type);
+		} catch (NoSuchMethodException | SecurityException e) {
+			throw new FriendlyException(e);
+		}
 	}
 	
 	public default void sendCommandInfo(CommandSender sender) {

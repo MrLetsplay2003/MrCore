@@ -1,5 +1,7 @@
 package me.mrletsplay.mrcore.command;
 
+import me.mrletsplay.mrcore.command.parser.ParsedCommand;
+
 public class CommandInvokedEvent {
 
 	private CommandSender sender;

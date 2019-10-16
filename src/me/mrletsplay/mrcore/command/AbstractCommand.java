@@ -3,22 +3,30 @@ package me.mrletsplay.mrcore.command;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.mrletsplay.mrcore.command.impl.DefaultCommandOption;
+import me.mrletsplay.mrcore.command.option.CommandOption;
+import me.mrletsplay.mrcore.command.option.impl.DefaultCommandOption;
+import me.mrletsplay.mrcore.command.properties.CommandProperties;
 
-public abstract class AbstractCommand implements Command {
+public abstract class AbstractCommand<T extends CommandProperties> implements Command {
 	
 	private Command parent;
 	private String name;
 	private List<String> aliases;
 	private List<CommandOption<?>> options;
 	private String description;
+	private T properties;
 	private List<Command> subCommands;
 	
-	public AbstractCommand(String name) {
+	public AbstractCommand(String name, T initialProperties) {
 		this.name = name;
 		this.aliases = new ArrayList<>();
 		this.options = new ArrayList<>();
 		this.subCommands = new ArrayList<>();
+		this.properties = initialProperties;
+	}
+	
+	public AbstractCommand(String name) {
+		this(name, null);
 	}
 	
 	public void setParent(Command parent) {
@@ -61,11 +69,21 @@ public abstract class AbstractCommand implements Command {
 		return description;
 	}
 	
+	public void setProperties(T properties) {
+		this.properties = properties;
+	}
+	
+	@Override
+	public T getProperties() {
+		return properties;
+	}
+
 	public void addSubCommand(Command subCommand) {
 		subCommand.setParent(this);
 		subCommands.add(subCommand);
 	}
 	
+	@Override
 	public List<Command> getSubCommands() {
 		return subCommands;
 	}

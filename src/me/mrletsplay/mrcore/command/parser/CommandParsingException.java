@@ -1,5 +1,6 @@
-package me.mrletsplay.mrcore.command;
+package me.mrletsplay.mrcore.command.parser;
 
+import me.mrletsplay.mrcore.command.CommandSender;
 import me.mrletsplay.mrcore.misc.FriendlyException;
 
 public class CommandParsingException extends FriendlyException {

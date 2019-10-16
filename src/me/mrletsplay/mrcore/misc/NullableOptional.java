@@ -33,6 +33,10 @@ public class NullableOptional<T> {
 		return value;
 	}
 	
+	public <R> NullableOptional<R> cast(Class<R> type) {
+		return map(t -> type.cast(value));
+	}
+	
 	public T orElse(T other) {
 		return present ? value : other;
 	}

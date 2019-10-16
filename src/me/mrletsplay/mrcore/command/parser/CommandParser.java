@@ -15,22 +15,20 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import me.mrletsplay.mrcore.command.Command;
-import me.mrletsplay.mrcore.command.CommandOption;
-import me.mrletsplay.mrcore.command.CommandParsingException;
-import me.mrletsplay.mrcore.command.CommandProvider;
-import me.mrletsplay.mrcore.command.ParsedCommand;
+import me.mrletsplay.mrcore.command.option.CommandOption;
 import me.mrletsplay.mrcore.command.parser.token.ParserToken;
 import me.mrletsplay.mrcore.command.parser.token.SimpleToken;
+import me.mrletsplay.mrcore.command.provider.CommandProvider;
 import me.mrletsplay.mrcore.misc.NullableOptional;
 
 public class CommandParser {
 
 	private static final Pattern
 		COMMAND_NAME_FORMAT = compile("[a-zA-Z-_0-9?]*"),
-		SHORT_OPTION_FORMAT = compile("-(?<name>[a-zA-Z-_0-9]*)"),
-		LONG_OPTION_FORMAT = compile("--(?<name>[a-zA-Z-_0-9]*)"),
-		BASIC_ARGUMENT_FORMAT = compile("[^\n\r\t\" ]*"),
-		ESCAPED_ARGUMENT_FORMAT = compile("\"(?<value>(?:\\\\[rnt\"]|[^\\r\\n\\t\"\\\\])*)(?<cq>\")?");
+		SHORT_OPTION_FORMAT = compile("-(?<name>[a-zA-Z-_0-9]*)(?: |$)"),
+		LONG_OPTION_FORMAT = compile("--(?<name>[a-zA-Z-_0-9]*)(?: |$)"),
+		BASIC_ARGUMENT_FORMAT = compile("[^\n\r\t\" ]*(?: |$)"),
+		ESCAPED_ARGUMENT_FORMAT = compile("\"(?<value>(?:\\\\[rnt\"\\\\]|[^\\r\\n\\t\"\\\\])*)(?<cq>\")?(?: |$)");
 	
 	private CommandParser() {}
 	
@@ -76,7 +74,7 @@ public class CommandParser {
 					continue;
 				}
 				ParserToken<String> v = readArgument(c, op.getType().getTabCompleteValues(), commandLine, tabComplete);
-				if(v == null) throw new CommandParsingException("Invalid argument format", commandLine.getAmountCut());
+				if(v == null) throw new CommandParsingException("Invalid argument format or no argument present", commandLine.getAmountCut());
 				if(!v.isComplete()) return new SimpleToken<>(v.getCompletions());
 				NullableOptional<?> pv = op.getType().parse(v.getValue());
 				if(!pv.isPresent()) throw new CommandParsingException("Invalid option value for option \"" + op.getLongName() + "\"", commandLine.getAmountCut());
@@ -107,16 +105,24 @@ public class CommandParser {
 			
 			commandLine.cutStart(m.group().length()).trim();
 			
-			return new SimpleToken<>(provider.getCommands().stream()
-					.filter(cm -> cm.getName().toLowerCase().startsWith(cName.toLowerCase())
-							|| cm.getAliases().stream().anyMatch(a -> a.toLowerCase().startsWith(cName.toLowerCase())))
-					.map(Command::getName)
-					.map(s -> s.substring(cName.length()))
-					.collect(Collectors.toList())); // TODO alias etc
+			return new SimpleToken<>(getCommandCompletions(provider.getCommands(), cName));
 		}
 		
 		commandLine.cutStart(m.group().length()).trim();
 		return new SimpleToken<>(c);
+	}
+	
+	private static List<String> getCommandCompletions(Collection<? extends Command> cmds, String cName) {
+		List<String> cs = new ArrayList<>();
+		for(Command cmd : cmds) {
+			if(cmd.getName().toLowerCase().startsWith(cName.toLowerCase())) {
+				cs.add(cName.substring(cName.length()));
+			}
+			cmd.getAliases().stream()
+				.filter(a -> a.toLowerCase().startsWith(cName.toLowerCase()))
+				.forEach(a -> cs.add(a.substring(cName.length())));
+		}
+		return cs;
 	}
 	
 	private static ParserToken<Command> readSubCommand(Command parent, MutableString commandLine, boolean tabComplete) {
@@ -130,12 +136,7 @@ public class CommandParser {
 			
 			commandLine.cutStart(m.group().length()).trim();
 			
-			return new SimpleToken<>(parent.getSubCommands().stream()
-					.filter(cm -> cm.getName().toLowerCase().startsWith(cName.toLowerCase())
-							|| cm.getAliases().stream().anyMatch(a -> a.toLowerCase().startsWith(cName.toLowerCase())))
-					.map(Command::getName)
-					.map(s -> s.substring(cName.length()))
-					.collect(Collectors.toList())); // TODO alias etc
+			return new SimpleToken<>(getCommandCompletions(parent.getSubCommands(), cName));
 		}
 		
 		commandLine.cutStart(m.group().length()).trim();
@@ -144,7 +145,7 @@ public class CommandParser {
 	
 	private static ParserToken<List<CommandOption<?>>> readOption(Command c, MutableString commandLine, boolean tabComplete) {
 		ParserToken<CommandOption<?>> lo = readLongOption(c, commandLine, tabComplete);
-		if(lo != null) return lo.map(Arrays::asList);
+		if(lo != null) return lo.map(Collections::singletonList);
 		
 		return readShortOption(c, commandLine, tabComplete);
 	}
@@ -247,20 +248,84 @@ public class CommandParser {
 	}
 	
 	private static String unescapeArg(String arg) {
-		return arg
-				.replace("\\n", "\n")
-				.replace("\\r", "\r")
-				.replace("\\t", "\t")
-				.replaceAll("\\\\(?!\\\\)", "") // TODO: \\\\
-				.replace("\\\\", "\\");
+		StringBuilder u = new StringBuilder();
+		for(int i = 0; i < arg.length(); i++) {
+			char c = arg.charAt(i);
+			if(c != '\\') {
+				u.append(c);
+				continue;
+			}
+			if(++i == arg.length()) return null;
+			char n = arg.charAt(i);
+			switch(n) {
+				case 'n':
+				{
+					u.append('\n');
+					break;
+				}
+				case 'r':
+				{
+					u.append('\r');
+					break;
+				}
+				case 't':
+				{
+					u.append('\t');
+					break;
+				}
+				case '\\':
+				{
+					u.append('\\');
+					break;
+				}
+				default:
+				{
+					u.append(n);
+					break;
+				}
+			}
+		}
+		return u.toString();
 	}
 	
 	private static String escapeArg(String arg) {
-		return arg
-				.replace("\n", "\\n")
-				.replace("\r", "\\r")
-				.replace("\t", "\\t")
-				.replace("\\", "\\\\");
+		StringBuilder u = new StringBuilder();
+		for(int i = 0; i < arg.length(); i++) {
+			char c = arg.charAt(i);
+			switch(c) {
+				case '\n':
+				{
+					u.append("\\n");
+					break;
+				}
+				case '\r':
+				{
+					u.append("\\r");
+					break;
+				}
+				case '\t':
+				{
+					u.append("\\t");
+					break;
+				}
+				case '\\':
+				{
+					u.append("\\\\");
+					break;
+				}
+				case '\"':
+				{
+					u.append("\\\"");
+					break;
+				}
+				default:
+				{
+					u.append(c);
+					break;
+				}
+			}
+		}
+		return u.toString();
 	}
 	
 	private static Matcher tryMatch(CharSequence s, Pattern p) {
