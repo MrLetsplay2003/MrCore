@@ -660,7 +660,7 @@ public enum VersionedMaterial {
 	/**
 	 * Finds the corresponding glass pane material by its color
 	 * @param bannerColor The color of the glass pane
-	 * @return The corresponding glass pane material
+	 * @return The corresponding stained glass pane material
 	 */
 	public static VersionedMaterial getStainedGlassPane(VersionedDyeColor bannerColor) {
 		return Arrays.stream(values())
@@ -675,7 +675,7 @@ public enum VersionedMaterial {
 	/**
 	 * Finds the corresponding glass material by its color
 	 * @param bannerColor The color of the glass
-	 * @return The corresponding glass material
+	 * @return The corresponding stained glass material
 	 */
 	public static VersionedMaterial getStainedGlass(VersionedDyeColor bannerColor) {
 		return Arrays.stream(values())
@@ -690,7 +690,7 @@ public enum VersionedMaterial {
 	/**
 	 * Finds the corresponding glass pane material by its color
 	 * @param bannerColor The color of the glass pane
-	 * @return The corresponding glass pane material
+	 * @return The corresponding dye material
 	 */
 	public static VersionedMaterial getDye(VersionedDyeColor bannerColor) {
 		return Arrays.stream(values())
@@ -706,7 +706,7 @@ public enum VersionedMaterial {
 	 * Finds the corresponding versioned material to its bukkit counterpart
 	 * @param bukkitMaterial The bukkit item's material
 	 * @param bukkitDamage The bukkit item's damage
-	 * @return
+	 * @return The versioned material corresponding versioned material
 	 */
 	public static VersionedMaterial getByBukkitType(Material bukkitMaterial, short bukkitDamage) {
 		return Arrays.stream(values())
