@@ -64,7 +64,7 @@ public class UIBuilder {
 	
 	/**
 	 * Builds this UIBuilder into a {@link UI} instance
-	 * @return
+	 * @return The built UI
 	 */
 	public UI build() {
 		return new UI(this);

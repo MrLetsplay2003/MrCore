@@ -128,7 +128,7 @@ public class GUIBuilder implements Builder<GUI, GUIBuilder>{
 	/**
 	 * Sets the build action/build listener for this instance<br>
 	 * This can be used to add instance-specific items to the GUI when the GUI is built or refreshed<br>
-	 * Note: This is not called when the {@link #build()} method is used but rather when the {@link GUI#getForPlayer(Player)} method is called
+	 * Note: This is not called when the {@link #create()} method is used but rather when the {@link GUI#getForPlayer(Player)} method is called
 	 * @param buildAction The buid action listener to use
 	 */
 	public GUIBuilder setBuildAction(GUIBuildAction buildAction) {

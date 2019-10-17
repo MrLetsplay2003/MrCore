@@ -181,7 +181,7 @@ public class LocaleProvider {
 		}
 		
 		/**
-		 * @return The custom locale folder specified in {@link CustomLocaleProvider#CustomLocaleProvider(File) CustomLocaleProvider(File)}
+		 * @return The custom locale folder specified in the constructor
 		 */
 		public File getCustomLocaleFolder() {
 			return customLocaleFolder;
