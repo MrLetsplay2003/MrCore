@@ -97,6 +97,7 @@ public class IOUtils {
 			for(File f : file.listFiles()) {
 				deleteFile(f);
 			}
+			file.delete();
 		}else {
 			file.delete();
 		}
