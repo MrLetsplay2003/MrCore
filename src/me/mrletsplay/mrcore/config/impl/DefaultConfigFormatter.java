@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import me.mrletsplay.mrcore.misc.Complex;
+import me.mrletsplay.mrcore.misc.MiscUtils;
 import me.mrletsplay.mrcore.misc.NullableOptional;
 
 public class DefaultConfigFormatter {
@@ -83,6 +84,7 @@ public class DefaultConfigFormatter {
 				w.newLine();
 				Map<String, String> sC = comments.entrySet().stream()
 						.filter(en -> en.getKey() != null && en.getValue() != null && en.getKey().startsWith(p.getKey() + "."))
+						.map(en -> MiscUtils.newMapEntry(en.getKey().substring(p.getKey().length() + 1), en.getValue()))
 						.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 				Map<String, Object> props = c.cast(p.getValue()).get();
 				if(props != null && !props.isEmpty()) {

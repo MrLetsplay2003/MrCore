@@ -169,9 +169,9 @@ public interface ConfigSection {
 	}
 	
 	/**
-	 * Returns a map containing all the (raw) properties as well as subsections (represented by other {@link Map}s) of this section.<br>
+	 * Returns a map containing all the (raw) properties of this section as well as subsections (represented by other {@link Map}s).<br>
 	 * The Map returned by this function may be passed to {@link #loadFromMap(Map)}
-	 * @return A map containing all the (raw) properties as well as subsections of this section
+	 * @return A map containing all the (raw) properties of this section as well as subsections
 	 */
 	public default Map<String, Object> toMap() {
 		Map<String, Object> map = new LinkedHashMap<>(getPropertyValues());
@@ -203,7 +203,7 @@ public interface ConfigSection {
 	}
 	
 	/**
-	 * Returns a map containing all the comments as well as subsections' comments (represented by other {@link Map}s) of this section.<br>
+	 * Returns a map containing all the comments of this section as well as subsections' comments (with their respective subpaths).<br>
 	 * The Map returned by this function may be passed to {@link #loadCommentsFromMap(Map)}
 	 * @return A map containing all the comments as well as subsections' comments of this section
 	 */
@@ -218,7 +218,7 @@ public interface ConfigSection {
 	}
 	
 	/**
-	 * Sets all the comments and subsections' comments (represented by other {@link Map}s) of the specified map in this subsection.<br>
+	 * Sets all the comments in this section and subsections' comments (represented by other {@link Map}s) of the specified map.<br>
 	 * Any map created by {@link #commentsToMap()} may be passed to this function
 	 * @param map A map containing all the comments and subsections' comments
 	 */
