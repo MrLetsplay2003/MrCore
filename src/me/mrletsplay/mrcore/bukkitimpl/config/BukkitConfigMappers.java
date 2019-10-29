@@ -72,7 +72,7 @@ public class BukkitConfigMappers {
 	@SuppressWarnings("deprecation")
 	public static final JSONObjectMapper<ItemStack> ITEM_MAPPER = new JSONMapperBuilder<>(ItemStack.class,
 			(sec, json) -> {
-				return new ItemStack(Material.valueOf(json.getString("type").toUpperCase()), json.getInt("amount"));
+				return new ItemStack(Material.valueOf(json.getString("type").toUpperCase()), json.has("amount") ? json.getInt("amount"): 1);
 			})
 			.mapString("type", it -> it.getType().name(), null).then()
 			.mapInteger("amount", ItemStack::getAmount, null).then()
