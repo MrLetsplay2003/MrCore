@@ -16,8 +16,6 @@ import java.util.stream.Collectors;
 
 import me.mrletsplay.mrcore.command.Command;
 import me.mrletsplay.mrcore.command.option.CommandOption;
-import me.mrletsplay.mrcore.command.parser.token.ParserToken;
-import me.mrletsplay.mrcore.command.parser.token.SimpleToken;
 import me.mrletsplay.mrcore.command.provider.CommandProvider;
 import me.mrletsplay.mrcore.misc.NullableOptional;
 
@@ -51,14 +49,14 @@ public class CommandParser {
 		ParserToken<Command> cmd = readCommand(provider, commandLine, tabComplete);
 		if(cmd == null) throw new CommandParsingException("Invalid command name", 0);
 		
-		if(!cmd.isComplete()) return new SimpleToken<>(cmd.getCompletions());
+		if(!cmd.isComplete()) return new ParserToken<>(cmd.getCompletions());
 		
 		Command c = cmd.getValue();
 		
 		while(!commandLine.isEmpty()) {
 			ParserToken<Command> sct = readSubCommand(c, commandLine, tabComplete);
 			if(sct == null) break; // End of subcommands
-			if(!sct.isComplete()) return new SimpleToken<>(sct.getCompletions());
+			if(!sct.isComplete()) return new ParserToken<>(sct.getCompletions());
 			c = sct.getValue();
 		}
 		
@@ -67,7 +65,7 @@ public class CommandParser {
 		while(!commandLine.isEmpty()) {
 			ParserToken<List<CommandOption<?>>> ops = readOption(c, commandLine, tabComplete);
 			if(ops == null) break;
-			if(!ops.isComplete()) return new SimpleToken<>(ops.getCompletions());
+			if(!ops.isComplete()) return new ParserToken<>(ops.getCompletions());
 			for(CommandOption<?> op : ops.getValue()) {
 				if(op.getType() == null) {
 					options.put(op, null);
@@ -75,7 +73,7 @@ public class CommandParser {
 				}
 				ParserToken<String> v = readArgument(c, op.getType().getTabCompleteValues(), commandLine, tabComplete);
 				if(v == null) throw new CommandParsingException("Invalid argument format or no argument present", commandLine.getAmountCut());
-				if(!v.isComplete()) return new SimpleToken<>(v.getCompletions());
+				if(!v.isComplete()) return new ParserToken<>(v.getCompletions());
 				NullableOptional<?> pv = op.getType().parse(v.getValue());
 				if(!pv.isPresent()) throw new CommandParsingException("Invalid option value for option \"" + op.getLongName() + "\"", commandLine.getAmountCut());
 				options.put(op, pv.get());
@@ -87,11 +85,11 @@ public class CommandParser {
 		while(!commandLine.isEmpty()) {
 			ParserToken<String> arg = readArgument(c, Collections.emptyList(), commandLine, tabComplete);
 			if(arg == null) throw new CommandParsingException("Invalid argument format", commandLine.getAmountCut());
-			if(!arg.isComplete()) return new SimpleToken<>(arg.getCompletions());
+			if(!arg.isComplete()) return new ParserToken<>(arg.getCompletions());
 			args.add(arg.getValue());
 		}
 		
-		return new SimpleToken<ParsedCommand>(new ParsedCommand(c, origCommandLine, "lol", args.toArray(new String[args.size()]), options));
+		return new ParserToken<ParsedCommand>(new ParsedCommand(c, origCommandLine, "lol", args.toArray(new String[args.size()]), options));
 	}
 	
 	private static ParserToken<Command> readCommand(CommandProvider provider, MutableString commandLine, boolean tabComplete) {
@@ -105,11 +103,11 @@ public class CommandParser {
 			
 			commandLine.cutStart(m.group().length()).trim();
 			
-			return new SimpleToken<>(getCommandCompletions(provider.getCommands(), cName));
+			return new ParserToken<>(getCommandCompletions(provider.getCommands(), cName));
 		}
 		
 		commandLine.cutStart(m.group().length()).trim();
-		return new SimpleToken<>(c);
+		return new ParserToken<>(c);
 	}
 	
 	private static List<String> getCommandCompletions(Collection<? extends Command> cmds, String cName) {
@@ -136,11 +134,11 @@ public class CommandParser {
 			
 			commandLine.cutStart(m.group().length()).trim();
 			
-			return new SimpleToken<>(getCommandCompletions(parent.getSubCommands(), cName));
+			return new ParserToken<>(getCommandCompletions(parent.getSubCommands(), cName));
 		}
 		
 		commandLine.cutStart(m.group().length()).trim();
-		return new SimpleToken<>(c);
+		return new ParserToken<>(c);
 	}
 	
 	private static ParserToken<List<CommandOption<?>>> readOption(Command c, MutableString commandLine, boolean tabComplete) {
@@ -161,7 +159,7 @@ public class CommandParser {
 			
 			commandLine.cutStart(m.group().length()).trim();
 			
-			return new SimpleToken<>(c.getOptions().stream()
+			return new ParserToken<>(c.getOptions().stream()
 					.filter(o -> o.getLongName().toLowerCase().startsWith(opName.toLowerCase()))
 					.map(CommandOption::getLongName)
 					.map(s -> s.substring(opName.length()))
@@ -169,7 +167,7 @@ public class CommandParser {
 		}
 
 		commandLine.cutStart(m.group().length()).trim();
-		return new SimpleToken<>(op);
+		return new ParserToken<>(op);
 	}
 	
 	private static ParserToken<List<CommandOption<?>>> readShortOption(Command c, MutableString commandLine, boolean tabComplete) {
@@ -187,13 +185,13 @@ public class CommandParser {
 		if(tabComplete && commandLine.length() == m.group().length()) {
 			commandLine.cutStart(m.group().length()).trim();
 			
-			return new SimpleToken<>(c.getOptions().stream()
+			return new ParserToken<>(c.getOptions().stream()
 					.map(CommandOption::getShortName)
 					.collect(Collectors.toList()));
 		}
 		
 		commandLine.cutStart(m.group().length()).trim();
-		return new SimpleToken<>(op);
+		return new ParserToken<>(op);
 	}
 	
 	private static ParserToken<String> readArgument(Command c, Collection<String> defaultValues, MutableString commandLine, boolean tabComplete) {
@@ -210,14 +208,14 @@ public class CommandParser {
 		
 		if(value.isEmpty() && (!tabComplete || commandLine.length() > m.group().length())) return null;
 		
-		if(tabComplete && commandLine.length() == m.group().length()) return new SimpleToken<>(defaultValues.stream()
+		if(tabComplete && commandLine.length() == m.group().length()) return new ParserToken<>(defaultValues.stream()
 				.filter(v -> v.startsWith(value))
 				.map(s -> s.substring(value.length()))
 				.collect(Collectors.toList()));
 		
 		commandLine.cutStart(m.group().length()).trim();
 		
-		return new SimpleToken<String>(value);
+		return new ParserToken<String>(value);
 	}
 	
 	private static ParserToken<String> readEscapedArgument(Command c, Collection<String> defaultValues, MutableString commandLine, boolean tabComplete) {
@@ -239,12 +237,12 @@ public class CommandParser {
 					.map(v -> escapeArg(v) + "\"")
 					.map(s -> s.substring(value.length()))
 					.collect(Collectors.toList()));
-			return new SimpleToken<>(tabCompletions);
+			return new ParserToken<>(tabCompletions);
 		}
 		
 		commandLine.cutStart(m.group().length()).trim();
 		
-		return new SimpleToken<String>(uValue);
+		return new ParserToken<String>(uValue);
 	}
 	
 	private static String unescapeArg(String arg) {
