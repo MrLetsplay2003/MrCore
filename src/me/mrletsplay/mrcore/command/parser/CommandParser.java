@@ -25,7 +25,7 @@ public class CommandParser {
 		COMMAND_NAME_FORMAT = compile("[a-zA-Z-_0-9?]*"),
 		SHORT_OPTION_FORMAT = compile("-(?<name>[a-zA-Z-_0-9]*)(?: |$)"),
 		LONG_OPTION_FORMAT = compile("--(?<name>[a-zA-Z-_0-9]*)(?: |$)"),
-		BASIC_ARGUMENT_FORMAT = compile("[^\n\r\t\" ]*(?: |$)"),
+		BASIC_ARGUMENT_FORMAT = compile("(?<arg>[^\n\r\t\" ]*)(?: |$)"),
 		ESCAPED_ARGUMENT_FORMAT = compile("\"(?<value>(?:\\\\[rnt\"\\\\]|[^\\r\\n\\t\"\\\\])*)(?<cq>\")?(?: |$)");
 	
 	private CommandParser() {}
@@ -204,7 +204,7 @@ public class CommandParser {
 	private static ParserToken<String> readBasicArgument(Command c, Collection<String> defaultValues, MutableString commandLine, boolean tabComplete) {
 		Matcher m = tryMatch(commandLine, BASIC_ARGUMENT_FORMAT);
 		if(m == null) return null;
-		String value = m.group();
+		String value = m.group("arg");
 		
 		if(value.isEmpty() && (!tabComplete || commandLine.length() > m.group().length())) return null;
 		
