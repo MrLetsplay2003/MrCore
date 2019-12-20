@@ -12,11 +12,7 @@ import me.mrletsplay.mrcore.misc.FriendlyException;
 public interface VersionedItemMeta {
 	
 	public default Method getMethod(String name, Class<?>... parameterTypes) {
-		try {
-			return getBukkit().getClass().getMethod(name, parameterTypes);
-		} catch (NoSuchMethodException | SecurityException e) {
-			throw new FriendlyException("Failed to get bukkit method: " + name + "(" + Arrays.stream(parameterTypes).map(Class::getName).collect(Collectors.joining(", ")) + ")", e);
-		}
+		return getMethod(getBukkit(), name, parameterTypes);
 	}
 	
 	public default Object invoke(Method method, Object... args) {
@@ -34,6 +30,23 @@ public interface VersionedItemMeta {
 		return Arrays.stream(meta.getClass().getInterfaces()).anyMatch(i -> {
 			return i.getName().equals(interfaceName);
 		});
+	}
+	
+	public static Method getMethod(Object object, String name, Class<?>... parameterTypes) {
+		try {
+			return object.getClass().getMethod(name, parameterTypes);
+		} catch (NoSuchMethodException | SecurityException e) {
+			throw new FriendlyException("Failed to get bukkit method: " + name + "(" + Arrays.stream(parameterTypes).map(Class::getName).collect(Collectors.joining(", ")) + ")", e);
+		}
+	}
+	
+	public static Object invoke(Object object, Method method, Object... args) {
+		try {
+			method.setAccessible(true);
+			return method.invoke(object, args);
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			throw new FriendlyException("Failed to invoke bukkit method: " + method);
+		}
 	}
 	
 }

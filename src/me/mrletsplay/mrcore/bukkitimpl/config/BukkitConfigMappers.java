@@ -40,6 +40,7 @@ import org.bukkit.potion.PotionType;
 
 import me.mrletsplay.mrcore.bukkitimpl.ItemUtils;
 import me.mrletsplay.mrcore.bukkitimpl.versioned.NMSVersion;
+import me.mrletsplay.mrcore.bukkitimpl.versioned.item.Pre113ItemMeta;
 import me.mrletsplay.mrcore.bukkitimpl.versioned.item.VersionedCrossbowMeta;
 import me.mrletsplay.mrcore.config.ConfigValueType;
 import me.mrletsplay.mrcore.config.mapper.JSONObjectMapper;
@@ -107,12 +108,12 @@ public class BukkitConfigMappers {
 				.onlyMapIf(ItemStack::hasItemMeta).onlyConstructIfNotNull().then()
 			.mapBoolean("unbreakable", i -> {
 				if(NMSVersion.getCurrentServerVersion().isOlderThan(NMSVersion.V1_13_R1))
-					return i.getItemMeta().spigot().isUnbreakable();
+					return new Pre113ItemMeta(i.getItemMeta()).isUnbreakable();
 				return i.getItemMeta().isUnbreakable();
 			}, (i, v) -> {
 				ItemMeta m = i.getItemMeta();
 				if(NMSVersion.getCurrentServerVersion().isOlderThan(NMSVersion.V1_13_R1)) {
-					m.spigot().setUnbreakable(v);
+					new Pre113ItemMeta(m).setUnbreakable(v);
 					return;
 				}
 				 m.setUnbreakable(v);
