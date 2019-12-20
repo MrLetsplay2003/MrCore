@@ -1,7 +1,8 @@
 package me.mrletsplay.mrcore.bukkitimpl.versioned;
 
 import static me.mrletsplay.mrcore.bukkitimpl.versioned.NMSRelease.V1_12;
-import static me.mrletsplay.mrcore.bukkitimpl.versioned.NMSRelease.V1_14;
+import static me.mrletsplay.mrcore.bukkitimpl.versioned.NMSRelease.V1_13;
+import static me.mrletsplay.mrcore.bukkitimpl.versioned.NMSRelease.V1_15;
 import static me.mrletsplay.mrcore.bukkitimpl.versioned.NMSRelease.V1_8;
 
 import java.util.AbstractMap;
@@ -17,25 +18,25 @@ import org.bukkit.DyeColor;
  */
 public enum VersionedDyeColor {
 
-	BLACK(of("BLACK", V1_8.versionsTo(V1_14))),
-	RED(of("RED", V1_8.versionsTo(V1_14))),
-	GREEN(of("GREEN", V1_8.versionsTo(V1_14))),
-	BROWN(of("BROWN", V1_8.versionsTo(V1_14))),
-	BLUE(of("BLUE", V1_8.versionsTo(V1_14))),
-	PURPLE(of("PURPLE", V1_8.versionsTo(V1_14))),
-	CYAN(of("CYAN", V1_8.versionsTo(V1_14))),
+	BLACK(of("BLACK", V1_8.versionsTo(V1_15))),
+	RED(of("RED", V1_8.versionsTo(V1_15))),
+	GREEN(of("GREEN", V1_8.versionsTo(V1_15))),
+	BROWN(of("BROWN", V1_8.versionsTo(V1_15))),
+	BLUE(of("BLUE", V1_8.versionsTo(V1_15))),
+	PURPLE(of("PURPLE", V1_8.versionsTo(V1_15))),
+	CYAN(of("CYAN", V1_8.versionsTo(V1_15))),
 	LIGHT_GRAY(
 			of("SILVER", V1_8.versionsTo(V1_12)),
-			of("LIGHT_GRAY", V1_14.getVersions())
+			of("LIGHT_GRAY", V1_13.versionsTo(V1_15))
 		),
-	GRAY(of("GRAY", V1_8.versionsTo(V1_14))),
-	PINK(of("PINK", V1_8.versionsTo(V1_14))),
-	LIME(of("LIME", V1_8.versionsTo(V1_14))),
-	YELLOW(of("YELLOW", V1_8.versionsTo(V1_14))),
-	LIGHT_BLUE(of("LIGHT_BLUE", V1_8.versionsTo(V1_14))),
-	MAGENTA(of("MAGENTA", V1_8.versionsTo(V1_14))),
-	ORANGE(of("ORANGE", V1_8.versionsTo(V1_14))),
-	WHITE(of("WHITE", V1_8.versionsTo(V1_14)));
+	GRAY(of("GRAY", V1_8.versionsTo(V1_15))),
+	PINK(of("PINK", V1_8.versionsTo(V1_15))),
+	LIME(of("LIME", V1_8.versionsTo(V1_15))),
+	YELLOW(of("YELLOW", V1_8.versionsTo(V1_15))),
+	LIGHT_BLUE(of("LIGHT_BLUE", V1_8.versionsTo(V1_15))),
+	MAGENTA(of("MAGENTA", V1_8.versionsTo(V1_15))),
+	ORANGE(of("ORANGE", V1_8.versionsTo(V1_15))),
+	WHITE(of("WHITE", V1_8.versionsTo(V1_15)));
 	
 	private Map<NMSVersion, String> definitions;
 	
