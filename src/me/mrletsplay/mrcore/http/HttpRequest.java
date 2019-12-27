@@ -1,6 +1,7 @@
 package me.mrletsplay.mrcore.http;
 
 import java.io.InputStream;
+import java.net.Proxy;
 
 public interface HttpRequest {
 	
@@ -30,6 +31,13 @@ public interface HttpRequest {
 	 * @return This request
 	 */
 	public HttpRequest setTimeout(int timeout);
+	
+	/**
+	 * Sets the proxy for this request
+	 * @param proxy The proxy to use
+	 * @return This request
+	 */
+	public HttpRequest setProxy(Proxy proxy);
 
 	/**
 	 * Executes the request, reads all bytes and returns the result as an {@link HttpResult}

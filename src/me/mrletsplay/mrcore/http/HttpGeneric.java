@@ -2,6 +2,7 @@ package me.mrletsplay.mrcore.http;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,6 +12,7 @@ public class HttpGeneric implements HttpRequest {
 	private Map<String, String> queryParameters, headerParameters;
 	private byte[] content;
 	private int timeout;
+	private Proxy proxy;
 	
 	/**
 	 * Creates a request using the given request method to the specified url
@@ -48,15 +50,21 @@ public class HttpGeneric implements HttpRequest {
 	}
 	
 	@Override
-	public HttpRequest setTimeout(int timeout) {
+	public HttpGeneric setTimeout(int timeout) {
 		this.timeout = timeout;
+		return this;
+	}
+	
+	@Override
+	public HttpGeneric setProxy(Proxy proxy) {
+		this.proxy = proxy;
 		return this;
 	}
 	
 	@Override
 	public HttpResult execute() {
 		try {
-			return HttpResult.retrieveFrom(url, requestMethod, queryParameters, headerParameters, content, timeout, false);
+			return HttpResult.retrieveFrom(url, requestMethod, queryParameters, headerParameters, content, timeout, proxy, false);
 		} catch (IOException e) {
 			throw new HttpException(e);
 		}
@@ -65,7 +73,7 @@ public class HttpGeneric implements HttpRequest {
 	@Override
 	public HttpResult executeUntilUnavailable() {
 		try {
-			return HttpResult.retrieveFrom(url, requestMethod, queryParameters, headerParameters, content, timeout, true);
+			return HttpResult.retrieveFrom(url, requestMethod, queryParameters, headerParameters, content, timeout, proxy, true);
 		} catch (IOException e) {
 			throw new HttpException(e);
 		}
@@ -74,7 +82,7 @@ public class HttpGeneric implements HttpRequest {
 	@Override
 	public InputStream executeAsInputStream() {
 		try {
-			return HttpResult.retrieveAsInputStreamFrom(url, requestMethod, queryParameters, headerParameters, content, timeout);
+			return HttpResult.retrieveAsInputStreamFrom(url, requestMethod, queryParameters, headerParameters, content, timeout, proxy);
 		} catch (IOException e) {
 			throw new HttpException(e);
 		}

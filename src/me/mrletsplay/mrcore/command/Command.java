@@ -18,7 +18,7 @@ public interface Command {
 	
 	public Collection<String> getAliases();
 	
-	public Collection<CommandOption<?>> getOptions();
+	public Collection<? extends CommandOption<?>> getOptions();
 	
 	public default CommandOption<?> getLongOption(String name) {
 		return getOptions().stream().filter(o -> o.getLongName().equals(name)).findFirst().orElse(null);
@@ -32,7 +32,7 @@ public interface Command {
 	
 	public CommandProperties getProperties();
 	
-	public Collection<Command> getSubCommands();
+	public Collection<? extends Command> getSubCommands();
 	
 	public default Command getSubCommand(String label) {
 		return getSubCommands().stream()

@@ -2,6 +2,7 @@ package me.mrletsplay.mrcore.http;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,6 +11,7 @@ public class HttpGet implements HttpRequest {
 	private String url;
 	private Map<String, String> queryParameters, headerParameters;
 	private int timeout;
+	private Proxy proxy;
 	
 	/**
 	 * Creates a GET request to the specified url
@@ -35,15 +37,21 @@ public class HttpGet implements HttpRequest {
 	}
 	
 	@Override
-	public HttpRequest setTimeout(int timeout) {
+	public HttpGet setTimeout(int timeout) {
 		this.timeout = timeout;
+		return this;
+	}
+	
+	@Override
+	public HttpGet setProxy(Proxy proxy) {
+		this.proxy = proxy;
 		return this;
 	}
 
 	@Override
 	public HttpResult execute() {
 		try {
-			return HttpResult.retrieveFrom(url, "GET", queryParameters, headerParameters, null, timeout, false);
+			return HttpResult.retrieveFrom(url, "GET", queryParameters, headerParameters, null, timeout, proxy, false);
 		} catch (IOException e) {
 			throw new HttpException(e);
 		}
@@ -52,7 +60,7 @@ public class HttpGet implements HttpRequest {
 	@Override
 	public HttpResult executeUntilUnavailable() {
 		try {
-			return HttpResult.retrieveFrom(url, "GET", queryParameters, headerParameters, null, timeout, true);
+			return HttpResult.retrieveFrom(url, "GET", queryParameters, headerParameters, null, timeout, proxy, true);
 		} catch (IOException e) {
 			throw new HttpException(e);
 		}
@@ -61,7 +69,7 @@ public class HttpGet implements HttpRequest {
 	@Override
 	public InputStream executeAsInputStream() {
 		try {
-			return HttpResult.retrieveAsInputStreamFrom(url, "GET", queryParameters, headerParameters, null, timeout);
+			return HttpResult.retrieveAsInputStreamFrom(url, "GET", queryParameters, headerParameters, null, timeout, proxy);
 		} catch (IOException e) {
 			throw new HttpException(e);
 		}

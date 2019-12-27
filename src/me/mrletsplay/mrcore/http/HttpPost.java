@@ -2,6 +2,7 @@ package me.mrletsplay.mrcore.http;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,6 +13,7 @@ public class HttpPost implements HttpRequest {
 	private String url;
 	private Map<String, String> queryParameters, headerParameters, postParameters;
 	private int timeout;
+	private Proxy proxy;
 
 	/**
 	 * Creates a POST request to the specified url
@@ -49,8 +51,14 @@ public class HttpPost implements HttpRequest {
 	}
 	
 	@Override
-	public HttpRequest setTimeout(int timeout) {
+	public HttpPost setTimeout(int timeout) {
 		this.timeout = timeout;
+		return this;
+	}
+	
+	@Override
+	public HttpPost setProxy(Proxy proxy) {
+		this.proxy = proxy;
 		return this;
 	}
 
@@ -63,7 +71,7 @@ public class HttpPost implements HttpRequest {
 						.map(e -> HttpUtils.urlEncode(e.getKey()) + "=" + HttpUtils.urlEncode(e.getValue()))
 						.collect(Collectors.joining("&")).getBytes(StandardCharsets.UTF_8);
 			}
-			return HttpResult.retrieveFrom(url, "POST", queryParameters, headerParameters, postData, timeout, false);
+			return HttpResult.retrieveFrom(url, "POST", queryParameters, headerParameters, postData, timeout, proxy, false);
 		} catch (IOException e) {
 			throw new HttpException(e);
 		}
@@ -78,7 +86,7 @@ public class HttpPost implements HttpRequest {
 						.map(e -> HttpUtils.urlEncode(e.getKey()) + "=" + HttpUtils.urlEncode(e.getValue()))
 						.collect(Collectors.joining("&")).getBytes(StandardCharsets.UTF_8);
 			}
-			return HttpResult.retrieveFrom(url, "POST", queryParameters, headerParameters, postData, timeout, true);
+			return HttpResult.retrieveFrom(url, "POST", queryParameters, headerParameters, postData, timeout, proxy, true);
 		} catch (IOException e) {
 			throw new HttpException(e);
 		}
@@ -93,7 +101,7 @@ public class HttpPost implements HttpRequest {
 						.map(e -> HttpUtils.urlEncode(e.getKey()) + "=" + HttpUtils.urlEncode(e.getValue()))
 						.collect(Collectors.joining("&")).getBytes(StandardCharsets.UTF_8);
 			}
-			return HttpResult.retrieveAsInputStreamFrom(url, "POST", queryParameters, headerParameters, postData, timeout);
+			return HttpResult.retrieveAsInputStreamFrom(url, "POST", queryParameters, headerParameters, postData, timeout, proxy);
 		} catch (IOException e) {
 			throw new HttpException(e);
 		}

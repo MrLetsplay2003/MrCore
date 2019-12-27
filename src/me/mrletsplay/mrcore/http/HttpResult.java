@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.Proxy;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -102,14 +103,14 @@ public class HttpResult {
 		return exception;
 	}
 	
-	protected static HttpURLConnection retrieveRawFrom(String url, String method, Map<String, String> queryParams, Map<String, String> headerParams, byte[] postData, int timeout) throws IOException {
+	protected static HttpURLConnection retrieveRawFrom(String url, String method, Map<String, String> queryParams, Map<String, String> headerParams, byte[] postData, int timeout, Proxy proxy) throws IOException {
 		if(!queryParams.isEmpty()) {
 			url += queryParams.entrySet().stream()
 				.map(e -> HttpUtils.urlEncode(e.getKey()) + "=" + HttpUtils.urlEncode(e.getValue()))
 				.collect(Collectors.joining("&", "?", ""));
 		}
 		URL u = new URL(url);
-		HttpURLConnection con = (HttpURLConnection) u.openConnection();
+		HttpURLConnection con = (HttpURLConnection) u.openConnection(proxy == null ? Proxy.NO_PROXY : proxy);
 		con.setRequestMethod(method);
 		con.setRequestProperty("charset", "utf-8");
 		con.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
@@ -128,12 +129,12 @@ public class HttpResult {
 		return con;
 	}
 	
-	protected static InputStream retrieveAsInputStreamFrom(String url, String method, Map<String, String> queryParams, Map<String, String> headerParams, byte[] postData, int timeout) throws IOException {
-		return retrieveRawFrom(url, method, queryParams, headerParams, postData, timeout).getInputStream();
+	protected static InputStream retrieveAsInputStreamFrom(String url, String method, Map<String, String> queryParams, Map<String, String> headerParams, byte[] postData, int timeout, Proxy proxy) throws IOException {
+		return retrieveRawFrom(url, method, queryParams, headerParams, postData, timeout, proxy).getInputStream();
 	}
 	
-	protected static HttpResult retrieveFrom(String url, String method, Map<String, String> queryParams, Map<String, String> headerParams, byte[] postParams, int timeout, boolean untilUnavailable) throws IOException {
-		HttpURLConnection con = retrieveRawFrom(url, method, queryParams, headerParams, postParams, timeout);
+	protected static HttpResult retrieveFrom(String url, String method, Map<String, String> queryParams, Map<String, String> headerParams, byte[] postParams, int timeout, Proxy proxy, boolean untilUnavailable) throws IOException {
+		HttpURLConnection con = retrieveRawFrom(url, method, queryParams, headerParams, postParams, timeout, proxy);
 		try {
 			InputStream in = con.getInputStream();
 			byte[] raw = untilUnavailable ? IOUtils.readBytesUntilUnavailable(in) : IOUtils.readAllBytes(in);
