@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -19,7 +20,7 @@ import me.mrletsplay.mrcore.misc.FriendlyException;
  * Provides tools for zipping files
  * @author MrLetsplay2003
  */
-public class ZipOut {
+public class ZipOut implements Closeable {
 	
 	public static final Consumer<File> EMPTY_HANDLER = f -> {};
 	
@@ -27,26 +28,17 @@ public class ZipOut {
 
 	/**
 	 * Creates a ZipOut to the specified {@link File}<br>
-	 * This class does not implement {@link Closeable} and thus doesn't need to be closed after the writing is finished<br>
-	 * You can continue to write to the underlying OutputStream afterwards. To retrieve it, use {@link #getOutputStream()}<br>
-	 * Alternatively, you can safely close the OutputStream using {@link #close()}
 	 * @param zipFile The file to write to
 	 * @throws IOException If an I/O error occurs
 	 * @throws FileNotFoundException As specified by {@link FileOutputStream#FileOutputStream(File) FileOutputStream(File)}
 	 */
 	public ZipOut(File zipFile) throws IOException {
-		if(!zipFile.exists()) {
-			zipFile.getAbsoluteFile().getParentFile().mkdirs();
-			zipFile.createNewFile();
-		}
+		IOUtils.createFile(zipFile);
 		this.out = new ZipOutputStream(new FileOutputStream(zipFile));
 	}
 	
 	/**
 	 * Creates a ZipOut to the specified {@link OutputStream}<br>
-	 * This class does not implement {@link Closeable} and thus doesn't need to be closed after the writing is finished<br>
-	 * You can continue to write to the underlying OutputStream afterwards. To retrieve it, use {@link #getOutputStream()}<br>
-	 * Alternatively, you can safely close the OutputStream using {@link #close()}
 	 * @param out The OutputStream to write to
 	 */
 	public ZipOut(OutputStream out) {
@@ -55,9 +47,6 @@ public class ZipOut {
 
 	/**
 	 * Creates a ZipOut to the specified {@link ZipOutputStream}<br>
-	 * This class does not implement {@link Closeable} and thus doesn't need to be closed after the writing is finished<br>
-	 * You can continue to write to the underlying OutputStream afterwards. To retrieve it, use {@link #getOutputStream()}<br>
-	 * Alternatively, you can safely close the OutputStream using {@link #close()}
 	 * @param out The ZipOutputStream to write to
 	 */
 	public ZipOut(ZipOutputStream out) {
@@ -100,12 +89,35 @@ public class ZipOut {
 	 * Writes a file (possibly a folder) to the zip file<br>
 	 * If the provided file is a folder, a subfolder will be created inside the zip file and all its contents (and possibly subfolders) will be added
 	 * @param file A {@link File} object (can be a folder)
+	 * @param filter Predicate to determine which files to include
+	 * @throws IOException If an I/O error occurs
+	 */
+	public void writeFile(File file, Predicate<File> filter) throws IOException {
+		writeFile(file, filter, EMPTY_HANDLER);
+	}
+	
+	/**
+	 * Writes a file (possibly a folder) to the zip file<br>
+	 * If the provided file is a folder, a subfolder will be created inside the zip file and all its contents (and possibly subfolders) will be added
+	 * @param file A {@link File} object (can be a folder)
 	 * @param exceptions Files to exclude
 	 * @param fileHandler A handler function which gets called when a file is being added
 	 * @throws IOException If an I/O error occurs
 	 */
 	public void writeFile(File file, List<File> exceptions, Consumer<File> fileHandler) throws IOException {
 		writeFile("", file, exceptions, fileHandler);
+	}
+	
+	/**
+	 * Writes a file (possibly a folder) to the zip file<br>
+	 * If the provided file is a folder, a subfolder will be created inside the zip file and all its contents (and possibly subfolders) will be added
+	 * @param file A {@link File} object (can be a folder)
+	 * @param filter Predicate to determine which files to include
+	 * @param fileHandler A handler function which gets called when a file is being added
+	 * @throws IOException If an I/O error occurs
+	 */
+	public void writeFile(File file, Predicate<File> filter, Consumer<File> fileHandler) throws IOException {
+		writeFile("", file, filter, fileHandler);
 	}
 	
 	/**
@@ -125,29 +137,55 @@ public class ZipOut {
 	 * If the provided file is a folder, a subfolder will be created inside the zip file and all its contents (and possibly subfolders) will be added
 	 * @param file A {@link File} object (can be a folder)
 	 * @param subPath The sub path/folder to write to
+	 * @param filter Predicate to determine which files to include
+	 * @throws IOException If an I/O error occurs
+	 */
+	public void writeFile(String subPath, File file, Predicate<File> filter) throws IOException {
+		writeFile(subPath, file, filter, EMPTY_HANDLER);
+	}
+	
+	/**
+	 * Writes a file (possibly a folder) to the zip file<br>
+	 * If the provided file is a folder, a subfolder will be created inside the zip file and all its contents (and possibly subfolders) will be added
+	 * @param file A {@link File} object (can be a folder)
+	 * @param subPath The sub path/folder to write to
 	 * @param exceptions Files to exclude
 	 * @param fileHandler A handler function which gets called when a file is being added
 	 * @throws IOException If an I/O error occurs
 	 */
 	public void writeFile(String subPath, File file, List<File> exceptions, Consumer<File> fileHandler) throws IOException {
 		file = file.getAbsoluteFile();
-		addFilesToZip(file, out, subPath, absFilePath(file).length() - file.getName().length() - 1, exceptions, fileHandler);
+		addFilesToZip(file, out, subPath, absFilePath(file).length() - file.getName().length() - 1, f -> !isException(f, exceptions), fileHandler);
+	}
+
+	/**
+	 * Writes a file (possibly a folder) to the zip file<br>
+	 * If the provided file is a folder, a subfolder will be created inside the zip file and all its contents (and possibly subfolders) will be added
+	 * @param file A {@link File} object (can be a folder)
+	 * @param subPath The sub path/folder to write to
+	 * @param filter Predicate to determine which files to include
+	 * @param fileHandler A handler function which gets called when a file is being added
+	 * @throws IOException If an I/O error occurs
+	 */
+	public void writeFile(String subPath, File file, Predicate<File> filter, Consumer<File> fileHandler) throws IOException {
+		file = file.getAbsoluteFile();
+		addFilesToZip(file, out, subPath, absFilePath(file).length() - file.getName().length() - 1, filter, fileHandler);
 	}
 	
-	private static void addFilesToZip(File f, ZipOutputStream out, String subPath, int sI, List<File> exceptions, Consumer<File> fileHandler) throws IOException{
+	private static void addFilesToZip(File f, ZipOutputStream out, String subPath, int sI, Predicate<File> filter, Consumer<File> fileHandler) throws IOException{
 		if(f.isDirectory()){
-			if(isException(f, exceptions)) return;
+			if(filter.test(f)) return;
 			for(File fl : f.listFiles()){
-				addFilesToZip(fl, out, subPath, sI, exceptions, fileHandler);
+				addFilesToZip(fl, out, subPath, sI, filter, fileHandler);
 			}
 		}else{
-			if(isException(f, exceptions)) return;
+			if(filter.test(f)) return;
 			fileHandler.accept(f);
 			FileInputStream fIn = new FileInputStream(f);
 			out.putNextEntry(new ZipEntry((subPath.isEmpty() ? "" : subPath + "/") + absFilePath(f).substring(sI + 1)));
 			byte[] buffer = new byte[4096];
 			int curr;
-			while((curr=fIn.read(buffer))>0){
+			while((curr = fIn.read(buffer)) > 0){
 				out.write(buffer, 0, curr);
 			}
 			fIn.close();
@@ -180,6 +218,7 @@ public class ZipOut {
 	 * Closes the underlying OutputStream using {@link ZipOutputStream#close()}
 	 * @throws IOException If an I/O error occurs while closing the stream
 	 */
+	@Override
 	public void close() throws IOException {
 		out.close();
 	}

@@ -2,6 +2,7 @@ package me.mrletsplay.mrcore.io;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -102,5 +103,14 @@ public class IOUtils {
 			file.delete();
 		}
 	}
-
+	
+	public static void writeBytes(File f, byte[] bytes) throws FriendlyException {
+		IOUtils.createFile(f);
+		try(FileOutputStream fOut = new FileOutputStream(f)) {
+			fOut.write(bytes);
+		}catch(IOException e) {
+			throw new FriendlyException(e);
+		}
+	}
+	
 }

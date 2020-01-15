@@ -30,6 +30,7 @@ public class ZIPFileUtils {
 		o.close();
 	}
 	
+	@Deprecated
 	private static void addFilesToZip(File f, ZipOutputStream out, int sI) throws IOException {
 		if(f.isDirectory()){
 			for(File fl : f.listFiles()){
