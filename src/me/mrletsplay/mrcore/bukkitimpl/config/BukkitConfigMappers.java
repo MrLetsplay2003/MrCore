@@ -366,8 +366,11 @@ public class BukkitConfigMappers {
 				SkullMeta m = (SkullMeta) i.getItemMeta();
 				JSONObject s = new JSONObject();
 				if(m.hasOwner()) {
-					// Using SkullMeta#getOwner for backwards compatibility
-					s.set("owner", m.getOwner());
+					if(NMSVersion.getCurrentServerVersion().isOlderThan(NMSVersion.V1_12_R1)) {
+						s.set("owner", m.getOwner());
+					}else {
+						s.set("owner", m.getOwningPlayer().getUniqueId().toString());
+					}
 				}else {
 					String texture = getTexture(m);
 					if(texture != null) s.set("texture", texture);
@@ -376,8 +379,11 @@ public class BukkitConfigMappers {
 			}, (i, j) -> {
 				SkullMeta m = (SkullMeta) i.getItemMeta();
 				if(j.has("owner")) {
-					// Using SkullMeta#setOwner for backwards compatability
-					m.setOwner(j.getString("owner"));
+					if(NMSVersion.getCurrentServerVersion().isOlderThan(NMSVersion.V1_12_R1)) {
+						m.setOwner(j.getString("owner"));
+					}else {
+						m.setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString(j.getString("owner"))));
+					}
 				}
 				if(j.has("texture")) {
 					setTexture(m, j.getString("texture"));
@@ -388,8 +394,6 @@ public class BukkitConfigMappers {
 				i.setItemMeta(m);
 			})
 				.onlyMapIf(i -> i.getItemMeta() instanceof SkullMeta)
-				.onlyMapIf(i -> NMSVersion.getCurrentServerVersion().isOlderThan(NMSVersion.V1_13_R1))
-				.onlyConstructIf((a, b, c, d) -> NMSVersion.getCurrentServerVersion().isOlderThan(NMSVersion.V1_13_R1))
 				.onlyConstructIfNotNull()
 				.then()
 			.mapJSONObject("crossbow", (s, i) -> {
