@@ -41,6 +41,17 @@ public class ClassUtils {
 		return fs;
 	}
 	
+	public static Set<Method> getMethods(Class<?> clz) {
+		Set<Method> fs = new HashSet<>();
+		Class<?> cls = clz;
+		while(!cls.equals(Object.class)) {
+			fs.addAll(Arrays.asList(cls.getDeclaredMethods()));
+			cls = cls.getSuperclass();
+			if(cls == null) break;
+		}
+		return fs;
+	}
+	
 	public static Method getDeclaredMethodRecursively(Class<?> clz, String name, Class<?>... parameterTypes) throws NoSuchMethodException, SecurityException {
 		Class<?> cls = clz;
 		while(true) {
