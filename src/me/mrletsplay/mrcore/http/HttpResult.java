@@ -141,7 +141,7 @@ public class HttpResult {
 			in.close();
 			return new HttpResult(con.getHeaderFields(), raw);
 		} catch(IOException e) {
-			String resp = new String(IOUtils.readAllBytesSafely(con.getErrorStream()));
+			String resp = con.getErrorStream() == null ? null : new String(IOUtils.readAllBytesSafely(con.getErrorStream()));
 			return new HttpResult(e, resp);
 		}
 	}
