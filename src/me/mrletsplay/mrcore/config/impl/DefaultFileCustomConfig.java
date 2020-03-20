@@ -152,6 +152,11 @@ public class DefaultFileCustomConfig implements FileCustomConfig {
 	}
 	
 	@Override
+	public void removeFlags(ConfigFlag... flags) {
+		this.flags.removeAll(Arrays.asList(flags));
+	}
+	
+	@Override
 	public Set<ConfigFlag> getFlags() {
 		return flags;
 	}

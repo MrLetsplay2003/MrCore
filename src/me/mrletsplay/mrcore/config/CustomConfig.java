@@ -160,6 +160,8 @@ public interface CustomConfig extends ConfigSection {
 	
 	public void addFlags(ConfigFlag... flags);
 	
+	public void removeFlags(ConfigFlag... flags);
+	
 	public Set<ConfigFlag> getFlags();
 	
 }

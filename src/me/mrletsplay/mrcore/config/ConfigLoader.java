@@ -20,14 +20,18 @@ public class ConfigLoader {
 	}
 
 	public static FileCustomConfig loadFileConfig(File configFile, boolean saveConverted, ConfigFlag... flags) throws ConfigException {
-		return loadConfigFromFile(new DefaultFileCustomConfig(configFile), configFile, saveConverted);
+		DefaultFileCustomConfig cfg = new DefaultFileCustomConfig(null);
+		cfg.addFlags(flags);
+		return loadConfigFromFile(cfg, configFile, saveConverted);
 	}
 
 	public static CustomConfig loadStreamConfig(InputStream stream, boolean closeAfterLoad, ConfigFlag... flags) throws ConfigException {
-		return loadConfigFromStream(new DefaultFileCustomConfig(null), stream, closeAfterLoad);
+		DefaultFileCustomConfig cfg = new DefaultFileCustomConfig(null);
+		cfg.addFlags(flags);
+		return loadConfigFromStream(cfg, stream, closeAfterLoad);
 	}
 	
-	public static <T extends CustomConfig> T loadConfigFromStream(T config, InputStream stream, boolean closeAfterLoad, ConfigFlag... flags) throws ConfigException {
+	public static <T extends CustomConfig> T loadConfigFromStream(T config, InputStream stream, boolean closeAfterLoad) throws ConfigException {
 		byte[] b;
 		try {
 			b = IOUtils.readAllBytes(stream);
