@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
+import java.util.Set;
 
 import me.mrletsplay.mrcore.config.mapper.ObjectMapper;
 import me.mrletsplay.mrcore.io.IOUtils;
@@ -43,7 +44,11 @@ public interface CustomConfig extends ConfigSection {
 	
 	public default void load(File file) {
 		try {
-			IOUtils.createFile(file);
+			if(!file.exists()) {
+				if(!getFlags().contains(ConfigFlag.CREATE_EMPTY_FILE)) return;
+				IOUtils.createFile(file);
+				return;
+			}
 			FileInputStream in = new FileInputStream(file);
 			try {
 				load(in);
@@ -59,6 +64,7 @@ public interface CustomConfig extends ConfigSection {
 	
 	public default void save(File file) {
 		try {
+			if(isEmpty() && !getFlags().contains(ConfigFlag.CREATE_EMPTY_FILE)) return;
 			IOUtils.createFile(file);
 			FileOutputStream out = new FileOutputStream(file);
 			try {
@@ -151,5 +157,9 @@ public interface CustomConfig extends ConfigSection {
 	public void registerLowLevelMapper(int priority, ObjectMapper<?, ?> lowLevelMapper);
 	
 	public Map<ObjectMapper<?, ?>, Integer> getLowLevelMappers();
+	
+	public void addFlags(ConfigFlag... flags);
+	
+	public Set<ConfigFlag> getFlags();
 	
 }

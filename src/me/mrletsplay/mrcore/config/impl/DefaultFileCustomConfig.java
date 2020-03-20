@@ -10,11 +10,15 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import me.mrletsplay.mrcore.config.ConfigException;
+import me.mrletsplay.mrcore.config.ConfigFlag;
 import me.mrletsplay.mrcore.config.ConfigSection;
 import me.mrletsplay.mrcore.config.CustomConfig;
 import me.mrletsplay.mrcore.config.DefaultConfigMappers;
@@ -32,6 +36,7 @@ public class DefaultFileCustomConfig implements FileCustomConfig {
 	private ConfigSection mainSection;
 	private Map<ObjectMapper<?, ?>, Integer> lowLevelMappers;
 	private Map<ObjectMapper<?, ?>, Integer> mappers;
+	private EnumSet<ConfigFlag> flags;
 	
 	private Map<String, Object> defaults;
 	
@@ -41,6 +46,7 @@ public class DefaultFileCustomConfig implements FileCustomConfig {
 		this.mappers = new LinkedHashMap<>();
 		this.lowLevelMappers = new LinkedHashMap<>();
 		this.defaults = new LinkedHashMap<>();
+		this.flags = EnumSet.noneOf(ConfigFlag.class);
 		registerLowLevelMapper(0, DefaultConfigMappers.JSON_OBJECT_MAPPER);
 		registerLowLevelMapper(0, DefaultConfigMappers.JSON_ARRAY_MAPPER);
 		registerLowLevelMapper(0, DefaultConfigMappers.MAP_MAPPER);
@@ -138,6 +144,16 @@ public class DefaultFileCustomConfig implements FileCustomConfig {
 	@Override
 	public Map<ObjectMapper<?, ?>, Integer> getLowLevelMappers() {
 		return lowLevelMappers;
+	}
+	
+	@Override
+	public void addFlags(ConfigFlag... flags) {
+		this.flags.addAll(Arrays.asList(flags));
+	}
+	
+	@Override
+	public Set<ConfigFlag> getFlags() {
+		return flags;
 	}
 	
 }
