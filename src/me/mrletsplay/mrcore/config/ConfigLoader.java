@@ -20,7 +20,7 @@ public class ConfigLoader {
 	}
 
 	public static FileCustomConfig loadFileConfig(File configFile, boolean saveConverted, ConfigFlag... flags) throws ConfigException {
-		DefaultFileCustomConfig cfg = new DefaultFileCustomConfig(null);
+		DefaultFileCustomConfig cfg = new DefaultFileCustomConfig(configFile);
 		cfg.addFlags(flags);
 		return loadConfigFromFile(cfg, configFile, saveConverted);
 	}
