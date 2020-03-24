@@ -111,12 +111,10 @@ public class ClassFileUtils {
 		
 		PrimitiveType pt = mDesc.getReturnType().getPrimitiveType();
 		
-		if(mDesc.getReturnType().isVoid()) {
-			
-		}else if(mDesc.getReturnType().getPrimitiveType().equals(PrimitiveType.OBJECT)) {
+		if(!mDesc.getReturnType().isPrimitive()) {
 			int classInd = getOrAppendClass(file, getOrAppendUTF8(file, mDesc.getReturnType().getClassName().replace('.', '/')));
 			nInstr.add(new InstructionInformation(Instruction.CHECKCAST, getShortBytes(classInd)));
-		}else {
+		}else if(!mDesc.getReturnType().isVoid()){
 			int classInd = getOrAppendClass(file, getOrAppendUTF8(file, pt.getNonPrimitiveClassName().replace('.', '/')));
 			nInstr.add(new InstructionInformation(Instruction.CHECKCAST, getShortBytes(classInd)));
 			nInstr.add(new InstructionInformation(Instruction.INVOKEVIRTUAL, getShortBytes(getOrAppendPrimitiveValueMethod(file, pt))));
