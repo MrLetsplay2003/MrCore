@@ -17,53 +17,60 @@ public class TypeDescriptor {
 		if(rawDescriptor.endsWith(";")) rawDescriptor = rawDescriptor.substring(0, rawDescriptor.length() - 1);
 		rawDescriptor = rawDescriptor.replace('/', '.');
 		isPrimitive = true;
-		switch(rawDescriptor.charAt(0)) {
-			case 'Z':
-				className = "boolean";
-				break;
-			case 'B':
-				className = "byte";
-				break;
-			case 'C':
-				className = "char";
-				break;
-			case 'S':
-				className = "short";
-				break;
-			case 'I':
-				className = "int";
-				break;
-			case 'J':
-				className = "long";
-				break;
-			case 'F':
-				className = "float";
-				break;
-			case 'D':
-				className = "double";
-				break;
-			case 'V':
-				className = "void";
-				break;
-			case 'L':
-				className = rawDescriptor.substring(1);
-				isPrimitive = false;
-				break;
-			case '[':
-				int i = 0;
-				while(rawDescriptor.charAt(++i) == '[') continue;
-				TypeDescriptor tDsc = new TypeDescriptor(rawDescriptor.substring(i));
-				if(tDsc.isPrimitive()) {
+		if(rawDescriptor.length() == 1) {
+			switch(rawDescriptor.charAt(0)) {
+				case 'Z':
+					className = "boolean";
+					break;
+				case 'B':
+					className = "byte";
+					break;
+				case 'C':
+					className = "char";
+					break;
+				case 'S':
+					className = "short";
+					break;
+				case 'I':
+					className = "int";
+					break;
+				case 'J':
+					className = "long";
+					break;
+				case 'F':
+					className = "float";
+					break;
+				case 'D':
+					className = "double";
+					break;
+				case 'V':
+					className = "void";
+					break;
+				default:
+					throw new IllegalArgumentException("Invalid descriptor \"" + rawDescriptor + "\"");
+			}
+		}else {
+			switch(rawDescriptor.charAt(0)) {
+				case 'L':
+					className = rawDescriptor.substring(1);
+					isPrimitive = false;
+					break;
+				case '[':
+					int i = 0;
+					while(rawDescriptor.charAt(++i) == '[') continue;
+					TypeDescriptor tDsc = new TypeDescriptor(rawDescriptor.substring(i));
+					if(tDsc.isPrimitive()) {
+						className = rawDescriptor;
+					}else {
+						className = rawDescriptor + ";";
+					}
+					isPrimitive = false;
+					break;
+				default:
 					className = rawDescriptor;
-				}else {
-					className = rawDescriptor + ";";
-				}
-				isPrimitive = false;
-				break;
-			default:
-				className = rawDescriptor;
-				isPrimitive = false;
-				break;
+					isPrimitive = false;
+					break;
+			}
 		}
 	}
 	
@@ -205,6 +212,13 @@ public class TypeDescriptor {
 			}
 		}
 		return ds;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(!(obj instanceof TypeDescriptor)) return false;
+		TypeDescriptor o = (TypeDescriptor) obj;
+		return rawDescriptor.equals(o.rawDescriptor);
 	}
 
 }

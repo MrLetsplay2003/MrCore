@@ -4,8 +4,10 @@ import java.util.Arrays;
 
 import me.mrletsplay.mrcore.misc.EnumFlagCompound;
 import me.mrletsplay.mrcore.misc.classfile.attribute.Attribute;
+import me.mrletsplay.mrcore.misc.classfile.attribute.AttributeCode;
 import me.mrletsplay.mrcore.misc.classfile.attribute.DefaultAttributeType;
 import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolUTF8Entry;
+import me.mrletsplay.mrcore.misc.classfile.util.ClassFileUtils;
 
 public class ClassMethod {
 
@@ -21,6 +23,22 @@ public class ClassMethod {
 		this.nameIndex = nameIndex;
 		this.descriptorIndex = descriptorIndex;
 		this.attributes = attributes;
+	}
+	
+	public ClassMethod(ClassFile classFile, EnumFlagCompound<MethodAccessFlag> accessFlags, String name, String descriptor) {
+		this.classFile = classFile;
+		this.accessFlags = accessFlags;
+		this.nameIndex = ClassFileUtils.getOrAppendUTF8(classFile, name);
+		this.descriptorIndex = ClassFileUtils.getOrAppendUTF8(classFile, descriptor);
+		this.attributes = new Attribute[0];
+	}
+	
+	public ClassMethod(ClassFile classFile, MethodDescriptor methodDescriptor) {
+		this.classFile = classFile;
+		this.accessFlags = methodDescriptor.getAccessFlags();
+		this.nameIndex = ClassFileUtils.getOrAppendUTF8(classFile, methodDescriptor.getName());
+		this.descriptorIndex = ClassFileUtils.getOrAppendUTF8(classFile, methodDescriptor.getRawDescriptor());
+		this.attributes = new Attribute[0];
 	}
 	
 	public EnumFlagCompound<MethodAccessFlag> getAccessFlags() {
@@ -43,8 +61,16 @@ public class ClassMethod {
 		return new MethodDescriptor(getName().getValue(), accessFlags, getDescriptor().getValue());
 	}
 	
+	public void setAttributes(Attribute[] attributes) {
+		this.attributes = attributes;
+	}
+	
 	public Attribute[] getAttributes() {
 		return attributes;
+	}
+	
+	public AttributeCode getCodeAttribute() {
+		return getAttribute(DefaultAttributeType.CODE).as(AttributeCode.class);
 	}
 	
 	public Attribute getAttribute(String name) {

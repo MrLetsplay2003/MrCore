@@ -1,6 +1,7 @@
 package me.mrletsplay.mrcore.misc.classfile.util;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,6 +20,7 @@ import me.mrletsplay.mrcore.misc.classfile.ParameterDescriptor;
 import me.mrletsplay.mrcore.misc.classfile.TypeDescriptor;
 import me.mrletsplay.mrcore.misc.classfile.attribute.AttributeCode;
 import me.mrletsplay.mrcore.misc.classfile.attribute.DefaultAttributeType;
+import me.mrletsplay.mrcore.misc.classfile.pool.ConstantPool;
 import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolClassEntry;
 import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolDoubleEntry;
 import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolFieldRefEntry;
@@ -32,6 +34,8 @@ import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolUTF8Entry;
 public class ClassFileUtils {
 	
 	public static void redirectMethodExecution(ClassFile file, ClassMethod method, String toClass, String toMethodName, String toMethodSignature) {
+		MethodDescriptor mDesc = method.getMethodDescriptor();
+		
 		AttributeCode codeAttr = (AttributeCode) method.getAttribute(DefaultAttributeType.CODE);
 		List<InstructionInformation> nInstr = new ArrayList<>();
 		
@@ -47,20 +51,25 @@ public class ClassFileUtils {
 			nInstr.add(new InstructionInformation(Instruction.ALOAD_0));
 		}
 		byte i = 0;
-		for(ParameterDescriptor p : method.getMethodDescriptor().getParameterDescriptors()) {
+		for(ParameterDescriptor p : mDesc.getParameterDescriptors()) {
 			PrimitiveType t = p.getParameterType().getPrimitiveType();
 			nInstr.add(getInfo(t, ++i));
 			if(t.equals(PrimitiveType.DOUBLE) || t.equals(PrimitiveType.LONG)) i++;
 		}
 		nInstr.add(new InstructionInformation(Instruction.INVOKESTATIC, getShortBytes(mrInd)));
-		nInstr.add(new InstructionInformation(Instruction.RETURN));
 		
-		codeAttr.setMaxStack(i + (isStatic ? 0 : 1)); // #params + 1 for this class instance if instance method
+		PrimitiveType pt = mDesc.getReturnType().getPrimitiveType();
+		
+		nInstr.add(new InstructionInformation(getReturnInstruction(pt)));
+
+		codeAttr.setMaxStack(i * 2 + (isStatic ? 0 : 1)); // #params * 2 (longs are 2x) + 1 for this class instance if instance method
 		
 		codeAttr.getCode().replace(ByteCode.of(nInstr));
 	}
 	
 	public static void redirectMethodExecutionNamed(ClassFile file, ClassMethod method, String toClass, String toMethodName, String toMethodSignature) {
+		MethodDescriptor mDesc = method.getMethodDescriptor();
+		
 		AttributeCode codeAttr = (AttributeCode) method.getAttribute(DefaultAttributeType.CODE);
 		List<InstructionInformation> nInstr = new ArrayList<>();
 		
@@ -74,15 +83,6 @@ public class ClassFileUtils {
 		int mDcInd = getOrAppendString(file, file.getConstantPool().indexOf(method.getDescriptor()));
 		int objClNmInd = getOrAppendUTF8(file, "java/lang/Object");
 		int objClInd = file.getConstantPool().appendEntry(new ConstantPoolClassEntry(file.getConstantPool(), objClNmInd));
-		
-		int intVOMr = appendVOMethod(file, "java/lang/Integer", "I");
-		int dbVOMr = appendVOMethod(file, "java/lang/Double", "D");
-		int flVOMr = appendVOMethod(file, "java/lang/Float", "F");
-		int loVOMr = appendVOMethod(file, "java/lang/Long", "J");
-		int byVOMr = appendVOMethod(file, "java/lang/Byte", "B");
-		int boVOMr = appendVOMethod(file, "java/lang/Boolean", "Z");
-		int chloVOMr = appendVOMethod(file, "java/lang/Character", "C");
-		int shloVOMr = appendVOMethod(file, "java/lang/Short", "S");
 		
 		boolean isStatic = method.getAccessFlags().hasFlag(MethodAccessFlag.STATIC);
 		if(!isStatic) { // Only add this class instance for instance methods
@@ -98,21 +98,58 @@ public class ClassFileUtils {
 		
 		byte i = 0;
 		byte idx = 0;
-		for(ParameterDescriptor p : method.getMethodDescriptor().getParameterDescriptors()) {
+		for(ParameterDescriptor p : mDesc.getParameterDescriptors()) {
 			nInstr.add(new InstructionInformation(Instruction.DUP));
-			nInstr.add(new InstructionInformation(Instruction.BIPUSH, idx++));
-			nInstr.addAll(getLoadInfo(p.getParameterType().getPrimitiveType(), isStatic ? i++ : ++i, intVOMr, dbVOMr, flVOMr, loVOMr, byVOMr, boVOMr, chloVOMr, shloVOMr));
-			nInstr.add(new InstructionInformation(Instruction.AASTORE));
+			nInstr.add(new InstructionInformation(Instruction.BIPUSH, idx++)); // Push array index
+			nInstr.addAll(getLoadInfo(file, p.getParameterType().getPrimitiveType(), isStatic ? i++ : ++i)); // Push value onto the stack
+			nInstr.add(new InstructionInformation(Instruction.AASTORE)); // Store value into array
 			PrimitiveType t = p.getParameterType().getPrimitiveType();
 			if(t.equals(PrimitiveType.DOUBLE) || t.equals(PrimitiveType.LONG)) i++;
 		}
 		
 		nInstr.add(new InstructionInformation(Instruction.INVOKESTATIC, getShortBytes(mrInd)));
-		nInstr.add(new InstructionInformation(Instruction.RETURN));
 		
-		codeAttr.setMaxStack(i + 3);
+		PrimitiveType pt = mDesc.getReturnType().getPrimitiveType();
+		
+		if(mDesc.getReturnType().isVoid()) {
+			
+		}else if(mDesc.getReturnType().getPrimitiveType().equals(PrimitiveType.OBJECT)) {
+			int classInd = getOrAppendClass(file, getOrAppendUTF8(file, mDesc.getReturnType().getClassName().replace('.', '/')));
+			nInstr.add(new InstructionInformation(Instruction.CHECKCAST, getShortBytes(classInd)));
+		}else {
+			int classInd = getOrAppendClass(file, getOrAppendUTF8(file, pt.getNonPrimitiveClassName().replace('.', '/')));
+			nInstr.add(new InstructionInformation(Instruction.CHECKCAST, getShortBytes(classInd)));
+			nInstr.add(new InstructionInformation(Instruction.INVOKEVIRTUAL, getShortBytes(getOrAppendPrimitiveValueMethod(file, pt))));
+		}
+		
+		nInstr.add(new InstructionInformation(getReturnInstruction(pt)));
+		
+		codeAttr.setMaxStack(8); // 4 constant args, up to 8 total (longs are 2x) when adding params to array
 		
 		codeAttr.getCode().replace(ByteCode.of(nInstr));
+	}
+	
+	public static Instruction getReturnInstruction(PrimitiveType primitiveType) {
+		switch(primitiveType) {
+			case DOUBLE:
+				return Instruction.DRETURN;
+			case FLOAT:
+				return Instruction.FRETURN;
+			case LONG:
+				return Instruction.LRETURN;
+			case OBJECT:
+				return Instruction.ARETURN;
+			case VOID:
+				return Instruction.RETURN;
+			case BOOLEAN:
+			case BYTE:
+			case SHORT:
+			case CHAR:
+			case INT:
+				return Instruction.IRETURN;
+			default:
+				throw new IllegalArgumentException("Invalid primitive type");
+		}
 	}
 	
 	public static int getOrAppendUTF8(ClassFile file, String utf8) {
@@ -137,16 +174,16 @@ public class ClassFileUtils {
 		return enInd;
 	}
 	
-//	private static int getOrAppendString(ClassFile file, String string) {
-//		int enInd = Arrays.stream(file.getConstantPool().getEntries())
-//				.filter(e -> e instanceof ConstantPoolStringEntry && ((ConstantPoolStringEntry) e).getString().getValue().equals(string))
-//				.map(e -> file.getConstantPool().indexOf(e))
-//				.findFirst().orElse(-1);
-//		if(enInd == -1) {
-//			enInd = file.getConstantPool().appendEntry(new ConstantPoolStringEntry(file.getConstantPool(), getOrAppendUTF8(file, string)));
-//		}
-//		return enInd;
-//	}
+	public static int getOrAppendString(ClassFile file, String string) {
+		int enInd = Arrays.stream(file.getConstantPool().getEntries())
+				.filter(e -> e instanceof ConstantPoolStringEntry && ((ConstantPoolStringEntry) e).getString().getValue().equals(string))
+				.map(e -> file.getConstantPool().indexOf(e))
+				.findFirst().orElse(-1);
+		if(enInd == -1) {
+			enInd = file.getConstantPool().appendEntry(new ConstantPoolStringEntry(file.getConstantPool(), getOrAppendUTF8(file, string)));
+		}
+		return enInd;
+	}
 	
 	public static int getOrAppendDouble(ClassFile file, double val) {
 		int enInd = Arrays.stream(file.getConstantPool().getEntries())
@@ -225,23 +262,62 @@ public class ClassFileUtils {
 		return enInd;
 	}
 	
-	public static int appendVOMethod(ClassFile file, String clName, String pNm) {
-		int intClNmInd = getOrAppendUTF8(file, clName);
+	public static int getOrAppendValueOfMethod(ClassFile file, String className, String primitiveName) {
+		int intClNmInd = getOrAppendUTF8(file, className);
 		int intClInd = getOrAppendClass(file, intClNmInd);
 		int intVONmInd = getOrAppendUTF8(file, "valueOf");
-		int intVOSigInd = getOrAppendUTF8(file, "(" + pNm + ")L" + clName + ";");
+		int intVOSigInd = getOrAppendUTF8(file, "(" + primitiveName + ")L" + className + ";");
 		int intVOntInd = getOrAppendNameAndType(file, intVONmInd, intVOSigInd);
 		return getOrAppendMethodRef(file, intClInd, intVOntInd);
 	}
 	
+	public static int getOrAppendValueOfMethod(ClassFile file, PrimitiveType primitiveType) {
+		return getOrAppendValueOfMethod(file, primitiveType.getNonPrimitiveClassName().replace('.', '/'), primitiveType.getSignatureName());
+	}
+	
+	public static int getOrAppendPrimitiveValueMethod(ClassFile file, String className, String primitiveName, String methodName) {
+		int intClNmInd = getOrAppendUTF8(file, className);
+		int intClInd = getOrAppendClass(file, intClNmInd);
+		int intVONmInd = getOrAppendUTF8(file, methodName);
+		int intVOSigInd = getOrAppendUTF8(file, "()" + primitiveName);
+		int intVOntInd = getOrAppendNameAndType(file, intVONmInd, intVOSigInd);
+		return getOrAppendMethodRef(file, intClInd, intVOntInd);
+	}
+	
+	public static int getOrAppendPrimitiveValueMethod(ClassFile file, PrimitiveType type) {
+		switch(type) {
+			case DOUBLE:
+				return getOrAppendPrimitiveValueMethod(file, "java/lang/Double", "D", "doubleValue");
+			case FLOAT:
+				return getOrAppendPrimitiveValueMethod(file, "java/lang/Float", "F", "floatValue");
+			case LONG:
+				return getOrAppendPrimitiveValueMethod(file, "java/lang/Long", "J", "longValue");
+			case BOOLEAN:
+				return getOrAppendPrimitiveValueMethod(file, "java/lang/Boolean", "Z", "booleanValue");
+			case BYTE:
+				return getOrAppendPrimitiveValueMethod(file, "java/lang/Byte", "B", "byteValue");
+			case SHORT:
+				return getOrAppendPrimitiveValueMethod(file, "java/lang/Short", "S", "shortValue");
+			case CHAR:
+				return getOrAppendPrimitiveValueMethod(file, "java/lang/Character", "C", "charValue");
+			case INT:
+				return getOrAppendPrimitiveValueMethod(file, "java/lang/Integer", "I", "intValue");
+			default:
+				throw new IllegalArgumentException("Invalid primitive type");
+		}
+	}
+	
 	public static void redirectClassMethodsNamed(ClassFile file, Class<?> toClass, Method handlerMethod) {
-		if(handlerMethod.getParameterCount() != 4 || !Arrays.equals(handlerMethod.getParameterTypes(), new Class<?>[] {Object.class, String.class, String.class, Object[].class}) || !handlerMethod.isVarArgs())
-			throw new IllegalArgumentException("Method must be of format method(Object classInst, String methodName, String methodSignature, Object... args)");
+		if(handlerMethod.getParameterCount() != 4
+				|| !Arrays.equals(handlerMethod.getParameterTypes(), new Class<?>[] {Object.class, String.class, String.class, Object[].class})
+				|| !Modifier.isPublic(handlerMethod.getModifiers())
+				|| !Modifier.isStatic(handlerMethod.getModifiers()))
+			throw new IllegalArgumentException("Method must be of format: Object method(Object classInstance, String methodName, String methodSignature, Object[] args)");
 		
 		for(ClassMethod m : file.getMethods()) {
 			if(m.isConstructor()) continue;
-			if(m.getMethodDescriptor().getReturnType().isVoid()) continue;
-			String sig = "(" + getMethodDescriptor(handlerMethod).getParameterSignature() + ")V";
+//			if(m.getMethodDescriptor().getReturnType().isVoid()) continue;
+			String sig = "(" + getMethodDescriptor(handlerMethod).getParameterSignature() + ")Ljava/lang/Object;";
 			redirectMethodExecutionNamed(file, m, toClass.getName().replace('.', '/'), handlerMethod.getName(), sig);
 		}
 	}
@@ -259,7 +335,8 @@ public class ClassFileUtils {
 			} catch (NoSuchMethodException | SecurityException | NoSuchElementException e) {
 				continue;
 			}
-			String sig = "(" + getMethodDescriptor(handlerMethod).getParameterSignature() + ")V";
+			MethodDescriptor dc = getMethodDescriptor(handlerMethod);
+			String sig = "(" + dc.getParameterSignature() + ")" + dc.getReturnType().getRawDescriptor();
 			redirectMethodExecution(file, m, toClass.getName().replace('.', '/'), handlerMethod.getName(), sig);
 		}
 	}
@@ -276,41 +353,14 @@ public class ClassFileUtils {
 		return bt;
 	}
 	
-	private static InstructionInformation getInfo(PrimitiveType type, byte paramIdx) {
+	public static InstructionInformation getInfo(PrimitiveType type, byte paramIdx) {
 		return new InstructionInformation(getLoadInstruction(type), new byte[] {paramIdx});
 	}
 	
-	public static List<InstructionInformation> getLoadInfo(PrimitiveType type, byte paramIdx, int iInd, int dInd, int fInd, int lInd, int byInd, int boInd, int cInd, int sInd) {
+	public static List<InstructionInformation> getLoadInfo(ClassFile file, PrimitiveType type, byte paramIdx) {
 		List<InstructionInformation> inf = new ArrayList<>();
 		inf.add(new InstructionInformation(getLoadInstruction(type), new byte[] {paramIdx}));
-		switch(type) {
-			case INT:
-				inf.add(new InstructionInformation(Instruction.INVOKESTATIC, getShortBytes(iInd)));
-				break;
-			case DOUBLE:
-				inf.add(new InstructionInformation(Instruction.INVOKESTATIC, getShortBytes(dInd)));
-				break;
-			case FLOAT:
-				inf.add(new InstructionInformation(Instruction.INVOKESTATIC, getShortBytes(fInd)));
-				break;
-			case LONG:
-				inf.add(new InstructionInformation(Instruction.INVOKESTATIC, getShortBytes(lInd)));
-				break;
-			case BOOLEAN:
-				inf.add(new InstructionInformation(Instruction.INVOKESTATIC, getShortBytes(boInd)));
-				break;
-			case BYTE:
-				inf.add(new InstructionInformation(Instruction.INVOKESTATIC, getShortBytes(byInd)));
-				break;
-			case CHAR:
-				inf.add(new InstructionInformation(Instruction.INVOKESTATIC, getShortBytes(cInd)));
-				break;
-			case SHORT:
-				inf.add(new InstructionInformation(Instruction.INVOKESTATIC, getShortBytes(sInd)));
-				break;
-			default:
-				throw new IllegalArgumentException("Invalid parameter type");
-		}
+		if(type != PrimitiveType.OBJECT) inf.add(new InstructionInformation(Instruction.INVOKESTATIC, getShortBytes(getOrAppendValueOfMethod(file, type))));
 		return inf;
 	}
 	
@@ -333,6 +383,18 @@ public class ClassFileUtils {
 			default:
 				throw new IllegalArgumentException("Invalid parameter type");
 		}
+	}
+	
+	public static boolean isEntryUsed(ClassFile cf, int poolEntryIndex) {
+		ConstantPool constantPool = cf.getConstantPool();
+		
+		if(constantPool.indexOf(cf.getThisClass()) == poolEntryIndex) return true;
+		if(cf.getThisClass().getNameIndex() == poolEntryIndex) return true;
+		if(constantPool.indexOf(cf.getThisClass()) == poolEntryIndex) return true;
+		if(cf.getThisClass().getNameIndex() == poolEntryIndex) return true;
+		
+		System.out.println("Entry @ " + poolEntryIndex + " is not used");
+		return false;
 	}
 
 }

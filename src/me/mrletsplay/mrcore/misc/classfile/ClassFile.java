@@ -36,6 +36,7 @@ import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolMethodTypeEntr
 import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolNameAndTypeEntry;
 import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolStringEntry;
 import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolUTF8Entry;
+import me.mrletsplay.mrcore.misc.classfile.util.ClassFileUtils;
 
 public class ClassFile {
 
@@ -60,7 +61,7 @@ public class ClassFile {
 		this.majorVersion = in.readUnsignedShort();
 		int cPoolCount = in.readUnsignedShort();
 		constantPool = new ConstantPool(cPoolCount);
-		for(int i = 0; i < cPoolCount - 1; i++) {
+		for(int i = 1; i < cPoolCount; i++) {
 			ConstantPoolEntry en = readConstantPoolEntry(constantPool, in);
 			constantPool.setEntry(i, en);
 			if(en.isDoubleEntry()) constantPool.setEntry(++i, null);
@@ -98,6 +99,32 @@ public class ClassFile {
 		for(int i = 0; i < attributes.length; i++) {
 			attributes[i] = readAttribute(constantPool, in);
 		}
+	}
+	
+	public ClassFile(String name, String superClassName) {
+		this.minorVersion = 0;
+		this.majorVersion = 52; // Java 8
+		this.constantPool = new ConstantPool(1);
+		this.accessFlags = EnumFlagCompound.noneOf(ClassAccessFlag.class);
+		this.thisClass = constantPool.getEntry(ClassFileUtils.getOrAppendClass(this, ClassFileUtils.getOrAppendUTF8(this, name))).as(ConstantPoolClassEntry.class);
+		this.superClass = constantPool.getEntry(ClassFileUtils.getOrAppendClass(this, ClassFileUtils.getOrAppendUTF8(this, superClassName))).as(ConstantPoolClassEntry.class);
+		this.interfaces = new ConstantPoolClassEntry[0];
+		this.fields = new ClassField[0];
+		this.methods = new ClassMethod[0];
+		this.attributes = new Attribute[0];
+	}
+	
+	public ClassFile(String name, Class<?> superClass) {
+		this(name, className(superClass));
+	}
+	
+	public ClassFile(String name) {
+		this(name, Object.class);
+	}
+	
+	private static String className(Class<?> clazz) {
+		if(clazz.isInterface() || clazz.isArray() || clazz.isEnum()) throw new IllegalArgumentException("Illegal superclass");
+		return clazz.getCanonicalName().replace('.', '/');
 	}
 	
 	private ConstantPoolEntry readConstantPoolEntry(ConstantPool pool, DataInputStream in) throws IOException {
@@ -211,20 +238,52 @@ public class ClassFile {
 		return accessFlags;
 	}
 	
+	public void setThisClass(ConstantPoolClassEntry thisClass) {
+		this.thisClass = thisClass;
+	}
+	
+	public void setThisClass(int thisClassIndex) {
+		ConstantPoolEntry en = constantPool.getEntry(thisClassIndex);
+		if(en == null || !en.getTag().equals(ConstantPoolTag.CLASS)) throw new IllegalArgumentException("Not a valid index");
+		setThisClass(en.as(ConstantPoolClassEntry.class));
+	}
+	
 	public ConstantPoolClassEntry getThisClass() {
 		return thisClass;
+	}
+	
+	public void setSuperClass(ConstantPoolClassEntry superClass) {
+		this.superClass = superClass;
+	}
+	
+	public void setSuperClass(int superClassIndex) {
+		ConstantPoolEntry en = constantPool.getEntry(superClassIndex);
+		if(en == null || !en.getTag().equals(ConstantPoolTag.CLASS)) throw new IllegalArgumentException("Not a valid index");
+		setSuperClass(en.as(ConstantPoolClassEntry.class));
 	}
 	
 	public ConstantPoolClassEntry getSuperClass() {
 		return superClass;
 	}
 	
+	public void setInterfaces(ConstantPoolClassEntry[] interfaces) {
+		this.interfaces = interfaces;
+	}
+	
 	public ConstantPoolClassEntry[] getInterfaces() {
 		return interfaces;
 	}
 	
+	public void setFields(ClassField[] fields) {
+		this.fields = fields;
+	}
+	
 	public ClassField[] getFields() {
 		return fields;
+	}
+	
+	public void setMethods(ClassMethod[] methods) {
+		this.methods = methods;
 	}
 	
 	public ClassMethod[] getMethods() {
@@ -233,6 +292,10 @@ public class ClassFile {
 	
 	public ClassMethod[] getMethods(String name) {
 		return Arrays.stream(methods).filter(m -> m.getName().getValue().equals(name)).toArray(ClassMethod[]::new);
+	}
+	
+	public ClassMethod[] getConstructors() {
+		return getMethods("<init>");
 	}
 	
 	public Attribute[] getAttributes() {

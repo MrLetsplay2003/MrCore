@@ -12,17 +12,15 @@ public abstract class AbstractDefaultAttribute implements DefaultAttribute {
 	private ClassFile classFile;
 	private ConstantPoolUTF8Entry name;
 	private byte[] info;
-	private DataInputStream input;
 	
 	public AbstractDefaultAttribute(ClassFile classFile, ConstantPoolUTF8Entry name, byte[] info) throws IOException {
 		this.classFile = classFile;
 		this.name = name;
 		this.info = info;
-		this.input = new DataInputStream(new ByteArrayInputStream(info));
 	}
 	
-	protected DataInputStream getInput() {
-		return input;
+	protected DataInputStream createInput() {
+		return new DataInputStream(new ByteArrayInputStream(info));
 	}
 	
 	@Override

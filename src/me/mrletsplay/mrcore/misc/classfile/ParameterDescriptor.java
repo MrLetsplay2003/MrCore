@@ -11,5 +11,12 @@ public class ParameterDescriptor {
 	public TypeDescriptor getParameterType() {
 		return parameterType;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(!(obj instanceof ParameterDescriptor)) return false;
+		ParameterDescriptor o = (ParameterDescriptor) obj;
+		return parameterType.equals(o.parameterType);
+	}
 
 }

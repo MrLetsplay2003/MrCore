@@ -14,7 +14,7 @@ public class AttributeLocalVariableTable extends AbstractDefaultAttribute {
 	
 	public AttributeLocalVariableTable(ClassFile classFile, ConstantPoolUTF8Entry name, byte[] info) throws IOException {
 		super(classFile, name, info);
-		DataInputStream in = getInput();
+		DataInputStream in = createInput();
 		this.entries = new LocalVariable[in.readUnsignedShort()];
 		for(int i = 0; i < entries.length; i++) {
 			int startPC = in.readUnsignedShort();

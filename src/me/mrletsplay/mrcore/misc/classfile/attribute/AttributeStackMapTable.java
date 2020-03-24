@@ -13,7 +13,7 @@ public class AttributeStackMapTable extends AbstractDefaultAttribute {
 	
 	public AttributeStackMapTable(ClassFile classFile, ConstantPoolUTF8Entry name, byte[] info) throws IOException {
 		super(classFile, name, info);
-		DataInputStream in = getInput();
+		DataInputStream in = createInput();
 		this.entries = new StackMapFrame[in.readUnsignedShort()];
 		for(int i = 0; i < entries.length; i++) {
 			entries[i] = StackMapFrame.readEntry(classFile.getConstantPool(), in);

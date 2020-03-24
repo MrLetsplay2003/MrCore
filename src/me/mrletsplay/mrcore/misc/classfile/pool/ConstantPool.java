@@ -11,7 +11,7 @@ public class ConstantPool {
 	}
 	
 	public void setEntry(int index, ConstantPoolEntry entry) {
-		entries[index] = entry;
+		entries[index - 1] = entry;
 	}
 	
 	public ConstantPoolEntry getEntry(int index) {

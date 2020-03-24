@@ -7,6 +7,7 @@ import me.mrletsplay.mrcore.misc.EnumFlagCompound;
 import me.mrletsplay.mrcore.misc.classfile.attribute.Attribute;
 import me.mrletsplay.mrcore.misc.classfile.attribute.DefaultAttributeType;
 import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolUTF8Entry;
+import me.mrletsplay.mrcore.misc.classfile.util.ClassFileUtils;
 
 public class ClassField {
 
@@ -24,6 +25,18 @@ public class ClassField {
 		this.attributes = attributes;
 	}
 	
+	public ClassField(ClassFile classFile, EnumFlagCompound<FieldAccessFlag> accessFlags, String name, String descriptor) {
+		this.classFile = classFile;
+		this.accessFlags = accessFlags;
+		this.nameIndex = ClassFileUtils.getOrAppendUTF8(classFile, name);
+		this.descriptorIndex = ClassFileUtils.getOrAppendUTF8(classFile, descriptor);
+		this.attributes = new Attribute[0];
+	}
+	
+	public ClassField(ClassFile classFile, EnumFlagCompound<FieldAccessFlag> accessFlags, String name, TypeDescriptor typeDescriptor) {
+		this(classFile, accessFlags, name, typeDescriptor.getRawDescriptor());
+	}
+	
 	public EnumFlagCompound<FieldAccessFlag> getAccessFlags() {
 		return accessFlags;
 	}
@@ -34,6 +47,10 @@ public class ClassField {
 	
 	public ConstantPoolUTF8Entry getDescriptor() {
 		return classFile.getConstantPool().getEntry(descriptorIndex).as(ConstantPoolUTF8Entry.class);
+	}
+	
+	public void setAttributes(Attribute[] attributes) {
+		this.attributes = attributes;
 	}
 	
 	public Attribute[] getAttributes() {

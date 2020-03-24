@@ -10,6 +10,7 @@ import me.mrletsplay.mrcore.misc.classfile.ByteCode;
 import me.mrletsplay.mrcore.misc.classfile.ClassFile;
 import me.mrletsplay.mrcore.misc.classfile.ExceptionHandler;
 import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolUTF8Entry;
+import me.mrletsplay.mrcore.misc.classfile.util.ClassFileUtils;
 
 public class AttributeCode extends AbstractDefaultAttribute {
 
@@ -20,7 +21,7 @@ public class AttributeCode extends AbstractDefaultAttribute {
 	
 	public AttributeCode(ClassFile classFile, ConstantPoolUTF8Entry name, byte[] info) throws IOException {
 		super(classFile, name, info);
-		DataInputStream in = getInput();
+		DataInputStream in = createInput();
 		this.maxStack = in.readUnsignedShort();
 		this.maxLocals = in.readUnsignedShort();
 		this.code = new ByteCode(new byte[in.readInt()]);
@@ -33,6 +34,15 @@ public class AttributeCode extends AbstractDefaultAttribute {
 		for(int i = 0; i < attributes.length; i++) {
 			attributes[i] = classFile.readAttribute(classFile.getConstantPool(), in);
 		}
+	}
+	
+	public AttributeCode(ClassFile classFile) throws IOException {
+		super(classFile, classFile.getConstantPool().getEntry(ClassFileUtils.getOrAppendUTF8(classFile, DefaultAttributeType.CODE.getName())).as(ConstantPoolUTF8Entry.class), new byte[0]);
+		this.maxStack = 0;
+		this.maxLocals = 0;
+		this.code = new ByteCode(new byte[0]);
+		this.exceptionTable = new ExceptionHandler[0];
+		this.attributes = new Attribute[0];
 	}
 
 	@Override

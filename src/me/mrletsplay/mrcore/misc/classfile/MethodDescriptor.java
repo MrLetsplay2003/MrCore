@@ -34,6 +34,17 @@ public class MethodDescriptor {
 		this.accessFlags = EnumFlagCompound.noneOf(MethodAccessFlag.class);
 	}
 	
+	public MethodDescriptor(String name, TypeDescriptor returnType, TypeDescriptor... parameterTypeDescriptors) {
+		this.name = name;
+		this.parameterDescriptors = new ParameterDescriptor[parameterTypeDescriptors.length];
+		this.returnType = returnType;
+		this.accessFlags = EnumFlagCompound.noneOf(MethodAccessFlag.class);
+		
+		for(int i = 0; i < parameterTypeDescriptors.length; i++) {
+			parameterDescriptors[i] = new ParameterDescriptor(parameterTypeDescriptors[i]);
+		}
+	}
+	
 	public boolean isConstructor() {
 		return name.equals("<init>");
 	}
@@ -42,12 +53,24 @@ public class MethodDescriptor {
 		return name;
 	}
 	
+	public EnumFlagCompound<MethodAccessFlag> getAccessFlags() {
+		return accessFlags;
+	}
+	
 	public ParameterDescriptor[] getParameterDescriptors() {
 		return parameterDescriptors;
 	}
 	
 	public String getParameterSignature() {
 		return Arrays.stream(parameterDescriptors).map(p -> p.getParameterType().getRawDescriptor()).collect(Collectors.joining());
+	}
+	
+	public String getRawDescriptor() {
+		return "(" + getParameterSignature() + ")" + getReturnType().getRawDescriptor();
+	}
+	
+	public void setReturnType(TypeDescriptor returnType) {
+		this.returnType = returnType;
 	}
 	
 	public TypeDescriptor getReturnType() {
@@ -59,6 +82,16 @@ public class MethodDescriptor {
 		return accessFlags.getApplicable().stream().map(f -> f.getName()).collect(Collectors.joining(" ")) + " " +
 				returnType.getFriendlyName() + " " +
 				name + "(" + Arrays.stream(parameterDescriptors).map(p -> p.getParameterType().getFriendlyName()).collect(Collectors.joining(", ")) + ")";
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(!(obj instanceof MethodDescriptor)) return false;
+		MethodDescriptor o = (MethodDescriptor) obj;
+		return name.equals(o.name)
+				&& Arrays.equals(parameterDescriptors, o.parameterDescriptors)
+				&& returnType.equals(o.returnType)
+				&& accessFlags.equals(o.accessFlags);
 	}
 	
 }
