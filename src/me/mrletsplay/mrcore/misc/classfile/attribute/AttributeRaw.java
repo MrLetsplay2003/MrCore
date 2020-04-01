@@ -36,6 +36,11 @@ public class AttributeRaw implements Attribute {
 	}
 	
 	@Override
+	public void setAttributes(Attribute[] attributes) {
+		throw new UnsupportedOperationException("Can't have attributes");
+	}
+	
+	@Override
 	public Attribute[] getAttributes() {
 		throw new UnsupportedOperationException();
 	}

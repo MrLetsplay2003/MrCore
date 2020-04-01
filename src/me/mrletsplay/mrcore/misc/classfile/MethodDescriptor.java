@@ -27,18 +27,18 @@ public class MethodDescriptor {
 		returnType = TypeDescriptor.parse(m.group("return"));
 	}
 	
-	public MethodDescriptor(String name, TypeDescriptor returnType, ParameterDescriptor... parameterDescriptors) {
+	public MethodDescriptor(String name, EnumFlagCompound<MethodAccessFlag> accessFlags, TypeDescriptor returnType, ParameterDescriptor... parameterDescriptors) {
 		this.name = name;
+		this.accessFlags = accessFlags;
 		this.parameterDescriptors = parameterDescriptors;
 		this.returnType = returnType;
-		this.accessFlags = EnumFlagCompound.noneOf(MethodAccessFlag.class);
 	}
 	
-	public MethodDescriptor(String name, TypeDescriptor returnType, TypeDescriptor... parameterTypeDescriptors) {
+	public MethodDescriptor(String name, EnumFlagCompound<MethodAccessFlag> accessFlags, TypeDescriptor returnType, TypeDescriptor... parameterTypeDescriptors) {
 		this.name = name;
 		this.parameterDescriptors = new ParameterDescriptor[parameterTypeDescriptors.length];
 		this.returnType = returnType;
-		this.accessFlags = EnumFlagCompound.noneOf(MethodAccessFlag.class);
+		this.accessFlags = accessFlags;
 		
 		for(int i = 0; i < parameterTypeDescriptors.length; i++) {
 			parameterDescriptors[i] = new ParameterDescriptor(parameterTypeDescriptors[i]);

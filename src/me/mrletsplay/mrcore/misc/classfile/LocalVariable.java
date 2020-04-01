@@ -1,6 +1,7 @@
 package me.mrletsplay.mrcore.misc.classfile;
 
 import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolUTF8Entry;
+import me.mrletsplay.mrcore.misc.classfile.util.ClassFileUtils;
 
 public class LocalVariable {
 
@@ -13,6 +14,14 @@ public class LocalVariable {
 		this.length = length;
 		this.name = name;
 		this.descriptor = descriptor;
+		this.index = index;
+	}
+	
+	public LocalVariable(ClassFile file, int startPC, int length, String name, String descriptor, int index) {
+		this.startPC = startPC;
+		this.length = length;
+		this.name = file.getConstantPool().getEntry(ClassFileUtils.getOrAppendUTF8(file, name)).as(ConstantPoolUTF8Entry.class);
+		this.descriptor = file.getConstantPool().getEntry(ClassFileUtils.getOrAppendUTF8(file, descriptor)).as(ConstantPoolUTF8Entry.class);
 		this.index = index;
 	}
 	

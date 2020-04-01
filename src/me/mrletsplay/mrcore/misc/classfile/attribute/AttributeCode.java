@@ -100,8 +100,26 @@ public class AttributeCode extends AbstractDefaultAttribute {
 		return exceptionTable;
 	}
 	
+	@Override
+	public void setAttributes(Attribute[] attributes) {
+		this.attributes = attributes;
+	}
+	
+	@Override
 	public Attribute[] getAttributes() {
 		return attributes;
+	}
+	
+	public AttributeStackMapTable getStackMapTable() {
+		Attribute a = getAttribute(DefaultAttributeType.STACK_MAP_TABLE);
+		if(a == null) return null;
+		return a.as(AttributeStackMapTable.class);
+	}
+	
+	public AttributeLocalVariableTable getLocalVariableTable() {
+		Attribute a = getAttribute(DefaultAttributeType.LOCAL_VARIABLE_TABLE);
+		if(a == null) return null;
+		return a.as(AttributeLocalVariableTable.class);
 	}
 	
 }

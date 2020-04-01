@@ -20,6 +20,8 @@ public interface Attribute {
 		return clazz.cast(this);
 	}
 	
+	public void setAttributes(Attribute[] attributes);
+	
 	public Attribute[] getAttributes();
 	
 	public default Attribute getAttribute(String name) {

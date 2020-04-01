@@ -33,7 +33,7 @@ public enum StackMapFrameType {
 	}
 	
 	public static StackMapFrameType getByValue(int value) {
-		return Arrays.stream(values()).filter(t -> t.rangeStart >= value && t.rangeEnd <= value).findFirst().orElse(null);
+		return Arrays.stream(values()).filter(t -> value >= t.rangeStart  && value <= t.rangeEnd).findFirst().orElse(null);
 	}
 	
 }

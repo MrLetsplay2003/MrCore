@@ -9,6 +9,9 @@ import me.mrletsplay.mrcore.misc.PrimitiveType;
 
 public class TypeDescriptor {
 	
+	public static final TypeDescriptor
+		VOID = of(void.class);
+	
 	private String rawDescriptor, className;
 	private boolean isPrimitive;
 	

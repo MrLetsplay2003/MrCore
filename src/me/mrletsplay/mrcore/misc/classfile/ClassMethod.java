@@ -70,7 +70,9 @@ public class ClassMethod {
 	}
 	
 	public AttributeCode getCodeAttribute() {
-		return getAttribute(DefaultAttributeType.CODE).as(AttributeCode.class);
+		Attribute a = getAttribute(DefaultAttributeType.CODE);
+		if(a == null) return null;
+		return a.as(AttributeCode.class);
 	}
 	
 	public Attribute getAttribute(String name) {
@@ -83,9 +85,6 @@ public class ClassMethod {
 	
 	@Override
 	public String toString() {
-//		return new StringBuilder()
-//				.append(accessFlags.getApplicable().stream().map(a -> a.name).collect(Collectors.joining(" "))).append(" ")
-//				.append(getName().getValue()).append(getDescriptor().getValue()).toString();
 		return getMethodDescriptor().toString();
 	}
 	

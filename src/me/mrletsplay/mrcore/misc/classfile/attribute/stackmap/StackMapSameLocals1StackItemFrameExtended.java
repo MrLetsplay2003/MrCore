@@ -1,6 +1,7 @@
 package me.mrletsplay.mrcore.misc.classfile.attribute.stackmap;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 
 import me.mrletsplay.mrcore.misc.classfile.attribute.stackmap.verification.VerificationTypeInfo;
@@ -17,6 +18,12 @@ public class StackMapSameLocals1StackItemFrameExtended extends AbstractStackMapF
 		this.typeInfo = VerificationTypeInfo.read(pool, dIn);
 	}
 	
+	public StackMapSameLocals1StackItemFrameExtended(int offsetDelta, VerificationTypeInfo typeInfo) {
+		super(247);
+		this.offsetDelta = offsetDelta;
+		this.typeInfo = typeInfo;
+	}
+
 	public VerificationTypeInfo getTypeInfo() {
 		return typeInfo;
 	}
@@ -26,9 +33,20 @@ public class StackMapSameLocals1StackItemFrameExtended extends AbstractStackMapF
 		return StackMapFrameType.SAME_LOCALS_1_STACK_ITEM_FRAME_EXTENDED;
 	}
 
+	public void setOffsetDelta(int offsetDelta) {
+		this.offsetDelta = offsetDelta;
+	}
+	
 	@Override
 	public int getOffsetDelta() {
 		return offsetDelta;
+	}
+	
+	@Override
+	public void write(DataOutputStream dOut) throws IOException {
+		dOut.write(getTag());
+		dOut.writeShort(offsetDelta);
+		typeInfo.write(dOut);
 	}
 	
 }

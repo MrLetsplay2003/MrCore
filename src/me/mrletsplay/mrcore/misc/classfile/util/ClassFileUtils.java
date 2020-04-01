@@ -1,15 +1,20 @@
 package me.mrletsplay.mrcore.misc.classfile.util;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.Callable;
 
+import me.mrletsplay.mrcore.misc.EnumFlagCompound;
+import me.mrletsplay.mrcore.misc.FriendlyException;
 import me.mrletsplay.mrcore.misc.MiscUtils;
 import me.mrletsplay.mrcore.misc.PrimitiveType;
 import me.mrletsplay.mrcore.misc.classfile.ByteCode;
+import me.mrletsplay.mrcore.misc.classfile.ClassAccessFlag;
 import me.mrletsplay.mrcore.misc.classfile.ClassFile;
 import me.mrletsplay.mrcore.misc.classfile.ClassMethod;
 import me.mrletsplay.mrcore.misc.classfile.Instruction;
@@ -18,6 +23,7 @@ import me.mrletsplay.mrcore.misc.classfile.MethodAccessFlag;
 import me.mrletsplay.mrcore.misc.classfile.MethodDescriptor;
 import me.mrletsplay.mrcore.misc.classfile.ParameterDescriptor;
 import me.mrletsplay.mrcore.misc.classfile.TypeDescriptor;
+import me.mrletsplay.mrcore.misc.classfile.attribute.Attribute;
 import me.mrletsplay.mrcore.misc.classfile.attribute.AttributeCode;
 import me.mrletsplay.mrcore.misc.classfile.attribute.DefaultAttributeType;
 import me.mrletsplay.mrcore.misc.classfile.pool.ConstantPool;
@@ -32,6 +38,102 @@ import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolStringEntry;
 import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolUTF8Entry;
 
 public class ClassFileUtils {
+	
+	public static ClassFile createStaticClassCopy(Class<?> ofClass, String canonicalName) {
+		try {
+			ClassFile file = new ClassFile(canonicalName.replace('.', '/'));
+			file.getAccessFlags().addFlag(ClassAccessFlag.PUBLIC);
+			
+			List<ClassMethod> methods = new ArrayList<>();
+			
+			ClassMethod constr = new ClassMethod(file, new MethodDescriptor("<init>", EnumFlagCompound.of(MethodAccessFlag.PUBLIC), "()V"));
+			
+			int mInd = getOrAppendMethodRef(file, getOrAppendClass(file, getOrAppendUTF8(file, "java/lang/Object")), getOrAppendNameAndType(file, getOrAppendUTF8(file, "<init>"), getOrAppendUTF8(file, "()V")));
+			
+			AttributeCode code = new AttributeCode(file);
+			code.getCode().replace(ByteCode.of(Arrays.asList(
+				new InstructionInformation(Instruction.ALOAD_0),
+				new InstructionInformation(Instruction.INVOKESPECIAL, getShortBytes(mInd)),
+				new InstructionInformation(Instruction.RETURN)
+			)));
+			code.setMaxLocals(1);
+			code.setMaxStack(1);
+			constr.setAttributes(new Attribute[] {code});
+			methods.add(constr);
+			
+			for(Method m : ofClass.getMethods()) {
+				if(!Modifier.isStatic(m.getModifiers())) continue;
+				MethodDescriptor md = getMethodDescriptor(m);
+				ClassMethod mth = new ClassMethod(file, md);
+				AttributeCode mCode = new AttributeCode(file);
+				mCode.setMaxLocals(m.getParameterCount() * 2);
+				mth.setAttributes(new Attribute[] {mCode});
+				redirectMethodExecution(file, mth, ofClass.getCanonicalName().replace('.', '/'), md.getName(), md.getRawDescriptor());
+				
+//				AttributeLocalVariableTable t = ClassFileUtils.createAttribute(mCode, DefaultAttributeType.LOCAL_VARIABLE_TABLE, () -> new AttributeLocalVariableTable(file)).as(AttributeLocalVariableTable.class);
+//				LocalVariable[] vs = new LocalVariable[m.getParameterCount()];
+//				for(int i = 0; i < vs.length; i++) {
+//					ParameterDescriptor p = md.getParameterDescriptors()[i];
+//					vs[i] = new LocalVariable(file, 0, mCode.getCode().getBytes().length, "arg" + i, p.getParameterType().getRawDescriptor(), i);
+//				}
+//				t.setEntries(vs);
+				
+				methods.add(mth);
+			}
+			
+			file.setMethods(methods.toArray(new ClassMethod[methods.size()]));
+			
+			return file;
+		}catch(IOException e) {
+			throw new FriendlyException(e);
+		}
+	}
+	
+	public static Attribute createAttribute(ClassMethod method, DefaultAttributeType type, Callable<? extends Attribute> initialValue) {
+		Attribute a = method.getAttribute(type);
+		if(a != null) return a;
+		
+		try {
+			a = initialValue.call();
+		} catch (Exception e) {
+			throw new FriendlyException(e);
+		}
+		
+		Attribute[] attrs = method.getAttributes();
+		Attribute[] newAttrs = new Attribute[attrs.length + 1];
+		System.arraycopy(attrs, 0, newAttrs, 0, attrs.length);
+		newAttrs[newAttrs.length - 1] = a;
+		method.setAttributes(newAttrs);
+		
+		return a;
+	}
+	
+	public static Attribute createAttribute(Attribute attribute, DefaultAttributeType type, Callable<? extends Attribute> initialValue) {
+		Attribute a = attribute.getAttribute(type);
+		if(a != null) return a;
+		
+		try {
+			a = initialValue.call();
+		} catch (Exception e) {
+			throw new FriendlyException(e);
+		}
+		
+		Attribute[] attrs = attribute.getAttributes();
+		Attribute[] newAttrs = new Attribute[attrs.length + 1];
+		System.arraycopy(attrs, 0, newAttrs, 0, attrs.length);
+		newAttrs[newAttrs.length - 1] = a;
+		attribute.setAttributes(newAttrs);
+		
+		return a;
+	}
+	
+	public static AttributeCode createCodeAttribute(ClassFile file, ClassMethod method) {
+		return createAttribute(method, DefaultAttributeType.CODE, () -> new AttributeCode(file)).as(AttributeCode.class);
+	}
+	
+	public static String getClassName(Class<?> clazz) {
+		return clazz.getCanonicalName().replace('.', '/');
+	}
 	
 	public static void redirectMethodExecution(ClassFile file, ClassMethod method, String toClass, String toMethodName, String toMethodSignature) {
 		MethodDescriptor mDesc = method.getMethodDescriptor();
@@ -51,6 +153,7 @@ public class ClassFileUtils {
 			nInstr.add(new InstructionInformation(Instruction.ALOAD_0));
 		}
 		byte i = 0;
+		if(isStatic) i--;
 		for(ParameterDescriptor p : mDesc.getParameterDescriptors()) {
 			PrimitiveType t = p.getParameterType().getPrimitiveType();
 			nInstr.add(getInfo(t, ++i));
@@ -62,7 +165,7 @@ public class ClassFileUtils {
 		
 		nInstr.add(new InstructionInformation(getReturnInstruction(pt)));
 
-		codeAttr.setMaxStack(i * 2 + (isStatic ? 0 : 1)); // #params * 2 (longs are 2x) + 1 for this class instance if instance method
+		codeAttr.setMaxStack(i * 2 + (isStatic ? 0 : 1) + 1); // #params * 2 (longs are 2x) + 1 for this class instance if instance method + 1 for possible return value
 		
 		codeAttr.getCode().replace(ByteCode.of(nInstr));
 	}
@@ -334,14 +437,17 @@ public class ClassFileUtils {
 				continue;
 			}
 			MethodDescriptor dc = getMethodDescriptor(handlerMethod);
-			String sig = "(" + dc.getParameterSignature() + ")" + dc.getReturnType().getRawDescriptor();
+			String sig = dc.getRawDescriptor();
 			redirectMethodExecution(file, m, toClass.getName().replace('.', '/'), handlerMethod.getName(), sig);
 		}
 	}
 	
 	public static MethodDescriptor getMethodDescriptor(Method m) {
-		MethodDescriptor dc = new MethodDescriptor(m.getName(), TypeDescriptor.of(m.getReturnType()), Arrays.stream(m.getParameterTypes()).map(t -> new ParameterDescriptor(TypeDescriptor.of(t))).toArray(ParameterDescriptor[]::new));
-		return dc;
+		return new MethodDescriptor(
+				m.getName(),
+				EnumFlagCompound.of(MethodAccessFlag.class, m.getModifiers()),
+				TypeDescriptor.of(m.getReturnType()),
+				Arrays.stream(m.getParameterTypes()).map(t -> new ParameterDescriptor(TypeDescriptor.of(t))).toArray(ParameterDescriptor[]::new));
 	}
 	
 	public static byte[] getShortBytes(int val) {

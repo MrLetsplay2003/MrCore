@@ -1,6 +1,7 @@
 package me.mrletsplay.mrcore.misc.classfile.attribute.stackmap;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 
 import me.mrletsplay.mrcore.misc.FriendlyException;
@@ -13,6 +14,13 @@ public interface StackMapFrame {
 	public StackMapFrameType getType();
 	
 	public int getOffsetDelta();
+	
+	public void write(DataOutputStream dOut) throws IOException;
+	
+	public default <T extends StackMapFrame> T as(Class<T> clazz) {
+		if(!clazz.isInstance(this)) throw new RuntimeException("Illegal stack map frame subtype");
+		return clazz.cast(this);
+	}
 	
 	public static StackMapFrame readEntry(ConstantPool pool, DataInputStream dIn) throws IOException {
 		int tag = dIn.readUnsignedByte();

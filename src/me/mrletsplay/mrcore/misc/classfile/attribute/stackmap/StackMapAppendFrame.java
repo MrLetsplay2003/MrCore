@@ -1,6 +1,7 @@
 package me.mrletsplay.mrcore.misc.classfile.attribute.stackmap;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 
 import me.mrletsplay.mrcore.misc.classfile.attribute.stackmap.verification.VerificationTypeInfo;
@@ -20,6 +21,16 @@ public class StackMapAppendFrame extends AbstractStackMapFrame {
 		}
 	}
 	
+	public StackMapAppendFrame(int offsetDelta, VerificationTypeInfo... additionalTypeInfo) {
+		super(additionalTypeInfo.length + 251);
+		this.offsetDelta = offsetDelta;
+		this.additionalTypeInfo = additionalTypeInfo;
+	}
+	
+	public void setAdditionalTypeInfo(VerificationTypeInfo[] additionalTypeInfo) {
+		this.additionalTypeInfo = additionalTypeInfo;
+	}
+	
 	public VerificationTypeInfo[] getAdditionalTypeInfo() {
 		return additionalTypeInfo;
 	}
@@ -27,6 +38,24 @@ public class StackMapAppendFrame extends AbstractStackMapFrame {
 	@Override
 	public StackMapFrameType getType() {
 		return StackMapFrameType.APPEND_FRAME;
+	}
+	
+	@Override
+	public int getTag() {
+		return additionalTypeInfo.length + 251;
+	}
+	
+	@Override
+	public void write(DataOutputStream dOut) throws IOException {
+		dOut.write(getTag());
+		dOut.writeShort(offsetDelta);
+		for(VerificationTypeInfo t : additionalTypeInfo) {
+			t.write(dOut);
+		}
+	}
+	
+	public void setOffsetDelta(int offsetDelta) {
+		this.offsetDelta = offsetDelta;
 	}
 
 	@Override
