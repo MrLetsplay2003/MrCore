@@ -15,8 +15,16 @@ public class ConfigLoader {
 		return loadFileConfig(configFile, false, flags);
 	}
 
+	public static FileCustomConfig loadFileConfig(File configFile) throws ConfigException {
+		return loadFileConfig(configFile, false);
+	}
+
 	public static CustomConfig loadStreamConfig(InputStream stream, ConfigFlag... flags) throws ConfigException {
 		return loadStreamConfig(stream, false, flags);
+	}
+
+	public static CustomConfig loadStreamConfig(InputStream stream) throws ConfigException {
+		return loadStreamConfig(stream, false);
 	}
 
 	public static FileCustomConfig loadFileConfig(File configFile, boolean saveConverted, ConfigFlag... flags) throws ConfigException {
@@ -25,10 +33,18 @@ public class ConfigLoader {
 		return loadConfigFromFile(cfg, configFile, saveConverted);
 	}
 
+	public static FileCustomConfig loadFileConfig(File configFile, boolean saveConverted) throws ConfigException {
+		return loadFileConfig(configFile, new ConfigFlag[0]);
+	}
+
 	public static CustomConfig loadStreamConfig(InputStream stream, boolean closeAfterLoad, ConfigFlag... flags) throws ConfigException {
 		DefaultFileCustomConfig cfg = new DefaultFileCustomConfig(null);
 		cfg.addFlags(flags);
 		return loadConfigFromStream(cfg, stream, closeAfterLoad);
+	}
+
+	public static CustomConfig loadStreamConfig(InputStream stream, boolean closeAfterLoad) throws ConfigException {
+		return loadStreamConfig(stream, closeAfterLoad, new ConfigFlag[0]);
 	}
 	
 	public static <T extends CustomConfig> T loadConfigFromStream(T config, InputStream stream, boolean closeAfterLoad) throws ConfigException {
