@@ -59,10 +59,11 @@ public class BukkitConfigMappers {
 						json.getDouble("x"),
 						json.getDouble("y"),
 						json.getDouble("z"),
-						json.has("pitch") ? (float) json.getDouble("pitch") : 0f,
-						json.has("yaw") ? (float) json.getDouble("yaw") : 0f
+						json.has("yaw") ? (float) json.getDouble("yaw") : 0f,
+						json.has("pitch") ? (float) json.getDouble("pitch") : 0f
 					)
 			)
+			.mapString("world", l -> l.getWorld().getName(), null).then()
 			.mapDouble("x", Location::getX, null).then()
 			.mapDouble("y", Location::getY, null).then()
 			.mapDouble("z", Location::getZ, null).then()

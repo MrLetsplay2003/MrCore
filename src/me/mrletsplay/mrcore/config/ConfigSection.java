@@ -295,47 +295,51 @@ public interface ConfigSection {
 		}else {
 			if(!allowComplex) return NullableOptional.empty();
 			List<ObjectMapper<?, ?>> llms = section.getConfig().getLowLevelMappers().entrySet().stream()
-					.filter(en -> en.getKey().canConstruct(o, section::castType))
+					.filter(en -> en.getKey().canConstruct(o, section::castPrimitiveType))
 					.sorted(Comparator.<Map.Entry<ObjectMapper<?, ?>, Integer>>comparingInt(Map.Entry::getValue).reversed())
 					.map(Map.Entry::getKey)
 					.collect(Collectors.toList());
+			
 			for(ObjectMapper<?, ?> om : llms) {
 				try {
 					Object c = om.constructRawObject(section, o, section::castType);
-					if(typeClass.isInstance(c)) {
-						NullableOptional<?> t = exactType.cast(c, section::castType);
+					if(exactType.isInstance(c, section::castPrimitiveType)) {
+						NullableOptional<T> t = exactType.cast(c, section::castPrimitiveType).map(v -> typeClass.cast(v));
 						if(t.isPresent()) {
-							return NullableOptional.of(typeClass.cast(c)); // cc -> llm -> ct
+							return t; // cc -> llm -> ct
 						}
 					}
+					
 					NullableOptional<T> tto = constructTopLevelType(section, c, typeClass, exactType); // First try cc -> llm -> tlm -> ct
 					if(tto.isPresent()) return tto;
 				}catch(ObjectMappingException e) {
-					continue;
+					throw e;
 				}
 			}
+			
 			return constructTopLevelType(section, o, typeClass, exactType); // Then just return cc -> tlm -> ct
 		}
 	}
 	
 	public static <T> NullableOptional<T> constructTopLevelType(ConfigSection section, Object o, Class<T> toClass, Complex<?> toExactType) {
-		List<ObjectMapper<?, ?>> tlms = section.getConfig().getMappers().entrySet().stream()
+		ObjectMapper<?, ?> tlm = section.getConfig().getMappers().entrySet().stream()
 				.filter(en -> en.getKey().canConstruct(o, section::castPrimitiveType))
+				.filter(en -> toExactType.isAssignableFrom(en.getKey().getMappingClass()))
 				.sorted(Comparator.comparingInt(Map.Entry::getValue))
 				.map(Map.Entry::getKey)
-				.collect(Collectors.toList());
-		for(ObjectMapper<?, ?> tom : tlms) {
-			try {
-				Object c2 = tom.constructRawObject(section, o, section::castType);
-				if(toClass.isInstance(c2)) {
-					NullableOptional<?> t = toExactType.cast(c2, section::castType);
-					if(t.isPresent()) {
-						return NullableOptional.of(toClass.cast(c2)); // cc -> llm -> ct
-					}
+				.findFirst().orElse(null);
+		
+		if(tlm == null) return NullableOptional.empty();
+		try {
+			Object c2 = tlm.constructRawObject(section, o, section::castType);
+			if(toClass.isInstance(c2)) {
+				NullableOptional<?> t = toExactType.cast(c2, section::castType);
+				if(t.isPresent()) {
+					return NullableOptional.of(toClass.cast(c2)); // cc -> llm -> ct
 				}
-			}catch(ObjectMappingException e) {
-				continue;
 			}
+		}catch(ObjectMappingException e) {
+			throw e;
 		}
 		return NullableOptional.empty();
 	}

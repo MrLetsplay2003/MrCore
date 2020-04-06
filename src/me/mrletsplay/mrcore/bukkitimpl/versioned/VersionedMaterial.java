@@ -2,6 +2,7 @@ package me.mrletsplay.mrcore.bukkitimpl.versioned;
 
 import static me.mrletsplay.mrcore.bukkitimpl.versioned.NMSRelease.V1_12;
 import static me.mrletsplay.mrcore.bukkitimpl.versioned.NMSRelease.V1_13;
+import static me.mrletsplay.mrcore.bukkitimpl.versioned.NMSRelease.V1_14;
 import static me.mrletsplay.mrcore.bukkitimpl.versioned.NMSRelease.V1_15;
 import static me.mrletsplay.mrcore.bukkitimpl.versioned.NMSRelease.V1_8;
 import static me.mrletsplay.mrcore.bukkitimpl.versioned.NMSRelease.V1_9;
@@ -15,10 +16,16 @@ import org.bukkit.Material;
 
 import me.mrletsplay.mrcore.bukkitimpl.versioned.definition.BannerDefinition;
 import me.mrletsplay.mrcore.bukkitimpl.versioned.definition.DyeDefinition;
+import me.mrletsplay.mrcore.bukkitimpl.versioned.definition.LeavesDefinition;
 import me.mrletsplay.mrcore.bukkitimpl.versioned.definition.StainedClayDefinition;
 import me.mrletsplay.mrcore.bukkitimpl.versioned.definition.StainedGlassDefinition;
 import me.mrletsplay.mrcore.bukkitimpl.versioned.definition.StainedGlassPaneDefinition;
 import me.mrletsplay.mrcore.bukkitimpl.versioned.definition.TypeDefinition;
+import me.mrletsplay.mrcore.bukkitimpl.versioned.definition.WoodType;
+import me.mrletsplay.mrcore.bukkitimpl.versioned.definition.WoodenLogDefinition;
+import me.mrletsplay.mrcore.bukkitimpl.versioned.definition.WoodenPlanksDefinition;
+import me.mrletsplay.mrcore.bukkitimpl.versioned.definition.WoodenSignDefinition;
+import me.mrletsplay.mrcore.bukkitimpl.versioned.definition.WoolDefinition;
 
 /**
  * An enum containing version-independent representations of {@link Material}s
@@ -394,30 +401,75 @@ public enum VersionedMaterial {
 			of(new MaterialDefinition("RECORD_12"), V1_8.versionsTo(V1_12)),
 			of(new MaterialDefinition("MUSIC_DISC_WAIT"), V1_13.versionsTo(V1_15))
 		),
+	/**
+	 * @deprecated {@link #INK_SAC}
+	 */
+	@Deprecated
 	INK_SACK(
-			new DyeDefinition(VersionedDyeColor.BLACK),
 			of(new MaterialDefinition("INK_SACK"), V1_8.versionsTo(V1_12)),
 			of(new MaterialDefinition("INK_SAC"), V1_13.versionsTo(V1_15))
 		),
+	INK_SAC(
+			of(new MaterialDefinition("INK_SACK"), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("INK_SAC"), V1_13.versionsTo(V1_15))
+		),
+	BLACK_DYE(
+			new DyeDefinition(VersionedDyeColor.BLACK),
+			of(new MaterialDefinition("INK_SACK"), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("INK_SAC"), V1_13.getVersions()),
+			of(new MaterialDefinition("BLACK_DYE"), V1_14.versionsTo(V1_15))
+		),
+	/**
+	 * @deprecated {@link #RED_DYE}
+	 */
+	@Deprecated
 	ROSE_RED(
 			new DyeDefinition(VersionedDyeColor.RED),
 			of(new MaterialDefinition("INK_SACK", 1), V1_8.versionsTo(V1_12)),
-			of(new MaterialDefinition("ROSE_RED"), V1_13.versionsTo(V1_15))
+			of(new MaterialDefinition("ROSE_RED"), V1_13.getVersions()),
+			of(new MaterialDefinition("RED_DYE"), V1_14.versionsTo(V1_15))
 		),
+	RED_DYE(
+			new DyeDefinition(VersionedDyeColor.RED),
+			of(new MaterialDefinition("INK_SACK", 1), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("ROSE_RED"), V1_13.getVersions()),
+			of(new MaterialDefinition("RED_DYE"), V1_14.versionsTo(V1_15))
+		),
+	/**
+	 * @deprecated {@link #GREEN_DYE}
+	 */
+	@Deprecated
 	CACTUS_GREEN(
 			new DyeDefinition(VersionedDyeColor.GREEN),
 			of(new MaterialDefinition("INK_SACK", 2), V1_8.versionsTo(V1_12)),
-			of(new MaterialDefinition("CACTUS_GREEN"), V1_13.versionsTo(V1_15))
+			of(new MaterialDefinition("CACTUS_GREEN"), V1_13.getVersions()),
+			of(new MaterialDefinition("GREEN_DYE"), V1_14.versionsTo(V1_15))
+		),
+	GREEN_DYE(
+			new DyeDefinition(VersionedDyeColor.GREEN),
+			of(new MaterialDefinition("INK_SACK", 2), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("CACTUS_GREEN"), V1_13.getVersions()),
+			of(new MaterialDefinition("GREEN_DYE"), V1_14.versionsTo(V1_15))
 		),
 	COCOA_BEANS(
-			new DyeDefinition(VersionedDyeColor.BROWN),
 			of(new MaterialDefinition("INK_SACK", 3), V1_8.versionsTo(V1_12)),
 			of(new MaterialDefinition("COCOA_BEANS"), V1_13.versionsTo(V1_15))
 		),
+	BROWN_DYE(
+			new DyeDefinition(VersionedDyeColor.BROWN),
+			of(new MaterialDefinition("INK_SACK", 3), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("COCOA_BEANS"), V1_13.getVersions()),
+			of(new MaterialDefinition("BROWN_DYE"), V1_14.versionsTo(V1_15))
+		),
 	LAPIS_LAZULI(
-			new DyeDefinition(VersionedDyeColor.BLUE),
 			of(new MaterialDefinition("INK_SACK", 4), V1_8.versionsTo(V1_12)),
 			of(new MaterialDefinition("LAPIS_LAZULI"), V1_13.versionsTo(V1_15))
+		),
+	BLUE_DYE(
+			new DyeDefinition(VersionedDyeColor.BLUE),
+			of(new MaterialDefinition("INK_SACK", 4), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("LAPIS_LAZULI"), V1_13.getVersions()),
+			of(new MaterialDefinition("BLUE_DYE"), V1_14.versionsTo(V1_15))
 		),
 	PURPLE_DYE(
 			new DyeDefinition(VersionedDyeColor.PURPLE),
@@ -449,10 +501,21 @@ public enum VersionedMaterial {
 			of(new MaterialDefinition("INK_SACK", 10), V1_8.versionsTo(V1_12)),
 			of(new MaterialDefinition("LIME_DYE"), V1_13.versionsTo(V1_15))
 		),
+	/**
+	 * @deprecated {@link #YELLOW_DYE}
+	 */
+	@Deprecated
 	DANDELION_YELLOW(
 			new DyeDefinition(VersionedDyeColor.YELLOW),
 			of(new MaterialDefinition("INK_SACK", 11), V1_8.versionsTo(V1_12)),
-			of(new MaterialDefinition("DANDELION_YELLOW"), V1_13.versionsTo(V1_15))
+			of(new MaterialDefinition("DANDELION_YELLOW"), V1_13.getVersions()),
+			of(new MaterialDefinition("YELLOW_DYE"), V1_14.versionsTo(V1_15))
+		),
+	YELLOW_DYE(
+			new DyeDefinition(VersionedDyeColor.YELLOW),
+			of(new MaterialDefinition("INK_SACK", 11), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("DANDELION_YELLOW"), V1_13.getVersions()),
+			of(new MaterialDefinition("YELLOW_DYE"), V1_14.versionsTo(V1_15))
 		),
 	LIGHT_BLUE_DYE(
 			new DyeDefinition(VersionedDyeColor.LIGHT_BLUE),
@@ -577,6 +640,199 @@ public enum VersionedMaterial {
 	GRASS_BLOCK(
 			of(new MaterialDefinition("GRASS"), V1_8.versionsTo(V1_12)),
 			of(new MaterialDefinition("GRASS_BLOCK"), V1_13.versionsTo(V1_15))
+		),
+	OAK_PLANKS(
+			new WoodenPlanksDefinition(WoodType.OAK),
+			of(new MaterialDefinition("WOOD", 0), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("OAK_PLANKS", 0), V1_13.versionsTo(V1_15))
+		),
+	SPRUCE_PLANKS(
+			new WoodenPlanksDefinition(WoodType.SPRUCE),
+			of(new MaterialDefinition("WOOD", 1), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("SPRUCE_PLANKS", 0), V1_13.versionsTo(V1_15))
+		),
+	BIRCH_PLANKS(
+			new WoodenPlanksDefinition(WoodType.BIRCH),
+			of(new MaterialDefinition("WOOD", 2), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("BIRCH_PLANKS", 0), V1_13.versionsTo(V1_15))
+		),
+	JUNGLE_PLANKS(
+			new WoodenPlanksDefinition(WoodType.JUNGLE),
+			of(new MaterialDefinition("WOOD", 3), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("JUNGLE_PLANKS", 0), V1_13.versionsTo(V1_15))
+		),
+	ACACIA_PLANKS(
+			new WoodenPlanksDefinition(WoodType.ACACIA),
+			of(new MaterialDefinition("WOOD", 4), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("ACACIA_PLANKS", 0), V1_13.versionsTo(V1_15))
+		),
+	DARK_OAK_PLANKS(
+			new WoodenPlanksDefinition(WoodType.DARK_OAK),
+			of(new MaterialDefinition("WOOD", 5), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("DARK_OAK_PLANKS", 0), V1_13.versionsTo(V1_15))
+		),
+	OAK_LEAVES(
+			new LeavesDefinition(WoodType.OAK),
+			of(new MaterialDefinition("LEAVES", 0), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("OAK_LEAVES", 0), V1_13.versionsTo(V1_15))
+		),
+	SPRUCE_LEAVES(
+			new LeavesDefinition(WoodType.SPRUCE),
+			of(new MaterialDefinition("LEAVES", 1), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("SPRUCE_LEAVES", 0), V1_13.versionsTo(V1_15))
+		),
+	BIRCH_LEAVES(
+			new LeavesDefinition(WoodType.BIRCH),
+			of(new MaterialDefinition("LEAVES", 2), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("BIRCH_LEAVES", 0), V1_13.versionsTo(V1_15))
+		),
+	JUNGLE_LEAVES(
+			new LeavesDefinition(WoodType.JUNGLE),
+			of(new MaterialDefinition("LEAVES", 3), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("JUNGLE_LEAVES", 0), V1_13.versionsTo(V1_15))
+		),
+	ACACIA_LEAVES(
+			new LeavesDefinition(WoodType.ACACIA),
+			of(new MaterialDefinition("LEAVES_2", 0), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("ACACIA_LEAVES", 0), V1_13.versionsTo(V1_15))
+		),
+	DARK_OAK_LEAVES(
+			new LeavesDefinition(WoodType.DARK_OAK),
+			of(new MaterialDefinition("LEAVES_2", 1), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("DARK_OAK_LEAVES", 0), V1_13.versionsTo(V1_15))
+		),
+	OAK_LOG(
+			new WoodenLogDefinition(WoodType.OAK),
+			of(new MaterialDefinition("LOG", 0), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("OAK_LOG", 0), V1_13.versionsTo(V1_15))
+		),
+	SPRUCE_LOG(
+			new WoodenLogDefinition(WoodType.SPRUCE),
+			of(new MaterialDefinition("LOG", 1), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("SPRUCE_LOG", 0), V1_13.versionsTo(V1_15))
+		),
+	BIRCH_LOG(
+			new WoodenLogDefinition(WoodType.BIRCH),
+			of(new MaterialDefinition("LOG", 2), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("BIRCH_LOG", 0), V1_13.versionsTo(V1_15))
+		),
+	JUNGLE_LOG(
+			new WoodenLogDefinition(WoodType.JUNGLE),
+			of(new MaterialDefinition("LOG", 3), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("JUNGLE_LOG", 0), V1_13.versionsTo(V1_15))
+		),
+	ACACIA_LOG(
+			new WoodenLogDefinition(WoodType.ACACIA),
+			of(new MaterialDefinition("LOG2", 0), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("ACACIA_LOG", 0), V1_13.versionsTo(V1_15))
+		),
+	DARK_OAK_LOG(
+			new WoodenLogDefinition(WoodType.DARK_OAK),
+			of(new MaterialDefinition("LOG_2", 1), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("DARK_OAK_LOG", 0), V1_13.versionsTo(V1_15))
+		),
+	OAK_SIGN(
+			new WoodenSignDefinition(WoodType.OAK),
+			of(new MaterialDefinition("SIGN", 1), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("OAK_SIGN", 0), V1_13.versionsTo(V1_15))
+		),
+	OAK_SIGN_BLOCK(
+			new WoodenSignDefinition(WoodType.OAK),
+			of(new MaterialDefinition("SIGN_POST", 1), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("OAK_SIGN", 0), V1_13.versionsTo(V1_15))
+		),
+	OAK_WALL_SIGN(
+			new WoodenSignDefinition(WoodType.OAK),
+			of(new MaterialDefinition("WALL_SIGN", 1), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("OAK_WALL_SIGN", 0), V1_13.versionsTo(V1_15))
+		),
+	WHITE_WOOL(
+			new WoolDefinition(VersionedDyeColor.WHITE),
+			of(new MaterialDefinition("WOOL", 0), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("WHITE_WOOL", 0), V1_13.versionsTo(V1_15))
+		),
+	ORANGE_WOOL(
+			new WoolDefinition(VersionedDyeColor.ORANGE),
+			of(new MaterialDefinition("WOOL", 1), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("ORANGE_WOOL", 0), V1_13.versionsTo(V1_15))
+		),
+	MAGENTA_WOOL(
+			new WoolDefinition(VersionedDyeColor.MAGENTA),
+			of(new MaterialDefinition("WOOL", 2), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("MAGENTA_WOOL", 0), V1_13.versionsTo(V1_15))
+		),
+	LIGHT_BLUE_WOOL(
+			new WoolDefinition(VersionedDyeColor.LIGHT_BLUE),
+			of(new MaterialDefinition("WOOL", 3), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("LIGHT_BLUE_WOOL", 0), V1_13.versionsTo(V1_15))
+		),
+	YELLOW_WOOL(
+			new WoolDefinition(VersionedDyeColor.YELLOW),
+			of(new MaterialDefinition("WOOL", 4), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("YELLOW_WOOL", 0), V1_13.versionsTo(V1_15))
+		),
+	LIME_WOOL(
+			new WoolDefinition(VersionedDyeColor.LIME),
+			of(new MaterialDefinition("WOOL", 5), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("LIME_WOOL", 0), V1_13.versionsTo(V1_15))
+		),
+	PINK_WOOL(
+			new WoolDefinition(VersionedDyeColor.PINK),
+			of(new MaterialDefinition("WOOL", 6), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("PINK_WOOL", 0), V1_13.versionsTo(V1_15))
+		),
+	GRAY_WOOL(
+			new WoolDefinition(VersionedDyeColor.GRAY),
+			of(new MaterialDefinition("WOOL", 7), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("GRAY_WOOL", 0), V1_13.versionsTo(V1_15))
+		),
+	LIGHT_GRAY_WOOL(
+			new WoolDefinition(VersionedDyeColor.LIGHT_GRAY),
+			of(new MaterialDefinition("WOOL", 8), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("LIGHT_GRAY_WOOL", 0), V1_13.versionsTo(V1_15))
+		),
+	CYAN_WOOL(
+			new WoolDefinition(VersionedDyeColor.CYAN),
+			of(new MaterialDefinition("WOOL", 9), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("CYAN_WOOL", 0), V1_13.versionsTo(V1_15))
+		),
+	PURPLE_WOOL(
+			new WoolDefinition(VersionedDyeColor.PURPLE),
+			of(new MaterialDefinition("WOOL", 10), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("PURPLE_WOOL", 0), V1_13.versionsTo(V1_15))
+		),
+	BLUE_WOOL(
+			new WoolDefinition(VersionedDyeColor.BLUE),
+			of(new MaterialDefinition("WOOL", 11), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("BLUE_WOOL", 0), V1_13.versionsTo(V1_15))
+		),
+	BROWN_WOOL(
+			new WoolDefinition(VersionedDyeColor.BROWN),
+			of(new MaterialDefinition("WOOL", 12), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("BROWN_WOOL", 0), V1_13.versionsTo(V1_15))
+		),
+	GREEN_WOOL(
+			new WoolDefinition(VersionedDyeColor.GREEN),
+			of(new MaterialDefinition("WOOL", 13), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("GREEN_WOOL", 0), V1_13.versionsTo(V1_15))
+		),
+	RED_WOOL(
+			new WoolDefinition(VersionedDyeColor.RED),
+			of(new MaterialDefinition("WOOL", 14), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("RED_WOOL", 0), V1_13.versionsTo(V1_15))
+		),
+	BLACK_WOOL(
+			new WoolDefinition(VersionedDyeColor.BLACK),
+			of(new MaterialDefinition("WOOL", 15), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("BLACK_WOOL", 0), V1_13.versionsTo(V1_15))
+		),
+	REPEATER(
+			of(new MaterialDefinition("DIODE", 0), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("REPEATER", 0), V1_13.versionsTo(V1_15))
+		),
+	COMPARATOR(
+			of(new MaterialDefinition("REDSTONE_COMPARATOR", 0), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("COMPARATOR", 0), V1_13.versionsTo(V1_15))
 		)
 	;
 	
@@ -659,45 +915,128 @@ public enum VersionedMaterial {
 
 	/**
 	 * Finds the corresponding glass pane material by its color
-	 * @param bannerColor The color of the glass pane
+	 * @param glassColor The color of the glass pane
 	 * @return The corresponding stained glass pane material
 	 */
-	public static VersionedMaterial getStainedGlassPane(VersionedDyeColor bannerColor) {
+	public static VersionedMaterial getStainedGlassPane(VersionedDyeColor glassColor) {
 		return Arrays.stream(values())
 				.filter(m ->
 						m.getTypeDefinition() != null &&
 						m.getTypeDefinition().asStainedGlassPane() != null &&
-						m.getTypeDefinition().asStainedGlassPane().getDyeColor().equals(bannerColor)
+						m.getTypeDefinition().asStainedGlassPane().getDyeColor().equals(glassColor)
 					)
 				.findFirst().orElse(null);
 	}
 
 	/**
 	 * Finds the corresponding glass material by its color
-	 * @param bannerColor The color of the glass
+	 * @param glassColor The color of the glass
 	 * @return The corresponding stained glass material
 	 */
-	public static VersionedMaterial getStainedGlass(VersionedDyeColor bannerColor) {
+	public static VersionedMaterial getStainedGlass(VersionedDyeColor glassColor) {
 		return Arrays.stream(values())
 				.filter(m ->
 						m.getTypeDefinition() != null &&
 						m.getTypeDefinition().asStainedGlass() != null &&
-						m.getTypeDefinition().asStainedGlass().getDyeColor().equals(bannerColor)
+						m.getTypeDefinition().asStainedGlass().getDyeColor().equals(glassColor)
 					)
 				.findFirst().orElse(null);
 	}
 
 	/**
 	 * Finds the corresponding glass pane material by its color
-	 * @param bannerColor The color of the glass pane
+	 * @param dyeColor The color of the glass pane
 	 * @return The corresponding dye material
 	 */
-	public static VersionedMaterial getDye(VersionedDyeColor bannerColor) {
+	public static VersionedMaterial getDye(VersionedDyeColor dyeColor) {
 		return Arrays.stream(values())
 				.filter(m ->
 						m.getTypeDefinition() != null &&
 						m.getTypeDefinition().asDye() != null &&
-						m.getTypeDefinition().asDye().getDyeColor().equals(bannerColor)
+						m.getTypeDefinition().asDye().getDyeColor().equals(dyeColor)
+					)
+				.filter(m -> {
+					try {
+						Deprecated d = VersionedMaterial.class.getField(m.name()).getAnnotation(Deprecated.class);
+						return d == null;
+					} catch (NoSuchFieldException | SecurityException e) {
+						return false;
+					}
+				})
+				.findFirst().orElse(null);
+	}
+
+	/**
+	 * Finds the corresponding wooden planks material by its wood type
+	 * @param woodType The wood type of the planks
+	 * @return The corresponding dye material
+	 */
+	public static VersionedMaterial getWoodenPlanks(WoodType woodType) {
+		return Arrays.stream(values())
+				.filter(m ->
+						m.getTypeDefinition() != null &&
+						m.getTypeDefinition().asWoodenPlanks() != null &&
+						m.getTypeDefinition().asWoodenPlanks().getWoodType().equals(woodType)
+					)
+				.findFirst().orElse(null);
+	}
+
+	/**
+	 * Finds the corresponding leaves material by its wood type
+	 * @param woodType The type of the leaves
+	 * @return The corresponding dye material
+	 */
+	public static VersionedMaterial getLeaves(WoodType woodType) {
+		return Arrays.stream(values())
+				.filter(m ->
+						m.getTypeDefinition() != null &&
+						m.getTypeDefinition().asLeaves() != null &&
+						m.getTypeDefinition().asLeaves().getWoodType().equals(woodType)
+					)
+				.findFirst().orElse(null);
+	}
+
+	/**
+	 * Finds the corresponding wooden log material by its wood type
+	 * @param woodType The wood type of the log
+	 * @return The corresponding dye material
+	 */
+	public static VersionedMaterial getWoodenLog(WoodType woodType) {
+		return Arrays.stream(values())
+				.filter(m ->
+						m.getTypeDefinition() != null &&
+						m.getTypeDefinition().asWoodenLog() != null &&
+						m.getTypeDefinition().asWoodenLog().getWoodType().equals(woodType)
+					)
+				.findFirst().orElse(null);
+	}
+
+	/**
+	 * Finds the corresponding wooden sign material by its wood type
+	 * @param woodType The wood type of the sign
+	 * @return The corresponding dye material
+	 */
+	public static VersionedMaterial getWoodenSign(WoodType woodType) {
+		return Arrays.stream(values())
+				.filter(m ->
+						m.getTypeDefinition() != null &&
+						m.getTypeDefinition().asWoodenSign() != null &&
+						m.getTypeDefinition().asWoodenSign().getWoodType().equals(woodType)
+					)
+				.findFirst().orElse(null);
+	}
+
+	/**
+	 * Finds the corresponding wool material by its color
+	 * @param woolColor The color of the wool
+	 * @return The corresponding dye material
+	 */
+	public static VersionedMaterial getWool(VersionedDyeColor woolColor) {
+		return Arrays.stream(values())
+				.filter(m ->
+						m.getTypeDefinition() != null &&
+						m.getTypeDefinition().asWool() != null &&
+						m.getTypeDefinition().asWool().getDyeColor().equals(woolColor)
 					)
 				.findFirst().orElse(null);
 	}
