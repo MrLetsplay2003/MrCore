@@ -13,6 +13,7 @@ public class ParserToken<T> {
 	public ParserToken(T value, String raw) {
 		this.isComplete = true;
 		this.value = value;
+		this.raw = raw;
 	}
 	
 	public ParserToken(T value) {
