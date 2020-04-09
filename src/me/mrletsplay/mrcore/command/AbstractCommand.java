@@ -13,7 +13,9 @@ public abstract class AbstractCommand<T extends CommandProperties> implements Co
 	private String name;
 	private List<String> aliases;
 	private List<CommandOption<?>> options;
-	private String description;
+	private String
+		description,
+		usage;
 	private T properties;
 	private List<Command> subCommands;
 	
@@ -69,6 +71,15 @@ public abstract class AbstractCommand<T extends CommandProperties> implements Co
 		return description;
 	}
 	
+	public void setUsage(String usage) {
+		this.usage = usage;
+	}
+	
+	@Override
+	public String getUsage() {
+		return usage;
+	}
+	
 	public void setProperties(T properties) {
 		this.properties = properties;
 	}
@@ -78,9 +89,10 @@ public abstract class AbstractCommand<T extends CommandProperties> implements Co
 		return properties;
 	}
 
-	public void addSubCommand(Command subCommand) {
+	public <S extends Command> S addSubCommand(S subCommand) {
 		subCommand.setParent(this);
 		subCommands.add(subCommand);
+		return subCommand;
 	}
 	
 	@Override

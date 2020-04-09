@@ -30,6 +30,8 @@ public interface Command {
 	
 	public String getDescription();
 	
+	public String getUsage();
+	
 	public CommandProperties getProperties();
 	
 	public Collection<? extends Command> getSubCommands();
@@ -50,9 +52,20 @@ public interface Command {
 	
 	public default void sendCommandInfo(CommandSender sender) {
 		sender.sendMessage("Command: " + getName());
-		sender.sendMessage("Description: " + getDescription());
-		sender.sendMessage("");
-		sender.sendMessage("Available options: " + getOptions().stream().map(o -> "--" + o.getLongName()).collect(Collectors.joining(", ")));
+		if(getDescription() != null) sender.sendMessage("Description: " + getDescription());
+		if(!getOptions().isEmpty()) sender.sendMessage("Available options: " + getOptions().stream().map(o -> "--" + o.getLongName()).collect(Collectors.joining(", ")));
+		if(getUsage() != null) sender.sendMessage("Usage: " + getUsage());
+		if(!getSubCommands().isEmpty()) {
+			sender.sendMessage("");
+			sender.sendMessage("Sub commands:");
+			for(Command sub : getSubCommands()) {
+				sender.sendMessage((sub.getUsage() == null ? sub.getFullName() : sub.getUsage()) + (sub.getDescription() == null ? "" : " - " + sub.getDescription()));
+			}
+		}
+	}
+	
+	public default String getFullName() {
+		return getParent() == null ? getName() : getParent().getFullName() + " " + getName();
 	}
 	
 	public void action(CommandInvokedEvent event);

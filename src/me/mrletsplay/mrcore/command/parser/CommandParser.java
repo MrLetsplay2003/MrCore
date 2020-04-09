@@ -23,10 +23,10 @@ public class CommandParser {
 
 	private static final Pattern
 		COMMAND_NAME_FORMAT = compile("[a-zA-Z-_0-9?]*"),
-		SHORT_OPTION_FORMAT = compile("-(?<name>[a-zA-Z-_0-9]*)(?: |$)"),
-		LONG_OPTION_FORMAT = compile("--(?<name>[a-zA-Z-_0-9]*)(?: |$)"),
-		BASIC_ARGUMENT_FORMAT = compile("(?<arg>[^\n\r\t\" ]*)(?: |$)"),
-		ESCAPED_ARGUMENT_FORMAT = compile("\"(?<value>(?:\\\\[rnt\"\\\\]|[^\\r\\n\\t\"\\\\])*)(?<cq>\")?(?: |$)");
+		SHORT_OPTION_FORMAT = compile("-(?<name>[a-zA-Z-_0-9]+)(?= |$)"),
+		LONG_OPTION_FORMAT = compile("--(?<name>[a-zA-Z-_0-9]*)(?= |$)"),
+		BASIC_ARGUMENT_FORMAT = compile("(?<arg>(?:\\\\ |[^\n\r\t\" ])*)(?= |$)"),
+		ESCAPED_ARGUMENT_FORMAT = compile("\"(?<value>(?:\\\\[rnt\"\\\\]|[^\\r\\n\\t\"\\\\])*)(?<cq>\")?(?= |$)");
 	
 	private CommandParser() {}
 	
@@ -106,7 +106,17 @@ public class CommandParser {
 			return new ParserToken<>(getCommandCompletions(provider.getCommands(), cName));
 		}
 		
-		commandLine.cutStart(m.group().length()).trim();
+		commandLine.cutStart(m.group().length());
+		
+		if(commandLine.toString().equals(" ") && tabComplete) {
+			List<String> cs = new ArrayList<>();
+			cs.addAll(getCommandCompletions(c.getSubCommands(), ""));
+			c.getOptions().forEach(o -> cs.add("--" + o.getLongName()));
+			return new ParserToken<>(cs);
+		}
+		
+		commandLine.trim();
+		
 		return new ParserToken<>(c);
 	}
 	
@@ -114,13 +124,34 @@ public class CommandParser {
 		List<String> cs = new ArrayList<>();
 		for(Command cmd : cmds) {
 			if(cmd.getName().toLowerCase().startsWith(cName.toLowerCase())) {
-				cs.add(cName.substring(cName.length()));
+				cs.add(cmd.getName().substring(cName.length()));
 			}
 			cmd.getAliases().stream()
 				.filter(a -> a.toLowerCase().startsWith(cName.toLowerCase()))
 				.forEach(a -> cs.add(a.substring(cName.length())));
 		}
 		return cs;
+	}
+	
+	private static List<String> getOptionCompletions(Command cmd, String optionName, boolean longOption) {
+		if(!longOption) return cmd.getOptions().stream()
+				.map(CommandOption::getShortName)
+				.filter(Objects::nonNull)
+				.collect(Collectors.toList());
+		
+		return cmd.getOptions().stream()
+				.map(CommandOption::getLongName)
+				.filter(c -> c.toLowerCase().startsWith(optionName.toLowerCase()))
+				.map(c -> c.substring(optionName.length()))
+				.collect(Collectors.toList());
+	}
+	
+	private static List<String> getArgumentCompletions(Collection<String> completions, String rawArgument, boolean quoted) {
+		return completions.stream()
+				.map(o -> escapeArgument(o, quoted))
+				.filter(c -> c.toLowerCase().startsWith(rawArgument.toLowerCase()))
+				.map(c -> c.substring(rawArgument.length()))
+				.collect(Collectors.toList());
 	}
 	
 	private static ParserToken<Command> readSubCommand(Command parent, MutableString commandLine, boolean tabComplete) {
@@ -134,7 +165,15 @@ public class CommandParser {
 			
 			commandLine.cutStart(m.group().length()).trim();
 			
-			return new ParserToken<>(getCommandCompletions(parent.getSubCommands(), cName));
+			List<String> cs = new ArrayList<>();
+			cs.addAll(getCommandCompletions(parent.getSubCommands(), cName));
+			
+			if(cName.startsWith("-")) {
+				boolean isLong = cName.startsWith("--");
+				cs.addAll(getOptionCompletions(parent, cName.substring(isLong ? 2 : 1), isLong));
+			}
+			
+			return new ParserToken<>(cs);
 		}
 		
 		commandLine.cutStart(m.group().length()).trim();
@@ -159,14 +198,17 @@ public class CommandParser {
 			
 			commandLine.cutStart(m.group().length()).trim();
 			
-			return new ParserToken<>(c.getOptions().stream()
-					.filter(o -> o.getLongName().toLowerCase().startsWith(opName.toLowerCase()))
-					.map(CommandOption::getLongName)
-					.map(s -> s.substring(opName.length()))
-					.collect(Collectors.toList()));
+			return new ParserToken<>(getOptionCompletions(c, opName, true));
 		}
-
-		commandLine.cutStart(m.group().length()).trim();
+		
+		commandLine.cutStart(m.group().length());
+		
+		if(commandLine.toString().equals(" ") && tabComplete) {
+			return new ParserToken<>(getArgumentCompletions(op.getType() == null ? Collections.emptyList() : op.getType().getTabCompleteValues(), "", true));
+		}
+		
+		commandLine.trim();
+		
 		return new ParserToken<>(op);
 	}
 	
@@ -183,14 +225,21 @@ public class CommandParser {
 		if(op.stream().anyMatch(Objects::isNull)) return null;
 		
 		if(tabComplete && commandLine.length() == m.group().length()) {
-			commandLine.cutStart(m.group().length()).trim();
-			
 			return new ParserToken<>(c.getOptions().stream()
 					.map(CommandOption::getShortName)
 					.collect(Collectors.toList()));
 		}
 		
-		commandLine.cutStart(m.group().length()).trim();
+		commandLine.cutStart(m.group().length());
+		
+		if(commandLine.toString().equals(" ") && tabComplete) {
+			CommandOption<?> fOp = op.stream().filter(o -> o.getType() != null).findFirst().orElse(null);
+			if(fOp == null) return new ParserToken<>(Collections.emptyList());
+			return new ParserToken<>(getArgumentCompletions(fOp.getType().getTabCompleteValues(), "", true));
+		}
+		
+		commandLine.trim();
+		
 		return new ParserToken<>(op);
 	}
 	
@@ -208,10 +257,7 @@ public class CommandParser {
 		
 		if(value.isEmpty() && (!tabComplete || commandLine.length() > m.group().length())) return null;
 		
-		if(tabComplete && commandLine.length() == m.group().length()) return new ParserToken<>(defaultValues.stream()
-				.filter(v -> v.startsWith(value))
-				.map(s -> s.substring(value.length()))
-				.collect(Collectors.toList()));
+		if(tabComplete && commandLine.length() == m.group().length()) return new ParserToken<>(getArgumentCompletions(defaultValues, value, false));
 		
 		commandLine.cutStart(m.group().length()).trim();
 		
@@ -221,9 +267,10 @@ public class CommandParser {
 	private static ParserToken<String> readEscapedArgument(Command c, Collection<String> defaultValues, MutableString commandLine, boolean tabComplete) {
 		Matcher m = tryMatch(commandLine, ESCAPED_ARGUMENT_FORMAT);
 		if(m == null) return null;
+		
 		String
 			value = m.group("value"),
-			uValue = unescapeArg(value);
+			uValue = unescapeArgument(value);
 		
 		if(m.group("cq") == null) {
 			if(!tabComplete || commandLine.length() > m.group().length()) return null;
@@ -232,11 +279,7 @@ public class CommandParser {
 			
 			List<String> tabCompletions = new ArrayList<>();
 			tabCompletions.add("\"");
-			tabCompletions.addAll(defaultValues.stream()
-					.filter(v -> v.startsWith(uValue))
-					.map(v -> escapeArg(v) + "\"")
-					.map(s -> s.substring(value.length()))
-					.collect(Collectors.toList()));
+			tabCompletions.addAll(getArgumentCompletions(defaultValues, value, true));
 			return new ParserToken<>(tabCompletions);
 		}
 		
@@ -245,7 +288,7 @@ public class CommandParser {
 		return new ParserToken<String>(uValue);
 	}
 	
-	private static String unescapeArg(String arg) {
+	private static String unescapeArgument(String arg) {
 		StringBuilder u = new StringBuilder();
 		for(int i = 0; i < arg.length(); i++) {
 			char c = arg.charAt(i);
@@ -276,6 +319,11 @@ public class CommandParser {
 					u.append('\\');
 					break;
 				}
+				case ' ':
+				{
+					u.append(' ');
+					break;
+				}
 				default:
 				{
 					u.append(n);
@@ -286,7 +334,7 @@ public class CommandParser {
 		return u.toString();
 	}
 	
-	private static String escapeArg(String arg) {
+	private static String escapeArgument(String arg, boolean quoted) {
 		StringBuilder u = new StringBuilder();
 		for(int i = 0; i < arg.length(); i++) {
 			char c = arg.charAt(i);
@@ -315,6 +363,13 @@ public class CommandParser {
 				{
 					u.append("\\\"");
 					break;
+				}
+				case ' ':
+				{
+					if(!quoted) {
+						u.append("\\ ");
+						break;
+					}
 				}
 				default:
 				{
@@ -357,7 +412,10 @@ public class CommandParser {
 		
 		public MutableString trim() {
 			String os = str;
-			str = str.trim();
+//			str = str.trim();
+			while(str.startsWith(" ")) {
+				str = str.substring(1);
+			}
 			amountCut += os.length() - str.length();
 			return this;
 		}

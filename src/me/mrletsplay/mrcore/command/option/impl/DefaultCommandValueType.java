@@ -26,7 +26,7 @@ public final class DefaultCommandValueType {
 		}
 	}, "true", "false");
 	
-	public static final CommandValueType<String> STRING = string("\"\t\r\n");
+	public static final CommandValueType<String> STRING = string("hello world");
 
 	private DefaultCommandValueType() {}
 	

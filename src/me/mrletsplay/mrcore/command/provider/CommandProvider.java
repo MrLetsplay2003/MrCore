@@ -1,6 +1,7 @@
 package me.mrletsplay.mrcore.command.provider;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import me.mrletsplay.mrcore.command.Command;
@@ -30,7 +31,11 @@ public interface CommandProvider {
 	}
 	
 	public default List<String> tabComplete(String commandLine) {
-		return CommandParser.tabComplete(this, commandLine);
+		try {
+			return CommandParser.tabComplete(this, commandLine);
+		}catch(CommandParsingException ex) {
+			return Collections.emptyList();
+		}
 	}
 
 }
