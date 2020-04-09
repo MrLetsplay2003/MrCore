@@ -7,11 +7,16 @@ public class ParserToken<T> {
 	
 	private boolean isComplete;
 	private T value;
+	private String raw;
 	private List<String> completions;
 	
-	public ParserToken(T value) {
+	public ParserToken(T value, String raw) {
 		this.isComplete = true;
 		this.value = value;
+	}
+	
+	public ParserToken(T value) {
+		this(value, null);
 	}
 	
 	public ParserToken(List<String> completions) {
@@ -26,6 +31,10 @@ public class ParserToken<T> {
 	public T getValue() throws IllegalStateException {
 		if(!isComplete) throw new IllegalStateException("Token is incomplete");
 		return value;
+	}
+	
+	public String getRaw() {
+		return raw;
 	}
 	
 	public List<String> getCompletions() throws IllegalStateException {

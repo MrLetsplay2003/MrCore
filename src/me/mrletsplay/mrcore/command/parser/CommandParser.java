@@ -47,22 +47,28 @@ public class CommandParser {
 	private static ParserToken<ParsedCommand> parseCommand(CommandProvider provider, MutableString commandLine, boolean tabComplete) {
 		String origCommandLine = commandLine.toString();
 		ParserToken<Command> cmd = readCommand(provider, commandLine, tabComplete);
+		if(!commandLine.isBlank()) commandLine.trim();
 		if(cmd == null) throw new CommandParsingException("Invalid command name", 0);
 		
 		if(!cmd.isComplete()) return new ParserToken<>(cmd.getCompletions());
 		
 		Command c = cmd.getValue();
+		String label = cmd.getRaw();
 		
-		while(!commandLine.isEmpty()) {
+		while(!commandLine.isBlank()) {
 			ParserToken<Command> sct = readSubCommand(c, commandLine, tabComplete);
 			if(sct == null) break; // End of subcommands
 			if(!sct.isComplete()) return new ParserToken<>(sct.getCompletions());
 			c = sct.getValue();
+			label = sct.getRaw();
+			
+			if(commandLine.isBlank()) break;
+			commandLine.trim();
 		}
 		
 		Map<CommandOption<?>, Object> options = new HashMap<>();
 		
-		while(!commandLine.isEmpty()) {
+		while(!commandLine.isBlank()) {
 			ParserToken<List<CommandOption<?>>> ops = readOption(c, commandLine, tabComplete);
 			if(ops == null) break;
 			if(!ops.isComplete()) return new ParserToken<>(ops.getCompletions());
@@ -72,24 +78,36 @@ public class CommandParser {
 					continue;
 				}
 				ParserToken<String> v = readArgument(c, op.getType().getTabCompleteValues(), commandLine, tabComplete);
+				if(commandLine.isBlank()) break;
+				commandLine.trim();
 				if(v == null) throw new CommandParsingException("Invalid argument format or no argument present", commandLine.getAmountCut());
 				if(!v.isComplete()) return new ParserToken<>(v.getCompletions());
 				NullableOptional<?> pv = op.getType().parse(v.getValue());
 				if(!pv.isPresent()) throw new CommandParsingException("Invalid option value for option \"" + op.getLongName() + "\"", commandLine.getAmountCut());
 				options.put(op, pv.get());
 			}
+
+			if(commandLine.isBlank()) break;
+			commandLine.trim();
 		}
 		
 		List<String> args = new ArrayList<>();
 		
-		while(!commandLine.isEmpty()) {
+		while(!commandLine.isBlank()) {
 			ParserToken<String> arg = readArgument(c, Collections.emptyList(), commandLine, tabComplete);
 			if(arg == null) throw new CommandParsingException("Invalid argument format", commandLine.getAmountCut());
 			if(!arg.isComplete()) return new ParserToken<>(arg.getCompletions());
 			args.add(arg.getValue());
+
+			if(commandLine.isBlank()) break;
+			commandLine.trim();
 		}
 		
-		return new ParserToken<ParsedCommand>(new ParsedCommand(c, origCommandLine, "lol", args.toArray(new String[args.size()]), options));
+		if(tabComplete && commandLine.isBlank() && !commandLine.isEmpty() && c.getTabCompleter() != null) {
+			return new ParserToken<>(c.getTabCompleter().tabComplete(c, label, args.toArray(new String[args.size()])));
+		}
+		
+		return new ParserToken<>(new ParsedCommand(c, origCommandLine, label, args.toArray(new String[args.size()]), options));
 	}
 	
 	private static ParserToken<Command> readCommand(CommandProvider provider, MutableString commandLine, boolean tabComplete) {
@@ -117,7 +135,7 @@ public class CommandParser {
 		
 		commandLine.trim();
 		
-		return new ParserToken<>(c);
+		return new ParserToken<>(c, cName);
 	}
 	
 	private static List<String> getCommandCompletions(Collection<? extends Command> cmds, String cName) {
@@ -176,8 +194,8 @@ public class CommandParser {
 			return new ParserToken<>(cs);
 		}
 		
-		commandLine.cutStart(m.group().length()).trim();
-		return new ParserToken<>(c);
+		commandLine.cutStart(m.group().length());
+		return new ParserToken<>(c, cName);
 	}
 	
 	private static ParserToken<List<CommandOption<?>>> readOption(Command c, MutableString commandLine, boolean tabComplete) {
@@ -196,7 +214,7 @@ public class CommandParser {
 		if(op == null) {
 			if(!tabComplete || commandLine.length() > m.group().length()) return null;
 			
-			commandLine.cutStart(m.group().length()).trim();
+			commandLine.cutStart(m.group().length());
 			
 			return new ParserToken<>(getOptionCompletions(c, opName, true));
 		}
@@ -206,8 +224,6 @@ public class CommandParser {
 		if(commandLine.toString().equals(" ") && tabComplete) {
 			return new ParserToken<>(getArgumentCompletions(op.getType() == null ? Collections.emptyList() : op.getType().getTabCompleteValues(), "", true));
 		}
-		
-		commandLine.trim();
 		
 		return new ParserToken<>(op);
 	}
@@ -238,8 +254,6 @@ public class CommandParser {
 			return new ParserToken<>(getArgumentCompletions(fOp.getType().getTabCompleteValues(), "", true));
 		}
 		
-		commandLine.trim();
-		
 		return new ParserToken<>(op);
 	}
 	
@@ -259,7 +273,7 @@ public class CommandParser {
 		
 		if(tabComplete && commandLine.length() == m.group().length()) return new ParserToken<>(getArgumentCompletions(defaultValues, value, false));
 		
-		commandLine.cutStart(m.group().length()).trim();
+		commandLine.cutStart(m.group().length());
 		
 		return new ParserToken<String>(value);
 	}
@@ -275,7 +289,7 @@ public class CommandParser {
 		if(m.group("cq") == null) {
 			if(!tabComplete || commandLine.length() > m.group().length()) return null;
 			
-			commandLine.cutStart(m.group().length()).trim();
+			commandLine.cutStart(m.group().length());
 			
 			List<String> tabCompletions = new ArrayList<>();
 			tabCompletions.add("\"");
@@ -283,7 +297,7 @@ public class CommandParser {
 			return new ParserToken<>(tabCompletions);
 		}
 		
-		commandLine.cutStart(m.group().length()).trim();
+		commandLine.cutStart(m.group().length());
 		
 		return new ParserToken<String>(uValue);
 	}
@@ -422,6 +436,10 @@ public class CommandParser {
 		
 		public boolean isEmpty() {
 			return str.isEmpty();
+		}
+		
+		public boolean isBlank() {
+			return str.trim().isEmpty();
 		}
 		
 		public int getAmountCut() {

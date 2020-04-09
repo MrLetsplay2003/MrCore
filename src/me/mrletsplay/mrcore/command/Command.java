@@ -4,6 +4,7 @@ import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import me.mrletsplay.mrcore.command.completer.CommandTabCompleter;
 import me.mrletsplay.mrcore.command.option.CommandOption;
 import me.mrletsplay.mrcore.command.properties.CommandProperties;
 import me.mrletsplay.mrcore.misc.FriendlyException;
@@ -33,6 +34,8 @@ public interface Command {
 	public String getUsage();
 	
 	public CommandProperties getProperties();
+	
+	public CommandTabCompleter getTabCompleter();
 	
 	public Collection<? extends Command> getSubCommands();
 	

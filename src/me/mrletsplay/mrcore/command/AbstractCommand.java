@@ -3,6 +3,7 @@ package me.mrletsplay.mrcore.command;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.mrletsplay.mrcore.command.completer.CommandTabCompleter;
 import me.mrletsplay.mrcore.command.option.CommandOption;
 import me.mrletsplay.mrcore.command.option.impl.DefaultCommandOption;
 import me.mrletsplay.mrcore.command.properties.CommandProperties;
@@ -18,6 +19,7 @@ public abstract class AbstractCommand<T extends CommandProperties> implements Co
 		usage;
 	private T properties;
 	private List<Command> subCommands;
+	private CommandTabCompleter tabCompleter;
 	
 	public AbstractCommand(String name, T initialProperties) {
 		this.name = name;
@@ -98,6 +100,15 @@ public abstract class AbstractCommand<T extends CommandProperties> implements Co
 	@Override
 	public List<Command> getSubCommands() {
 		return subCommands;
+	}
+	
+	public void setTabCompleter(CommandTabCompleter tabCompleter) {
+		this.tabCompleter = tabCompleter;
+	}
+	
+	@Override
+	public CommandTabCompleter getTabCompleter() {
+		return tabCompleter;
 	}
 	
 	public static CommandOption<?> createCommandOption(String shortName, String longName) {
