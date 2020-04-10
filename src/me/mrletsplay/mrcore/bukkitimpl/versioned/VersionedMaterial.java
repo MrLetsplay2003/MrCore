@@ -833,7 +833,23 @@ public enum VersionedMaterial {
 	COMPARATOR(
 			of(new MaterialDefinition("REDSTONE_COMPARATOR", 0), V1_8.versionsTo(V1_12)),
 			of(new MaterialDefinition("COMPARATOR", 0), V1_13.versionsTo(V1_15))
-		)
+		),
+	STONE_PRESSURE_PLATE(
+			of(new MaterialDefinition("STONE_PLATE", 0), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("STONE_PRESSURE_PLATE", 0), V1_13.versionsTo(V1_15))
+		),
+	OAK_PRESSURE_PLATE(
+			of(new MaterialDefinition("WOOD_PLATE", 0), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("OAK_PRESSURE_PLATE", 0), V1_13.versionsTo(V1_15))
+		),
+	LIGHT_WEIGHTED_PRESSURE_PLATE(
+			of(new MaterialDefinition("GOLD_PLATE", 0), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("LIGHT_WEIGHTED_PRESSURE_PLATE", 0), V1_13.versionsTo(V1_15))
+		),
+	HEAVY_WEIGHTED_PRESSURE_PLATE(
+			of(new MaterialDefinition("IRON_PLATE", 0), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("HEAVY_WEIGHTED_PRESSURE_PLATE", 0), V1_13.versionsTo(V1_15))
+		),
 	;
 	
 	private TypeDefinition typeDefinition;

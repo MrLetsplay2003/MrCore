@@ -54,7 +54,7 @@ public interface Command {
 	}
 	
 	public default void sendCommandInfo(CommandSender sender) {
-		sender.sendMessage("Command: " + getName());
+		sender.sendMessage("Command: " + getFullName());
 		if(getDescription() != null) sender.sendMessage("Description: " + getDescription());
 		if(!getOptions().isEmpty()) sender.sendMessage("Available options: " + getOptions().stream().map(o -> "--" + o.getLongName()).collect(Collectors.joining(", ")));
 		if(getUsage() != null) sender.sendMessage("Usage: " + getUsage());

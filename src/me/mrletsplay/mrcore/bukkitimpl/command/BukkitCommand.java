@@ -50,7 +50,7 @@ public abstract class BukkitCommand extends AbstractCommand<CommandProperties> i
 	
 	@Override
 	public void sendCommandInfo(me.mrletsplay.mrcore.command.CommandSender sender) {
-		sender.sendMessage("§6Command: §f" + getName());
+		sender.sendMessage("§6Command: §f" + getFullName());
 		if(getDescription() != null) sender.sendMessage("§6Description: §f" + getDescription());
 		if(!getOptions().isEmpty()) sender.sendMessage("§6Available options: §f" + getOptions().stream().map(o -> "--" + o.getLongName()).collect(Collectors.joining(", ")));
 		if(getUsage() != null) sender.sendMessage("§6Usage: §f" + getUsage());
