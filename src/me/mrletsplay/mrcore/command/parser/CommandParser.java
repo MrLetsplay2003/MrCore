@@ -71,10 +71,10 @@ public class CommandParser {
 		while(!commandLine.isEmpty()) {
 			if(tabComplete && commandLine.hasBlankContent()) {
 				List<String> cs = new ArrayList<>();
-				cs.addAll(prefixOptionCompletions(getOptionCompletions(c, "", true), true));
 				if(c.getTabCompleter() != null) {
 					cs.addAll(c.getTabCompleter().tabComplete(c, label, new String[0]));
 				}
+				cs.addAll(prefixOptionCompletions(getOptionCompletions(c, "", true), true));
 				return new ParserToken<>(cs);
 			}
 			
@@ -187,7 +187,7 @@ public class CommandParser {
 	
 	private static List<String> getArgumentCompletions(Collection<String> completions, String rawArgument, boolean quoted) {
 		return completions.stream()
-				.map(o -> escapeArgument(o, quoted))
+				.map(o -> quoted ? escapeArgument(o, true) + "\"" : escapeArgument(o, false))
 				.filter(c -> c.toLowerCase().startsWith(rawArgument.toLowerCase()))
 				.map(c -> c.substring(rawArgument.length()))
 				.collect(Collectors.toList());
@@ -254,10 +254,10 @@ public class CommandParser {
 		if(commandLine.toString().equals(" ") && tabComplete) {
 			if(op.getType() == null) {
 				List<String> cs = new ArrayList<>();
-				cs.addAll(prefixOptionCompletions(getOptionCompletions(c, "", true), true));
 				if(c.getTabCompleter() != null) {
 					cs.addAll(c.getTabCompleter().tabComplete(c, label, new String[0]));
 				}
+				cs.addAll(prefixOptionCompletions(getOptionCompletions(c, "", true), true));
 				return new ParserToken<>(cs);
 			}
 			return new ParserToken<>(autoQuoteArguments(op.getType().getTabCompleteValues()));
@@ -290,10 +290,10 @@ public class CommandParser {
 			CommandOption<?> fOp = op.stream().filter(o -> o.getType() != null).findFirst().orElse(null);
 			if(fOp == null) {
 				List<String> cs = new ArrayList<>();
-				cs.addAll(prefixOptionCompletions(getOptionCompletions(c, "", true), true));
 				if(c.getTabCompleter() != null) {
 					cs.addAll(c.getTabCompleter().tabComplete(c, label, new String[0]));
 				}
+				cs.addAll(prefixOptionCompletions(getOptionCompletions(c, "", true), true));
 				return new ParserToken<>(cs);
 			}
 			return new ParserToken<>(autoQuoteArguments(fOp.getType().getTabCompleteValues()));

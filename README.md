@@ -23,7 +23,7 @@ via the graphite-official repository
 </repository>
 ```
 
-#### Backup Maven dependency
+## Backup Maven dependency
 ```xml
 <dependency>
 	<groupId>com.github.mrletsplay2003</groupId>

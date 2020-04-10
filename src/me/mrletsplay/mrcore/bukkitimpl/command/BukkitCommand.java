@@ -11,6 +11,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 
 import me.mrletsplay.mrcore.command.AbstractCommand;
+import me.mrletsplay.mrcore.command.parser.CommandParsingException;
 import me.mrletsplay.mrcore.command.properties.CommandProperties;
 import me.mrletsplay.mrcore.command.provider.CommandProvider;
 
@@ -39,7 +40,11 @@ public abstract class BukkitCommand extends AbstractCommand<CommandProperties> i
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		invoke(new BukkitCommandSender(sender), label + " " + Arrays.stream(args).collect(Collectors.joining(" ")));
+		try {
+			invoke(new BukkitCommandSender(sender), label + " " + Arrays.stream(args).collect(Collectors.joining(" ")));
+		}catch(CommandParsingException e) {
+			sender.sendMessage("§cError: §7" + e.getMessage());
+		}
 		return true;
 	}
 	
