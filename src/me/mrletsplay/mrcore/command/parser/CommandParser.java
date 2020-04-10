@@ -56,7 +56,7 @@ public class CommandParser {
 		String label = cmd.getRaw();
 		
 		while(!commandLine.isBlank()) {
-			ParserToken<Command> sct = readSubCommand(c, commandLine, tabComplete);
+			ParserToken<Command> sct = readSubCommand(c, label, commandLine, tabComplete);
 			if(sct == null) break; // End of subcommands
 			if(!sct.isComplete()) return new ParserToken<>(sct.getCompletions());
 			c = sct.getValue();
@@ -111,7 +111,11 @@ public class CommandParser {
 		List<String> args = new ArrayList<>();
 		
 		while(!commandLine.isBlank()) {
-			ParserToken<String> arg = readArgument(c, Collections.emptyList(), commandLine, tabComplete);
+			List<String> cs = Collections.emptyList();
+			if(tabComplete && c.getTabCompleter() != null) {
+				cs = c.getTabCompleter().tabComplete(c, label, args.toArray(new String[args.size()]));
+			}
+			ParserToken<String> arg = readArgument(c, cs, commandLine, tabComplete);
 			if(arg == null) throw new CommandParsingException("Invalid argument format", commandLine.getAmountCut());
 			if(!arg.isComplete()) return new ParserToken<>(arg.getCompletions());
 			args.add(arg.getValue());
@@ -193,7 +197,7 @@ public class CommandParser {
 				.collect(Collectors.toList());
 	}
 	
-	private static ParserToken<Command> readSubCommand(Command parent, MutableString commandLine, boolean tabComplete) {
+	private static ParserToken<Command> readSubCommand(Command parent, String label, MutableString commandLine, boolean tabComplete) {
 		Matcher m = tryMatch(commandLine, COMMAND_NAME_FORMAT);
 		if(m == null) return null;
 		String cName = m.group();
@@ -206,6 +210,10 @@ public class CommandParser {
 			
 			List<String> cs = new ArrayList<>();
 			cs.addAll(getCommandCompletions(parent.getSubCommands(), cName));
+			
+			if(parent.getTabCompleter() != null) {
+				cs.addAll(getArgumentCompletions(parent.getTabCompleter().tabComplete(c, label, new String[0]), cName, false));
+			}
 			
 			if(cName.startsWith("-")) {
 				boolean isLong = cName.startsWith("--");
@@ -311,8 +319,11 @@ public class CommandParser {
 	
 	private static ParserToken<String> readBasicArgument(Command c, Collection<String> defaultValues, MutableString commandLine, boolean tabComplete) {
 		Matcher m = tryMatch(commandLine, BASIC_ARGUMENT_FORMAT);
+		System.out.println(m);
 		if(m == null) return null;
 		String value = m.group("arg");
+		
+		System.out.println(value);
 		
 		if(value.isEmpty() && (!tabComplete || commandLine.length() > m.group().length())) return null;
 		
