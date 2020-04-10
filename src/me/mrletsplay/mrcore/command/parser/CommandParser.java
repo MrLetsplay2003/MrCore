@@ -319,11 +319,8 @@ public class CommandParser {
 	
 	private static ParserToken<String> readBasicArgument(Command c, Collection<String> defaultValues, MutableString commandLine, boolean tabComplete) {
 		Matcher m = tryMatch(commandLine, BASIC_ARGUMENT_FORMAT);
-		System.out.println(m);
 		if(m == null) return null;
 		String value = m.group("arg");
-		
-		System.out.println(value);
 		
 		if(value.isEmpty() && (!tabComplete || commandLine.length() > m.group().length())) return null;
 		
