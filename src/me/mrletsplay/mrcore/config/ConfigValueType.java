@@ -84,13 +84,13 @@ public enum ConfigValueType {
 		ConfigValueType type = getRawTypeOf(o);
 		if(type != null) return NullableOptional.of(o);
 		List<ObjectMapper<?, ?>> tlms = forSection.getConfig().getMappers().entrySet().stream()
-				.filter(en -> en.getKey().canMap(o, forSection::castType))
+				.filter(en -> en.getKey().canMap(o, forSection::castPrimitiveType))
 				.sorted(Comparator.comparingInt(Map.Entry::getValue))
 				.map(Map.Entry::getKey)
 				.collect(Collectors.toList());
 		for(ObjectMapper<?, ?> om : tlms) {
 			try {
-				Object c = om.mapRawObject(forSection, o, forSection::castType);
+				Object c = om.mapRawObject(forSection, o, forSection::castPrimitiveType);
 				if(isConfigPrimitive(om.getMappedClass())) return NullableOptional.of(c); // ct -> tlm -> cc
 				NullableOptional<?> tto = mapLowLevelType(forSection, c); // First try ct -> tlm -> llm -> ct
 				if(tto.isPresent()) return tto;
@@ -104,13 +104,13 @@ public enum ConfigValueType {
 	
 	public static NullableOptional<?> mapLowLevelType(ConfigSection section, Object o) {
 		List<ObjectMapper<?, ?>> llms = section.getConfig().getLowLevelMappers().entrySet().stream()
-				.filter(en -> en.getKey().canMap(o, section::castType))
+				.filter(en -> en.getKey().canMap(o, section::castPrimitiveType))
 				.sorted(Comparator.comparingInt(Map.Entry::getValue))
 				.map(Map.Entry::getKey)
 				.collect(Collectors.toList());
 		for(ObjectMapper<?, ?> tom : llms) {
 			try {
-				Object c2 = tom.mapRawObject(section, o, section::castType);
+				Object c2 = tom.mapRawObject(section, o, section::castPrimitiveType);
 				if(isConfigPrimitive(tom.getMappedClass())) return NullableOptional.of(c2);
 			}catch(ObjectMappingException e) {
 				e.printStackTrace();
