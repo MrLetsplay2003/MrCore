@@ -29,7 +29,7 @@ import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolClassEntry;
 
 public class ProxyUtils {
 	
-	private static final String PROXY_HANDLER_FIELD = "proxyHandler";
+	public static final String PROXY_HANDLER_FIELD = "proxyHandler";
 	
 	private static int proxyID;
 	
