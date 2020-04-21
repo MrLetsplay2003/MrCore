@@ -196,8 +196,8 @@ public class ClassFileUtils {
 			nInstr.add(new InstructionInformation(Instruction.ACONST_NULL));
 		}
 		
-		nInstr.add(new InstructionInformation(Instruction.LDC, (byte) mNmInd));
-		nInstr.add(new InstructionInformation(Instruction.LDC, (byte) mDcInd));
+		nInstr.add(new InstructionInformation(Instruction.LDC_W, getShortBytes(mNmInd)));
+		nInstr.add(new InstructionInformation(Instruction.LDC_W, getShortBytes(mDcInd)));
 		nInstr.add(new InstructionInformation(Instruction.BIPUSH, (byte) method.getMethodDescriptor().getParameterDescriptors().length));
 		nInstr.add(new InstructionInformation(Instruction.ANEWARRAY, getShortBytes(objClInd)));
 		

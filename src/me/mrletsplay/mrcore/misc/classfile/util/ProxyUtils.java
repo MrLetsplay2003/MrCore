@@ -94,6 +94,7 @@ public class ProxyUtils {
 				if(Modifier.isStatic(m.getModifiers())) continue;
 				if(!Modifier.isAbstract(m.getModifiers()) && !overrideImplemented) continue;
 				MethodDescriptor d = ClassFileUtils.getMethodDescriptor(m);
+				d.getAccessFlags().removeFlag(MethodAccessFlag.ABSTRACT);
 				
 				ms.add(d);
 			}
@@ -103,6 +104,7 @@ public class ProxyUtils {
 					if(Modifier.isStatic(m.getModifiers())) continue;
 					if(!Modifier.isAbstract(m.getModifiers()) && !overrideImplemented) continue;
 					MethodDescriptor d = ClassFileUtils.getMethodDescriptor(m);
+					d.getAccessFlags().removeFlag(MethodAccessFlag.ABSTRACT);
 					
 					ms.add(d);
 				}
