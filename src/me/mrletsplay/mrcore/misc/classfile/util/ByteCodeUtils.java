@@ -51,6 +51,14 @@ public class ByteCodeUtils {
 				for(byte b : bs) info.add(b);
 				break;
 			}
+			case PUTFIELD:
+			case PUTSTATIC:
+			{
+				if(args.size() != 3) throw new IllegalArgumentException("Need 3 args for " + instr + " (clz, fld, type)");
+				byte[] bs = ClassFileUtils.getShortBytes(ClassFileUtils.getOrAppendFieldRef(classFile, ClassFileUtils.getOrAppendClass(classFile, ClassFileUtils.getOrAppendUTF8(classFile, args.remove(0))), ClassFileUtils.getOrAppendNameAndType(classFile, ClassFileUtils.getOrAppendUTF8(classFile, args.remove(0)), ClassFileUtils.getOrAppendUTF8(classFile, args.remove(0)))));
+				for(byte b : bs) info.add(b);
+				break;
+			}
 			default:
 				break;
 		}
