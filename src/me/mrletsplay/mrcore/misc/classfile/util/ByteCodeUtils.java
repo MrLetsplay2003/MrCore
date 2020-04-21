@@ -44,6 +44,13 @@ public class ByteCodeUtils {
 				for(byte b : bs) info.add(b);
 				break;
 			}
+			case CHECKCAST:
+			{
+				if(args.size() != 1) throw new IllegalArgumentException("Need 1 arg for " + instr + " (clz)");
+				byte[] bs = ClassFileUtils.getShortBytes(ClassFileUtils.getOrAppendClass(classFile, ClassFileUtils.getOrAppendUTF8(classFile, args.remove(0))));
+				for(byte b : bs) info.add(b);
+				break;
+			}
 			default:
 				break;
 		}

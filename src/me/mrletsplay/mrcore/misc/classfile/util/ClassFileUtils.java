@@ -147,25 +147,27 @@ public class ClassFileUtils {
 		int clNInd = getOrAppendUTF8(file, toClass);
 		int clInd = getOrAppendClass(file, clNInd);
 		int mrInd = getOrAppendMethodRef(file, clInd, ntInd);
-		
+
+		byte i = 0;
 		boolean isStatic = method.getAccessFlags().hasFlag(MethodAccessFlag.STATIC);
 		if(!isStatic) { // Only add this class instance for instance methods
 			nInstr.add(new InstructionInformation(Instruction.ALOAD_0));
+			i++;
 		}
-		byte i = 0;
-		if(isStatic) i--;
+		
 		for(ParameterDescriptor p : mDesc.getParameterDescriptors()) {
 			PrimitiveType t = p.getParameterType().getPrimitiveType();
-			nInstr.add(getInfo(t, ++i));
+			nInstr.add(getInfo(t, i++));
 			if(t.equals(PrimitiveType.DOUBLE) || t.equals(PrimitiveType.LONG)) i++;
 		}
+		
 		nInstr.add(new InstructionInformation(Instruction.INVOKESTATIC, getShortBytes(mrInd)));
 		
 		PrimitiveType pt = mDesc.getReturnType().getPrimitiveType();
 		
 		nInstr.add(new InstructionInformation(getReturnInstruction(pt)));
 
-		codeAttr.setMaxStack(i * 2 + (isStatic ? 0 : 1) + 1); // #params * 2 (longs are 2x) + 1 for this class instance if instance method + 1 for possible return value
+		codeAttr.setMaxStack(i + 2); // #params * 2 (longs are 2x) + 2 for possible return value (can be long)
 		
 		codeAttr.getCode().replace(ByteCode.of(nInstr));
 	}

@@ -27,17 +27,13 @@ public class ClassMethod {
 	
 	public ClassMethod(ClassFile classFile, EnumFlagCompound<MethodAccessFlag> accessFlags, String name, String descriptor) {
 		this.classFile = classFile;
-		this.accessFlags = accessFlags;
-		this.nameIndex = ClassFileUtils.getOrAppendUTF8(classFile, name);
-		this.descriptorIndex = ClassFileUtils.getOrAppendUTF8(classFile, descriptor);
+		setMethodDescriptor(accessFlags, name, descriptor);
 		this.attributes = new Attribute[0];
 	}
 	
 	public ClassMethod(ClassFile classFile, MethodDescriptor methodDescriptor) {
 		this.classFile = classFile;
-		this.accessFlags = methodDescriptor.getAccessFlags();
-		this.nameIndex = ClassFileUtils.getOrAppendUTF8(classFile, methodDescriptor.getName());
-		this.descriptorIndex = ClassFileUtils.getOrAppendUTF8(classFile, methodDescriptor.getRawDescriptor());
+		setMethodDescriptor(methodDescriptor.getAccessFlags(), methodDescriptor.getName(), methodDescriptor.getRawDescriptor());
 		this.attributes = new Attribute[0];
 	}
 	
@@ -55,6 +51,16 @@ public class ClassMethod {
 	
 	public ConstantPoolUTF8Entry getDescriptor() {
 		return classFile.getConstantPool().getEntry(descriptorIndex).as(ConstantPoolUTF8Entry.class);
+	}
+	
+	public void setMethodDescriptor(EnumFlagCompound<MethodAccessFlag> accessFlags, String name, String descriptor) {
+		this.accessFlags = accessFlags;
+		this.nameIndex = ClassFileUtils.getOrAppendUTF8(classFile, name);
+		this.descriptorIndex = ClassFileUtils.getOrAppendUTF8(classFile, descriptor);
+	}
+	
+	public void setMethodDescriptor(MethodDescriptor methodDescriptor) {
+		setMethodDescriptor(methodDescriptor.getAccessFlags(), methodDescriptor.getName(), methodDescriptor.getRawDescriptor());
 	}
 	
 	public MethodDescriptor getMethodDescriptor() {

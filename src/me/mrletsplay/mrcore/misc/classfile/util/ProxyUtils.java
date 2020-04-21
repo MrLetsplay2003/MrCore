@@ -52,12 +52,11 @@ public class ProxyUtils {
 			throw new FriendlyException("Failed to invoke proxy method", e);
 		}
 	}
-	
+
 	/**
-	 * Creates a proxy class with the provided superclass that implements all of the given interfaces.
-	 * This class is not instantiable except by using {@link #instantiate(Class)}, as it does not declare any constructors.
-	 * It is recommended to use {@link #createProxy(ClassLoader, ProxyHandler, boolean, Class, Class...)} instead to also set a proxyHandler
-	 * @param loader The ClassLoader this class should be loaded into
+	 * Creates a proxy class file with the provided superclass that implements all of the given interfaces.
+	 * This class does not have any constructors.
+	 * @param className The canonical name the class should have, providing <code>null</code> will result in an automatically generated name
 	 * @param overrideImplemented Whether non-abstract/default methods should be overridden and redirected to the proxyHandler
 	 * @param superclass The superclass for the proxy class
 	 * @param interfaces The interfaces this class should implement
@@ -65,12 +64,12 @@ public class ProxyUtils {
 	 * @throws IllegalArgumentException If the superclass is an interface, an interface is not an interface class, or more than 65535 interfaces are provided
 	 * @throws FriendlyException If creating/loading the class fails due to some other reason
 	 */
-	public static synchronized Class<?> createProxyClass(ClassLoader loader, boolean overrideImplemented, Class<?> superclass, Class<?>... interfaces) throws FriendlyException {
+	public static synchronized ClassFile createProxyClassFile(String className, boolean overrideImplemented, Class<?> superclass, Class<?>... interfaces) throws FriendlyException {
 		if(interfaces.length > 65535) throw new IllegalArgumentException("Interface limit exceeded");
 		if(superclass.isInterface()) throw new IllegalArgumentException("Superclass cannot be an interface");
 		if(Arrays.stream(interfaces).anyMatch(i -> !i.isInterface())) throw new IllegalArgumentException("All implemented classes need to be interfaces");
 		
-		String className = "me.mrletsplay.mrcore.misc.classfile.util.Proxy$" + (proxyID++);
+		if(className == null) className = "me.mrletsplay.mrcore.misc.classfile.util.Proxy$" + (proxyID++);
 		
 		ClassFile cf = new ClassFile(className.replace('.', '/'), superclass);
 		
@@ -125,8 +124,29 @@ public class ProxyUtils {
 			
 			ClassFileUtils.redirectClassMethodsNamed(cf, ProxyUtils.class, ProxyUtils.class.getMethod("proxyInvoke", Object.class, String.class, String.class, Object[].class));
 			
+			return cf;
+		}catch(IOException | NoSuchMethodException | SecurityException e) {
+			throw new FriendlyException(e);
+		}
+	}
+	
+	/**
+	 * Creates a proxy class with the provided superclass that implements all of the given interfaces.
+	 * This class is not instantiable except by using {@link #instantiate(Class)}, as it does not declare any constructors.
+	 * It is recommended to use {@link #createProxy(ClassLoader, ProxyHandler, boolean, Class, Class...)} instead to also set a proxyHandler
+	 * @param loader The ClassLoader this class should be loaded into
+	 * @param className The canonical name the class should have, providing <code>null</code> will result in an automatically generated name
+	 * @param overrideImplemented Whether non-abstract/default methods should be overridden and redirected to the proxyHandler
+	 * @param superclass The superclass for the proxy class
+	 * @param interfaces The interfaces this class should implement
+	 * @return The newly created proxy class
+	 * @throws IllegalArgumentException If the superclass is an interface, an interface is not an interface class, or more than 65535 interfaces are provided
+	 * @throws FriendlyException If creating/loading the class fails due to some other reason
+	 */
+	public static Class<?> createProxyClass(ClassLoader loader, String className, boolean overrideImplemented, Class<?> superclass, Class<?>... interfaces) throws FriendlyException {
+		try {
 			ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-			cf.write(bOut);
+			createProxyClassFile(className, overrideImplemented, superclass, interfaces).write(bOut);
 			
 			Method defClass = ClassLoader.class.getDeclaredMethod("defineClass", String.class, byte[].class, int.class, int.class);
 			defClass.setAccessible(true);
@@ -149,7 +169,7 @@ public class ProxyUtils {
 	 * @throws FriendlyException If creating/loading the class fails due to some other reason
 	 */
 	public static Class<?> createProxyClass(ClassLoader loader, Class<?> superclass, Class<?>... interfaces) throws FriendlyException {
-		return createProxyClass(loader, false, superclass, interfaces);
+		return createProxyClass(loader, null, false, superclass, interfaces);
 	}
 	
 	private static List<MethodDescriptor> checkIncompatibleMethods(List<MethodDescriptor> methods) {
@@ -249,7 +269,7 @@ public class ProxyUtils {
 	 */
 	public static Object createProxy(ClassLoader loader, ProxyHandler proxyHandler, boolean overrideImplemented, Class<?> superclass, Class<?>... interfaces) {
 		try {
-			Class<?> proxyClass = createProxyClass(loader, overrideImplemented, superclass, interfaces);
+			Class<?> proxyClass = createProxyClass(loader, null, overrideImplemented, superclass, interfaces);
 			Object inst = instantiate(proxyClass);
 			Field f = proxyClass.getDeclaredField(PROXY_HANDLER_FIELD);
 			f.setAccessible(true);
