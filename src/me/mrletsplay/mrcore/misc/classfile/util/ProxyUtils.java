@@ -271,9 +271,7 @@ public class ProxyUtils {
 		try {
 			Class<?> proxyClass = createProxyClass(loader, null, overrideImplemented, superclass, interfaces);
 			Object inst = instantiate(proxyClass);
-			Field f = proxyClass.getDeclaredField(PROXY_HANDLER_FIELD);
-			f.setAccessible(true);
-			f.set(inst, proxyHandler);
+			setProxyHandler(inst, proxyHandler);
 			return inst;
 		} catch(Exception e) {
 			throw new FriendlyException("Failed to create proxy instance", e);
@@ -292,6 +290,21 @@ public class ProxyUtils {
 	 */
 	public static Object createProxy(ClassLoader loader, ProxyHandler proxyHandler, Class<?> superclass, Class<?>... interfaces) {
 		return createProxy(loader, proxyHandler, false, superclass, interfaces);
+	}
+	
+	/**
+	 * Sets the proxy handler of the given proxy instance to the one provided
+	 * @param proxyInstance The proxy instance
+	 * @param handler The new handler
+	 */
+	public static void setProxyHandler(Object proxyInstance, ProxyHandler handler) {
+		try {
+			Field f = proxyInstance.getClass().getDeclaredField(PROXY_HANDLER_FIELD);
+			f.setAccessible(true);
+			f.set(proxyInstance, handler);
+		}catch(IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
+			throw new FriendlyException(e);
+		}
 	}
 	
 }
