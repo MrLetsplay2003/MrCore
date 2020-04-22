@@ -216,6 +216,10 @@ public class ClassFileUtils {
 		
 		PrimitiveType pt = mDesc.getReturnType().getPrimitiveType();
 		
+		if(pt == PrimitiveType.VOID) {
+			nInstr.add(new InstructionInformation(Instruction.POP));
+		}
+		
 		if(!mDesc.getReturnType().isPrimitive()) {
 			int classInd = getOrAppendClass(file, getOrAppendUTF8(file, mDesc.getReturnType().getClassName().replace('.', '/')));
 			nInstr.add(new InstructionInformation(Instruction.CHECKCAST, getShortBytes(classInd)));
