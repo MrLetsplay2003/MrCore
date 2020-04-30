@@ -160,7 +160,7 @@ public class BukkitConfigMappers {
 				BookMeta m = (BookMeta) i.getItemMeta();
 				JSONObject b = new JSONObject();
 				b.set("author", m.getAuthor());
-				if(NMSVersion.getCurrentServerVersion().isNewerThan(NMSVersion.V1_8_R3)) b.set("generation", m.getGeneration().name());
+				if(NMSVersion.getCurrentServerVersion().isNewerThan(NMSVersion.V1_8_R3) && m.hasGeneration()) b.set("generation", m.getGeneration().name());
 				b.set("title", m.getTitle());
 				b.set("pages", new JSONArray(m.getPages()));
 				return b;
