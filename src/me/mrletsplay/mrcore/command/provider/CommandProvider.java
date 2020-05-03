@@ -22,7 +22,7 @@ public interface CommandProvider {
 	}
 	
 	public default ParsedCommand parseCommand(String commandLine) throws CommandParsingException {
-		return CommandParser.parseCommand(this, commandLine);
+		return CommandParser.parseCommand(this, null, commandLine);
 	}
 	
 	public default void invoke(CommandSender sender, String commandLine) throws CommandParsingException {
@@ -30,9 +30,9 @@ public interface CommandProvider {
 		cmd.getCommand().action(new CommandInvokedEvent(sender, cmd));
 	}
 	
-	public default List<String> tabComplete(String commandLine) {
+	public default List<String> tabComplete(CommandSender sender, String commandLine) {
 		try {
-			return CommandParser.tabComplete(this, commandLine);
+			return CommandParser.tabComplete(this, sender, commandLine);
 		}catch(CommandParsingException ex) {
 			return Collections.emptyList();
 		}

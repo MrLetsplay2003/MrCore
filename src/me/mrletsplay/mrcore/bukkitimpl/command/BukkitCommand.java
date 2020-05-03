@@ -32,7 +32,7 @@ public abstract class BukkitCommand extends AbstractCommand<CommandProperties> i
 
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		List<String> s = tabComplete(alias + " " + Arrays.stream(args).collect(Collectors.joining(" ")));
+		List<String> s = tabComplete(new BukkitCommandSender(sender), alias + " " + Arrays.stream(args).collect(Collectors.joining(" ")));
 		return s.stream()
 				.map(c -> args[args.length - 1] + c)
 				.collect(Collectors.toList());
