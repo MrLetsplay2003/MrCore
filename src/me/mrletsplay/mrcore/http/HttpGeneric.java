@@ -3,13 +3,16 @@ package me.mrletsplay.mrcore.http;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Proxy;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class HttpGeneric implements HttpRequest {
 
 	private String requestMethod, url;
-	private Map<String, String> queryParameters, headerParameters;
+	private Map<String, List<String>> queryParameters;
+	private Map<String, String> headerParameters;
 	private byte[] content;
 	private int timeout;
 	private Proxy proxy;
@@ -39,7 +42,17 @@ public class HttpGeneric implements HttpRequest {
 	
 	@Override
 	public HttpGeneric setQueryParameter(String key, String value) {
-		queryParameters.put(key, value);
+		List<String> v = new ArrayList<>();
+		v.add(value);
+		queryParameters.put(key, v);
+		return this;
+	}
+	
+	@Override
+	public HttpGeneric addQueryParameter(String key, String value) {
+		List<String> v = queryParameters.getOrDefault(key, new ArrayList<>());
+		v.add(value);
+		queryParameters.put(key, v);
 		return this;
 	}
 

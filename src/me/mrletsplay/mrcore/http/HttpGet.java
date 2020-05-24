@@ -3,13 +3,16 @@ package me.mrletsplay.mrcore.http;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Proxy;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class HttpGet implements HttpRequest {
 
 	private String url;
-	private Map<String, String> queryParameters, headerParameters;
+	private Map<String, List<String>> queryParameters;
+	private Map<String, String> headerParameters;
 	private int timeout;
 	private Proxy proxy;
 	
@@ -26,7 +29,17 @@ public class HttpGet implements HttpRequest {
 	
 	@Override
 	public HttpGet setQueryParameter(String key, String value) {
-		queryParameters.put(key, value);
+		List<String> v = new ArrayList<>();
+		v.add(value);
+		queryParameters.put(key, v);
+		return this;
+	}
+	
+	@Override
+	public HttpGet addQueryParameter(String key, String value) {
+		List<String> v = queryParameters.getOrDefault(key, new ArrayList<>());
+		v.add(value);
+		queryParameters.put(key, v);
 		return this;
 	}
 

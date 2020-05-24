@@ -4,14 +4,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Proxy;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class HttpPost implements HttpRequest {
 
 	private String url;
-	private Map<String, String> queryParameters, headerParameters, postParameters;
+	private Map<String, List<String>> queryParameters;
+	
+	private Map<String, String>
+		headerParameters,
+		postParameters;
+	
 	private int timeout;
 	private Proxy proxy;
 
@@ -29,7 +36,17 @@ public class HttpPost implements HttpRequest {
 	
 	@Override
 	public HttpPost setQueryParameter(String key, String value) {
-		queryParameters.put(key, value);
+		List<String> v = new ArrayList<>();
+		v.add(value);
+		queryParameters.put(key, v);
+		return this;
+	}
+	
+	@Override
+	public HttpPost addQueryParameter(String key, String value) {
+		List<String> v = queryParameters.getOrDefault(key, new ArrayList<>());
+		v.add(value);
+		queryParameters.put(key, v);
 		return this;
 	}
 

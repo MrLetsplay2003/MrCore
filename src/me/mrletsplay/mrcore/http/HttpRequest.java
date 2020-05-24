@@ -16,6 +16,16 @@ public interface HttpRequest {
 	public HttpRequest setQueryParameter(String key, String value);
 	
 	/**
+	 * Adds a query parameter for this request<br>
+	 * Query parameters are appended after the url in the format:<br>
+	 * {@code ?query-key=query-value&query-key2=query-value2&query-key3=...}
+	 * @param key The key of the query parameter
+	 * @param value The value of the query parameter
+	 * @return This request
+	 */
+	public HttpRequest addQueryParameter(String key, String value);
+	
+	/**
 	 * Sets a header parameter for this request<br>
 	 * Header parameters are sent as part of the HTTP header<br>
 	 * These may include: Authorization, User-Agent, ...

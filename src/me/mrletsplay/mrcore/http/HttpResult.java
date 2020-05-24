@@ -103,10 +103,12 @@ public class HttpResult {
 		return exception;
 	}
 	
-	protected static HttpURLConnection retrieveRawFrom(String url, String method, Map<String, String> queryParams, Map<String, String> headerParams, byte[] postData, int timeout, Proxy proxy) throws IOException {
+	protected static HttpURLConnection retrieveRawFrom(String url, String method, Map<String, List<String>> queryParams, Map<String, String> headerParams, byte[] postData, int timeout, Proxy proxy) throws IOException {
 		if(!queryParams.isEmpty()) {
 			url += queryParams.entrySet().stream()
-				.map(e -> HttpUtils.urlEncode(e.getKey()) + "=" + HttpUtils.urlEncode(e.getValue()))
+				.map(e -> e.getValue().stream()
+						.map(v -> HttpUtils.urlEncode(e.getKey()) + "=" + HttpUtils.urlEncode(v))
+						.collect(Collectors.joining("&")))
 				.collect(Collectors.joining("&", "?", ""));
 		}
 		URL u = new URL(url);
@@ -129,11 +131,11 @@ public class HttpResult {
 		return con;
 	}
 	
-	protected static InputStream retrieveAsInputStreamFrom(String url, String method, Map<String, String> queryParams, Map<String, String> headerParams, byte[] postData, int timeout, Proxy proxy) throws IOException {
+	protected static InputStream retrieveAsInputStreamFrom(String url, String method, Map<String, List<String>> queryParams, Map<String, String> headerParams, byte[] postData, int timeout, Proxy proxy) throws IOException {
 		return retrieveRawFrom(url, method, queryParams, headerParams, postData, timeout, proxy).getInputStream();
 	}
 	
-	protected static HttpResult retrieveFrom(String url, String method, Map<String, String> queryParams, Map<String, String> headerParams, byte[] postParams, int timeout, Proxy proxy, boolean untilUnavailable) throws IOException {
+	protected static HttpResult retrieveFrom(String url, String method, Map<String, List<String>> queryParams, Map<String, String> headerParams, byte[] postParams, int timeout, Proxy proxy, boolean untilUnavailable) throws IOException {
 		HttpURLConnection con = retrieveRawFrom(url, method, queryParams, headerParams, postParams, timeout, proxy);
 		try {
 			InputStream in = con.getInputStream();
