@@ -64,7 +64,15 @@ public interface CustomConfig extends ConfigSection {
 	
 	public default void save(File file) {
 		try {
-			if(isEmpty() && !getFlags().contains(ConfigFlag.CREATE_EMPTY_FILE)) return;
+			if(isEmpty()) {
+				if(file.exists() && getFlags().contains(ConfigFlag.DELETE_EMPTY_FILE)) {
+					file.delete();
+					return;
+				}
+				
+				if(!file.exists() && !getFlags().contains(ConfigFlag.CREATE_EMPTY_FILE)) return;
+			}
+			
 			IOUtils.createFile(file);
 			FileOutputStream out = new FileOutputStream(file);
 			try {

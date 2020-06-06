@@ -19,6 +19,11 @@ public enum ConfigFlag {
 	/**
 	 * When saving the config, always create the file, even if there wouldn't be anything in it
 	 */
-	CREATE_EMPTY_FILE;
+	CREATE_EMPTY_FILE,
+	
+	/**
+	 * When saving the config, delete the file if there wouldn't be anything in it
+	 */
+	DELETE_EMPTY_FILE;
 	
 }
