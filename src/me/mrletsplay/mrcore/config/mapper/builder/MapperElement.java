@@ -1,6 +1,6 @@
 package me.mrletsplay.mrcore.config.mapper.builder;
 
-import com.google.common.base.Predicate;
+import java.util.function.Predicate;
 
 import me.mrletsplay.mrcore.config.ConfigSection;
 import me.mrletsplay.mrcore.json.JSONObject;
@@ -16,7 +16,7 @@ public interface MapperElement<S extends MapperElement<S, P, T>, P extends SubMa
 	public S onlyMapIf(QuadPredicate<T, ConfigSection, JSONObject, String> condition);
 
 	public default S onlyMapIf(Predicate<T> condition) {
-		return onlyMapIf((t, s, j, k) -> condition.apply(t));
+		return onlyMapIf((t, s, j, k) -> condition.test(t));
 	}
 
 	public S onlyConstructIf(QuadPredicate<T, ConfigSection, JSONObject, String> condition);

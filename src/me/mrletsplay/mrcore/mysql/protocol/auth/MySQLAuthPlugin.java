@@ -1,5 +1,6 @@
 package me.mrletsplay.mrcore.mysql.protocol.auth;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
 import me.mrletsplay.mrcore.mysql.protocol.misc.MySQLException;
@@ -28,8 +29,8 @@ public enum MySQLAuthPlugin {
 	
 	public MySQLAuthPluginBase newInstance() {
 		try {
-			return clazz.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
+			return clazz.getConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 			throw new MySQLException(e);
 		}
 	}

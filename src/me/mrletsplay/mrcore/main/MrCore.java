@@ -2,7 +2,7 @@
 
 public class MrCore {
 	
-	private static final String VERSION = "2.6.2";
+	private static final String VERSION = "2.7";
 	
 	public static String getVersion() {
 		return VERSION;

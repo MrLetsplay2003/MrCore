@@ -8,7 +8,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
-import java.sql.SQLException;
 import java.util.Base64;
 
 import javax.crypto.Cipher;
@@ -116,7 +115,7 @@ public class MySQLCachingSha2Auth implements MySQLAuthPluginBase {
 
 		try {
 			if (key == null) {
-				throw new SQLException("key parameter is null");
+				throw new MySQLException("key parameter is null");
 			}
 
 			int offset = key.indexOf("\n") + 1;

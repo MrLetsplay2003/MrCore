@@ -117,7 +117,7 @@ public class BukkitConfigMappers {
 					new Pre113ItemMeta(m).setUnbreakable(v);
 					return;
 				}
-				 m.setUnbreakable(v);
+				m.setUnbreakable(v);
 				i.setItemMeta(m);
 			})
 				.onlyMapIf(ItemStack::hasItemMeta)
