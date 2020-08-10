@@ -850,6 +850,10 @@ public enum VersionedMaterial {
 			of(new MaterialDefinition("IRON_PLATE", 0), V1_8.versionsTo(V1_12)),
 			of(new MaterialDefinition("HEAVY_WEIGHTED_PRESSURE_PLATE", 0), V1_13.versionsTo(V1_16))
 		),
+	END_STONE(
+			of(new MaterialDefinition("ENDER_STONE", 0), V1_8.versionsTo(V1_12)),
+			of(new MaterialDefinition("END_STONE", 0), V1_13.versionsTo(V1_16))
+		),
 	;
 	
 	private TypeDefinition typeDefinition;
