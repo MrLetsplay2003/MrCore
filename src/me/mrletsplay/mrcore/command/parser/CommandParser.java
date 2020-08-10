@@ -23,7 +23,7 @@ import me.mrletsplay.mrcore.misc.NullableOptional;
 public class CommandParser {
 
 	private static final Pattern
-		COMMAND_NAME_FORMAT = compile("[a-zA-Z-_0-9?]*"),
+		COMMAND_NAME_FORMAT = compile("[a-zA-Z-_0-9?:./\\\\]*"),
 		SHORT_OPTION_FORMAT = compile("-(?<name>[a-zA-Z-_0-9]+)(?= |$)"),
 		LONG_OPTION_FORMAT = compile("--(?<name>[a-zA-Z-_0-9]*)(?= |$)"),
 		BASIC_ARGUMENT_FORMAT = compile("(?<arg>(?:\\\\ |[^\n\r\t\" ])*)(?= |$)"),
