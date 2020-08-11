@@ -178,10 +178,12 @@ public class ProxyUtils {
 		List<MethodDescriptor> removedMethods = new ArrayList<>();
 		List<MethodDescriptor> newMethods = new ArrayList<>();
 		for(MethodDescriptor m : methods) {
+			if(m.getAccessFlags().hasFlag(MethodAccessFlag.SYNTHETIC)) continue; // Ignore synthetic methods
 			if(removedMethods.contains(m)) continue;
 			List<MethodDescriptor> ms = methods.stream()
 					.filter(o -> {
 						if(o == m) return false;
+						if(o.getAccessFlags().hasFlag(MethodAccessFlag.SYNTHETIC)) return false; // Ignore synthetic methods
 						return m.getName().equals(o.getName()) && m.getParameterSignature().equals(o.getParameterSignature());
 					})
 					.collect(Collectors.toList());
