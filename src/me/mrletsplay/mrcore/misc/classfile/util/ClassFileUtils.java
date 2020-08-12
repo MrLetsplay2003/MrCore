@@ -32,6 +32,7 @@ import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolDoubleEntry;
 import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolFieldRefEntry;
 import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolFloatEntry;
 import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolIntegerEntry;
+import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolInterfaceMethodRefEntry;
 import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolMethodRefEntry;
 import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolNameAndTypeEntry;
 import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolStringEntry;
@@ -365,6 +366,17 @@ public class ClassFileUtils {
 				.findFirst().orElse(-1);
 		if(enInd == -1) {
 			enInd = file.getConstantPool().appendEntry(new ConstantPoolMethodRefEntry(file.getConstantPool(), clInd, ntInd));
+		}
+		return enInd;
+	}
+	
+	public static int getOrAppendInterfaceMethodRef(ClassFile file, int clInd, int ntInd) {
+		int enInd = Arrays.stream(file.getConstantPool().getEntries())
+				.filter(e -> e instanceof ConstantPoolInterfaceMethodRefEntry && ((ConstantPoolInterfaceMethodRefEntry) e).getClassIndex() == clInd && ((ConstantPoolInterfaceMethodRefEntry) e).getNameAndTypeIndex() == ntInd)
+				.map(e -> file.getConstantPool().indexOf(e))
+				.findFirst().orElse(-1);
+		if(enInd == -1) {
+			enInd = file.getConstantPool().appendEntry(new ConstantPoolInterfaceMethodRefEntry(file.getConstantPool(), clInd, ntInd));
 		}
 		return enInd;
 	}

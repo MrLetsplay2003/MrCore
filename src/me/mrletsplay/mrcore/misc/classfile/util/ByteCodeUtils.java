@@ -5,10 +5,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import me.mrletsplay.mrcore.misc.EnumFlagCompound;
+import me.mrletsplay.mrcore.misc.PrimitiveType;
 import me.mrletsplay.mrcore.misc.classfile.ByteCode;
 import me.mrletsplay.mrcore.misc.classfile.ClassFile;
 import me.mrletsplay.mrcore.misc.classfile.Instruction;
 import me.mrletsplay.mrcore.misc.classfile.InstructionInformation;
+import me.mrletsplay.mrcore.misc.classfile.MethodAccessFlag;
+import me.mrletsplay.mrcore.misc.classfile.MethodDescriptor;
 
 public class ByteCodeUtils {
 	
@@ -28,13 +32,39 @@ public class ByteCodeUtils {
 		switch(instr) {
 			case INVOKESTATIC:
 			case INVOKESPECIAL:
-			case INVOKEDYNAMIC:
 			case INVOKEVIRTUAL:
-			case INVOKEINTERFACE:
 			{
 				if(args.size() != 3) throw new IllegalArgumentException("Need 3 args for " + instr + " (clz, mth, sig)");
 				byte[] bs = ClassFileUtils.getShortBytes(ClassFileUtils.getOrAppendMethodRef(classFile, ClassFileUtils.getOrAppendClass(classFile, ClassFileUtils.getOrAppendUTF8(classFile, args.remove(0))), ClassFileUtils.getOrAppendNameAndType(classFile, ClassFileUtils.getOrAppendUTF8(classFile, args.remove(0)), ClassFileUtils.getOrAppendUTF8(classFile, args.remove(0)))));
 				for(byte b : bs) info.add(b);
+				break;
+			}
+//			case INVOKEDYNAMIC: // TODO: Fix invokedynamic, use InvokeDynamic cp entry
+//			{
+//				if(args.size() != 3) throw new IllegalArgumentException("Need 3 args for " + instr + " (clz, mth, sig)");
+//				byte[] bs = ClassFileUtils.getShortBytes(ClassFileUtils.getOrAppendMethodRef(classFile, ClassFileUtils.getOrAppendClass(classFile, ClassFileUtils.getOrAppendUTF8(classFile, args.remove(0))), ClassFileUtils.getOrAppendNameAndType(classFile, ClassFileUtils.getOrAppendUTF8(classFile, args.remove(0)), ClassFileUtils.getOrAppendUTF8(classFile, args.remove(0)))));
+//				for(byte b : bs) info.add(b);
+//				info.add((byte) 0);
+//				info.add((byte) 0);
+//				break;
+//			}
+			case INVOKEINTERFACE:
+			{
+				if(args.size() != 3) throw new IllegalArgumentException("Need 3 args for " + instr + " (clz, mth, sig)");
+				String
+					className = args.remove(0),
+					mthName = args.remove(0),
+					mthSig = args.remove(0);
+				byte[] bs = ClassFileUtils.getShortBytes(ClassFileUtils.getOrAppendInterfaceMethodRef(classFile, ClassFileUtils.getOrAppendClass(classFile, ClassFileUtils.getOrAppendUTF8(classFile, className)), ClassFileUtils.getOrAppendNameAndType(classFile, ClassFileUtils.getOrAppendUTF8(classFile, mthName), ClassFileUtils.getOrAppendUTF8(classFile, mthSig))));
+				for(byte b : bs) info.add(b);
+				
+				int count = Arrays.stream(new MethodDescriptor(mthName, EnumFlagCompound.noneOf(MethodAccessFlag.class), mthSig).getParameterDescriptors())
+						.mapToInt(p -> (p.getParameterType().getPrimitiveType() == PrimitiveType.DOUBLE || p.getParameterType().getPrimitiveType() == PrimitiveType.DOUBLE) ? 2 : 1)
+						.sum();
+				
+				info.add((byte) (count + 1));
+				info.add((byte) 0);
+				
 				break;
 			}
 			case NEW:
