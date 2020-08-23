@@ -10,6 +10,7 @@ import net.md_5.bungee.api.chat.HoverEvent;
 
 public class UILayoutParser {
 	
+	@SuppressWarnings("deprecation")
 	public static BaseComponent[] parseElement(UIBuildEvent event, UIElement element, String instanceID, String elementID) {
 		BaseComponent[] tcs = element.getLayout(event);
 		if(element.getHoverText() != null)
