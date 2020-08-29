@@ -26,7 +26,7 @@ public class AttributeLocalVariableTable extends AbstractDefaultAttribute {
 			ConstantPoolUTF8Entry lname = classFile.getConstantPool().getEntry(in.readUnsignedShort()).as(ConstantPoolUTF8Entry.class);
 			ConstantPoolUTF8Entry ldescriptor = classFile.getConstantPool().getEntry(in.readUnsignedShort()).as(ConstantPoolUTF8Entry.class);
 			int index = in.readUnsignedShort();
-			entries[index] = new LocalVariable(startPC, length, lname, ldescriptor, index);
+			entries[i] = new LocalVariable(startPC, length, lname, ldescriptor, index);
 		}
 	}
 	

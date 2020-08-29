@@ -176,14 +176,11 @@ public enum Instruction {
 	LMUL(0x69, 0),
 	LNEG(0x75, 0),
 	LOOKUPSWITCH(0xab, (a, i) -> {
-		i += 4 - (i % 4);
+		int padding = (4 - ((i + 1) % 4)) % 4;
+		i += padding;
 		i += 4; // Default bytes
-		int nPairs = 0;
-		nPairs += a[i++] << 24;
-		nPairs += a[i++] << 16;
-		nPairs += a[i++] << 8;
-		nPairs += a[i++] << 0;
-		return nPairs * 2 * 4;
+		int nPairs = (a[++i] << 24) | (a[++i] << 16) | (a[++i] << 8) | a[++i];
+		return padding + 8 + nPairs * 2 * 4;
 	}),
 	LOR(0x81, 0),
 	LREM(0x71, 0),
@@ -215,19 +212,12 @@ public enum Instruction {
 	SIPUSH(0x11, 2),
 	SWAP(0x5f, 0),
 	TABLESWITCH(0xaa, (a, i) -> {
-		i += 4 - (i % 4);
+		int padding = (4 - ((i + 1) % 4)) % 4;
+		i += padding;
 		i += 4; // Default bytes
-		int lo = 0;
-		lo += a[i++] << 24;
-		lo += a[i++] << 16;
-		lo += a[i++] << 8;
-		lo += a[i++] << 0;
-		int hi = 0;
-		hi += a[i++] << 24;
-		hi += a[i++] << 16;
-		hi += a[i++] << 8;
-		hi += a[i++] << 0;
-		return (hi - lo + 1) * 4;
+		int lo = (a[++i] << 24) | (a[++i] << 16) | (a[++i] << 8) | a[++i];
+		int hi = (a[++i] << 24) | (a[++i] << 16) | (a[++i] << 8) | a[++i];
+		return padding + 12 + (hi - lo + 1) * 4;
 	}),
 	WIDE(0xc4, 3),
 	;

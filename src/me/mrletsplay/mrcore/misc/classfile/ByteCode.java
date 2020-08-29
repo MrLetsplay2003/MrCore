@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import me.mrletsplay.mrcore.misc.FriendlyException;
+
 public class ByteCode {
 
 	private byte[] bytes;
@@ -30,8 +32,13 @@ public class ByteCode {
 		List<InstructionInformation> is = new ArrayList<>();
 		for(int i = 0; i < bytes.length; i++) {
 			Instruction in = Instruction.getInstruction(bytes[i] & 0xff);
+			if(in == null) throw new FriendlyException("Unknown instruction with byte code " + (bytes[i] & 0xff) + " at offset " + i);
 			int j = in.getByteCountFunction().apply(bytes, i);
-			byte[] inf = new byte[j];
+			byte[] inf = new byte[j < 0 ? 12 : j];
+			if(j < 0 || j > 500) {
+				byte[] inf2 = new byte[12];
+				System.arraycopy(bytes, i, inf2, 0, 12);
+			}
 			System.arraycopy(bytes, i + 1, inf, 0, j);
 			i += j;
 			is.add(new InstructionInformation(in, inf));

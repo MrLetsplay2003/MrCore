@@ -15,6 +15,7 @@ public class ConstantPool {
 	}
 	
 	public ConstantPoolEntry getEntry(int index) {
+		if(index < 0) throw new RuntimeException("Invalid constant pool (Index out of bounds, " + index + " < 0)");
 		if(index > entries.length) throw new RuntimeException("Invalid constant pool (Index out of bounds, " + index + " > " + entries.length + ")");
 		return entries[index - 1];
 	}
