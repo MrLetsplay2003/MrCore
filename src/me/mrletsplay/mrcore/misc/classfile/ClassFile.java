@@ -17,6 +17,10 @@ import me.mrletsplay.mrcore.misc.classfile.attribute.Attribute;
 import me.mrletsplay.mrcore.misc.classfile.attribute.AttributeCode;
 import me.mrletsplay.mrcore.misc.classfile.attribute.AttributeLocalVariableTable;
 import me.mrletsplay.mrcore.misc.classfile.attribute.AttributeRaw;
+import me.mrletsplay.mrcore.misc.classfile.attribute.AttributeRuntimeInvisibleAnnotations;
+import me.mrletsplay.mrcore.misc.classfile.attribute.AttributeRuntimeInvisibleParameterAnnotations;
+import me.mrletsplay.mrcore.misc.classfile.attribute.AttributeRuntimeVisibleAnnotations;
+import me.mrletsplay.mrcore.misc.classfile.attribute.AttributeRuntimeVisibleParameterAnnotations;
 import me.mrletsplay.mrcore.misc.classfile.attribute.AttributeStackMapTable;
 import me.mrletsplay.mrcore.misc.classfile.attribute.DefaultAttributeType;
 import me.mrletsplay.mrcore.misc.classfile.pool.ConstantPool;
@@ -201,13 +205,13 @@ public class ClassFile {
 			case LOCAL_VARIABLE_TYPE_TABLE:
 				break;
 			case RUNTIME_INVISIBLE_ANNOTATIONS:
-				break;
+				return new AttributeRuntimeInvisibleAnnotations(this, attr.getName(), attr.getInfo());
 			case RUNTIME_INVISIBLE_PARAMETER_ANNOTATIONS:
-				break;
+				return new AttributeRuntimeInvisibleParameterAnnotations(this, attr.getName(), attr.getInfo());
 			case RUNTIME_VISIBLE_ANNOTATIONS:
-				break;
+				return new AttributeRuntimeVisibleAnnotations(this, attr.getName(), attr.getInfo());
 			case RUNTIME_VISIBLE_PARAMETER_ANNOTATIONS:
-				break;
+				return new AttributeRuntimeVisibleParameterAnnotations(this, attr.getName(), attr.getInfo());
 			case SIGNATURE:
 				break;
 			case SOURCE_DEBUG_EXCEPTION:
