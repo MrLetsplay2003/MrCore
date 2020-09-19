@@ -21,6 +21,7 @@ import me.mrletsplay.mrcore.misc.classfile.attribute.AttributeRuntimeInvisibleAn
 import me.mrletsplay.mrcore.misc.classfile.attribute.AttributeRuntimeInvisibleParameterAnnotations;
 import me.mrletsplay.mrcore.misc.classfile.attribute.AttributeRuntimeVisibleAnnotations;
 import me.mrletsplay.mrcore.misc.classfile.attribute.AttributeRuntimeVisibleParameterAnnotations;
+import me.mrletsplay.mrcore.misc.classfile.attribute.AttributeSignature;
 import me.mrletsplay.mrcore.misc.classfile.attribute.AttributeStackMapTable;
 import me.mrletsplay.mrcore.misc.classfile.attribute.DefaultAttributeType;
 import me.mrletsplay.mrcore.misc.classfile.pool.ConstantPool;
@@ -213,7 +214,7 @@ public class ClassFile {
 			case RUNTIME_VISIBLE_PARAMETER_ANNOTATIONS:
 				return new AttributeRuntimeVisibleParameterAnnotations(this, attr.getName(), attr.getInfo());
 			case SIGNATURE:
-				break;
+				return new AttributeSignature(this, attr.getName(), attr.getInfo());
 			case SOURCE_DEBUG_EXCEPTION:
 				break;
 			case SOURCE_FILE:
