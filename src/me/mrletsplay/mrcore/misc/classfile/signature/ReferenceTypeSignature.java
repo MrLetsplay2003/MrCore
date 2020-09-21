@@ -2,10 +2,8 @@ package me.mrletsplay.mrcore.misc.classfile.signature;
 
 import me.mrletsplay.mrcore.misc.CharReader;
 import me.mrletsplay.mrcore.misc.PrimitiveType;
-import me.mrletsplay.mrcore.misc.classfile.signature.ArrayTypeSignature.BaseTypeArraySignature;
-import me.mrletsplay.mrcore.misc.classfile.signature.ArrayTypeSignature.ReferenceTypeArraySignature;
 
-public class ReferenceTypeSignature extends Signature {
+public class ReferenceTypeSignature implements JavaTypeSignature {
 	
 	public static ReferenceTypeSignature read(CharReader reader) {
 		char c = reader.next();
@@ -14,17 +12,17 @@ public class ReferenceTypeSignature extends Signature {
 				reader.revert();
 				return ClassTypeSignature.read(reader);
 			case 'T':
-				String identifier = reader.nextUntil(';');
-				reader.next(); // Skip the ;
-				return new TypeVariableSignature(identifier);
+				reader.revert();
+				return TypeVariableSignature.read(reader);
 			case '[':
 				char t = reader.next();
 				PrimitiveType p = PrimitiveType.getBySignature(String.valueOf(t));
-				if(p != null) return new BaseTypeArraySignature(p);
+				if(p != null) return new ArrayTypeSignature(new PrimitiveJavaTypeSignature(p));
 				reader.revert();
-				return new ReferenceTypeArraySignature(read(reader));
+				return new ArrayTypeSignature(read(reader));
+			default:
+				return null;
 		}
-		return null;
 	}
 	
 }

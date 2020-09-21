@@ -1,35 +1,15 @@
 package me.mrletsplay.mrcore.misc.classfile.signature;
 
-import me.mrletsplay.mrcore.misc.PrimitiveType;
-
 public class ArrayTypeSignature extends ReferenceTypeSignature {
 	
-	public static class BaseTypeArraySignature extends ArrayTypeSignature {
-		
-		private PrimitiveType arrayType;
-		
-		public BaseTypeArraySignature(PrimitiveType arrayType) {
-			this.arrayType = arrayType;
-		}
+	private JavaTypeSignature javaType;
+	
+	public ArrayTypeSignature(JavaTypeSignature javaType) {
+		this.javaType = javaType;
+	}
 
-		public PrimitiveType getArrayType() {
-			return arrayType;
-		}
-		
+	public JavaTypeSignature getJavaType() {
+		return javaType;
 	}
 	
-	public static class ReferenceTypeArraySignature extends ArrayTypeSignature {
-		
-		private ReferenceTypeSignature referenceType;
-
-		public ReferenceTypeArraySignature(ReferenceTypeSignature referenceType) {
-			this.referenceType = referenceType;
-		}
-		
-		public ReferenceTypeSignature getArrayType() {
-			return referenceType;
-		}
-		
-	}
-
 }

@@ -8,11 +8,11 @@ import me.mrletsplay.mrcore.misc.CharReader;
 public class ClassTypeSignature extends ReferenceTypeSignature {
 	
 	private String className;
-	private List<TypeArgumentSignature> typeArguments;
+	private List<TypeArgument> typeArguments;
 	private String suffixes;
-	private List<List<TypeArgumentSignature>> suffixTypeArguments;
+	private List<List<TypeArgument>> suffixTypeArguments;
 
-	public ClassTypeSignature(String className, List<TypeArgumentSignature> typeArguments) {
+	public ClassTypeSignature(String className, List<TypeArgument> typeArguments) {
 		this.className = className;
 		this.typeArguments = typeArguments;
 	}
@@ -21,7 +21,7 @@ public class ClassTypeSignature extends ReferenceTypeSignature {
 		return className;
 	}
 	
-	public List<TypeArgumentSignature> getTypeArguments() {
+	public List<TypeArgument> getTypeArguments() {
 		return typeArguments;
 	}
 	
@@ -29,7 +29,7 @@ public class ClassTypeSignature extends ReferenceTypeSignature {
 		return suffixes;
 	}
 	
-	public List<List<TypeArgumentSignature>> getSuffixTypeArguments() {
+	public List<List<TypeArgument>> getSuffixTypeArguments() {
 		return suffixTypeArguments;
 	}
 	
@@ -37,14 +37,14 @@ public class ClassTypeSignature extends ReferenceTypeSignature {
 		reader.next(); // Skip the L
 		
 		String className = reader.nextUntilAny(';', '<');
-		List<TypeArgumentSignature> typeArguments = new ArrayList<>();
+		List<TypeArgument> typeArguments = new ArrayList<>();
 		if(reader.next() == '<') { // Type parameters
 			reader.revert();
 			typeArguments = readTypeArguments(reader);
 		}
 		
 		List<String> suffixes = new ArrayList<>();
-		List<List<TypeArgumentSignature>> suffixTypeArguments = new ArrayList<>();
+		List<List<TypeArgument>> suffixTypeArguments = new ArrayList<>();
 		
 		if(reader.hasNext()) {
 			while(reader.next() == '.') {
@@ -70,12 +70,12 @@ public class ClassTypeSignature extends ReferenceTypeSignature {
 		return new ClassTypeSignature(className, typeArguments);
 	}
 	
-	private static List<TypeArgumentSignature> readTypeArguments(CharReader reader) {
+	private static List<TypeArgument> readTypeArguments(CharReader reader) {
 		reader.next(); // Skip the <
-		List<TypeArgumentSignature> typeArguments = new ArrayList<>();
+		List<TypeArgument> typeArguments = new ArrayList<>();
 		while(reader.next() != '>') {
 			reader.revert();
-			typeArguments.add(TypeArgumentSignature.read(reader));
+			typeArguments.add(TypeArgument.read(reader));
 		}
 		return typeArguments;
 	}

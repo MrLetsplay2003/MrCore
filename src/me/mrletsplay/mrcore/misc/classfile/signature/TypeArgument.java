@@ -2,17 +2,17 @@ package me.mrletsplay.mrcore.misc.classfile.signature;
 
 import me.mrletsplay.mrcore.misc.CharReader;
 
-public class TypeArgumentSignature {
+public class TypeArgument {
 	
 	private boolean any;
 	private Character wildcardIndicator;
 	private ReferenceTypeSignature typeSignature;
 	
-	public TypeArgumentSignature() {
+	public TypeArgument() {
 		this.any = true;
 	}
 	
-	public TypeArgumentSignature(Character wildcardIndicator, ReferenceTypeSignature typeSignature) {
+	public TypeArgument(Character wildcardIndicator, ReferenceTypeSignature typeSignature) {
 		this.any = false;
 		this.wildcardIndicator = wildcardIndicator;
 		this.typeSignature = typeSignature;
@@ -48,12 +48,12 @@ public class TypeArgumentSignature {
 		return isExtends() ? Wildcard.EXTENDS : Wildcard.SUPER;
 	}
 	
-	public static TypeArgumentSignature read(CharReader reader) {
+	public static TypeArgument read(CharReader reader) {
 		char c = reader.next();
-		if(c == '*') return new TypeArgumentSignature();
+		if(c == '*') return new TypeArgument();
 		Character wc = c == '+' || c == '-' ? c : null;
 		if(wc == null) reader.revert();
-		return new TypeArgumentSignature(wc, ReferenceTypeSignature.read(reader));
+		return new TypeArgument(wc, ReferenceTypeSignature.read(reader));
 	}
 	
 	public static enum Wildcard {

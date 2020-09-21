@@ -5,7 +5,7 @@ import java.util.List;
 
 import me.mrletsplay.mrcore.misc.CharReader;
 
-public class ClassSignature {
+public class ClassSignature implements Signature {
 	
 	private List<TypeParameter> typeParameters;
 	private ClassTypeSignature superclassSignature;
@@ -36,7 +36,7 @@ public class ClassSignature {
 				reader.revert();
 				typeParameters.add(TypeParameter.read(reader));
 			}
-		}
+		}else reader.revert();
 		
 		ClassTypeSignature superclassSig = ClassTypeSignature.read(reader);
 		
@@ -51,6 +51,10 @@ public class ClassSignature {
 		}
 		
 		return new ClassSignature(typeParameters, superclassSig, superinterfaceSigs);
+	}
+	
+	public static ClassSignature parse(String signature) {
+		return read(new CharReader(signature));
 	}
 	
 }
