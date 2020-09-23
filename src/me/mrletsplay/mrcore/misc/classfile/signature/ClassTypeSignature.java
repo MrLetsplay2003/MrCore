@@ -41,7 +41,7 @@ public class ClassTypeSignature extends ReferenceTypeSignature {
 		if(reader.next() == '<') { // Type parameters
 			reader.revert();
 			typeArguments = readTypeArguments(reader);
-		}
+		}else reader.revert();
 		
 		List<String> suffixes = new ArrayList<>();
 		List<List<TypeArgument>> suffixTypeArguments = new ArrayList<>();

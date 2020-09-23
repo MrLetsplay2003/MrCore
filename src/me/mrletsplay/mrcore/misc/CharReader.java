@@ -64,7 +64,11 @@ public class CharReader {
 	}
 	
 	public boolean contains(String s) {
-		return string.substring(currentIndex, string.length()).contains(s);
+		return remaining().contains(s);
+	}
+	
+	public String remaining() {
+		return string.substring(currentIndex, string.length());
 	}
 	
 	public boolean hasNext() {
