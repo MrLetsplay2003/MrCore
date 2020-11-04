@@ -1,5 +1,6 @@
 package me.mrletsplay.mrcore.command;
 
+import me.mrletsplay.mrcore.command.option.CommandOption;
 import me.mrletsplay.mrcore.command.parser.ParsedCommand;
 
 public class CommandInvokedEvent {
@@ -18,6 +19,18 @@ public class CommandInvokedEvent {
 	
 	public ParsedCommand getParsedCommand() {
 		return parsedCommand;
+	}
+	
+	public String[] getArguments() {
+		return parsedCommand.getArguments();
+	}
+	
+	public boolean isOptionPresent(CommandOption<?> option) {
+		return parsedCommand.isOptionPresent(option);
+	}
+	
+	public <T> T getOptionValue(CommandOption<T> option) {
+		return parsedCommand.getOptionValue(option);
 	}
 	
 }

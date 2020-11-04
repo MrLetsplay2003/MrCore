@@ -8,9 +8,12 @@ import java.util.stream.Collectors;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
 
 import me.mrletsplay.mrcore.command.AbstractCommand;
+import me.mrletsplay.mrcore.command.CommandInvokedEvent;
 import me.mrletsplay.mrcore.command.parser.CommandParsingException;
 import me.mrletsplay.mrcore.command.properties.CommandProperties;
 import me.mrletsplay.mrcore.command.provider.CommandProvider;
@@ -61,6 +64,16 @@ public abstract class BukkitCommand extends AbstractCommand<CommandProperties> i
 				sender.sendMessage((sub.getUsage() == null ? "§7/" + sub.getFullName() : "§7" + sub.getUsage()) + (sub.getDescription() == null ? "" : " §8- §f" + sub.getDescription()));
 			}
 		}
+	}
+	
+	protected boolean isSenderPlayer(CommandInvokedEvent event) {
+		return event.getSender() instanceof BukkitCommandSender
+				&& ((BukkitCommandSender) event.getSender()).getBukkitSender() instanceof Player;
+	}
+	
+	protected boolean isSenderConsole(CommandInvokedEvent event) {
+		return event.getSender() instanceof BukkitCommandSender
+				&& ((BukkitCommandSender) event.getSender()).getBukkitSender() instanceof ConsoleCommandSender;
 	}
 	
 }
