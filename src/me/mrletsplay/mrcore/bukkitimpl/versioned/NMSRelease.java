@@ -12,7 +12,7 @@ public enum NMSRelease {
 	V1_13(NMSVersion.V1_13_R1, NMSVersion.V1_13_R2),
 	V1_14(NMSVersion.V1_14_R1),
 	V1_15(NMSVersion.V1_15_R1),
-	V1_16(NMSVersion.V1_16_R1, NMSVersion.V1_16_R2),
+	V1_16(NMSVersion.V1_16_R1, NMSVersion.V1_16_R2, NMSVersion.V1_16_R3),
 	;
 	
 	private NMSVersion[] versions;
