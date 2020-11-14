@@ -69,6 +69,7 @@ public class DefaultFileCustomConfig implements FileCustomConfig {
 			List<String> lines = new ArrayList<>();
 			String s;
 			while((s = r.readLine()) != null) {
+				if(s.trim().isEmpty()) continue;
 				lines.add(s + "\n");
 			}
 			DefaultConfigParser p = new DefaultConfigParser(lines.toArray(new String[lines.size()]));
