@@ -228,6 +228,10 @@ public interface ConfigSection {
 		});
 	}
 	
+	/**
+	 * Checks whether all properties of this section contain no elements (Lists are empty, sub-sections are empty)
+	 * @return Whether this section is empty
+	 */
 	public default boolean isEmpty() {
 		return getProperties().values().stream().allMatch(ConfigProperty::isEmpty) && getSubsections().values().stream().allMatch(ConfigSection::isEmpty);
 	}
@@ -259,6 +263,16 @@ public interface ConfigSection {
 		json.forEach(this::set);
 	}
 	
+	/**
+	 * This is the default method for casting raw configuration objects to their (possibly complex) final types
+	 * @param <T> The type to cast to
+	 * @param section The section which contains the necessary {@link ObjectMapper}s to cast the specified object to its type
+	 * @param o The object to cast
+	 * @param typeClass The class of the type to cast to
+	 * @param exactType The exact, complex type to cast to. For non-complex objects, it should be equivalent to <code>{@link Complex#value}(typeClass)</code>
+	 * @param allowComplex Whether to allow casting to a complex type using the section's {@link ObjectMapper}s
+	 * @return A {@link NullableOptional} containing the cast value or {@link NullableOptional#empty()} if it can't be cast
+	 */
 	public static <T> NullableOptional<T> defaultCast(ConfigSection section, Object o, Class<T> typeClass, Complex<?> exactType, boolean allowComplex) {
 		if(ClassUtils.isPrimitiveTypeClass(typeClass)) throw new IllegalArgumentException("Primitive types are not allowed");
 		if(o == null) return NullableOptional.of(null);
@@ -321,6 +335,15 @@ public interface ConfigSection {
 		}
 	}
 	
+	/**
+	 * Internal method
+	 * @param <T>
+	 * @param section
+	 * @param o
+	 * @param toClass
+	 * @param toExactType
+	 * @return
+	 */
 	public static <T> NullableOptional<T> constructTopLevelType(ConfigSection section, Object o, Class<T> toClass, Complex<?> toExactType) {
 		ObjectMapper<?, ?> tlm = section.getConfig().getMappers().entrySet().stream()
 				.filter(en -> en.getKey().canConstruct(o, section::castPrimitiveType))
@@ -344,10 +367,26 @@ public interface ConfigSection {
 		return NullableOptional.empty();
 	}
 	
+	/**
+	 * Equivalent to calling {@link #defaultCast(ConfigSection, Object, Class, Complex, boolean)} for this section with <code>allowComplex</code> set to <code>true</code>
+	 * @param <T> The type to cast to
+	 * @param o The object to cast
+	 * @param typeClass The class of the type to cast to
+	 * @param exactType The exact, complex type to cast to. For non-complex objects, it should be equivalent to <code>{@link Complex#value}(typeClass)</code>
+	 * @return A {@link NullableOptional} containing the cast value or {@link NullableOptional#empty()} if it can't be cast
+	 */
 	public default <T> NullableOptional<T> castType(Object o, Class<T> clazz, Complex<?> exactType) {
 		return defaultCast(this, o, clazz, exactType, true);
 	}
 	
+	/**
+	 * Equivalent to calling {@link #defaultCast(ConfigSection, Object, Class, Complex, boolean)} for this section with <code>allowComplex</code> set to <code>false</code>
+	 * @param <T> The type to cast to
+	 * @param o The object to cast
+	 * @param typeClass The class of the type to cast to
+	 * @param exactType The exact, complex type to cast to. For non-complex objects, it should be equivalent to <code>{@link Complex#value}(typeClass)</code>
+	 * @return A {@link NullableOptional} containing the cast value or {@link NullableOptional#empty()} if it can't be cast
+	 */
 	public default <T> NullableOptional<T> castPrimitiveType(Object o, Class<T> clazz, Complex<?> exactType) {
 		return defaultCast(this, o, clazz, exactType, false);
 	}
@@ -364,7 +403,18 @@ public interface ConfigSection {
 		return p.getValueType();
 	}
 	
-	public default <T> T getComplex(String key, Complex<T> complex, T defaultValue, boolean applyDefault) {
+	/**
+	 * Gets a value from this section and attempts to cast it to the specified type
+	 * The {@code key} parameter allows for subpaths (e.g. "{@code somepath.somesubpath}").<br>
+	 * @param <T> The type to cast to
+	 * @param key The key of the value
+	 * @param complex The exact, complex value to cast to
+	 * @param defaultValue The default value, if none is set
+	 * @param applyDefault Whether to set the value in addition to returning it if there is none
+	 * @return The cast value
+	 * @throws IncompatibleTypeException If the value set in the config cannot be cast to the specified type
+	 */
+	public default <T> T getComplex(String key, Complex<T> complex, T defaultValue, boolean applyDefault) throws IncompatibleTypeException {
 		ConfigProperty prop = getProperty(key);
 		if(prop == null || prop.isUndefined()) {
 			if(applyDefault) set(key, defaultValue);

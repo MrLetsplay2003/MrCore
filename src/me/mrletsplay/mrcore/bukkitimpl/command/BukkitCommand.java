@@ -15,16 +15,16 @@ import org.bukkit.entity.Player;
 import me.mrletsplay.mrcore.command.AbstractCommand;
 import me.mrletsplay.mrcore.command.CommandInvokedEvent;
 import me.mrletsplay.mrcore.command.parser.CommandParsingException;
-import me.mrletsplay.mrcore.command.properties.CommandProperties;
+import me.mrletsplay.mrcore.command.parser.ParsedCommand;
 import me.mrletsplay.mrcore.command.provider.CommandProvider;
 
-public abstract class BukkitCommand extends AbstractCommand<CommandProperties> implements CommandExecutor, TabCompleter, CommandProvider {
+public abstract class BukkitCommand extends AbstractCommand<BukkitCommandProperties> implements CommandExecutor, TabCompleter, CommandProvider {
 
 	public BukkitCommand(String name) {
-		super(name);
+		super(name, new BukkitCommandProperties());
 	}
 	
-	public BukkitCommand(String name, CommandProperties initialProperties) {
+	public BukkitCommand(String name, BukkitCommandProperties initialProperties) {
 		super(name, initialProperties);
 	}
 	
@@ -49,6 +49,32 @@ public abstract class BukkitCommand extends AbstractCommand<CommandProperties> i
 			sender.sendMessage("§cError: §7" + e.getMessage());
 		}
 		return true;
+	}
+	
+	private boolean checkPermission(CommandSender sender) {
+		String perm = getProperties().getPermission();
+		
+		if(BukkitCommandProperties.PERMISSION_DEFAULT.equals(perm)) {
+			if(getParent() == null) return true; // We have reached a top level command with no explicit permission
+			return ((BukkitCommand) getParent()).checkPermission(sender);
+		}
+		
+		if(perm == null) return true; // Explicitly no permission
+		
+		return sender.hasPermission(perm);
+	}
+	
+	@Override
+	public void invoke(me.mrletsplay.mrcore.command.CommandSender sender, String commandLine)throws CommandParsingException {
+		ParsedCommand cmd = parseCommand(commandLine);
+		
+		BukkitCommand b = (BukkitCommand) cmd.getCommand();
+		if(!b.checkPermission(((BukkitCommandSender) sender).getBukkitSender())) {
+			sender.sendMessage("§cYou don't have the required permission §7" + b.getProperties().getPermission() + " §cto use this command");
+			return;
+		}
+		
+		cmd.getCommand().action(new CommandInvokedEvent(sender, cmd));
 	}
 	
 	@Override

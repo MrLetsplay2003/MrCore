@@ -1,5 +1,7 @@
 package me.mrletsplay.mrcore.bukkitimpl.command;
 
+import org.bukkit.entity.Player;
+
 import me.mrletsplay.mrcore.command.CommandSender;
 
 public class BukkitCommandSender implements CommandSender {
@@ -17,6 +19,10 @@ public class BukkitCommandSender implements CommandSender {
 	
 	public org.bukkit.command.CommandSender getBukkitSender() {
 		return bukkitSender;
+	}
+	
+	public Player asPlayer() {
+		return bukkitSender instanceof Player ? (Player) bukkitSender : null;
 	}
 
 }
