@@ -74,6 +74,14 @@ public class NullableOptional<T> {
 		if(present) consumer.accept(value);
 	}
 	
+	public void ifPresentOrElse(Consumer<? super T> consumer, Runnable empty) {
+		if(present) {
+			consumer.accept(value);
+		}else {
+			empty.run();
+		}
+	}
+	
 	public <X extends Throwable> ErroringNullableOptional<T, X> asErroring(Supplier<X> exceptionSupplier) {
 		if(present) return ErroringNullableOptional.ofErroring(value);
 		return ErroringNullableOptional.ofErroring(exceptionSupplier.get());

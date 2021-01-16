@@ -1,5 +1,6 @@
 package me.mrletsplay.mrcore.misc;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ErroringNullableOptional<T, E extends Throwable> extends DualNullableOptional<T, E> {
@@ -22,6 +23,19 @@ public class ErroringNullableOptional<T, E extends Throwable> extends DualNullab
 	
 	public T orElseThrowException() throws E {
 		return orElseThrow(() -> getOther());
+	}
+	
+	public void ifPresentOrElse(Consumer<? super T> consumer, Runnable empty, Consumer<? super E> exception) {
+		if(isPresent()) {
+			consumer.accept(get());
+		}else {
+			E ex = getException();
+			if(ex == null) {
+				empty.run();
+			}else {
+				exception.accept(ex);
+			}
+		}
 	}
 	
 	public static <T, E extends Throwable> ErroringNullableOptional<T, E> ofErroring(T value) {
