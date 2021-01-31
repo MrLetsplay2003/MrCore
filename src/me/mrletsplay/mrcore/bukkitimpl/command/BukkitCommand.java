@@ -68,16 +68,20 @@ public abstract class BukkitCommand extends AbstractCommand<BukkitCommandPropert
 		return true;
 	}
 	
-	private boolean checkPermission(CommandSender sender) {
+	public String getEffectivePermission() {
 		String perm = getProperties().getPermission();
 		
 		if(BukkitCommandProperties.PERMISSION_DEFAULT.equals(perm)) {
-			if(getParent() == null) return true; // We have reached a top level command with no explicit permission
-			return ((BukkitCommand) getParent()).checkPermission(sender);
+			if(getParent() == null) return null; // We have reached a top level command with no explicit permission
+			return ((BukkitCommand) getParent()).getEffectivePermission();
 		}
 		
+		return perm;
+	}
+	
+	private boolean checkPermission(CommandSender sender) {
+		String perm = getEffectivePermission();
 		if(perm == null) return true; // Explicitly no permission
-		
 		return sender.hasPermission(perm);
 	}
 	
@@ -87,7 +91,7 @@ public abstract class BukkitCommand extends AbstractCommand<BukkitCommandPropert
 		
 		BukkitCommand b = (BukkitCommand) cmd.getCommand();
 		if(!b.checkPermission(((BukkitCommandSender) sender).getBukkitSender())) {
-			sender.sendMessage("§cYou don't have the required permission §7" + b.getProperties().getPermission() + " §cto use this command");
+			sender.sendMessage("§cYou don't have the required permission §7" + getEffectivePermission() + " §cto use this command");
 			return;
 		}
 		
