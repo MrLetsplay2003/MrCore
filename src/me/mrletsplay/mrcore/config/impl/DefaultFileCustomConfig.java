@@ -106,7 +106,7 @@ public class DefaultFileCustomConfig implements FileCustomConfig {
 
 	@Override
 	public void addDefaults(CustomConfig defaultConfig) {
-		defaultConfig.toMap().forEach(this::addDefault);
+		defaultConfig.getKeys(true, true).forEach(k -> addDefault(k, defaultConfig.getProperty(k).getValue()));
 	}
 
 	@Override
