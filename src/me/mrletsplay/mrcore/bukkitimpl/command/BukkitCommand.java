@@ -9,6 +9,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
@@ -19,13 +20,29 @@ import me.mrletsplay.mrcore.command.parser.ParsedCommand;
 import me.mrletsplay.mrcore.command.provider.CommandProvider;
 
 public abstract class BukkitCommand extends AbstractCommand<BukkitCommandProperties> implements CommandExecutor, TabCompleter, CommandProvider {
+	
+	public BukkitCommand(String name, BukkitCommandProperties initialProperties) {
+		super(name, initialProperties);
+	}
 
 	public BukkitCommand(String name) {
 		super(name, new BukkitCommandProperties());
 	}
 	
-	public BukkitCommand(String name, BukkitCommandProperties initialProperties) {
-		super(name, initialProperties);
+	public BukkitCommand(PluginCommand command, BukkitCommandProperties initialProperties) {
+		super(command.getName(), initialProperties);
+		addAlias(command.getPlugin().getName() + ":" + command.getName());
+		command.getAliases().forEach(a -> {
+			addAlias(a);
+			addAlias(command.getPlugin().getName() + ":" + a);
+		});
+		getProperties().setPermission(command.getPermission());
+		setUsage(command.getUsage());
+		setDescription(command.getDescription());
+	}
+	
+	public BukkitCommand(PluginCommand command) {
+		super(command.getName(), new BukkitCommandProperties());
 	}
 	
 	@Override
