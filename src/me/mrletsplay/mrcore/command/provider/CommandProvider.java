@@ -5,8 +5,8 @@ import java.util.Collections;
 import java.util.List;
 
 import me.mrletsplay.mrcore.command.Command;
-import me.mrletsplay.mrcore.command.CommandInvokedEvent;
 import me.mrletsplay.mrcore.command.CommandSender;
+import me.mrletsplay.mrcore.command.event.CommandInvokedEvent;
 import me.mrletsplay.mrcore.command.parser.CommandParser;
 import me.mrletsplay.mrcore.command.parser.CommandParsingException;
 import me.mrletsplay.mrcore.command.parser.ParsedCommand;
@@ -15,6 +15,8 @@ public interface CommandProvider {
 	
 	public Collection<? extends Command> getCommands();
 	
+	public CommandParser getCommandParser();
+	
 	public default Command getCommand(String label) {
 		return getCommands().stream()
 				.filter(c -> c.getName().equals(label) || c.getAliases().contains(label))
@@ -22,7 +24,7 @@ public interface CommandProvider {
 	}
 	
 	public default ParsedCommand parseCommand(String commandLine) throws CommandParsingException {
-		return CommandParser.parseCommand(this, null, commandLine);
+		return getCommandParser().parseCommand(null, commandLine);
 	}
 	
 	public default void invoke(CommandSender sender, String commandLine) throws CommandParsingException {
@@ -32,7 +34,7 @@ public interface CommandProvider {
 	
 	public default List<String> tabComplete(CommandSender sender, String commandLine) {
 		try {
-			return CommandParser.tabComplete(this, sender, commandLine);
+			return getCommandParser().tabComplete(sender, commandLine);
 		}catch(CommandParsingException ex) {
 			return Collections.emptyList();
 		}

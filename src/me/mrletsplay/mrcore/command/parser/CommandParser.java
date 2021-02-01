@@ -16,6 +16,11 @@ import java.util.stream.Collectors;
 
 import me.mrletsplay.mrcore.command.Command;
 import me.mrletsplay.mrcore.command.CommandSender;
+import me.mrletsplay.mrcore.command.event.CommandTabCompleteEvent;
+import me.mrletsplay.mrcore.command.event.filter.ArgumentFilterEvent;
+import me.mrletsplay.mrcore.command.event.filter.CommandFilterEvent;
+import me.mrletsplay.mrcore.command.event.filter.OptionArgumentFilterEvent;
+import me.mrletsplay.mrcore.command.event.filter.OptionFilterEvent;
 import me.mrletsplay.mrcore.command.option.CommandOption;
 import me.mrletsplay.mrcore.command.provider.CommandProvider;
 import me.mrletsplay.mrcore.misc.NullableOptional;
@@ -29,25 +34,50 @@ public class CommandParser {
 		BASIC_ARGUMENT_FORMAT = compile("(?<arg>(?:\\\\ |[^\n\r\t\" ])*)(?= |$)"),
 		ESCAPED_ARGUMENT_FORMAT = compile("\"(?<value>(?:\\\\[rnt\"\\\\]|[^\\r\\n\\t\"\\\\])*)(?<cq>\")?(?= |$)");
 	
-	private CommandParser() {}
+	private CommandProvider provider;
+	private CommandParsingProperties properties;
 	
-	public static ParserToken<ParsedCommand> parse(CommandProvider provider, CommandSender sender, String commandLine, boolean tabComplete) throws CommandParsingException {
-		return parseCommand(provider, sender, new MutableString(commandLine), tabComplete);
+	public CommandParser(CommandProvider provider) {
+		this.provider = provider;
+		this.properties = new CommandParsingProperties();
 	}
 	
-	public static ParsedCommand parseCommand(CommandProvider provider, CommandSender sender, String commandLine) throws CommandParsingException {
-		return parseCommand(provider, sender, new MutableString(commandLine), false).getValue();
+	public CommandParsingProperties getParsingProperties() {
+		return properties;
 	}
 	
-	public static List<String> tabComplete(CommandProvider provider, CommandSender sender, String commandLine) throws CommandParsingException {
-		ParserToken<ParsedCommand> token = parseCommand(provider, sender, new MutableString(commandLine), true);
+	public ParserToken<ParsedCommand> parse(CommandSender sender, String commandLine, boolean tabComplete) throws CommandParsingException {
+		return parseCommand(sender, new MutableString(commandLine), tabComplete);
+	}
+	
+	public ParsedCommand parseCommand(CommandSender sender, String commandLine) throws CommandParsingException {
+		return parseCommand(sender, new MutableString(commandLine), false).getValue();
+	}
+	
+	public List<String> tabComplete(CommandSender sender, String commandLine) throws CommandParsingException {
+		ParserToken<ParsedCommand> token = parseCommand(sender, new MutableString(commandLine), true);
 		if(token.isComplete()) return Collections.emptyList();
 		return token.getCompletions();
 	}
 	
-	private static ParserToken<ParsedCommand> parseCommand(CommandProvider provider, CommandSender sender, MutableString commandLine, boolean tabComplete) {
+	@Deprecated
+	public static ParserToken<ParsedCommand> parse(CommandProvider provider, CommandSender sender, String commandLine, boolean tabComplete) throws CommandParsingException {
+		return provider.getCommandParser().parse(sender, commandLine, tabComplete);
+	}
+	
+	@Deprecated
+	public static ParsedCommand parseCommand(CommandProvider provider, CommandSender sender, String commandLine) throws CommandParsingException {
+		return provider.getCommandParser().parseCommand(sender, commandLine);
+	}
+	
+	@Deprecated
+	public static List<String> tabComplete(CommandProvider provider, CommandSender sender, String commandLine) throws CommandParsingException {
+		return provider.getCommandParser().tabComplete(sender, commandLine);
+	}
+	
+	private ParserToken<ParsedCommand> parseCommand(CommandSender sender, MutableString commandLine, boolean tabComplete) {
 		String origCommandLine = commandLine.toString();
-		ParserToken<Command> cmd = readCommand(provider, commandLine, tabComplete);
+		ParserToken<Command> cmd = readCommand(sender, commandLine, tabComplete);
 		if(!commandLine.isBlank()) commandLine.trim();
 		if(cmd == null) throw new CommandParsingException("Invalid command name", 0);
 		
@@ -73,9 +103,9 @@ public class CommandParser {
 			if(tabComplete && commandLine.hasBlankContent()) {
 				List<String> cs = new ArrayList<>();
 				if(c.getTabCompleter() != null) {
-					cs.addAll(c.getTabCompleter().tabComplete(sender, c, label, new String[0]));
+					cs.addAll(autoQuoteCommandArguments(sender, c, c.getTabCompleter().tabComplete(new CommandTabCompleteEvent(sender, c, label, new String[0]))));
 				}
-				cs.addAll(prefixOptionCompletions(getOptionCompletions(c, "", true), true));
+				cs.addAll(getOptionCompletions(sender, c, "", true, true));
 				return new ParserToken<>(cs);
 			}
 			
@@ -93,10 +123,10 @@ public class CommandParser {
 				}
 				
 				if(tabComplete && commandLine.hasBlankContent()) {
-					return new ParserToken<>(autoQuoteArguments(op.getType().getTabCompleteValues()));
+					return new ParserToken<>(autoQuoteOptionArguments(sender, c, op, op.getType().getTabCompleteValues()));
 				}
 				
-				ParserToken<String> v = readArgument(c, op.getType().getTabCompleteValues(), commandLine, tabComplete);
+				ParserToken<String> v = readArgument(sender, c, op.getType().getTabCompleteValues(), commandLine, tabComplete);
 				
 				if(v == null) throw new CommandParsingException("Invalid argument format or no argument present", commandLine.getAmountCut());
 				if(!v.isComplete()) return new ParserToken<>(v.getCompletions());
@@ -114,9 +144,9 @@ public class CommandParser {
 		while(!commandLine.isBlank()) {
 			List<String> cs = Collections.emptyList();
 			if(tabComplete && c.getTabCompleter() != null) {
-				cs = c.getTabCompleter().tabComplete(sender, c, label, args.toArray(new String[args.size()]));
+				cs = c.getTabCompleter().tabComplete(new CommandTabCompleteEvent(sender, c, label, args.toArray(new String[args.size()])));
 			}
-			ParserToken<String> arg = readArgument(c, cs, commandLine, tabComplete);
+			ParserToken<String> arg = readArgument(sender, c, cs, commandLine, tabComplete);
 			if(arg == null) throw new CommandParsingException("Invalid argument format", commandLine.getAmountCut());
 			if(!arg.isComplete()) return new ParserToken<>(arg.getCompletions());
 			args.add(arg.getValue());
@@ -125,14 +155,14 @@ public class CommandParser {
 			commandLine.trim();
 		}
 		
-		if(tabComplete && commandLine.hasBlankContent() && c.getTabCompleter() != null) {
-			return new ParserToken<>(autoQuoteArguments(c.getTabCompleter().tabComplete(sender, c, label, args.toArray(new String[args.size()]))));
+		if(tabComplete && commandLine.hasBlankContent()) {
+			return new ParserToken<>(c.getTabCompleter() != null ? autoQuoteCommandArguments(sender, c, c.getTabCompleter().tabComplete(new CommandTabCompleteEvent(sender, c, label, args.toArray(new String[args.size()])))) : Collections.emptyList());
 		}
 		
 		return new ParserToken<>(new ParsedCommand(c, origCommandLine, label, args.toArray(new String[args.size()]), options));
 	}
 	
-	private static ParserToken<Command> readCommand(CommandProvider provider, MutableString commandLine, boolean tabComplete) {
+	private ParserToken<Command> readCommand(CommandSender sender, MutableString commandLine, boolean tabComplete) {
 		Matcher m = tryMatch(commandLine, COMMAND_NAME_FORMAT);
 		if(m == null) return null;
 		String cName = m.group();
@@ -143,27 +173,31 @@ public class CommandParser {
 			
 			commandLine.cutStart(m.group().length());
 			
-			return new ParserToken<>(getCommandCompletions(provider.getCommands(), cName));
+			return new ParserToken<>(getCommandCompletions(sender, provider.getCommands(), cName));
 		}
 		
 		commandLine.cutStart(m.group().length());
 		
 		if(commandLine.hasBlankContent() && tabComplete) {
 			List<String> cs = new ArrayList<>();
-			cs.addAll(getCommandCompletions(c.getSubCommands(), ""));
-			c.getOptions().forEach(o -> cs.add("--" + o.getLongName()));
+			cs.addAll(getCommandCompletions(sender, c.getSubCommands(), ""));
+			cs.addAll(getOptionCompletions(sender, c, "", true, true));
+			if(c.getTabCompleter() != null) cs.addAll(autoQuoteCommandArguments(sender, c, c.getTabCompleter().tabComplete(new CommandTabCompleteEvent(sender, c, cName, new String[0]))));
 			return new ParserToken<>(cs);
 		}
 		
 		return new ParserToken<>(c, cName);
 	}
 	
-	private static List<String> getCommandCompletions(Collection<? extends Command> cmds, String cName) {
+	private List<String> getCommandCompletions(CommandSender sender, Collection<? extends Command> cmds, String cName) {
 		List<String> cs = new ArrayList<>();
 		for(Command cmd : cmds) {
+			if(!properties.getTabCompleteCommandFilter().test(new CommandFilterEvent(sender, cmd))) continue;
+			
 			if(cmd.getName().toLowerCase().startsWith(cName.toLowerCase())) {
 				cs.add(cmd.getName().substring(cName.length()));
 			}
+			
 			cmd.getAliases().stream()
 				.filter(a -> a.toLowerCase().startsWith(cName.toLowerCase()))
 				.forEach(a -> cs.add(a.substring(cName.length())));
@@ -171,34 +205,33 @@ public class CommandParser {
 		return cs;
 	}
 	
-	private static List<String> getOptionCompletions(Command cmd, String optionName, boolean longOption) {
-		if(!longOption) return cmd.getOptions().stream()
+	private List<String> getOptionCompletions(CommandSender sender, Command cmd, String optionName, boolean longOptions, boolean prefix) {
+		if(!longOptions) return cmd.getOptions().stream()
+				.filter(o -> properties.getTabCompleteOptionFilter().test(new OptionFilterEvent(sender, o, cmd)))
 				.map(CommandOption::getShortName)
 				.filter(Objects::nonNull)
+				.map(o -> prefix ? "-" + o : o)
 				.collect(Collectors.toList());
 		
 		return cmd.getOptions().stream()
+				.filter(o -> properties.getTabCompleteOptionFilter().test(new OptionFilterEvent(sender, o, cmd)))
 				.map(CommandOption::getLongName)
 				.filter(c -> c.toLowerCase().startsWith(optionName.toLowerCase()))
 				.map(c -> c.substring(optionName.length()))
+				.map(o -> prefix ? "--" + o : o)
 				.collect(Collectors.toList());
 	}
 	
-	private static List<String> prefixOptionCompletions(List<String> options, boolean longOptions) {
-		return options.stream()
-				.map(o -> (longOptions ? "--" : "-") + o)
-				.collect(Collectors.toList());
-	}
-	
-	private static List<String> getArgumentCompletions(Collection<String> completions, String rawArgument, boolean quoted) {
+	private List<String> getArgumentCompletions(CommandSender sender, Command command, Collection<String> completions, String rawArgument, boolean quoted) {
 		return completions.stream()
+				.filter(a -> properties.getTabCompleteArgumentFilter().test(new ArgumentFilterEvent(sender, a, command)))
 				.map(o -> quoted ? escapeArgument(o, true) + "\"" : escapeArgument(o, false))
 				.filter(c -> c.toLowerCase().startsWith(rawArgument.toLowerCase()))
 				.map(c -> c.substring(rawArgument.length()))
 				.collect(Collectors.toList());
 	}
 	
-	private static ParserToken<Command> readSubCommand(CommandSender sender, Command parent, String label, MutableString commandLine, boolean tabComplete) {
+	private ParserToken<Command> readSubCommand(CommandSender sender, Command parent, String label, MutableString commandLine, boolean tabComplete) {
 		Matcher m = tryMatch(commandLine, COMMAND_NAME_FORMAT);
 		if(m == null) return null;
 		String cName = m.group();
@@ -210,15 +243,15 @@ public class CommandParser {
 			commandLine.cutStart(m.group().length());
 			
 			List<String> cs = new ArrayList<>();
-			cs.addAll(getCommandCompletions(parent.getSubCommands(), cName));
+			cs.addAll(getCommandCompletions(sender, parent.getSubCommands(), cName));
 			
 			if(parent.getTabCompleter() != null) {
-				cs.addAll(getArgumentCompletions(parent.getTabCompleter().tabComplete(sender, c, label, new String[0]), cName, false));
+				cs.addAll(getArgumentCompletions(sender, parent, parent.getTabCompleter().tabComplete(new CommandTabCompleteEvent(sender, c, label, new String[0])), cName, false));
 			}
 			
 			if(cName.startsWith("-")) {
 				boolean isLong = cName.startsWith("--");
-				cs.addAll(getOptionCompletions(parent, cName.substring(isLong ? 2 : 1), isLong));
+				cs.addAll(getOptionCompletions(sender, parent, cName.substring(isLong ? 2 : 1), isLong, false));
 			}
 			
 			return new ParserToken<>(cs);
@@ -228,23 +261,23 @@ public class CommandParser {
 		
 		if(commandLine.toString().equals(" ") && tabComplete) {
 			List<String> cs = new ArrayList<>();
-			cs.addAll(getCommandCompletions(c.getSubCommands(), ""));
-			c.getOptions().forEach(o -> cs.add("--" + o.getLongName()));
-			if(c.getTabCompleter() != null) cs.addAll(autoQuoteArguments(c.getTabCompleter().tabComplete(sender, c, cName, new String[0])));
+			cs.addAll(getCommandCompletions(sender, c.getSubCommands(), ""));
+			cs.addAll(getOptionCompletions(sender, c, "", true, true));
+			if(c.getTabCompleter() != null) cs.addAll(autoQuoteCommandArguments(sender, c, c.getTabCompleter().tabComplete(new CommandTabCompleteEvent(sender, c, cName, new String[0]))));
 			return new ParserToken<>(cs);
 		}
 		
 		return new ParserToken<>(c, cName);
 	}
 	
-	private static ParserToken<List<CommandOption<?>>> readOption(CommandSender sender, Command c, String label, MutableString commandLine, boolean tabComplete) {
+	private ParserToken<List<CommandOption<?>>> readOption(CommandSender sender, Command c, String label, MutableString commandLine, boolean tabComplete) {
 		ParserToken<CommandOption<?>> lo = readLongOption(sender, c, label, commandLine, tabComplete);
 		if(lo != null) return lo.map(Collections::singletonList);
 		
 		return readShortOption(sender, c, label, commandLine, tabComplete);
 	}
 	
-	private static ParserToken<CommandOption<?>> readLongOption(CommandSender sender, Command c, String label, MutableString commandLine, boolean tabComplete) {
+	private ParserToken<CommandOption<?>> readLongOption(CommandSender sender, Command c, String label, MutableString commandLine, boolean tabComplete) {
 		Matcher m = tryMatch(commandLine, LONG_OPTION_FORMAT);
 		if(m == null) return null;
 		String opName = m.group("name");
@@ -255,27 +288,27 @@ public class CommandParser {
 			
 			commandLine.cutStart(m.group().length());
 			
-			return new ParserToken<>(getOptionCompletions(c, opName, true));
+			return new ParserToken<>(getOptionCompletions(sender, c, opName, true, false));
 		}
 		
 		commandLine.cutStart(m.group().length());
 		
-		if(commandLine.toString().equals(" ") && tabComplete) {
+		if(commandLine.hasBlankContent() && tabComplete) {
 			if(op.getType() == null) {
 				List<String> cs = new ArrayList<>();
 				if(c.getTabCompleter() != null) {
-					cs.addAll(c.getTabCompleter().tabComplete(sender, c, label, new String[0]));
+					cs.addAll(autoQuoteCommandArguments(sender, c, c.getTabCompleter().tabComplete(new CommandTabCompleteEvent(sender, c, label, new String[0]))));
 				}
-				cs.addAll(prefixOptionCompletions(getOptionCompletions(c, "", true), true));
+				cs.addAll(getOptionCompletions(sender, c, "", true, true));
 				return new ParserToken<>(cs);
 			}
-			return new ParserToken<>(autoQuoteArguments(op.getType().getTabCompleteValues()));
+			return new ParserToken<>(autoQuoteOptionArguments(sender, c, op, op.getType().getTabCompleteValues()));
 		}
 		
 		return new ParserToken<>(op);
 	}
 	
-	private static ParserToken<List<CommandOption<?>>> readShortOption(CommandSender sender, Command c, String label, MutableString commandLine, boolean tabComplete) {
+	private ParserToken<List<CommandOption<?>>> readShortOption(CommandSender sender, Command c, String label, MutableString commandLine, boolean tabComplete) {
 		Matcher m = tryMatch(commandLine, SHORT_OPTION_FORMAT);
 		if(m == null) return null;
 		
@@ -288,51 +321,49 @@ public class CommandParser {
 		if(op.stream().anyMatch(Objects::isNull)) return null;
 		
 		if(tabComplete && commandLine.length() == m.group().length()) {
-			return new ParserToken<>(c.getOptions().stream()
-					.map(CommandOption::getShortName)
-					.collect(Collectors.toList()));
+			return new ParserToken<>(getOptionCompletions(sender, c, "", false, true));
 		}
 		
 		commandLine.cutStart(m.group().length());
 		
-		if(commandLine.toString().equals(" ") && tabComplete) {
+		if(commandLine.hasBlankContent() && tabComplete) {
 			CommandOption<?> fOp = op.stream().filter(o -> o.getType() != null).findFirst().orElse(null);
 			if(fOp == null) {
 				List<String> cs = new ArrayList<>();
 				if(c.getTabCompleter() != null) {
-					cs.addAll(c.getTabCompleter().tabComplete(sender, c, label, new String[0]));
+					cs.addAll(autoQuoteCommandArguments(sender, c, c.getTabCompleter().tabComplete(new CommandTabCompleteEvent(sender, c, label, new String[0]))));
 				}
-				cs.addAll(prefixOptionCompletions(getOptionCompletions(c, "", true), true));
+				cs.addAll(getOptionCompletions(sender, c, "", true, true));
 				return new ParserToken<>(cs);
 			}
-			return new ParserToken<>(autoQuoteArguments(fOp.getType().getTabCompleteValues()));
+			return new ParserToken<>(autoQuoteOptionArguments(sender, c, fOp, fOp.getType().getTabCompleteValues()));
 		}
 		
 		return new ParserToken<>(op);
 	}
 	
-	private static ParserToken<String> readArgument(Command c, Collection<String> defaultValues, MutableString commandLine, boolean tabComplete) {
-		ParserToken<String> arg = readBasicArgument(c, defaultValues, commandLine, tabComplete);
+	private ParserToken<String> readArgument(CommandSender sender, Command c, Collection<String> defaultValues, MutableString commandLine, boolean tabComplete) {
+		ParserToken<String> arg = readBasicArgument(sender, c, defaultValues, commandLine, tabComplete);
 		if(arg != null) return arg;
 		
-		return readEscapedArgument(c, defaultValues, commandLine, tabComplete);
+		return readEscapedArgument(sender, c, defaultValues, commandLine, tabComplete);
 	}
 	
-	private static ParserToken<String> readBasicArgument(Command c, Collection<String> defaultValues, MutableString commandLine, boolean tabComplete) {
+	private ParserToken<String> readBasicArgument(CommandSender sender, Command c, Collection<String> defaultValues, MutableString commandLine, boolean tabComplete) {
 		Matcher m = tryMatch(commandLine, BASIC_ARGUMENT_FORMAT);
 		if(m == null) return null;
 		String value = m.group("arg");
 		
 		if(value.isEmpty() && (!tabComplete || commandLine.length() > m.group().length())) return null;
 		
-		if(tabComplete && commandLine.length() == m.group().length()) return new ParserToken<>(getArgumentCompletions(defaultValues, value, false));
+		if(tabComplete && commandLine.length() == m.group().length()) return new ParserToken<>(getArgumentCompletions(sender, c, defaultValues, value, false));
 		
 		commandLine.cutStart(m.group().length());
 		
 		return new ParserToken<String>(value);
 	}
 	
-	private static ParserToken<String> readEscapedArgument(Command c, Collection<String> defaultValues, MutableString commandLine, boolean tabComplete) {
+	private ParserToken<String> readEscapedArgument(CommandSender sender, Command c, Collection<String> defaultValues, MutableString commandLine, boolean tabComplete) {
 		Matcher m = tryMatch(commandLine, ESCAPED_ARGUMENT_FORMAT);
 		if(m == null) return null;
 		
@@ -347,7 +378,7 @@ public class CommandParser {
 			
 			List<String> tabCompletions = new ArrayList<>();
 			tabCompletions.add("\"");
-			tabCompletions.addAll(getArgumentCompletions(defaultValues, value, true));
+			tabCompletions.addAll(getArgumentCompletions(sender, c, defaultValues, value, true));
 			return new ParserToken<>(tabCompletions);
 		}
 		
@@ -449,8 +480,16 @@ public class CommandParser {
 		return u.toString();
 	}
 	
-	private static List<String> autoQuoteArguments(Collection<String> arguments) {
+	private List<String> autoQuoteCommandArguments(CommandSender sender, Command command, Collection<String> arguments) {
 		return arguments.stream()
+				.filter(a -> properties.getTabCompleteArgumentFilter().test(new ArgumentFilterEvent(sender, a, command)))
+				.map(a -> a.contains(" ") ? "\"" + escapeArgument(a, true) + "\"" : escapeArgument(a, false))
+				.collect(Collectors.toList());
+	}
+	
+	private List<String> autoQuoteOptionArguments(CommandSender sender, Command command, CommandOption<?> option, Collection<String> arguments) {
+		return arguments.stream()
+				.filter(a -> properties.getTabCompleteOptionArgumentFilter().test(new OptionArgumentFilterEvent(sender, a, command, option)))
 				.map(a -> a.contains(" ") ? "\"" + escapeArgument(a, true) + "\"" : escapeArgument(a, false))
 				.collect(Collectors.toList());
 	}

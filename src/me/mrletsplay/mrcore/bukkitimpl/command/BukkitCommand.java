@@ -14,23 +14,43 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 import me.mrletsplay.mrcore.command.AbstractCommand;
-import me.mrletsplay.mrcore.command.CommandInvokedEvent;
+import me.mrletsplay.mrcore.command.event.CommandInvokedEvent;
+import me.mrletsplay.mrcore.command.parser.CommandParser;
 import me.mrletsplay.mrcore.command.parser.CommandParsingException;
 import me.mrletsplay.mrcore.command.parser.ParsedCommand;
 import me.mrletsplay.mrcore.command.provider.CommandProvider;
 
 public abstract class BukkitCommand extends AbstractCommand<BukkitCommandProperties> implements CommandExecutor, TabCompleter, CommandProvider {
 	
+	private CommandParser parser;
+	
 	public BukkitCommand(String name, BukkitCommandProperties initialProperties) {
 		super(name, initialProperties);
+		this.parser = new CommandParser(this);
+		
+		parser.getParsingProperties().setTabCompleteCommandFilter(event -> {
+			return ((BukkitCommand) event.getObject()).checkPermission(((BukkitCommandSender) event.getSender()).getBukkitSender());
+		});
+		
+		parser.getParsingProperties().setTabCompleteOptionFilter(event -> {
+			return ((BukkitCommand) event.getCommand()).checkPermission(((BukkitCommandSender) event.getSender()).getBukkitSender());
+		});
+		
+		parser.getParsingProperties().setTabCompleteArgumentFilter(event -> {
+			return ((BukkitCommand) event.getCommand()).checkPermission(((BukkitCommandSender) event.getSender()).getBukkitSender());
+		});
+		
+		parser.getParsingProperties().setTabCompleteOptionArgumentFilter(event -> {
+			return ((BukkitCommand) event.getCommand()).checkPermission(((BukkitCommandSender) event.getSender()).getBukkitSender());
+		});
 	}
 
 	public BukkitCommand(String name) {
-		super(name, new BukkitCommandProperties());
+		this(name, new BukkitCommandProperties());
 	}
 	
 	public BukkitCommand(PluginCommand command, BukkitCommandProperties initialProperties) {
-		super(command.getName(), initialProperties);
+		this(command.getName(), initialProperties);
 		addAlias(command.getPlugin().getName() + ":" + command.getName());
 		command.getAliases().forEach(a -> {
 			addAlias(a);
@@ -42,12 +62,17 @@ public abstract class BukkitCommand extends AbstractCommand<BukkitCommandPropert
 	}
 	
 	public BukkitCommand(PluginCommand command) {
-		super(command.getName(), new BukkitCommandProperties());
+		this(command, new BukkitCommandProperties());
 	}
 	
 	@Override
 	public List<BukkitCommand> getCommands() {
 		return Collections.singletonList(this);
+	}
+	
+	@Override
+	public CommandParser getCommandParser() {
+		return parser;
 	}
 
 	@Override

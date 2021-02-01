@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 import me.mrletsplay.mrcore.command.completer.CommandTabCompleter;
+import me.mrletsplay.mrcore.command.event.CommandInvokedEvent;
 import me.mrletsplay.mrcore.command.option.CommandOption;
 import me.mrletsplay.mrcore.command.properties.CommandProperties;
 import me.mrletsplay.mrcore.misc.FriendlyException;

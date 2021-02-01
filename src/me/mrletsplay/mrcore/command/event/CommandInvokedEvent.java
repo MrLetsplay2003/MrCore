@@ -1,5 +1,6 @@
-package me.mrletsplay.mrcore.command;
+package me.mrletsplay.mrcore.command.event;
 
+import me.mrletsplay.mrcore.command.CommandSender;
 import me.mrletsplay.mrcore.command.option.CommandOption;
 import me.mrletsplay.mrcore.command.parser.ParsedCommand;
 
