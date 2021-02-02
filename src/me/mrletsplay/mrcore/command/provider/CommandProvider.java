@@ -23,12 +23,17 @@ public interface CommandProvider {
 				.findFirst().orElse(null);
 	}
 	
+	@Deprecated
 	public default ParsedCommand parseCommand(String commandLine) throws CommandParsingException {
 		return getCommandParser().parseCommand(null, commandLine);
 	}
 	
+	public default ParsedCommand parseCommand(CommandSender sender, String commandLine) throws CommandParsingException {
+		return getCommandParser().parseCommand(sender, commandLine);
+	}
+	
 	public default void invoke(CommandSender sender, String commandLine) throws CommandParsingException {
-		ParsedCommand cmd = parseCommand(commandLine);
+		ParsedCommand cmd = parseCommand(sender, commandLine);
 		cmd.getCommand().action(new CommandInvokedEvent(sender, cmd));
 	}
 	

@@ -112,7 +112,7 @@ public abstract class BukkitCommand extends AbstractCommand<BukkitCommandPropert
 	
 	@Override
 	public void invoke(me.mrletsplay.mrcore.command.CommandSender sender, String commandLine)throws CommandParsingException {
-		ParsedCommand cmd = parseCommand(commandLine);
+		ParsedCommand cmd = parseCommand(sender, commandLine);
 		
 		BukkitCommand b = (BukkitCommand) cmd.getCommand();
 		if(!b.checkPermission(((BukkitCommandSender) sender).getBukkitSender())) {
