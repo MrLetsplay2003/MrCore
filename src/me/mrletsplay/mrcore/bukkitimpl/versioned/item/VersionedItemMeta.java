@@ -27,6 +27,8 @@ public interface VersionedItemMeta {
 	public ItemMeta getBukkit();
 	
 	public static boolean isInstance(ItemMeta meta, String interfaceName) {
+		if(meta == null) return false;
+		
 		return Arrays.stream(meta.getClass().getInterfaces()).anyMatch(i -> {
 			return i.getName().equals(interfaceName);
 		});
