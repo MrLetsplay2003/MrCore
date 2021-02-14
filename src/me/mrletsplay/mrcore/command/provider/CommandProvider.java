@@ -17,10 +17,16 @@ public interface CommandProvider {
 	
 	public CommandParser getCommandParser();
 	
-	public default Command getCommand(String label) {
+	public default Command getCommand(String label, boolean caseSensitive) {
 		return getCommands().stream()
-				.filter(c -> c.getName().equals(label) || c.getAliases().contains(label))
+				.filter(c -> caseSensitive ?
+						c.getName().equals(label) || c.getAliases().contains(label)
+						: c.getName().equalsIgnoreCase(label) || c.getAliases().stream().anyMatch(a -> a.equalsIgnoreCase(label)))
 				.findFirst().orElse(null);
+	}
+	
+	public default Command getCommand(String label) {
+		return getCommand(label, false);
 	}
 	
 	@Deprecated

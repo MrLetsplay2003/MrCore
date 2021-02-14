@@ -166,7 +166,7 @@ public class CommandParser {
 		Matcher m = tryMatch(commandLine, COMMAND_NAME_FORMAT);
 		if(m == null) return null;
 		String cName = m.group();
-		Command c = provider.getCommand(cName);
+		Command c = provider.getCommand(cName, properties.isCaseSensitive());
 		
 		if(c == null) {
 			if(!tabComplete || commandLine.length() > m.group().length()) return null;
@@ -235,7 +235,7 @@ public class CommandParser {
 		Matcher m = tryMatch(commandLine, COMMAND_NAME_FORMAT);
 		if(m == null) return null;
 		String cName = m.group();
-		Command c = parent.getSubCommand(cName);
+		Command c = parent.getSubCommand(cName, properties.isCaseSensitive());
 		
 		if(c == null) {
 			if(!tabComplete || commandLine.length() > m.group().length()) return null;

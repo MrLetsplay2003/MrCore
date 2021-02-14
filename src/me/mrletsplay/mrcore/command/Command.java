@@ -40,10 +40,16 @@ public interface Command {
 	
 	public Collection<? extends Command> getSubCommands();
 	
-	public default Command getSubCommand(String label) {
+	public default Command getSubCommand(String label, boolean caseSensitive) {
 		return getSubCommands().stream()
-				.filter(c -> c.getName().equals(label) || c.getAliases().contains(label))
+				.filter(c -> caseSensitive ?
+						c.getName().equals(label) || c.getAliases().contains(label)
+						: c.getName().equalsIgnoreCase(label) || c.getAliases().stream().anyMatch(a -> a.equalsIgnoreCase(label)))
 				.findFirst().orElse(null);
+	}
+	
+	public default Command getSubCommand(String label) {
+		return getSubCommand(label, false);
 	}
 	
 	public default <T extends Annotation> T getAnnotation(Class<T> type) {
