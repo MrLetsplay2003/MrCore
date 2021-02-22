@@ -12,7 +12,12 @@ public class GUIBuilder implements Builder<GUI, GUIBuilder>{
 	private String title;
 	private int inventorySize;
 	private Map<Integer, GUIElement> elements;
+	
+	@SuppressWarnings("deprecation")
 	private GUIDragDropListener dragDropListener;
+	
+	private GUIPutItemListener putItemListener;
+	private GUITakeItemListener takeItemListener;
 	private GUIClosedListener closedListener;
 	private GUIActionListener actionListener;
 	private Map<String, Object> defaultProperties = new HashMap<>();
@@ -77,16 +82,49 @@ public class GUIBuilder implements Builder<GUI, GUIBuilder>{
 	/**
 	 * Sets the {@link GUIDragDropListener} for this GUI<br>
 	 * If there's already a listener registered, it will be overridden
+	 * @deprecated Use {@link #setPutItemListener(GUIPutItemListener)} and {@link #setTakeItemListener(GUITakeItemListener)} instead
 	 * @param dragDropListener The listener to use
 	 * @return This GUIBuilder instance
 	 */
+	@Deprecated
 	public GUIBuilder setDragDropListener(GUIDragDropListener dragDropListener) {
 		this.dragDropListener = dragDropListener;
 		return this;
 	}
 	
+	@Deprecated
 	public GUIDragDropListener getDragDropListener() {
 		return dragDropListener;
+	}
+	
+	/**
+	 * Sets the {@link GUIPutItemListener} for this GUI<br>
+	 * If there's already a listener registered, it will be overridden
+	 * @param putItemListener The listener to use
+	 * @return This GUIBuilder instance
+	 */
+	public GUIBuilder setPutItemListener(GUIPutItemListener putItemListener) {
+		this.putItemListener = putItemListener;
+		return this;
+	}
+	
+	public GUIPutItemListener getPutItemListener() {
+		return putItemListener;
+	}
+	
+	/**
+	 * Sets the {@link GUITakeItemListener} for this GUI<br>
+	 * If there's already a listener registered, it will be overridden
+	 * @param takeItemListener The listener to use
+	 * @return This GUIBuilder instance
+	 */
+	public GUIBuilder setTakeItemListener(GUITakeItemListener takeItemListener) {
+		this.takeItemListener = takeItemListener;
+		return this;
+	}
+	
+	public GUITakeItemListener getTakeItemListener() {
+		return takeItemListener;
 	}
 	
 	/**

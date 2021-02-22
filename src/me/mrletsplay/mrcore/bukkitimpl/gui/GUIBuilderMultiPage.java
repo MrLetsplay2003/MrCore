@@ -88,8 +88,21 @@ public class GUIBuilderMultiPage<T> extends GUIBuilder {
 	}
 	
 	@Override
+	@Deprecated
 	public GUIBuilderMultiPage<T> setDragDropListener(GUIDragDropListener dragDrop) {
 		super.setDragDropListener(dragDrop);
+		return this;
+	}
+	
+	@Override
+	public GUIBuilderMultiPage<T> setPutItemListener(GUIPutItemListener putItemListener) {
+		super.setPutItemListener(putItemListener);
+		return this;
+	}
+	
+	@Override
+	public GUIBuilderMultiPage<T> setTakeItemListener(GUITakeItemListener takeItemListener) {
+		super.setTakeItemListener(takeItemListener);
 		return this;
 	}
 	

@@ -109,10 +109,20 @@ public class GUI {
 	}
 	
 	/**
+	 * @deprecated Use {@link #getPutItemListener()} and {@link #getTakeItemListener()} instead
 	 * @return GUIDragDropListener for this GUI, null if none
 	 */
+	@Deprecated
 	public GUIDragDropListener getDragDropListener() {
 		return builder.getDragDropListener();
+	}
+	
+	public GUIPutItemListener getPutItemListener() {
+		return builder.getPutItemListener();
+	}
+	
+	public GUITakeItemListener getTakeItemListener() {
+		return builder.getTakeItemListener();
 	}
 	
 	/**
