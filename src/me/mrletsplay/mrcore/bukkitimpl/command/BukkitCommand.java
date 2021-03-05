@@ -93,6 +93,14 @@ public abstract class BukkitCommand extends AbstractCommand<BukkitCommandPropert
 		return true;
 	}
 	
+	public void setPermission(String permission) {
+		getProperties().setPermission(permission);
+	}
+	
+	public String getPermission() {
+		return getProperties().getPermission();
+	}
+	
 	public String getEffectivePermission() {
 		String perm = getProperties().getPermission();
 		
@@ -141,6 +149,10 @@ public abstract class BukkitCommand extends AbstractCommand<BukkitCommandPropert
 	protected boolean isSenderPlayer(CommandInvokedEvent event) {
 		return event.getSender() instanceof BukkitCommandSender
 				&& ((BukkitCommandSender) event.getSender()).getBukkitSender() instanceof Player;
+	}
+	
+	protected Player getSenderPlayer(CommandInvokedEvent event) {
+		return ((BukkitCommandSender) event.getSender()).asPlayer();
 	}
 	
 	protected boolean isSenderConsole(CommandInvokedEvent event) {
