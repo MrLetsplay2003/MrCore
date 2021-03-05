@@ -7,16 +7,15 @@ import java.text.ParseException;
 import me.mrletsplay.mrcore.http.HttpRequest;
 import me.mrletsplay.mrcore.json.JSONArray;
 import me.mrletsplay.mrcore.json.JSONObject;
-import me.mrletsplay.mrcore.main.MrCore;
 
 public class MrCoreUpdateChecker {
 
 	public static void checkForUpdate(String version){
 		String absoluteVersion = version.equalsIgnoreCase("latest") ? getLatestVersion() : version;
-		if(!MrCore.getVersion().equals(absoluteVersion)) {
+		if(!MrCorePlugin.getVersion().equals(absoluteVersion)) {
 			try {
 				String newestLink = getDownloadLink(version);
-				MrCorePlugin.pl.getLogger().info("The current version (" + MrCore.getVersion() + ") does not match the configured one (" + version + "/" + absoluteVersion + ")");
+				MrCorePlugin.pl.getLogger().info("The current version (" + MrCorePlugin.getVersion() + ") does not match the configured one (" + version + "/" + absoluteVersion + ")");
 				MrCorePlugin.pl.getLogger().info("You can download the required version here: "+newestLink);
 			} catch (IOException | ParseException e) {
 				e.printStackTrace();

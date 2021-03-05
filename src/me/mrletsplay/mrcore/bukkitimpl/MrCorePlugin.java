@@ -14,7 +14,6 @@ import me.mrletsplay.mrcore.bukkitimpl.gui.GUIListener;
 import me.mrletsplay.mrcore.bukkitimpl.multiblock.MultiBlockStructureListener;
 import me.mrletsplay.mrcore.bukkitimpl.ui.UIListener;
 import me.mrletsplay.mrcore.bukkitimpl.versioned.NMSVersion;
-import me.mrletsplay.mrcore.main.MrCore;
 
 public class MrCorePlugin extends JavaPlugin{
 	
@@ -49,6 +48,10 @@ public class MrCorePlugin extends JavaPlugin{
 		return getInstance().getDataFolder();
 	}
 	
+	public static String getVersion() {
+		return getInstance().getDescription().getVersion();
+	}
+	
 	@Override
 	public void onDisable() {
 		// Close all GUIs because them staying open would cause bugs
@@ -70,7 +73,7 @@ public class MrCorePlugin extends JavaPlugin{
 				if(args.length == 1) return sendCommandHelp(sender, null);
 				sendCommandHelp(sender, args[1]);
 			}else if(args[0].equalsIgnoreCase("version")) {
-				sender.sendMessage("§6MrCore version: §r"+MrCore.getVersion());
+				sender.sendMessage("§6MrCore version: §r" + MrCorePlugin.getVersion());
 			}else {
 				sendCommandHelp(sender, null);
 			}

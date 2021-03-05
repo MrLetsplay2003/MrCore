@@ -10,8 +10,7 @@ public class MrCoreConfig {
 	private FileCustomConfig config;
 	
 	public MrCoreConfig() {
-		config = ConfigLoader.loadFileConfig(new File(MrCorePlugin.getInstance().getDataFolder(), "config.yml"), true);
-		
+		config = ConfigLoader.loadFileConfig(new File(MrCorePlugin.getInstance().getDataFolder(), "config.yml"));
 		config.addDefault("versioning.check-update", true);
 		config.addDefault("versioning.version-to-use", "latest");
 		config.addDefault("nms-version", "auto");

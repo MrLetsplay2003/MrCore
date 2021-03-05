@@ -10,6 +10,12 @@ import me.mrletsplay.mrcore.bukkitimpl.config.BukkitCustomConfig;
 import me.mrletsplay.mrcore.http.HttpRequest;
 import me.mrletsplay.mrcore.json.JSONObject;
 
+/**
+ * @deprecated The conversion API has been deprecated
+ * @author MrLetsplay2003
+ *
+ */
+@Deprecated
 public class ConfigConverter {
 	
 	private static final String API_URL = "https://graphite-official.com";
