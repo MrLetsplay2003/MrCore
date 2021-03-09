@@ -278,10 +278,7 @@ public class DefaultConfigParser {
 	public char readCharacter() {
 		if(r.next() != '\'') throw new UnsupportedOperationException();
 		char c = r.next();
-		switch(c) {
-			case '\\':
-				c = readEscaped();
-		}
+		if(c == '\\') c = readEscaped();
 		if(r.next() != '\'') throw new ConfigException("Missing end of string", r.currentLine, r.currentIndex);
 		return c;
 	}

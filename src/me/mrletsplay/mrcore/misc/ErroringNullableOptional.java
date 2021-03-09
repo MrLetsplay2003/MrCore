@@ -46,6 +46,12 @@ public class ErroringNullableOptional<T, E extends Throwable> extends DualNullab
 		return new ErroringNullableOptional<>(false, null, exception);
 	}
 	
+	/**
+	 * @deprecated Doesn't make too much sense becaue it will create an optional with both values absent. Use {@link #ofErroring(Object)} with a null exception to explicitly create an absent optional with a null value
+	 * @param <T> The value type
+	 * @param <E> The exception type
+	 * @return An {@link ErroringNullableOptional} with both values absent (the exception is null)
+	 */
 	public static <T, E extends Throwable> ErroringNullableOptional<T, E> emptyErroring() {
 		return new ErroringNullableOptional<>(false, null, null);
 	}

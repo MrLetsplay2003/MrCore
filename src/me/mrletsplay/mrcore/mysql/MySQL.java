@@ -9,6 +9,12 @@ import java.net.UnknownHostException;
 import me.mrletsplay.mrcore.mysql.impl.MySQLConnection;
 import me.mrletsplay.mrcore.mysql.protocol.MySQLServerConnection;
 
+/**
+ * @deprecated Not actively updated, to be removed
+ * @author MrLetsplay2003
+ *
+ */
+@Deprecated
 public class MySQL {
 
 	public static MySQLConnection connect(String host, int port, String userName, String password, String database) throws UnknownHostException, IOException {
