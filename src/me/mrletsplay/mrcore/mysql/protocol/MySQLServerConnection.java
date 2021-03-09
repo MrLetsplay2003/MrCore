@@ -32,6 +32,7 @@ import me.mrletsplay.mrcore.mysql.protocol.packet.text.MySQLPrepareStatementResp
 import me.mrletsplay.mrcore.mysql.protocol.packet.text.MySQLResultSetPacket;
 import me.mrletsplay.mrcore.mysql.protocol.type.MySQLString;
 
+@Deprecated
 public class MySQLServerConnection {
 	
 	private static FlagCompound defaultCapabilityFlags = new FlagCompound(

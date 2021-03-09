@@ -4,6 +4,7 @@ import me.mrletsplay.mrcore.mysql.impl.statement.PreparedStatement;
 import me.mrletsplay.mrcore.mysql.impl.statement.simple.MySQLStatement;
 import me.mrletsplay.mrcore.mysql.protocol.MySQLServerConnection;
 
+@Deprecated
 public class MySQLConnection {
 
 	private MySQLServerConnection serverConnection;
