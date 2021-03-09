@@ -28,7 +28,7 @@ public class DualNullableOptional<T, A> extends NullableOptional<T> {
 	}
 	
 	/**
-	 * @deprecated Doesn't make too much sense becaue it will create an optional with both values absent. Use {@link #ofDualAbsent(Object)} with a null value to explicitly create an absent optional with a null value
+	 * @deprecated Doesn't make too much sense because it will create an optional with both values absent. Use {@link #ofDualAbsent(Object)} with a null value to explicitly create an absent optional with a null value
 	 * @param <T> The first type
 	 * @param <A> The second type
 	 * @return A {@link DualNullableOptional} with both values absent (the absent value is null)
