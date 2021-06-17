@@ -78,7 +78,7 @@ public class ClassFile {
 		for(int i = 0; i < interfaces.length; i++) {
 			interfaces[i] = constantPool.getEntry(in.readUnsignedShort()).as(ConstantPoolClassEntry.class);
 		}
-		this.fields = new ClassField[in.readShort()];
+		this.fields = new ClassField[in.readUnsignedShort()];
 		for(int i = 0; i < fields.length; i++) {
 			int accFlags = in.readUnsignedShort();
 			int nameIdx = in.readUnsignedShort();
@@ -89,7 +89,7 @@ public class ClassFile {
 			}
 			fields[i] = new ClassField(this, accFlags, nameIdx, descIdx, attrs);
 		}
-		this.methods = new ClassMethod[in.readShort()];
+		this.methods = new ClassMethod[in.readUnsignedShort()];
 		for(int i = 0; i < methods.length; i++) {
 			int accFlags = in.readUnsignedShort();
 			int nameIdx = in.readUnsignedShort();
