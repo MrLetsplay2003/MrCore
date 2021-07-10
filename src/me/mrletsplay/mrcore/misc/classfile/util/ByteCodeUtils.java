@@ -16,13 +16,27 @@ import me.mrletsplay.mrcore.misc.classfile.MethodDescriptor;
 
 public class ByteCodeUtils {
 	
+	/**
+	 * Parses an array of Strings into bytecode.<br>
+	 * This is equivalent to calling {@link #parseInstruction(ClassFile, String)} for every instruction and then using {@link ByteCode#of(List)} to convert it into a {@link ByteCode} object.
+	 * @param classFile The {@link ClassFile} to parse this bytecode for to add the required entries to the constant pool
+	 * @param code The array of instructions. Not every instruction is supported yet
+	 * @return A parsed {@link ByteCode} object
+	 * @see #parseInstruction(ClassFile, String)
+	 */
 	public static ByteCode parse(ClassFile classFile, String... code) {
 		List<InstructionInformation> inf = new ArrayList<>();
-		for(String c : code) inf.add(parse(classFile, c));
+		for(String c : code) inf.add(parseInstruction(classFile, c));
 		return ByteCode.of(inf);
 	}
 	
-	public static InstructionInformation parse(ClassFile classFile, String code) {
+	/**
+	 * Parses the String representation of an instruction into an {@link InstructionInformation} object.<br>
+	 * @param classFile The {@link ClassFile} to parse this instruction for to add the required entries to the constant pool
+	 * @param code The string representation of the instruction. Not every instruction is supported yet
+	 * @return A parsed {@link InstructionInformation} object
+	 */
+	public static InstructionInformation parseInstruction(ClassFile classFile, String code) {
 		String[] spl = code.split(" ");
 		Instruction instr = Instruction.valueOf(spl[0].toUpperCase());
 		

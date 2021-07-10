@@ -2,6 +2,7 @@ package me.mrletsplay.mrcore.misc.classfile.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -135,7 +136,8 @@ public class ProxyUtils {
 	/**
 	 * Creates a proxy class with the provided superclass that implements all of the given interfaces.
 	 * This class is not instantiable except by using {@link #instantiate(Class)}, as it does not declare any constructors.
-	 * It is recommended to use {@link #createProxy(ClassLoader, ProxyHandler, boolean, Class, Class...)} instead to also set a proxyHandler
+	 * It is recommended to use {@link #createProxy(ClassLoader, ProxyHandler, boolean, Class, Class...)} instead to also set a proxyHandler.<br>
+	 * This method currently does not work for Java 16+ without the <code>--illegal-access=permit</code> option.
 	 * @param loader The ClassLoader this class should be loaded into
 	 * @param className The canonical name the class should have, providing <code>null</code> will result in an automatically generated name
 	 * @param overrideImplemented Whether non-abstract/default methods should be overridden and redirected to the proxyHandler
@@ -144,9 +146,13 @@ public class ProxyUtils {
 	 * @return The newly created proxy class
 	 * @throws IllegalArgumentException If the superclass is an interface, an interface is not an interface class, or more than 65535 interfaces are provided
 	 * @throws FriendlyException If creating/loading the class fails due to some other reason
+	 * @deprecated Use {@link #createProxyClass(Lookup, String, boolean, Class, Class...)}
 	 */
+	@Deprecated
 	public static Class<?> createProxyClass(ClassLoader loader, String className, boolean overrideImplemented, Class<?> superclass, Class<?>... interfaces) throws FriendlyException {
 		try {
+			if(className == null) className = "me.mrletsplay.mrcore.misc.classfile.util.Proxy$" + (proxyID++);
+
 			ByteArrayOutputStream bOut = new ByteArrayOutputStream();
 			createProxyClassFile(className, overrideImplemented, superclass, interfaces).write(bOut);
 			
@@ -162,6 +168,44 @@ public class ProxyUtils {
 	}
 	
 	/**
+	 * Creates a proxy class with the provided superclass that implements all of the given interfaces.
+	 * This class is not instantiable except by using {@link #instantiate(Class)}, as it does not declare any constructors.
+	 * It is recommended to use {@link #createProxy(ClassLoader, ProxyHandler, boolean, Class, Class...)} instead to also set a proxyHandler.
+	 * @param loader The {@link Lookup} this class should be defined for
+	 * @param className The canonical name the class should have, providing <code>null</code> will result in an automatically generated name
+	 * @param overrideImplemented Whether non-abstract/default methods should be overridden and redirected to the proxyHandler
+	 * @param superclass The superclass for the proxy class
+	 * @param interfaces The interfaces this class should implement
+	 * @return The newly created proxy class
+	 * @throws IllegalArgumentException If the superclass is an interface, an interface is not an interface class, or more than 65535 interfaces are provided
+	 * @throws FriendlyException If creating/loading the class fails due to some other reason
+	 */
+	public static Class<?> createProxyClass(Lookup lookup, String className, boolean overrideImplemented, Class<?> superclass, Class<?>... interfaces) throws FriendlyException {
+		try {
+			ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+			createProxyClassFile(className, overrideImplemented, superclass, interfaces).write(bOut);
+			return lookup.defineClass(bOut.toByteArray());
+		}catch(IOException | IllegalAccessException e) {
+			throw new FriendlyException(e);
+		}
+	}
+	
+	/**
+	 * Creates a proxy class as defined by {@link #createProxyClass(ClassLoader, boolean, Class, Class...)} with <code>overrideImplemented</code> set to <code>false</code>
+	 * @param overrideImplemented Whether non-abstract/default methods should be overridden and redirected to the proxyHandler
+	 * @param superclass The superclass for the proxy class
+	 * @param interfaces The interfaces this class should implement
+	 * @return The newly created proxy class
+	 * @throws IllegalArgumentException If the superclass is an interface, an interface is not an interface class, or more than 65535 interfaces are provided
+	 * @throws FriendlyException If creating/loading the class fails due to some other reason
+	 * @deprecated Use {@link #createProxyClass(Lookup, Class, Class...)} instead
+	 */
+	@Deprecated
+	public static Class<?> createProxyClass(ClassLoader loader, Class<?> superclass, Class<?>... interfaces) throws FriendlyException {
+		return createProxyClass(loader, null, false, superclass, interfaces);
+	}
+	
+	/**
 	 * Creates a proxy class as defined by {@link #createProxyClass(ClassLoader, boolean, Class, Class...)} with <code>overrideImplemented</code> set to <code>false</code>
 	 * @param overrideImplemented Whether non-abstract/default methods should be overridden and redirected to the proxyHandler
 	 * @param superclass The superclass for the proxy class
@@ -170,8 +214,8 @@ public class ProxyUtils {
 	 * @throws IllegalArgumentException If the superclass is an interface, an interface is not an interface class, or more than 65535 interfaces are provided
 	 * @throws FriendlyException If creating/loading the class fails due to some other reason
 	 */
-	public static Class<?> createProxyClass(ClassLoader loader, Class<?> superclass, Class<?>... interfaces) throws FriendlyException {
-		return createProxyClass(loader, null, false, superclass, interfaces);
+	public static Class<?> createProxyClass(Lookup lookup, Class<?> superclass, Class<?>... interfaces) throws FriendlyException {
+		return createProxyClass(lookup, null, false, superclass, interfaces);
 	}
 	
 	private static List<MethodDescriptor> checkIncompatibleMethods(List<MethodDescriptor> methods) {
@@ -270,10 +314,34 @@ public class ProxyUtils {
 	 * @return The newly created proxy instance
 	 * @throws IllegalArgumentException As defined by {@link #createProxyClass(ClassLoader, boolean, Class, Class...)}
 	 * @throws FriendlyException As defined by {@link #createProxyClass(ClassLoader, boolean, Class, Class...)}
+	 * @deprecated Use {@link #createProxy(Lookup, ProxyHandler, boolean, Class, Class...)} instead
 	 */
+	@Deprecated
 	public static Object createProxy(ClassLoader loader, ProxyHandler proxyHandler, boolean overrideImplemented, Class<?> superclass, Class<?>... interfaces) {
 		try {
 			Class<?> proxyClass = createProxyClass(loader, null, overrideImplemented, superclass, interfaces);
+			Object inst = instantiate(proxyClass);
+			setProxyHandler(inst, proxyHandler);
+			return inst;
+		} catch(Exception e) {
+			throw new FriendlyException("Failed to create proxy instance", e);
+		}
+	}
+	
+	/**
+	 * Creates a proxy instance using a proxy class defined by {@link #createProxyClass(Lookup, String, boolean, Class, Class...)}
+	 * @param loader The ClassLoader the proxy class should be loaded into
+	 * @param proxyHandler The proxy handler for this proxy. All implemented methods will be redirected to it
+	 * @param overrideImplemented Whether non-abstract/default methods should be overridden and redirected to the proxyHandler
+	 * @param superclass The superclass for the proxy class
+	 * @param interfaces The interfaces the proxy class should implement
+	 * @return The newly created proxy instance
+	 * @throws IllegalArgumentException As defined by {@link #createProxyClass(ClassLoader, boolean, Class, Class...)}
+	 * @throws FriendlyException As defined by {@link #createProxyClass(ClassLoader, boolean, Class, Class...)}
+	 */
+	public static Object createProxy(Lookup lookup, ProxyHandler proxyHandler, boolean overrideImplemented, Class<?> superclass, Class<?>... interfaces) {
+		try {
+			Class<?> proxyClass = createProxyClass(lookup, null, overrideImplemented, superclass, interfaces);
 			Object inst = instantiate(proxyClass);
 			setProxyHandler(inst, proxyHandler);
 			return inst;
@@ -291,9 +359,25 @@ public class ProxyUtils {
 	 * @return The newly created proxy instance
 	 * @throws IllegalArgumentException As defined by {@link #createProxyClass(ClassLoader, boolean, Class, Class...)}
 	 * @throws FriendlyException As defined by {@link #createProxyClass(ClassLoader, boolean, Class, Class...)}
+	 * @deprecated Use {@link #createProxy(Lookup, ProxyHandler, Class, Class...)} instead
 	 */
+	@Deprecated
 	public static Object createProxy(ClassLoader loader, ProxyHandler proxyHandler, Class<?> superclass, Class<?>... interfaces) {
 		return createProxy(loader, proxyHandler, false, superclass, interfaces);
+	}
+
+	/**
+	 * Creates a proxy instance using a proxy class defined by {@link #createProxyClass(Lookup, boolean, Class, Class...)} with <code>overrideImplemented</code> set to <code>false</code>
+	 * @param loader The ClassLoader the proxy class should be loaded into
+	 * @param proxyHandler The proxy handler for this proxy. All implemented methods will be redirected to it
+	 * @param superclass The superclass for the proxy class
+	 * @param interfaces The interfaces the proxy class should implement
+	 * @return The newly created proxy instance
+	 * @throws IllegalArgumentException As defined by {@link #createProxyClass(Lookup, boolean, Class, Class...)}
+	 * @throws FriendlyException As defined by {@link #createProxyClass(Lookup, boolean, Class, Class...)}
+	 */
+	public static Object createProxy(Lookup lookup, ProxyHandler proxyHandler, Class<?> superclass, Class<?>... interfaces) {
+		return createProxy(lookup, proxyHandler, false, superclass, interfaces);
 	}
 	
 	/**
