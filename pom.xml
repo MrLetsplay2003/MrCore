@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>me.mrletsplay</groupId>
 	<artifactId>MrCore</artifactId>
-	<version>3.0</version>
+	<version>3.1</version>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<plugins>
@@ -35,7 +35,7 @@
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>3.1.1</version>
 				<configuration>
-					<source>1.8</source>
+					<source>11</source>
 					<encoding>UTF-8</encoding>
 				</configuration>
 				<executions>
@@ -70,18 +70,6 @@
 		</resources>
 	</build>
 
-	<profiles>
-		<profile>
-			<id>java8-doclint-disabled</id>
-			<activation>
-				<jdk>[1.8,)</jdk>
-			</activation>
-			<properties>
-				<doclint>none</doclint>
-			</properties>
-		</profile>
-	</profiles>
-
 	<repositories>
 		<repository>
 			<id>spigot-repo</id>
@@ -94,7 +82,7 @@
 		<dependency>
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot-api</artifactId>
-			<version>1.17-R0.1-SNAPSHOT</version>
+			<version>1.17.1-R0.1-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
