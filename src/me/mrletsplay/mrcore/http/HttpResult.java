@@ -42,6 +42,10 @@ public class HttpResult {
 		return headerFields;
 	}
 	
+	public boolean isSuccess() {
+		return success;
+	}
+	
 	public JSONObject asJSONObject() {
 		return new JSONObject(asString());
 	}
