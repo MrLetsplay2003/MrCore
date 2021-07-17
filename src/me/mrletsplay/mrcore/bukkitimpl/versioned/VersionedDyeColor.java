@@ -2,7 +2,6 @@ package me.mrletsplay.mrcore.bukkitimpl.versioned;
 
 import static me.mrletsplay.mrcore.bukkitimpl.versioned.NMSRelease.V1_12;
 import static me.mrletsplay.mrcore.bukkitimpl.versioned.NMSRelease.V1_13;
-import static me.mrletsplay.mrcore.bukkitimpl.versioned.NMSRelease.V1_16;
 import static me.mrletsplay.mrcore.bukkitimpl.versioned.NMSRelease.V1_8;
 
 import java.util.AbstractMap;
@@ -18,25 +17,25 @@ import org.bukkit.DyeColor;
  */
 public enum VersionedDyeColor {
 
-	BLACK(of("BLACK", V1_8.versionsTo(V1_16))),
-	RED(of("RED", V1_8.versionsTo(V1_16))),
-	GREEN(of("GREEN", V1_8.versionsTo(V1_16))),
-	BROWN(of("BROWN", V1_8.versionsTo(V1_16))),
-	BLUE(of("BLUE", V1_8.versionsTo(V1_16))),
-	PURPLE(of("PURPLE", V1_8.versionsTo(V1_16))),
-	CYAN(of("CYAN", V1_8.versionsTo(V1_16))),
+	BLACK(of("BLACK", V1_8.versionsTo(NMSRelease.getLatestSupportedRelease()))),
+	RED(of("RED", V1_8.versionsTo(NMSRelease.getLatestSupportedRelease()))),
+	GREEN(of("GREEN", V1_8.versionsTo(NMSRelease.getLatestSupportedRelease()))),
+	BROWN(of("BROWN", V1_8.versionsTo(NMSRelease.getLatestSupportedRelease()))),
+	BLUE(of("BLUE", V1_8.versionsTo(NMSRelease.getLatestSupportedRelease()))),
+	PURPLE(of("PURPLE", V1_8.versionsTo(NMSRelease.getLatestSupportedRelease()))),
+	CYAN(of("CYAN", V1_8.versionsTo(NMSRelease.getLatestSupportedRelease()))),
 	LIGHT_GRAY(
 			of("SILVER", V1_8.versionsTo(V1_12)),
-			of("LIGHT_GRAY", V1_13.versionsTo(V1_16))
+			of("LIGHT_GRAY", V1_13.versionsTo(NMSRelease.getLatestSupportedRelease()))
 		),
-	GRAY(of("GRAY", V1_8.versionsTo(V1_16))),
-	PINK(of("PINK", V1_8.versionsTo(V1_16))),
-	LIME(of("LIME", V1_8.versionsTo(V1_16))),
-	YELLOW(of("YELLOW", V1_8.versionsTo(V1_16))),
-	LIGHT_BLUE(of("LIGHT_BLUE", V1_8.versionsTo(V1_16))),
-	MAGENTA(of("MAGENTA", V1_8.versionsTo(V1_16))),
-	ORANGE(of("ORANGE", V1_8.versionsTo(V1_16))),
-	WHITE(of("WHITE", V1_8.versionsTo(V1_16)));
+	GRAY(of("GRAY", V1_8.versionsTo(NMSRelease.getLatestSupportedRelease()))),
+	PINK(of("PINK", V1_8.versionsTo(NMSRelease.getLatestSupportedRelease()))),
+	LIME(of("LIME", V1_8.versionsTo(NMSRelease.getLatestSupportedRelease()))),
+	YELLOW(of("YELLOW", V1_8.versionsTo(NMSRelease.getLatestSupportedRelease()))),
+	LIGHT_BLUE(of("LIGHT_BLUE", V1_8.versionsTo(NMSRelease.getLatestSupportedRelease()))),
+	MAGENTA(of("MAGENTA", V1_8.versionsTo(NMSRelease.getLatestSupportedRelease()))),
+	ORANGE(of("ORANGE", V1_8.versionsTo(NMSRelease.getLatestSupportedRelease()))),
+	WHITE(of("WHITE", V1_8.versionsTo(NMSRelease.getLatestSupportedRelease())));
 	
 	private Map<NMSVersion, String> definitions;
 	

@@ -90,6 +90,13 @@ public enum NMSVersion {
 	}
 	
 	/**
+	 * @return The latest version supported by this version of MrCore
+	 */
+	public static NMSVersion getLatestSupportedVersion() {
+		return values()[values().length - 1];
+	}
+	
+	/**
 	 * Returns an array of all the versions from {@code startVersion} to {@code endVersion} (both inclusive)
 	 * @param startVersion The starting version (inclusive)
 	 * @param endVersion The ending version (inclusive)

@@ -13,6 +13,7 @@ public enum NMSRelease {
 	V1_14(NMSVersion.V1_14_R1),
 	V1_15(NMSVersion.V1_15_R1),
 	V1_16(NMSVersion.V1_16_R1, NMSVersion.V1_16_R2, NMSVersion.V1_16_R3),
+	V1_17(NMSVersion.V1_17_R1),
 	;
 	
 	private NMSVersion[] versions;
@@ -44,6 +45,13 @@ public enum NMSRelease {
 				.map(NMSRelease::getVersions)
 				.flatMap(Arrays::stream)
 				.toArray(NMSVersion[]::new);
+	}
+	
+	/**
+	 * @return The latest release supported by this version of MrCore
+	 */
+	public static NMSRelease getLatestSupportedRelease() {
+		return values()[values().length - 1];
 	}
 	
 }
