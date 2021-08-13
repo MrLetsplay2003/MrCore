@@ -47,11 +47,12 @@ module mrcore {
 	exports me.mrletsplay.mrcore.config.impl;
 	exports me.mrletsplay.mrcore.misc.classfile.pool;
 	exports me.mrletsplay.mrcore.bukkitimpl.versioned.definition;
-
-	requires transitive bungeecord.chat;
-	requires transitive gson;
+	
 	requires transitive java.desktop;
 	requires transitive java.logging;
 	requires transitive java.sql;
-	requires transitive org.bukkit;
+
+	requires static bungeecord.chat;
+	requires static gson;
+	requires static org.bukkit;
 }

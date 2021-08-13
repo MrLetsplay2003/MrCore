@@ -375,8 +375,8 @@ public interface ConfigSection {
 	 * @param exactType The exact, complex type to cast to. For non-complex objects, it should be equivalent to <code>{@link Complex#value}(typeClass)</code>
 	 * @return A {@link NullableOptional} containing the cast value or {@link NullableOptional#empty()} if it can't be cast
 	 */
-	public default <T> NullableOptional<T> castType(Object o, Class<T> clazz, Complex<?> exactType) {
-		return defaultCast(this, o, clazz, exactType, true);
+	public default <T> NullableOptional<T> castType(Object o, Class<T> typeClass, Complex<?> exactType) {
+		return defaultCast(this, o, typeClass, exactType, true);
 	}
 	
 	/**
@@ -387,8 +387,8 @@ public interface ConfigSection {
 	 * @param exactType The exact, complex type to cast to. For non-complex objects, it should be equivalent to <code>{@link Complex#value}(typeClass)</code>
 	 * @return A {@link NullableOptional} containing the cast value or {@link NullableOptional#empty()} if it can't be cast
 	 */
-	public default <T> NullableOptional<T> castPrimitiveType(Object o, Class<T> clazz, Complex<?> exactType) {
-		return defaultCast(this, o, clazz, exactType, false);
+	public default <T> NullableOptional<T> castPrimitiveType(Object o, Class<T> typeClass, Complex<?> exactType) {
+		return defaultCast(this, o, typeClass, exactType, false);
 	}
 
 	/**
