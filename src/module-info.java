@@ -52,7 +52,8 @@ module mrcore {
 	requires transitive java.logging;
 	requires transitive java.sql;
 
-	requires static bungeecord.chat;
+	requires transitive static bungeecord.chat;
+	requires transitive static org.bukkit;
+	
 	requires static gson;
-	requires static org.bukkit;
 }
