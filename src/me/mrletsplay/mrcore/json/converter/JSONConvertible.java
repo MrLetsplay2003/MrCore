@@ -1,15 +1,22 @@
 package me.mrletsplay.mrcore.json.converter;
 
+import java.util.EnumSet;
+
 import me.mrletsplay.mrcore.json.JSONObject;
 
 public interface JSONConvertible {
 
 	public default JSONObject toJSON() {
-		return toJSON(true);
+		return toJSON(EnumSet.noneOf(SerializationOption.class));
 	}
 
+	@Deprecated
 	public default JSONObject toJSON(boolean includeClass) {
 		return JSONConverter.encodeObject(this, includeClass);
+	}
+
+	public default JSONObject toJSON(EnumSet<SerializationOption> options) {
+		return JSONConverter.encodeObject(this, options);
 	}
 	
 	public default void preSerialize(JSONObject object) {};
