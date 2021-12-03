@@ -73,7 +73,8 @@ public class ClassFile {
 		}
 		this.accessFlags = EnumFlagCompound.of(ClassAccessFlag.class, in.readUnsignedShort());
 		this.thisClass = constantPool.getEntry(in.readUnsignedShort()).as(ConstantPoolClassEntry.class);
-		this.superClass = constantPool.getEntry(in.readUnsignedShort()).as(ConstantPoolClassEntry.class);
+		int superIdx = in.readUnsignedShort();
+		this.superClass = superIdx == 0 ? null : constantPool.getEntry(superIdx).as(ConstantPoolClassEntry.class);
 		this.interfaces = new ConstantPoolClassEntry[in.readUnsignedShort()];
 		for(int i = 0; i < interfaces.length; i++) {
 			interfaces[i] = constantPool.getEntry(in.readUnsignedShort()).as(ConstantPoolClassEntry.class);
@@ -262,6 +263,11 @@ public class ClassFile {
 	}
 	
 	public void setSuperClass(int superClassIndex) {
+		if(superClassIndex == 0) {
+			setSuperClass(null);
+			return;
+		}
+		
 		ConstantPoolEntry en = constantPool.getEntry(superClassIndex);
 		if(en == null || !en.getTag().equals(ConstantPoolTag.CLASS)) throw new IllegalArgumentException("Not a valid index");
 		setSuperClass(en.as(ConstantPoolClassEntry.class));
@@ -327,7 +333,7 @@ public class ClassFile {
 		}
 		dOut.writeShort((int) accessFlags.getCompound());
 		dOut.writeShort(constantPool.indexOf(thisClass));
-		dOut.writeShort(constantPool.indexOf(superClass));
+		dOut.writeShort(superClass == null ? 0 : constantPool.indexOf(superClass));
 		dOut.writeShort(interfaces.length);
 		for(ConstantPoolClassEntry en : interfaces) {
 			dOut.writeShort(constantPool.indexOf(en));
@@ -468,7 +474,7 @@ public class ClassFile {
 	public String toString() {
 		StringBuilder res = new StringBuilder();
 		res.append(accessFlags.getApplicable().stream().map(a -> a.getName()).collect(Collectors.joining(" "))).append(" class ")
-			.append(TypeDescriptor.parse(thisClass.getName().getValue()).getFriendlyName()).append(" extends ").append(TypeDescriptor.parse(superClass.getName().getValue()).getFriendlyName());
+			.append(thisClass.getName().getValue().replace('/', '.')).append(" extends ").append(TypeDescriptor.parse(superClass.getName().getValue()).getFriendlyName());
 		if(interfaces.length > 0) {
 			res.append(" implements ").append(Arrays.stream(interfaces).map(i -> TypeDescriptor.parse(i.getName().getValue()).getFriendlyName()).collect(Collectors.joining(", ")));
 		}
