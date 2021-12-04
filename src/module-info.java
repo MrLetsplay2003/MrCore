@@ -55,5 +55,5 @@ module mrcore {
 	requires transitive static bungeecord.chat;
 	requires transitive static org.bukkit;
 	
-	requires com.google.gson;
+	requires static com.google.gson;
 }
