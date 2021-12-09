@@ -38,7 +38,7 @@ public class ConstantPool {
 	
 	public int indexOf(ConstantPoolEntry entry) {
 		for(int i = 0; i < entries.length; i++) {
-			if(entries[i].equals(entry)) return i + 1;
+			if(entries[i] != null && entries[i].equals(entry)) return i + 1;
 		}
 		throw new IllegalArgumentException("Entry not in constant pool");
 	}

@@ -474,7 +474,7 @@ public class ClassFile {
 	public String toString() {
 		StringBuilder res = new StringBuilder();
 		res.append(accessFlags.getApplicable().stream().map(a -> a.getName()).collect(Collectors.joining(" "))).append(" class ")
-			.append(thisClass.getName().getValue().replace('/', '.')).append(" extends ").append(TypeDescriptor.parse(superClass.getName().getValue()).getFriendlyName());
+			.append(thisClass.getName().getValue().replace('/', '.')).append(" extends ").append(superClass == null ? "(no superclass)" : TypeDescriptor.parse(superClass.getName().getValue()).getFriendlyName());
 		if(interfaces.length > 0) {
 			res.append(" implements ").append(Arrays.stream(interfaces).map(i -> TypeDescriptor.parse(i.getName().getValue()).getFriendlyName()).collect(Collectors.joining(", ")));
 		}
