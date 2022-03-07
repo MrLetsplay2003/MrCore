@@ -25,6 +25,7 @@ public enum NMSVersion {
 	V1_16_R3("MC 1.16 Release 3", "v1_16_R3"),
 	V1_17_R1("MC 1.17 Release 1", "v1_17_R1"),
 	V1_18_R1("MC 1.18 Release 1", "v1_18_R1"),
+	V1_18_R2("MC 1.18 Release 2", "v1_18_R2"),
 	/**
 	 * Represents any unknown version of Spigot. This may include any version older than 1.8R1 or newer than 1.16R1
 	 */

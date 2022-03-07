@@ -232,8 +232,16 @@ public class ClassFile {
 		return majorVersion;
 	}
 	
+	public void setMajorVersion(int majorVersion) {
+		this.majorVersion = majorVersion;
+	}
+	
 	public int getMinorVersion() {
 		return minorVersion;
+	}
+	
+	public void setMinorVersion(int minorVersion) {
+		this.minorVersion = minorVersion;
 	}
 	
 	public ConstantPool getConstantPool() {
