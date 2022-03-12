@@ -36,6 +36,7 @@ public class JSONParser {
 			char c = reader.nextIgnoreWhitespaces();
 			switch(c) {
 				case ',':
+					if(obj.isEmpty()) throw new JSONParseException("Unexpected comma", reader.currentIndex);
 					if(hasComma) throw new JSONParseException("Double comma", reader.currentIndex);
 					hasComma = true;
 					break;

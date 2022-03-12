@@ -105,6 +105,7 @@ public class ClassFile {
 		for(int i = 0; i < attributes.length; i++) {
 			attributes[i] = readAttribute(constantPool, in);
 		}
+		in.close();
 	}
 	
 	public ClassFile(String name, String superClassName) {

@@ -174,12 +174,12 @@ public class ZipOut implements Closeable {
 	
 	private static void addFilesToZip(File f, ZipOutputStream out, String subPath, int sI, Predicate<File> filter, Consumer<File> fileHandler) throws IOException{
 		if(f.isDirectory()){
-			if(filter.test(f)) return;
+			if(!filter.test(f)) return;
 			for(File fl : f.listFiles()){
 				addFilesToZip(fl, out, subPath, sI, filter, fileHandler);
 			}
 		}else{
-			if(filter.test(f)) return;
+			if(!filter.test(f)) return;
 			fileHandler.accept(f);
 			FileInputStream fIn = new FileInputStream(f);
 			out.putNextEntry(new ZipEntry((subPath.isEmpty() ? "" : subPath + "/") + absFilePath(f).substring(sI + 1)));
