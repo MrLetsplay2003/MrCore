@@ -302,6 +302,12 @@ public class ClassFile {
 		return fields;
 	}
 	
+	public ClassField getField(String name) {
+		return Arrays.stream(fields)
+				.filter(m -> m.getName().getValue().equals(name))
+				.findFirst().orElse(null);
+	}
+	
 	public void setMethods(ClassMethod[] methods) {
 		this.methods = methods;
 	}
@@ -311,7 +317,9 @@ public class ClassFile {
 	}
 	
 	public ClassMethod[] getMethods(String name) {
-		return Arrays.stream(methods).filter(m -> m.getName().getValue().equals(name)).toArray(ClassMethod[]::new);
+		return Arrays.stream(methods)
+				.filter(m -> m.getName().getValue().equals(name))
+				.toArray(ClassMethod[]::new);
 	}
 	
 	public ClassMethod[] getConstructors() {
