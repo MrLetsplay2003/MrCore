@@ -90,7 +90,7 @@ public class ClassFileUtils {
 		}
 	}
 	
-	public static Attribute createAttribute(ClassMethod method, DefaultAttributeType type, Callable<? extends Attribute> initialValue) {
+	public static Attribute appendAttribute(ClassMethod method, DefaultAttributeType type, Callable<? extends Attribute> initialValue) {
 		Attribute a = method.getAttribute(type);
 		if(a != null) return a;
 		
@@ -109,7 +109,12 @@ public class ClassFileUtils {
 		return a;
 	}
 	
-	public static Attribute createAttribute(Attribute attribute, DefaultAttributeType type, Callable<? extends Attribute> initialValue) {
+	@Deprecated
+	public static Attribute createAttribute(ClassMethod method, DefaultAttributeType type, Callable<? extends Attribute> initialValue) {
+		return appendAttribute(method, type, initialValue);
+	}
+	
+	public static Attribute appendAttribute(Attribute attribute, DefaultAttributeType type, Callable<? extends Attribute> initialValue) {
 		Attribute a = attribute.getAttribute(type);
 		if(a != null) return a;
 		
@@ -128,12 +133,27 @@ public class ClassFileUtils {
 		return a;
 	}
 	
-	public static AttributeCode createCodeAttribute(ClassFile file, ClassMethod method) {
-		return createAttribute(method, DefaultAttributeType.CODE, () -> new AttributeCode(file)).as(AttributeCode.class);
+	@Deprecated
+	public static Attribute createAttribute(Attribute attribute, DefaultAttributeType type, Callable<? extends Attribute> initialValue) {
+		return appendAttribute(attribute, type, initialValue);
 	}
 	
-	public static String getClassName(Class<?> clazz) {
+	public static AttributeCode appendCodeAttribute(ClassFile file, ClassMethod method) {
+		return appendAttribute(method, DefaultAttributeType.CODE, () -> new AttributeCode(file)).as(AttributeCode.class);
+	}
+	
+	@Deprecated
+	public static AttributeCode createCodeAttribute(ClassFile file, ClassMethod method) {
+		return appendAttribute(method, DefaultAttributeType.CODE, () -> new AttributeCode(file)).as(AttributeCode.class);
+	}
+	
+	public static String getInternalClassName(Class<?> clazz) {
 		return clazz.getCanonicalName().replace('.', '/');
+	}
+
+	@Deprecated
+	public static String getClassName(Class<?> clazz) {
+		return getInternalClassName(clazz);
 	}
 	
 	public static void redirectMethodExecution(ClassFile file, ClassMethod method, String toClass, String toMethodName, String toMethodSignature) {

@@ -10,17 +10,16 @@ import me.mrletsplay.mrcore.misc.classfile.ByteCode;
 import me.mrletsplay.mrcore.misc.classfile.ClassFile;
 import me.mrletsplay.mrcore.misc.classfile.ExceptionHandler;
 import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolUTF8Entry;
-import me.mrletsplay.mrcore.misc.classfile.util.ClassFileUtils;
 
-public class AttributeCode extends AbstractDefaultAttribute {
+public class AttributeCode extends DefaultAttribute {
 
 	private int maxStack, maxLocals;
 	private ByteCode code;
 	private ExceptionHandler[] exceptionTable;
 	private Attribute[] attributes;
 	
-	public AttributeCode(ClassFile classFile, ConstantPoolUTF8Entry name, byte[] info) throws IOException {
-		super(classFile, name, info);
+	public AttributeCode(ClassFile classFile, int nameIndex, byte[] info) throws IOException {
+		super(classFile, nameIndex, info);
 		DataInputStream in = createInput();
 		this.maxStack = in.readUnsignedShort();
 		this.maxLocals = in.readUnsignedShort();
@@ -36,18 +35,18 @@ public class AttributeCode extends AbstractDefaultAttribute {
 		}
 	}
 	
+	@Deprecated
+	public AttributeCode(ClassFile classFile, ConstantPoolUTF8Entry name, byte[] info) throws IOException {
+		this(classFile, classFile.getConstantPool().indexOf(name), info);
+	}
+	
 	public AttributeCode(ClassFile classFile) throws IOException {
-		super(classFile, classFile.getConstantPool().getEntry(ClassFileUtils.getOrAppendUTF8(classFile, DefaultAttributeType.CODE.getName())).as(ConstantPoolUTF8Entry.class), new byte[0]);
+		super(classFile, DefaultAttributeType.CODE, new byte[0]);
 		this.maxStack = 0;
 		this.maxLocals = 0;
 		this.code = new ByteCode(new byte[0]);
 		this.exceptionTable = new ExceptionHandler[0];
 		this.attributes = new Attribute[0];
-	}
-
-	@Override
-	public DefaultAttributeType getType() {
-		return DefaultAttributeType.CODE;
 	}
 	
 	public void setMaxStack(int maxStack) {

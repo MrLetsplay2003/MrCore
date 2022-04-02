@@ -7,14 +7,13 @@ import me.mrletsplay.mrcore.misc.classfile.ClassFile;
 import me.mrletsplay.mrcore.misc.classfile.annotation.Annotation;
 import me.mrletsplay.mrcore.misc.classfile.pool.ConstantPool;
 import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolUTF8Entry;
-import me.mrletsplay.mrcore.misc.classfile.util.ClassFileUtils;
 
-public class AttributeRuntimeVisibleParameterAnnotations extends AbstractDefaultAttribute {
+public class AttributeRuntimeVisibleParameterAnnotations extends DefaultAttribute {
 	
 	private Annotation[][] annotations;
 	
-	public AttributeRuntimeVisibleParameterAnnotations(ClassFile classFile, ConstantPoolUTF8Entry name, byte[] info) throws IOException {
-		super(classFile, name, info);
+	public AttributeRuntimeVisibleParameterAnnotations(ClassFile classFile, int nameIndex, byte[] info) throws IOException {
+		super(classFile, nameIndex, info);
 		ConstantPool pool = classFile.getConstantPool();
 		DataInputStream in = createInput();
 		this.annotations = new Annotation[in.readUnsignedByte()][];
@@ -26,8 +25,13 @@ public class AttributeRuntimeVisibleParameterAnnotations extends AbstractDefault
 		}
 	}
 	
+	@Deprecated
+	public AttributeRuntimeVisibleParameterAnnotations(ClassFile classFile, ConstantPoolUTF8Entry name, byte[] info) throws IOException {
+		this(classFile, classFile.getConstantPool().indexOf(name), info);
+	}
+	
 	public AttributeRuntimeVisibleParameterAnnotations(ClassFile classFile) throws IOException {
-		super(classFile, classFile.getConstantPool().getEntry(ClassFileUtils.getOrAppendUTF8(classFile, DefaultAttributeType.RUNTIME_VISIBLE_ANNOTATIONS.getName())).as(ConstantPoolUTF8Entry.class), new byte[0]);
+		super(classFile, DefaultAttributeType.RUNTIME_VISIBLE_ANNOTATIONS, new byte[0]);
 		this.annotations = new Annotation[0][];
 	}
 	
@@ -37,11 +41,6 @@ public class AttributeRuntimeVisibleParameterAnnotations extends AbstractDefault
 	
 	public Annotation[] getAnnotations(int index) {
 		return annotations[index];
-	}
-
-	@Override
-	public DefaultAttributeType getType() {
-		return DefaultAttributeType.RUNTIME_VISIBLE_PARAMETER_ANNOTATIONS;
 	}
 
 	@Override

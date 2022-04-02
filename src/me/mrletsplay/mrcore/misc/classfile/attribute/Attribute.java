@@ -7,9 +7,15 @@ import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolUTF8Entry;
 
 public interface Attribute {
 
-	public ConstantPoolUTF8Entry getName();
-	
-	public String getNameString();
+	public int getNameIndex();
+
+	public default ConstantPoolUTF8Entry getName() {
+		return getClassFile().getConstantPool().getEntry(getNameIndex()).as(ConstantPoolUTF8Entry.class);
+	}
+
+	public default String getNameString() {
+		return getName().getValue();
+	}
 	
 	public byte[] getInfo();
 	

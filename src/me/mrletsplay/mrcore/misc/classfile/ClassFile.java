@@ -178,7 +178,7 @@ public class ClassFile {
 		int aNameIdx = in.readUnsignedShort();
 		byte[] info = new byte[in.readInt()];
 		in.read(info);
-		return parseAttribute(new AttributeRaw(this, pool.getEntry(aNameIdx).as(ConstantPoolUTF8Entry.class), info));
+		return parseAttribute(new AttributeRaw(this, aNameIdx, info));
 	}
 	
 	private Attribute parseAttribute(AttributeRaw attr) throws IOException {
@@ -186,7 +186,7 @@ public class ClassFile {
 		if(defType == null) return attr;
 		switch(defType) {
 			case CODE:
-				return new AttributeCode(this, attr.getName(), attr.getInfo());
+				return new AttributeCode(this, attr.getNameIndex(), attr.getInfo());
 			case ANNOTATION_DEFAULT:
 				break;
 			case BOOTSTRAP_METHODS:
@@ -204,25 +204,25 @@ public class ClassFile {
 			case LINE_NUMBER_TABLE:
 				break;
 			case LOCAL_VARIABLE_TABLE:
-				return new AttributeLocalVariableTable(this, attr.getName(), attr.getInfo());
+				return new AttributeLocalVariableTable(this, attr.getNameIndex(), attr.getInfo());
 			case LOCAL_VARIABLE_TYPE_TABLE:
 				break;
 			case RUNTIME_INVISIBLE_ANNOTATIONS:
-				return new AttributeRuntimeInvisibleAnnotations(this, attr.getName(), attr.getInfo());
+				return new AttributeRuntimeInvisibleAnnotations(this, attr.getNameIndex(), attr.getInfo());
 			case RUNTIME_INVISIBLE_PARAMETER_ANNOTATIONS:
-				return new AttributeRuntimeInvisibleParameterAnnotations(this, attr.getName(), attr.getInfo());
+				return new AttributeRuntimeInvisibleParameterAnnotations(this, attr.getNameIndex(), attr.getInfo());
 			case RUNTIME_VISIBLE_ANNOTATIONS:
-				return new AttributeRuntimeVisibleAnnotations(this, attr.getName(), attr.getInfo());
+				return new AttributeRuntimeVisibleAnnotations(this, attr.getNameIndex(), attr.getInfo());
 			case RUNTIME_VISIBLE_PARAMETER_ANNOTATIONS:
-				return new AttributeRuntimeVisibleParameterAnnotations(this, attr.getName(), attr.getInfo());
+				return new AttributeRuntimeVisibleParameterAnnotations(this, attr.getNameIndex(), attr.getInfo());
 			case SIGNATURE:
-				return new AttributeSignature(this, attr.getName(), attr.getInfo());
+				return new AttributeSignature(this, attr.getNameIndex(), attr.getInfo());
 			case SOURCE_DEBUG_EXCEPTION:
 				break;
 			case SOURCE_FILE:
 				break;
 			case STACK_MAP_TABLE:
-				return new AttributeStackMapTable(this, attr.getName(), attr.getInfo());
+				return new AttributeStackMapTable(this, attr.getNameIndex(), attr.getInfo());
 			case SYNTHETIC:
 				break;
 		}
