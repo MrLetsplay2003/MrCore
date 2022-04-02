@@ -96,6 +96,10 @@ public class AttributeCode extends AbstractDefaultAttribute {
 		return bO.toByteArray();
 	}
 	
+	public void setExceptionTable(ExceptionHandler[] exceptionTable) {
+		this.exceptionTable = exceptionTable;
+	}
+	
 	public ExceptionHandler[] getExceptionTable() {
 		return exceptionTable;
 	}
