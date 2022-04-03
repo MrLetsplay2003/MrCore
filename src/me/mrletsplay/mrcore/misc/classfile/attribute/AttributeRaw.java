@@ -31,11 +31,6 @@ public class AttributeRaw implements Attribute {
 	}
 	
 	@Override
-	public String getNameString() {
-		return getName().getValue();
-	}
-	
-	@Override
 	public byte[] getInfo() {
 		return info;
 	}

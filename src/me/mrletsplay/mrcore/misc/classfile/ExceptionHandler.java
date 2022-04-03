@@ -28,6 +28,10 @@ public class ExceptionHandler {
 		return handlerPC;
 	}
 	
+	public int getCatchTypeIndex() {
+		return catchTypeIndex;
+	}
+	
 	public ConstantPoolClassEntry getCatchType() {
 		if(catchTypeIndex == 0) return null;
 		return classFile.getConstantPool().getEntry(catchTypeIndex).as(ConstantPoolClassEntry.class);

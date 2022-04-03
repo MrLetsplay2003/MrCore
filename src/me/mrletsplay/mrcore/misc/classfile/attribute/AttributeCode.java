@@ -23,8 +23,7 @@ public class AttributeCode extends DefaultAttribute {
 		DataInputStream in = createInput();
 		this.maxStack = in.readUnsignedShort();
 		this.maxLocals = in.readUnsignedShort();
-		this.code = new ByteCode(new byte[in.readInt()]);
-		in.read(this.code.getBytes());
+		this.code = new ByteCode(in.readNBytes(in.readInt()));
 		this.exceptionTable = new ExceptionHandler[in.readUnsignedShort()];
 		for(int i = 0; i < exceptionTable.length; i++) {
 			exceptionTable[i] = new ExceptionHandler(classFile, in.readUnsignedShort(), in.readUnsignedShort(), in.readUnsignedShort(), in.readUnsignedShort());
@@ -83,7 +82,7 @@ public class AttributeCode extends DefaultAttribute {
 				dOut.writeShort(exH.getStartPC());
 				dOut.writeShort(exH.getEndPC());
 				dOut.writeShort(exH.getHandlerPC());
-				dOut.writeShort(getClassFile().getConstantPool().indexOf(exH.getCatchType()));
+				dOut.writeShort(exH.getCatchTypeIndex());
 			}
 			dOut.writeShort(attributes.length);
 			for(Attribute a : attributes) {

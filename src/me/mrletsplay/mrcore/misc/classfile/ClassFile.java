@@ -7,7 +7,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -60,52 +59,52 @@ public class ClassFile {
 	}
 	
 	public ClassFile(InputStream fromInputStream) throws IOException {
-		DataInputStream in = new DataInputStream(fromInputStream);
-		if(in.readInt() != 0xCAFEBABE) throw new IllegalArgumentException("Not a valid .class file");
-		this.minorVersion = in.readUnsignedShort();
-		this.majorVersion = in.readUnsignedShort();
-		int cPoolCount = in.readUnsignedShort();
-		constantPool = new ConstantPool(cPoolCount);
-		for(int i = 1; i < cPoolCount; i++) {
-			ConstantPoolEntry en = readConstantPoolEntry(constantPool, in);
-			constantPool.setEntry(i, en);
-			if(en.isDoubleEntry()) constantPool.setEntry(++i, null);
-		}
-		this.accessFlags = EnumFlagCompound.of(ClassAccessFlag.class, in.readUnsignedShort());
-		this.thisClass = constantPool.getEntry(in.readUnsignedShort()).as(ConstantPoolClassEntry.class);
-		int superIdx = in.readUnsignedShort();
-		this.superClass = superIdx == 0 ? null : constantPool.getEntry(superIdx).as(ConstantPoolClassEntry.class);
-		this.interfaces = new ConstantPoolClassEntry[in.readUnsignedShort()];
-		for(int i = 0; i < interfaces.length; i++) {
-			interfaces[i] = constantPool.getEntry(in.readUnsignedShort()).as(ConstantPoolClassEntry.class);
-		}
-		this.fields = new ClassField[in.readUnsignedShort()];
-		for(int i = 0; i < fields.length; i++) {
-			int accFlags = in.readUnsignedShort();
-			int nameIdx = in.readUnsignedShort();
-			int descIdx = in.readUnsignedShort();
-			Attribute[] attrs = new Attribute[in.readUnsignedShort()];
-			for(int j = 0; j < attrs.length; j++) {
-				attrs[j] = readAttribute(constantPool, in);
+		try(DataInputStream in = new DataInputStream(fromInputStream)) {
+			if(in.readInt() != 0xCAFEBABE) throw new IllegalArgumentException("Not a valid .class file");
+			this.minorVersion = in.readUnsignedShort();
+			this.majorVersion = in.readUnsignedShort();
+			int cPoolCount = in.readUnsignedShort();
+			constantPool = new ConstantPool(cPoolCount);
+			for(int i = 1; i < cPoolCount; i++) {
+				ConstantPoolEntry en = readConstantPoolEntry(constantPool, in);
+				constantPool.setEntry(i, en);
+				if(en.isDoubleEntry()) constantPool.setEntry(++i, null);
 			}
-			fields[i] = new ClassField(this, accFlags, nameIdx, descIdx, attrs);
-		}
-		this.methods = new ClassMethod[in.readUnsignedShort()];
-		for(int i = 0; i < methods.length; i++) {
-			int accFlags = in.readUnsignedShort();
-			int nameIdx = in.readUnsignedShort();
-			int descIdx = in.readUnsignedShort();
-			Attribute[] attrs = new Attribute[in.readUnsignedShort()];
-			for(int j = 0; j < attrs.length; j++) {
-				attrs[j] = readAttribute(constantPool, in);
+			this.accessFlags = EnumFlagCompound.of(ClassAccessFlag.class, in.readUnsignedShort());
+			this.thisClass = constantPool.getEntry(in.readUnsignedShort()).as(ConstantPoolClassEntry.class);
+			int superIdx = in.readUnsignedShort();
+			this.superClass = superIdx == 0 ? null : constantPool.getEntry(superIdx).as(ConstantPoolClassEntry.class);
+			this.interfaces = new ConstantPoolClassEntry[in.readUnsignedShort()];
+			for(int i = 0; i < interfaces.length; i++) {
+				interfaces[i] = constantPool.getEntry(in.readUnsignedShort()).as(ConstantPoolClassEntry.class);
 			}
-			methods[i] = new ClassMethod(this, accFlags, nameIdx, descIdx, attrs);
+			this.fields = new ClassField[in.readUnsignedShort()];
+			for(int i = 0; i < fields.length; i++) {
+				int accFlags = in.readUnsignedShort();
+				int nameIdx = in.readUnsignedShort();
+				int descIdx = in.readUnsignedShort();
+				Attribute[] attrs = new Attribute[in.readUnsignedShort()];
+				for(int j = 0; j < attrs.length; j++) {
+					attrs[j] = readAttribute(constantPool, in);
+				}
+				fields[i] = new ClassField(this, accFlags, nameIdx, descIdx, attrs);
+			}
+			this.methods = new ClassMethod[in.readUnsignedShort()];
+			for(int i = 0; i < methods.length; i++) {
+				int accFlags = in.readUnsignedShort();
+				int nameIdx = in.readUnsignedShort();
+				int descIdx = in.readUnsignedShort();
+				Attribute[] attrs = new Attribute[in.readUnsignedShort()];
+				for(int j = 0; j < attrs.length; j++) {
+					attrs[j] = readAttribute(constantPool, in);
+				}
+				methods[i] = new ClassMethod(this, accFlags, nameIdx, descIdx, attrs);
+			}
+			this.attributes = new Attribute[in.readUnsignedShort()];
+			for(int i = 0; i < attributes.length; i++) {
+				attributes[i] = readAttribute(constantPool, in);
+			}
 		}
-		this.attributes = new Attribute[in.readUnsignedShort()];
-		for(int i = 0; i < attributes.length; i++) {
-			attributes[i] = readAttribute(constantPool, in);
-		}
-		in.close();
 	}
 	
 	public ClassFile(String name, String superClassName) {
@@ -160,9 +159,7 @@ public class ClassFile {
 			case NAME_AND_TYPE:
 				return new ConstantPoolNameAndTypeEntry(pool, in.readUnsignedShort(), in.readUnsignedShort());
 			case UTF_8:
-				byte[] b = new byte[in.readUnsignedShort()];
-				in.read(b);
-				return new ConstantPoolUTF8Entry(pool, new String(b, StandardCharsets.UTF_8));
+				return new ConstantPoolUTF8Entry(pool, in.readUTF());
 			case METHOD_HANDLE:
 				return new ConstantPoolMethodHandleEntry(pool, in.readUnsignedByte(), in.readUnsignedShort());
 			case METHOD_TYPE:
@@ -176,9 +173,7 @@ public class ClassFile {
 	
 	public Attribute readAttribute(ConstantPool pool, DataInputStream in) throws IOException {
 		int aNameIdx = in.readUnsignedShort();
-		byte[] info = new byte[in.readInt()];
-		in.read(info);
-		return parseAttribute(new AttributeRaw(this, aNameIdx, info));
+		return parseAttribute(new AttributeRaw(this, aNameIdx, in.readNBytes(in.readInt())));
 	}
 	
 	private Attribute parseAttribute(AttributeRaw attr) throws IOException {
@@ -451,9 +446,7 @@ public class ClassFile {
 			case UTF_8:
 			{
 				ConstantPoolUTF8Entry en = (ConstantPoolUTF8Entry) entry;
-				byte[] bs = en.getValue().getBytes(StandardCharsets.UTF_8);
-				dOut.writeShort(bs.length);
-				dOut.write(bs);
+				dOut.writeUTF(en.getValue());
 				break;
 			}
 			case METHOD_HANDLE:
