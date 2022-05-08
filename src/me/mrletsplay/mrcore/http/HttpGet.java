@@ -1,91 +1,93 @@
 package me.mrletsplay.mrcore.http;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.Proxy;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.net.http.HttpClient;
+import java.time.temporal.TemporalUnit;
 
-public class HttpGet implements HttpRequest {
+import me.mrletsplay.mrcore.http.data.RequestData;
 
-	private String url;
-	private Map<String, List<String>> queryParameters;
-	private Map<String, String> headerParameters;
-	private int timeout;
-	private Proxy proxy;
-	
+public class HttpGet extends HttpGeneric {
+
 	/**
 	 * Creates a GET request to the specified url
 	 * @param url The url this request should be sent to
 	 * @see HttpRequest#createGet(String)
 	 */
 	public HttpGet(String url) {
-		this.url = url;
-		this.queryParameters = new HashMap<>();
-		this.headerParameters = new HashMap<>();
+		super("GET", url);
 	}
 	
 	@Override
 	public HttpGet setQueryParameter(String key, String value) {
-		List<String> v = new ArrayList<>();
-		v.add(value);
-		queryParameters.put(key, v);
+		super.setQueryParameter(key, value);
 		return this;
 	}
 	
 	@Override
 	public HttpGet addQueryParameter(String key, String value) {
-		List<String> v = queryParameters.getOrDefault(key, new ArrayList<>());
-		v.add(value);
-		queryParameters.put(key, v);
+		super.addQueryParameter(key, value);
+		return this;
+	}
+
+	@Deprecated
+	@Override
+	public HttpGet setHeaderParameter(String key, String value) {
+		super.setHeaderParameter(key, value);
 		return this;
 	}
 
 	@Override
-	public HttpGet setHeaderParameter(String key, String value) {
-		headerParameters.put(key, value);
+	public HttpGet setHeader(String key, String value) {
+		super.setHeader(key, value);
 		return this;
 	}
 	
 	@Override
+	public HttpGet setData(RequestData data) {
+		super.setData(data);
+		return this;
+	}
+	
+	@Deprecated
+	@Override
 	public HttpGet setTimeout(int timeout) {
-		this.timeout = timeout;
+		super.setTimeout(timeout);
+		return this;
+	}
+	
+	@Override
+	public HttpGet setTimeout(long amount, TemporalUnit unit) {
+		super.setTimeout(amount, unit);
 		return this;
 	}
 	
 	@Override
 	public HttpGet setProxy(Proxy proxy) {
-		this.proxy = proxy;
+		super.setProxy(proxy);
+		return this;
+	}
+	
+	@Override
+	public HttpGet setClient(HttpClient client) {
+		super.setClient(client);
 		return this;
 	}
 
 	@Override
 	public HttpResult execute() {
-		try {
-			return HttpResult.retrieveFrom(url, "GET", queryParameters, headerParameters, null, timeout, proxy, false);
-		} catch (IOException e) {
-			throw new HttpException(e);
-		}
+		return super.execute();
 	}
 
+	@Deprecated
 	@Override
 	public HttpResult executeUntilUnavailable() {
-		try {
-			return HttpResult.retrieveFrom(url, "GET", queryParameters, headerParameters, null, timeout, proxy, true);
-		} catch (IOException e) {
-			throw new HttpException(e);
-		}
+		return super.executeUntilUnavailable();
 	}
 
 	@Override
 	public InputStream executeAsInputStream() {
-		try {
-			return HttpResult.retrieveAsInputStreamFrom(url, "GET", queryParameters, headerParameters, null, timeout, proxy);
-		} catch (IOException e) {
-			throw new HttpException(e);
-		}
+		return super.executeAsInputStream();
 	}
 
 }

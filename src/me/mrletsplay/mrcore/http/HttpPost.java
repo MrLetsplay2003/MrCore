@@ -1,127 +1,109 @@
 package me.mrletsplay.mrcore.http;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.Proxy;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.net.http.HttpClient;
+import java.time.temporal.TemporalUnit;
 
-public class HttpPost implements HttpRequest {
+import me.mrletsplay.mrcore.http.data.RequestData;
+import me.mrletsplay.mrcore.http.data.URLEncodedData;
 
-	private String url;
-	private Map<String, List<String>> queryParameters;
+public class HttpPost extends HttpGeneric {
 	
-	private Map<String, String>
-		headerParameters,
-		postParameters;
-	
-	private int timeout;
-	private Proxy proxy;
-
 	/**
 	 * Creates a POST request to the specified url
 	 * @param url The url this request should be sent to
 	 * @see HttpRequest#createPost(String)
 	 */
 	public HttpPost(String url) {
-		this.url = url;
-		this.queryParameters = new HashMap<>();
-		this.headerParameters = new HashMap<>();
-		this.postParameters = new HashMap<>();
+		super("POST", url);
 	}
 	
 	@Override
 	public HttpPost setQueryParameter(String key, String value) {
-		List<String> v = new ArrayList<>();
-		v.add(value);
-		queryParameters.put(key, v);
+		super.setQueryParameter(key, value);
 		return this;
 	}
 	
 	@Override
 	public HttpPost addQueryParameter(String key, String value) {
-		List<String> v = queryParameters.getOrDefault(key, new ArrayList<>());
-		v.add(value);
-		queryParameters.put(key, v);
+		super.addQueryParameter(key, value);
+		return this;
+	}
+
+	@Deprecated
+	@Override
+	public HttpPost setHeaderParameter(String key, String value) {
+		super.setHeaderParameter(key, value);
 		return this;
 	}
 
 	@Override
-	public HttpPost setHeaderParameter(String key, String value) {
-		headerParameters.put(key, value);
-		return this;
-	}
-	
-	/**
-	 * Sets a post parameter for this request
-	 * @param key The key of the post parameter
-	 * @param value The value of the post parameter
-	 * @return This request
-	 */
-	public HttpPost setPostParameter(String key, String value) {
-		postParameters.put(key, value);
+	public HttpPost setHeader(String key, String value) {
+		super.setHeader(key, value);
 		return this;
 	}
 	
 	@Override
+	public HttpPost setData(RequestData data) {
+		super.setData(data);
+		return this;
+	}
+	
+	@Deprecated
+	@Override
 	public HttpPost setTimeout(int timeout) {
-		this.timeout = timeout;
+		super.setTimeout(timeout);
+		return this;
+	}
+	
+	@Override
+	public HttpPost setTimeout(long amount, TemporalUnit unit) {
+		super.setTimeout(amount, unit);
 		return this;
 	}
 	
 	@Override
 	public HttpPost setProxy(Proxy proxy) {
-		this.proxy = proxy;
+		super.setProxy(proxy);
+		return this;
+	}
+	
+	@Override
+	public HttpPost setClient(HttpClient client) {
+		super.setClient(client);
+		return this;
+	}
+	
+	/**
+	 * Sets a post parameter for this request
+	 * @deprecated Use {@link #setData(RequestData)} with {@link URLEncodedData} instead
+	 * @param key The key of the post parameter
+	 * @param value The value of the post parameter
+	 * @return This request
+	 */
+	@Deprecated
+	public HttpPost setPostParameter(String key, String value) {
+		if(data == null) data = new URLEncodedData();
+		if(!(data instanceof URLEncodedData)) throw new UnsupportedOperationException("Data is not url encoded");
+		((URLEncodedData) data).set(key, value);
 		return this;
 	}
 
 	@Override
 	public HttpResult execute() {
-		try {
-			byte[] postData = null;
-			if(postParameters.size() > 0) {
-				postData = postParameters.entrySet().stream()
-						.map(e -> HttpUtils.urlEncode(e.getKey()) + "=" + HttpUtils.urlEncode(e.getValue()))
-						.collect(Collectors.joining("&")).getBytes(StandardCharsets.UTF_8);
-			}
-			return HttpResult.retrieveFrom(url, "POST", queryParameters, headerParameters, postData, timeout, proxy, false);
-		} catch (IOException e) {
-			throw new HttpException(e);
-		}
+		return super.execute();
 	}
 
+	@Deprecated
 	@Override
 	public HttpResult executeUntilUnavailable() {
-		try {
-			byte[] postData = null;
-			if(postParameters.size() > 0) {
-				postData = postParameters.entrySet().stream()
-						.map(e -> HttpUtils.urlEncode(e.getKey()) + "=" + HttpUtils.urlEncode(e.getValue()))
-						.collect(Collectors.joining("&")).getBytes(StandardCharsets.UTF_8);
-			}
-			return HttpResult.retrieveFrom(url, "POST", queryParameters, headerParameters, postData, timeout, proxy, true);
-		} catch (IOException e) {
-			throw new HttpException(e);
-		}
+		return super.executeUntilUnavailable();
 	}
 
 	@Override
 	public InputStream executeAsInputStream() {
-		try {
-			byte[] postData = null;
-			if(postParameters.size() > 0) {
-				postData = postParameters.entrySet().stream()
-						.map(e -> HttpUtils.urlEncode(e.getKey()) + "=" + HttpUtils.urlEncode(e.getValue()))
-						.collect(Collectors.joining("&")).getBytes(StandardCharsets.UTF_8);
-			}
-			return HttpResult.retrieveAsInputStreamFrom(url, "POST", queryParameters, headerParameters, postData, timeout, proxy);
-		} catch (IOException e) {
-			throw new HttpException(e);
-		}
+		return super.executeAsInputStream();
 	}
 
 }

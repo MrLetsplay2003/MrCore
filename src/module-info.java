@@ -25,6 +25,7 @@ module mrcore {
 	exports me.mrletsplay.mrcore.locale;
 	exports me.mrletsplay.mrcore.bukkitimpl.ui.event;
 	exports me.mrletsplay.mrcore.http;
+	exports me.mrletsplay.mrcore.http.data;
 	exports me.mrletsplay.mrcore.command.completer;
 	exports me.mrletsplay.mrcore.command.properties.auto;
 	exports me.mrletsplay.mrcore.bukkitimpl;
@@ -50,7 +51,7 @@ module mrcore {
 	
 	requires transitive java.desktop;
 	requires transitive java.logging;
-	requires transitive java.sql;
+	requires transitive java.net.http;
 
 	requires transitive static bungeecord.chat;
 	requires transitive static org.bukkit;

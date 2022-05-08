@@ -2,8 +2,16 @@ package me.mrletsplay.mrcore.http;
 
 import java.io.InputStream;
 import java.net.Proxy;
+import java.net.http.HttpClient;
+import java.net.http.HttpClient.Redirect;
+import java.time.temporal.TemporalUnit;
+import java.util.concurrent.TimeUnit;
+
+import me.mrletsplay.mrcore.http.data.RequestData;
 
 public interface HttpRequest {
+	
+	public static final HttpClient DEFAULT_CLIENT = HttpClient.newBuilder().followRedirects(Redirect.NORMAL).build();
 	
 	/**
 	 * Sets a query parameter for this request<br>
@@ -33,21 +41,58 @@ public interface HttpRequest {
 	 * @param value The value of the header paramezer
 	 * @return This request
 	 */
+	@Deprecated
 	public HttpRequest setHeaderParameter(String key, String value);
 	
 	/**
-	 * Sets the maximum connection timeout for this request
-	 * @param timeout The timeout to set
+	 * Sets a header for this request<br>
+	 * Headers are sent as part of the HTTP header<br>
+	 * These may include: Authorization, User-Agent, ...
+	 * @param key The key of the header parameter
+	 * @param value The value of the header paramezer
 	 * @return This request
 	 */
+	public HttpRequest setHeader(String key, String value);
+	
+	/**
+	 * Sets the data for this request
+	 * @param data The data
+	 * @return This request
+	 */
+	public HttpRequest setData(RequestData data);
+	
+	/**
+	 * Sets the maximum connection timeout for this request
+	 * @deprecated Use {@link #setTimeout(long, TimeUnit)} instead
+	 * @param timeout The timeout to set
+	 * @return This request
+	 * @see {@link #setTimeout(long, TimeUnit)}
+	 */
+	@Deprecated
 	public HttpRequest setTimeout(int timeout);
 	
 	/**
-	 * Sets the proxy for this request
+	 * Sets the maximum connection timeout for this request
+	 * @param amount The timeout to set
+	 * @param unit The unit of the timeout
+	 * @return This request
+	 */
+	public HttpRequest setTimeout(long amount, TemporalUnit unit);
+	
+	/**
+	 * Sets the proxy for this request.<br>
+	 * Note: This won't work if you set a custom client for this request using {@link #setClient(HttpClient)}
 	 * @param proxy The proxy to use
 	 * @return This request
 	 */
 	public HttpRequest setProxy(Proxy proxy);
+	
+	/**
+	 * Sets the client for this request
+	 * @param client The client to use
+	 * @return This request
+	 */
+	public HttpRequest setClient(HttpClient client);
 
 	/**
 	 * Executes the request, reads all bytes and returns the result as an {@link HttpResult}
@@ -55,12 +100,15 @@ public interface HttpRequest {
 	 * @throws HttpException If an I/O error occurs while executing the request
 	 */
 	public HttpResult execute();
-
+	
 	/**
 	 * Executes the request, reads all bytes until unavailable and returns the result as an {@link HttpResult}
+	 * @deprecated As of MrCore 3.6, this is identical to {@link #execute()}
 	 * @return The result received after execution
 	 * @throws HttpException If an I/O error occurs while executing the request
+	 * @see {@link #execute()}
 	 */
+	@Deprecated
 	public HttpResult executeUntilUnavailable();
 
 	/**
@@ -69,7 +117,7 @@ public interface HttpRequest {
 	 * @throws HttpException If an I/O error occurs while executing the request
 	 */
 	public InputStream executeAsInputStream();
-
+	
 	/**
 	 * Creates a generic request represented by an {@link HttpGeneric} instance
 	 * @param requestMethod The request method to use
