@@ -1,12 +1,10 @@
 package me.mrletsplay.mrcore.config;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 import me.mrletsplay.mrcore.config.impl.DefaultFileCustomConfig;
-import me.mrletsplay.mrcore.io.IOUtils;
 
 public class ConfigLoader {
 
@@ -18,7 +16,10 @@ public class ConfigLoader {
 	 * @throws ConfigException If an error occurs while loading the config
 	 */
 	public static FileCustomConfig loadFileConfig(File configFile, ConfigFlag... flags) throws ConfigException {
-		return loadFileConfig(configFile, false, flags);
+		DefaultFileCustomConfig cfg = new DefaultFileCustomConfig(configFile);
+		cfg.addFlags(flags);
+		cfg.load(configFile);
+		return cfg;
 	}
 	
 	/**
@@ -28,7 +29,7 @@ public class ConfigLoader {
 	 * @throws ConfigException If an error occurs while loading the config
 	 */
 	public static FileCustomConfig loadFileConfig(File configFile) throws ConfigException {
-		return loadFileConfig(configFile, false);
+		return loadFileConfig(configFile, new ConfigFlag[0]);
 	}
 
 	/**
@@ -52,33 +53,6 @@ public class ConfigLoader {
 	 */
 	public static CustomConfig loadStreamConfig(InputStream stream) throws ConfigException {
 		return loadStreamConfig(stream, false);
-	}
-
-	/**
-	 * @deprecated The conversion API has been deprecated. Use {@link #loadFileConfig(File, ConfigFlag...)} instead
-	 * @param configFile
-	 * @param saveConverted
-	 * @param flags
-	 * @return
-	 * @throws ConfigException
-	 */
-	@Deprecated
-	public static FileCustomConfig loadFileConfig(File configFile, boolean saveConverted, ConfigFlag... flags) throws ConfigException {
-		DefaultFileCustomConfig cfg = new DefaultFileCustomConfig(configFile);
-		cfg.addFlags(flags);
-		return loadConfigFromFile(cfg, configFile, saveConverted);
-	}
-
-	/**
-	 * @deprecated The conversion API has been deprecated. Use {@link #loadFileConfig(File)} instead
-	 * @param configFile
-	 * @param saveConverted
-	 * @return
-	 * @throws ConfigException
-	 */
-	@Deprecated
-	public static FileCustomConfig loadFileConfig(File configFile, boolean saveConverted) throws ConfigException {
-		return loadFileConfig(configFile, new ConfigFlag[0]);
 	}
 
 	/**
@@ -125,32 +99,6 @@ public class ConfigLoader {
 				stream.close();
 			} catch (IOException e) {
 				throw new ConfigException(e);
-			}
-		}
-		return config;
-	}
-	
-	/**
-	 * This method will be removed in a future version
-	 * @deprecated The conversion API has been deprecated. Use {@link #loadConfigFromFile(CustomConfig, File)} instead
-	 * @param <T>
-	 * @param config
-	 * @param configFile
-	 * @param saveConverted
-	 * @return
-	 * @throws ConfigException
-	 */
-	@Deprecated
-	public static <T extends CustomConfig> T loadConfigFromFile(T config, File configFile, boolean saveConverted) throws ConfigException {
-		try {
-			config.load(configFile);
-		}catch(IncompatibleConfigVersionException e) {
-			try {
-				T c = ConfigConverter.convertConfig(IOUtils.readAllBytes(new FileInputStream(configFile)), config, e.getGivenDefaultVersion(), e.getRequiredDefaultVersion());
-				if(saveConverted) c.save(configFile);
-				return c;
-			} catch (IOException e1) {
-				throw new ConfigException(e1);
 			}
 		}
 		return config;

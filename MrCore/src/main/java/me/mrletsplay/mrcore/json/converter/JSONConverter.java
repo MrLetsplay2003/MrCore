@@ -22,17 +22,17 @@ import me.mrletsplay.mrcore.misc.MiscUtils;
 import me.mrletsplay.mrcore.misc.NullableOptional;
 
 public class JSONConverter {
-	
+
 	public static final String
 		CLASS_NAME_FIELD = "_class",
 		ENUM_VALUE_FIELD = "_enumValue";
 
 	private JSONConverter() {}
-	
+
 	public static JSONObject encodeObject(JSONConvertible convertible) {
 		return encodeObject(convertible, EnumSet.noneOf(SerializationOption.class));
 	}
-	
+
 	/**
 	 * @deprecated Use {@link #encodeObject(JSONConvertible, EnumSet)} instead
 	 * @param convertible
@@ -43,11 +43,11 @@ public class JSONConverter {
 	public static JSONObject encodeObject(JSONConvertible convertible, boolean includeClass) {
 		return encodeObject(convertible, includeClass ? EnumSet.noneOf(SerializationOption.class) : EnumSet.of(SerializationOption.DONT_INCLUDE_CLASS));
 	}
-	
+
 	public static JSONObject encodeObject(JSONConvertible convertible, EnumSet<SerializationOption> includeClass) {
 		return (JSONObject) encode0(convertible, includeClass);
 	}
-	
+
 	private static Object encode0(Object value, EnumSet<SerializationOption> options) {
 		if(value == null) return null;
 		if(value instanceof List<?>) {
@@ -62,7 +62,7 @@ public class JSONConverter {
 				if(!(value instanceof Enum<?>)) throw new JSONEncodeException("Class " + value.getClass().getName() + " is a JSONEnum but not an Enum");
 				return ((Enum<?>) value).name();
 			}
-			
+
 			JSONObject obj = new JSONObject();
 			((JSONConvertible) value).preSerialize(obj);
 			if(!(value instanceof JSONEnum) || options.contains(SerializationOption.EXTENDED_ENUMS)) {
@@ -90,12 +90,12 @@ public class JSONConverter {
 					}
 				}
 			}
-			
+
 			if(value instanceof JSONEnum) {
 				if(!(value instanceof Enum<?>)) throw new JSONEncodeException("Class " + value.getClass().getName() + " is a JSONEnum but not an Enum");
 				obj.put(ENUM_VALUE_FIELD, ((Enum<?>) value).name());
 			}
-			
+
 			if(!options.contains(SerializationOption.DONT_INCLUDE_CLASS)) obj.set(CLASS_NAME_FIELD, value.getClass().getName());
 			return obj;
 		}else if(value instanceof JSONPrimitiveConvertible) {
@@ -110,7 +110,7 @@ public class JSONConverter {
 			return value;
 		}
 	}
-	
+
 	private static Set<Field> getFields(Class<?> clz) {
 		if(!JSONConvertible.class.isAssignableFrom(clz)) return Collections.emptySet();
 		Set<Field> fs = new HashSet<>();
@@ -122,7 +122,7 @@ public class JSONConverter {
 		}
 		return fs;
 	}
-	
+
 	private static Set<Method> getMethods(Class<?> clz) {
 		if(!JSONConvertible.class.isAssignableFrom(clz)) return Collections.emptySet();
 		Set<Method> fs = new HashSet<>();
@@ -135,33 +135,33 @@ public class JSONConverter {
 		}
 		return fs;
 	}
-	
+
 	private static JSONArray encodeArray0(Object[] array, EnumSet<SerializationOption> options) {
 		JSONArray arr = new JSONArray();
 		for(Object v : array) arr.add(encode0(v, options));
 		return arr;
 	}
-	
+
 	public static <T extends JSONConvertible> T decodeObject(JSONObject object, Class<T> clazz, ClassLoader loader) {
 		return decodeObject(object, clazz, loader, EnumSet.noneOf(DeserializationOption.class));
 	}
-	
+
 	public static <T extends JSONConvertible> T decodeObject(JSONObject object, Class<T> clazz) {
 		return decodeObject(object, clazz, EnumSet.noneOf(DeserializationOption.class));
 	}
-	
+
 	public static <T extends JSONConvertible> T decodeObject(JSONObject object, Class<T> clazz, ClassLoader loader, EnumSet<DeserializationOption> options) {
 		return clazz.cast(decode0(object, clazz, loader, options));
 	}
-	
+
 	public static <T extends JSONConvertible> T decodeObject(JSONObject object, Class<T> clazz, EnumSet<DeserializationOption> options) {
 		return decodeObject(object, clazz, JSONConverter.class.getClassLoader(), options);
 	}
-	
+
 	public static <T extends JSONPrimitiveConvertible> T decodePrimitive(Object object, Class<T> clazz) {
 		return decodePrimitive0(clazz, object);
 	}
-	
+
 	private static <T extends JSONConvertible> T createObject0(JSONObject object, Class<T> clazz, ClassLoader loader, EnumSet<DeserializationOption> options) {
 		List<Constructor<?>> constrs = Arrays.stream(clazz.getDeclaredConstructors()).filter(c -> c.isAnnotationPresent(JSONConstructor.class)).collect(Collectors.toList());
 		if(constrs.isEmpty()) throw new IllegalArgumentException("No constructor available for class " + clazz.getName());
@@ -194,7 +194,7 @@ public class JSONConverter {
 		if(t == null) throw new IllegalArgumentException("No suitable/working constructor found for class " + clazz.getName());
 		return t;
 	}
-	
+
 	private static <T extends JSONPrimitiveConvertible> T decodePrimitive0(Class<T> clazz, Object value) {
 		try {
 			Method voM = clazz.getMethod("decodePrimitive", Object.class);
@@ -208,7 +208,7 @@ public class JSONConverter {
 			throw new JSONDecodeException("Class " + clazz.getName() + " doesn't have the static method decodePrimitive(Object)", e);
 		}
 	}
-	
+
 	private static Object decodeEnumValue(Class<?> clazz, String enumValue) {
 		try {
 			return clazz.getMethod("valueOf", String.class).invoke(null, enumValue);
@@ -216,14 +216,14 @@ public class JSONConverter {
 			throw new JSONDecodeException("Failed to get enum value", e);
 		}
 	}
-	
+
 	private static Object decode0(Object value, Class<?> clazz, ClassLoader loader, EnumSet<DeserializationOption> options) {
 		if(value == null) return null;
 		if(JSONConvertible.class.isAssignableFrom(clazz)) {
 			if(JSONEnum.class.isAssignableFrom(clazz) && options.contains(DeserializationOption.SHORT_ENUMS)) {
 				return decodeEnumValue(clazz, (String) value);
 			}
-			
+
 			JSONObject o = (JSONObject) value;
 			Class<? extends JSONConvertible> jClass = clazz.asSubclass(JSONConvertible.class);
 			if(o.isOfType(CLASS_NAME_FIELD, JSONType.STRING)) {
@@ -237,7 +237,7 @@ public class JSONConverter {
 					if(!options.contains(DeserializationOption.IGNORE_MISSING_CLASSES)) throw new JSONDecodeException("Explicitly specified class" + className + "doesn't exist");
 				}
 			}
-			
+
 			if(JSONEnum.class.isAssignableFrom(jClass)) {
 				if(!jClass.isEnum()) throw new JSONDecodeException("Class " + jClass.getName() + " is a JSONEnum but not an Enum");
 				if(!o.isOfType(ENUM_VALUE_FIELD, JSONType.STRING)) throw new JSONDecodeException("JSON object does not contain an enum value");
@@ -284,12 +284,16 @@ public class JSONConverter {
 			return v.get();
 		}
 	}
-	
+
 	private static List<Object> decodeList0(JSONArray value, ClassLoader loader, JSONListType type, JSONComplexListType complexType, JSONPrimitiveListType primitiveType, EnumSet<DeserializationOption> options) {
 		if(value == null) return null;
 		List<Object> list = new ArrayList<>();
 		for(Object o : value) {
-			if(o == null) list.add(null);
+			if(o == null) {
+				list.add(null);
+				continue;
+			}
+
 			if(type != null) {
 				NullableOptional<Object> v = MiscUtils.callSafely(() -> type.value().cast(o));
 				if(!v.isPresent()) throw new JSONDecodeException("Invalid JSON value type, cannot cast " + o.getClass().getName() + " to " + type.value());
@@ -304,5 +308,5 @@ public class JSONConverter {
 		}
 		return list;
 	}
-	
+
 }

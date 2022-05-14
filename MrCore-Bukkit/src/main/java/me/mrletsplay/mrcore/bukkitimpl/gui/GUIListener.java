@@ -28,7 +28,7 @@ import me.mrletsplay.mrcore.bukkitimpl.gui.event.GUITakeItemEvent;
  * @author MrLetsplay2003
  */
 public class GUIListener implements Listener {
-	
+
 	@EventHandler
 	public void onInvDrag(InventoryDragEvent e) {
 		if(e.getInventory() == null) return;
@@ -44,7 +44,7 @@ public class GUIListener implements Listener {
 						return; // Player inv
 					}
 					ItemStack tbp = e.getNewItems().get(slot).clone();
-					
+
 					GUIPutItemEvent p = new GUIPutItemEvent((Player) e.getWhoClicked(), e, e.getInventory(), gui, holder, tbp, tbp, slot);
 					gui.getPutItemListener().onPutItem(p);
 					if(!p.isCancelled()) {
@@ -55,7 +55,7 @@ public class GUIListener implements Listener {
 			}
 		}
 	}
-	
+
 	@SuppressWarnings({ "unchecked", "deprecation" })
 	@EventHandler
 	public void onInvClick(InventoryClickEvent e) {
@@ -66,7 +66,7 @@ public class GUIListener implements Listener {
 			e.setResult(Result.ALLOW);
 			GUIHolder holder = (GUIHolder) inv.getHolder();
 			GUI gui = holder.getGUI();
-			
+
 			if(e.getInventory().equals(e.getClickedInventory())) {
 				//Gui clicked
 				int slot = e.getSlot();
@@ -77,13 +77,13 @@ public class GUIListener implements Listener {
 					elClicked.getAction().onAction(event);
 					if(!event.isCancelled()) e.setCancelled(false);
 				}
-				
+
 				switch(e.getAction()) {
 					case HOTBAR_SWAP:
 					case HOTBAR_MOVE_AND_READD:
 					{
 						if(gui.getTakeItemListener() == null || gui.getPutItemListener() == null) break;
-						
+
 						Runnable take = null;
 						if(e.getCurrentItem() != null && e.getCurrentItem().getType() != Material.AIR) {
 							ItemStack current = e.getCurrentItem() != null ? e.getCurrentItem().clone() : null;
@@ -93,12 +93,12 @@ public class GUIListener implements Listener {
 							e.setCancelled(false);
 							take = t.getCallback();
 						}
-						
+
 						ItemStack hb = e.getView().getBottomInventory().getItem(e.getHotbarButton());
 						if(hb != null && hb.getType() != Material.AIR) {
 							ItemStack tbp = hb.clone();
 							ItemStack after = hb.clone();
-							
+
 							GUIPutItemEvent p = new GUIPutItemEvent(player, e, inv, gui, holder, tbp, after, slot);
 							gui.getPutItemListener().onPutItem(p);
 							if(!p.isCancelled()) {
@@ -132,13 +132,13 @@ public class GUIListener implements Listener {
 					{
 						if(gui.getTakeItemListener() != null) {
 							int take = (int) Math.ceil(e.getCurrentItem().getAmount() / 2D);
-							
+
 							ItemStack tbt = e.getCurrentItem().clone();
 							tbt.setAmount(take);
-							
+
 							ItemStack after = e.getCurrentItem().clone();
 							after.setAmount(after.getAmount() - take);
-							
+
 							GUITakeItemEvent t = new GUITakeItemEvent(player, e, inv, gui, holder, tbt, after, slot);
 							gui.getTakeItemListener().onTakeItem(t);
 							if(!t.isCancelled()) {
@@ -156,7 +156,7 @@ public class GUIListener implements Listener {
 							if(e.getCurrentItem() != null && e.getCurrentItem().getType() != Material.AIR) {
 								after.setAmount(after.getAmount() + e.getCurrentItem().getAmount());
 							}
-							
+
 							GUIPutItemEvent p = new GUIPutItemEvent(player, e, inv, gui, holder, tbp, after, slot);
 							gui.getPutItemListener().onPutItem(p);
 							if(!p.isCancelled()) {
@@ -168,15 +168,15 @@ public class GUIListener implements Listener {
 					}
 					case PLACE_ONE:
 					{
-						if(gui.getPutItemListener() != null) {
-							ItemStack tbp = e.getCursor() != null ? e.getCursor().clone() : null;
+						if(gui.getPutItemListener() != null && e.getCursor() != null) {
+							ItemStack tbp = e.getCursor().clone();
 							tbp.setAmount(1);
-							
+
 							ItemStack after = tbp.clone();
 							if(e.getCurrentItem() != null) {
 								after.setAmount(after.getAmount() + e.getCurrentItem().getAmount());
 							}
-							
+
 							GUIPutItemEvent p = new GUIPutItemEvent(player, e, inv, gui, holder, tbp, after, slot);
 							gui.getPutItemListener().onPutItem(p);
 							if(!p.isCancelled()) {
@@ -190,15 +190,15 @@ public class GUIListener implements Listener {
 					{
 						if(gui.getPutItemListener() != null) {
 							int tp = e.getCurrentItem().getMaxStackSize() - e.getCurrentItem().getAmount();
-							
+
 							ItemStack tbp = e.getCursor().clone();
 							tbp.setAmount(tp);
-							
+
 							ItemStack after = e.getCursor().clone();
 							if(e.getCurrentItem() != null && e.getCurrentItem().getType() != Material.AIR) {
 								after.setAmount(after.getAmount() + e.getCurrentItem().getAmount());
 							}
-							
+
 							GUIPutItemEvent p = new GUIPutItemEvent(player, e, inv, gui, holder, tbp, after, slot);
 							gui.getPutItemListener().onPutItem(p);
 							if(!p.isCancelled()) {
@@ -219,11 +219,11 @@ public class GUIListener implements Listener {
 							e.setCancelled(false);
 							take = t.getCallback();
 						}
-						
+
 						if(gui.getPutItemListener() != null) {
 							ItemStack tbp = e.getCursor().clone();
 							ItemStack after = e.getCursor().clone();
-							
+
 							GUIPutItemEvent p = new GUIPutItemEvent(player, e, inv, gui, holder, tbp, after, slot);
 							gui.getPutItemListener().onPutItem(p);
 							if(!p.isCancelled()) {
@@ -253,13 +253,13 @@ public class GUIListener implements Listener {
 						// Ignored and cancelled by default
 						break;
 				}
-				
+
 				if(gui.getBuilder().getActionListener() != null) {
 					GUIActionEvent event = new GUIActionEvent(player, elClicked, e.getClickedInventory(), gui, holder, e);
 					gui.getBuilder().getActionListener().onAction(event);
 					if(!event.isCancelled()) e.setCancelled(false);
 				}
-				
+
 				if(gui instanceof GUIMultiPage<?>) {
 					Map<Integer, GUIElement> pageElements = (Map<Integer, GUIElement>) holder.getProperties().get("page-elements");
 					GUIElement pElClicked = pageElements.get(slot);
@@ -271,14 +271,14 @@ public class GUIListener implements Listener {
 				}
 			} else {
 				//Player inv clicked
-				
+
 				if(gui.getDragDropListener() != null) {
 					// Use old behavior for legacy plugins. TODO remove at some point
 					if(e.getAction().equals(InventoryAction.MOVE_TO_OTHER_INVENTORY)) {
 						e.setCancelled(true);
 						return;
 					}
-					
+
 					if(gui.getBuilder().getDragDropListener() != null) {
 						ItemStack pickedUp = e.getCurrentItem();
 						if(pickedUp!=null) {
@@ -292,25 +292,25 @@ public class GUIListener implements Listener {
 						e.setCancelled(true);
 					}
 				}
-				
+
 				if(gui.getPutItemListener() != null) {
 					e.setCancelled(false);
-					
+
 					if(e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY && e.getCurrentItem() != null) {
 						e.setCancelled(true);
-						
+
 						ItemStack toPutDown = e.getCurrentItem().clone();
 						for(int i = 0; i < inv.getSize(); i++) {
 							ItemStack it = inv.getItem(i);
 							if(toPutDown.isSimilar(it) && it.getAmount() < it.getMaxStackSize()) {
 								int pd = Math.min(it.getMaxStackSize() - it.getAmount(), toPutDown.getAmount());
-								
+
 								ItemStack tbp = toPutDown.clone();
 								tbp.setAmount(pd);
-								
+
 								ItemStack after = it.clone();
 								after.setAmount(it.getAmount() + pd);
-								
+
 								GUIPutItemEvent p = new GUIPutItemEvent(player, e, inv, gui, holder, tbp, after, i);
 								gui.getPutItemListener().onPutItem(p);
 								if(!p.isCancelled()) {
@@ -322,7 +322,7 @@ public class GUIListener implements Listener {
 								}
 							}
 						}
-						
+
 						if(toPutDown.getAmount() > 0) {
 							for(int i = 0; i < inv.getSize(); i++) {
 								ItemStack it = inv.getItem(i);
@@ -338,7 +338,7 @@ public class GUIListener implements Listener {
 								}
 							}
 						}
-						
+
 						e.setCurrentItem(toPutDown);
 					}else if(e.getAction() == InventoryAction.COLLECT_TO_CURSOR) {
 						e.setCancelled(true);
@@ -347,7 +347,7 @@ public class GUIListener implements Listener {
 			}
 		}
 	}
-	
+
 	@EventHandler
 	public void onInvClose(InventoryCloseEvent e) {
 		Inventory inv = e.getInventory();
@@ -367,5 +367,5 @@ public class GUIListener implements Listener {
 			}
 		}
 	}
-	
+
 }
