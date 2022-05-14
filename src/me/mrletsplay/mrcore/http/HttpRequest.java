@@ -5,14 +5,13 @@ import java.net.Proxy;
 import java.net.http.HttpClient;
 import java.net.http.HttpClient.Redirect;
 import java.time.temporal.TemporalUnit;
-import java.util.concurrent.TimeUnit;
 
 import me.mrletsplay.mrcore.http.data.RequestData;
 
 public interface HttpRequest {
-	
+
 	public static final HttpClient DEFAULT_CLIENT = HttpClient.newBuilder().followRedirects(Redirect.NORMAL).build();
-	
+
 	/**
 	 * Sets a query parameter for this request<br>
 	 * Query parameters are appended after the url in the format:<br>
@@ -22,7 +21,7 @@ public interface HttpRequest {
 	 * @return This request
 	 */
 	public HttpRequest setQueryParameter(String key, String value);
-	
+
 	/**
 	 * Adds a query parameter for this request<br>
 	 * Query parameters are appended after the url in the format:<br>
@@ -32,7 +31,7 @@ public interface HttpRequest {
 	 * @return This request
 	 */
 	public HttpRequest addQueryParameter(String key, String value);
-	
+
 	/**
 	 * Sets a header parameter for this request<br>
 	 * Header parameters are sent as part of the HTTP header<br>
@@ -43,7 +42,7 @@ public interface HttpRequest {
 	 */
 	@Deprecated
 	public HttpRequest setHeaderParameter(String key, String value);
-	
+
 	/**
 	 * Sets a header for this request<br>
 	 * Headers are sent as part of the HTTP header<br>
@@ -53,24 +52,24 @@ public interface HttpRequest {
 	 * @return This request
 	 */
 	public HttpRequest setHeader(String key, String value);
-	
+
 	/**
 	 * Sets the data for this request
 	 * @param data The data
 	 * @return This request
 	 */
 	public HttpRequest setData(RequestData data);
-	
+
 	/**
 	 * Sets the maximum connection timeout for this request
-	 * @deprecated Use {@link #setTimeout(long, TimeUnit)} instead
+	 * @deprecated Use {@link #setTimeout(long, TemporalUnit)} instead
 	 * @param timeout The timeout to set
 	 * @return This request
-	 * @see {@link #setTimeout(long, TimeUnit)}
+	 * @see #setTimeout(long, TemporalUnit)
 	 */
 	@Deprecated
 	public HttpRequest setTimeout(int timeout);
-	
+
 	/**
 	 * Sets the maximum connection timeout for this request
 	 * @param amount The timeout to set
@@ -78,7 +77,7 @@ public interface HttpRequest {
 	 * @return This request
 	 */
 	public HttpRequest setTimeout(long amount, TemporalUnit unit);
-	
+
 	/**
 	 * Sets the proxy for this request.<br>
 	 * Note: This won't work if you set a custom client for this request using {@link #setClient(HttpClient)}
@@ -86,7 +85,7 @@ public interface HttpRequest {
 	 * @return This request
 	 */
 	public HttpRequest setProxy(Proxy proxy);
-	
+
 	/**
 	 * Sets the client for this request
 	 * @param client The client to use
@@ -100,13 +99,13 @@ public interface HttpRequest {
 	 * @throws HttpException If an I/O error occurs while executing the request
 	 */
 	public HttpResult execute();
-	
+
 	/**
 	 * Executes the request, reads all bytes until unavailable and returns the result as an {@link HttpResult}
 	 * @deprecated As of MrCore 3.6, this is identical to {@link #execute()}
 	 * @return The result received after execution
 	 * @throws HttpException If an I/O error occurs while executing the request
-	 * @see {@link #execute()}
+	 * @see #execute()
 	 */
 	@Deprecated
 	public HttpResult executeUntilUnavailable();
@@ -117,7 +116,7 @@ public interface HttpRequest {
 	 * @throws HttpException If an I/O error occurs while executing the request
 	 */
 	public InputStream executeAsInputStream();
-	
+
 	/**
 	 * Creates a generic request represented by an {@link HttpGeneric} instance
 	 * @param requestMethod The request method to use
@@ -127,7 +126,7 @@ public interface HttpRequest {
 	public static HttpGeneric createGeneric(String requestMethod, String url) {
 		return new HttpGeneric(requestMethod, url);
 	}
-	
+
 	/**
 	 * Creates a POST request represented by an {@link HttpPost} instance
 	 * @param url The url the request should be sent to
@@ -145,5 +144,5 @@ public interface HttpRequest {
 	public static HttpGet createGet(String url) {
 		return new HttpGet(url);
 	}
-	
+
 }
