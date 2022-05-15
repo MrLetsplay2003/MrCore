@@ -13,10 +13,10 @@ public class NumberUtils {
 	 * @throws IllegalArgumentException - If the specified amount of decimals is less than 0
 	 */
 	public static double round(double value, int places) {
-	    if (places < 0) throw new IllegalArgumentException("Can't have a negative amount of decimal places");
-	    BigDecimal bd = new BigDecimal(value);
-	    bd = bd.setScale(places, RoundingMode.HALF_UP);
-	    return bd.doubleValue();
+		if (places < 0) throw new IllegalArgumentException("Can't have a negative amount of decimal places");
+		BigDecimal bd = new BigDecimal(value);
+		bd = bd.setScale(places, RoundingMode.HALF_UP);
+		return bd.doubleValue();
 	}
-	
+
 }
