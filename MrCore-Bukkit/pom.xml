@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>me.mrletsplay</groupId>
 		<artifactId>MrCore-Parent</artifactId>
-		<version>4.0.2</version>
+		<version>4.1</version>
 	</parent>
 
 	<artifactId>MrCore-Bukkit</artifactId>

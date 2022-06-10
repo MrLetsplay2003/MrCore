@@ -26,50 +26,51 @@ public enum NMSVersion {
 	V1_17_R1("MC 1.17 Release 1", "v1_17_R1"),
 	V1_18_R1("MC 1.18 Release 1", "v1_18_R1"),
 	V1_18_R2("MC 1.18 Release 2", "v1_18_R2"),
+	V1_19_R1("MC 1.19 Release 1", "v1_19_R1"),
 	/**
-	 * Represents any unknown version of Spigot. This may include any version older than 1.8R1 or newer than 1.16R1
+	 * Represents any unknown version of Spigot. This may include any version older than 1.8R1 or newer than the highest supported version
 	 */
 	UNKNOWN("Unknown", "Unknown version");
-	
+
 	private final String friendlyName, version;
-	
+
 	private NMSVersion(String friendlyName, String version) {
 		this.friendlyName = friendlyName;
 		this.version = version;
 	}
-	
+
 	/**
 	 * @return The NMS name of this version (e.g. "v1_8_R1")
 	 */
 	public String getNMSName() {
 		return version;
 	}
-	
+
 	/**
 	 * @return A more user-friendly name for this version (e.g. "MC 1.8 Release 1")
 	 */
 	public String getFriendlyName() {
 		return friendlyName;
 	}
-	
+
 	public boolean isNewerThan(NMSVersion other) {
 		return other.ordinal() < ordinal();
 	}
-	
+
 	public boolean isOlderThan(NMSVersion other) {
 		return other.ordinal() > ordinal();
 	}
-	
+
 	public boolean isNewerThanOrEqualTo(NMSVersion other) {
 		return other.ordinal() <= ordinal();
 	}
-	
+
 	public boolean isOlderThanOrEqualTo(NMSVersion other) {
 		return other.ordinal() >= ordinal();
 	}
-	
+
 	private static final NMSVersion CURRENT_VERSION;
-	
+
 	static {
 		String vRaw = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
 		NMSVersion ver = Arrays.stream(values()).filter(v -> v.version.equalsIgnoreCase(vRaw)).findFirst().orElse(UNKNOWN);
@@ -83,21 +84,21 @@ public enum NMSVersion {
 		}
 		CURRENT_VERSION = ver;
 	}
-	
+
 	/**
 	 * @return The current server version or {@link NMSVersion#UNKNOWN} if unknown
 	 */
 	public static NMSVersion getCurrentServerVersion() {
 		return CURRENT_VERSION;
 	}
-	
+
 	/**
 	 * @return The latest version supported by this version of MrCore
 	 */
 	public static NMSVersion getLatestSupportedVersion() {
 		return values()[values().length - 1];
 	}
-	
+
 	/**
 	 * Returns an array of all the versions from {@code startVersion} to {@code endVersion} (both inclusive)
 	 * @param startVersion The starting version (inclusive)
@@ -109,7 +110,7 @@ public enum NMSVersion {
 				.filter(o -> o.ordinal() >= startVersion.ordinal() && o.ordinal() <= endVersion.ordinal())
 				.toArray(NMSVersion[]::new);
 	}
-	
+
 	/**
 	 * @deprecated Use {@link NMSRelease#getVersions()} instead
 	 * Returns an array of all the 1.8 versions.<br>
@@ -169,5 +170,5 @@ public enum NMSVersion {
 	public static NMSVersion[] v1_13() {
 		return new NMSVersion[] {V1_13_R1, V1_13_R2};
 	}
-	
+
 }
