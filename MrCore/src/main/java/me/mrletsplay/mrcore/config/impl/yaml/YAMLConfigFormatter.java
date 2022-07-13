@@ -1,4 +1,4 @@
-package me.mrletsplay.mrcore.config.impl;
+package me.mrletsplay.mrcore.config.impl.yaml;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -11,11 +11,11 @@ import me.mrletsplay.mrcore.misc.Complex;
 import me.mrletsplay.mrcore.misc.MiscUtils;
 import me.mrletsplay.mrcore.misc.NullableOptional;
 
-public class DefaultConfigFormatter {
+public class YAMLConfigFormatter {
 
 	private BufferedWriter w;
 	
-	public DefaultConfigFormatter(BufferedWriter out) {
+	public YAMLConfigFormatter(BufferedWriter out) {
 		this.w = out;
 	}
 	

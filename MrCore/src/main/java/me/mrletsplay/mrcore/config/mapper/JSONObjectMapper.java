@@ -4,7 +4,7 @@ import java.util.EnumSet;
 import java.util.function.BiFunction;
 
 import me.mrletsplay.mrcore.config.ConfigSection;
-import me.mrletsplay.mrcore.config.impl.JSONObjectMapperImpl;
+import me.mrletsplay.mrcore.config.mapper.impl.JSONObjectMapperImpl;
 import me.mrletsplay.mrcore.json.JSONObject;
 import me.mrletsplay.mrcore.json.converter.DeserializationOption;
 import me.mrletsplay.mrcore.json.converter.JSONConverter;

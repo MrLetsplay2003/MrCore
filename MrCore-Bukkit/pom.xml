@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>me.mrletsplay</groupId>
 		<artifactId>MrCore-Parent</artifactId>
-		<version>4.1</version>
+		<version>4.2-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>MrCore-Bukkit</artifactId>
@@ -31,10 +31,7 @@
 		</plugins>
 		<resources>
 			<resource>
-				<directory>${project.basedir}</directory>
-				<includes>
-					<include>plugin.yml</include>
-				</includes>
+				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
 			</resource>
 		</resources>
@@ -52,7 +49,7 @@
 		<dependency>
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot-api</artifactId>
-			<version>1.18.2-R0.1-SNAPSHOT</version>
+			<version>1.19-R0.1-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>

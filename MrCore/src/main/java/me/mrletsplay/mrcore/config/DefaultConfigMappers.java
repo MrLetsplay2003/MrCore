@@ -3,7 +3,7 @@ package me.mrletsplay.mrcore.config;
 import java.util.List;
 import java.util.Map;
 
-import me.mrletsplay.mrcore.config.impl.DefaultConfigSectionImpl;
+import me.mrletsplay.mrcore.config.impl.yaml.YAMLConfigSection;
 import me.mrletsplay.mrcore.config.mapper.ObjectMapper;
 import me.mrletsplay.mrcore.json.JSONArray;
 import me.mrletsplay.mrcore.json.JSONObject;
@@ -13,7 +13,7 @@ public class DefaultConfigMappers {
 
 	public static final ObjectMapper<JSONObject, ConfigSection> JSON_OBJECT_MAPPER = ObjectMapper.create(JSONObject.class, ConfigSection.class,
 			(c, j) -> {
-				ConfigSection s = new DefaultConfigSectionImpl(c.getConfig());
+				ConfigSection s = new YAMLConfigSection(c.getConfig());
 				s.loadFromJSON(j);
 				return s;
 			}, (c, s) -> {

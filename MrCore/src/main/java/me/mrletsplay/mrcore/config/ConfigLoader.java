@@ -4,26 +4,27 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import me.mrletsplay.mrcore.config.impl.DefaultFileCustomConfig;
+import me.mrletsplay.mrcore.config.impl.yaml.YAMLCustomConfig;
+import me.mrletsplay.mrcore.config.impl.yaml.YAMLFileCustomConfig;
 
 public class ConfigLoader {
 
 	/**
-	 * Loads a config from a file according to the implementation of {@link DefaultFileCustomConfig}
+	 * Loads a config from a file according to the implementation of {@link YAMLCustomConfig}
 	 * @param configFile The file to load the config from
 	 * @param flags The flags to be set for the config
 	 * @return The config after it has been loaded
 	 * @throws ConfigException If an error occurs while loading the config
 	 */
 	public static FileCustomConfig loadFileConfig(File configFile, ConfigFlag... flags) throws ConfigException {
-		DefaultFileCustomConfig cfg = new DefaultFileCustomConfig(configFile);
+		YAMLFileCustomConfig cfg = new YAMLFileCustomConfig(configFile);
 		cfg.addFlags(flags);
 		cfg.load(configFile);
 		return cfg;
 	}
-	
+
 	/**
-	 * Loads a config from a file according to the implementation of {@link DefaultFileCustomConfig}
+	 * Loads a config from a file according to the implementation of {@link YAMLCustomConfig}
 	 * @param configFile The file to load the config from
 	 * @return The config after it has been loaded
 	 * @throws ConfigException If an error occurs while loading the config
@@ -33,7 +34,7 @@ public class ConfigLoader {
 	}
 
 	/**
-	 * Loads a config from a stream according to the implementation of {@link DefaultFileCustomConfig}.<br>
+	 * Loads a config from a stream according to the implementation of {@link YAMLCustomConfig}.<br>
 	 * While the returned type will technically be a {@link FileCustomConfig}, it should not be treated as one, as it has a <code>null</code> file. This behaviour might also be changed in a future version
 	 * @param stream The stream to load the config from
 	 * @param flags The flags to be set for the config
@@ -45,7 +46,7 @@ public class ConfigLoader {
 	}
 
 	/**
-	 * Loads a config from a stream according to the implementation of {@link DefaultFileCustomConfig}.<br>
+	 * Loads a config from a stream according to the implementation of {@link YAMLCustomConfig}.<br>
 	 * While the returned type will technically be a {@link FileCustomConfig}, it should not be treated as one, as it has a <code>null</code> file. This behaviour might also be changed in a future version
 	 * @param stream The stream to load the config from
 	 * @return The config after it has been loaded
@@ -56,7 +57,7 @@ public class ConfigLoader {
 	}
 
 	/**
-	 * Loads a config from a stream according to the implementation of {@link DefaultFileCustomConfig} and optionally closes the stream afterwards.<br>
+	 * Loads a config from a stream according to the implementation of {@link YAMLCustomConfig} and optionally closes the stream afterwards.<br>
 	 * While the returned type will technically be a {@link FileCustomConfig}, it should not be treated as one, as it has a <code>null</code> file. This behaviour might also be changed in a future version
 	 * @param stream The stream to load the config from
 	 * @param closeAfterLoad Whether to close the stream after loading the config from it
@@ -65,13 +66,13 @@ public class ConfigLoader {
 	 * @throws ConfigException If an error occurs while loading the config
 	 */
 	public static CustomConfig loadStreamConfig(InputStream stream, boolean closeAfterLoad, ConfigFlag... flags) throws ConfigException {
-		DefaultFileCustomConfig cfg = new DefaultFileCustomConfig(null);
+		YAMLFileCustomConfig cfg = new YAMLFileCustomConfig(null);
 		cfg.addFlags(flags);
 		return loadConfigFromStream(cfg, stream, closeAfterLoad);
 	}
 
 	/**
-	 * Loads a config from a stream according to the implementation of {@link DefaultFileCustomConfig} and optionally closes the stream afterwards.<br>
+	 * Loads a config from a stream according to the implementation of {@link YAMLCustomConfig} and optionally closes the stream afterwards.<br>
 	 * While the returned type will technically be a {@link FileCustomConfig}, it should not be treated as one, as it has a <code>null</code> file. This behaviour might also be changed in a future version
 	 * @param stream The stream to load the config from
 	 * @param closeAfterLoad Whether to close the stream after loading the config from it
@@ -81,7 +82,7 @@ public class ConfigLoader {
 	public static CustomConfig loadStreamConfig(InputStream stream, boolean closeAfterLoad) throws ConfigException {
 		return loadStreamConfig(stream, closeAfterLoad, new ConfigFlag[0]);
 	}
-	
+
 	/**
 	 * Loads the config from the provided stream using {@link CustomConfig#load(InputStream)} and optionally closes the stream afterwards
 	 * @param <T> The type of the config
@@ -103,7 +104,7 @@ public class ConfigLoader {
 		}
 		return config;
 	}
-	
+
 	/**
 	 * Just a convenience method which invokes {@link CustomConfig#load(File)} and returns the config.<br>
 	 * Unlike {@link #loadFileConfig(File)}, this will take any {@link CustomConfig} type and load it from the provided file
@@ -118,7 +119,7 @@ public class ConfigLoader {
 		config.load(configFile);
 		return config;
 	}
-	
+
 	/**
 	 * Just a convenience method which invokes {@link FileCustomConfig#loadFromFile()} and returns the config
 	 * @param <T> The type of the config
@@ -131,5 +132,5 @@ public class ConfigLoader {
 		config.loadFromFile();
 		return config;
 	}
-	
+
 }

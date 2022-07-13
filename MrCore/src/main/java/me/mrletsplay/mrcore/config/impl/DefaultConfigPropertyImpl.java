@@ -7,7 +7,6 @@ import me.mrletsplay.mrcore.config.ConfigException;
 import me.mrletsplay.mrcore.config.ConfigProperty;
 import me.mrletsplay.mrcore.config.ConfigSection;
 import me.mrletsplay.mrcore.config.ConfigValueType;
-import me.mrletsplay.mrcore.config.impl.DefaultConfigParser.ConfigSectionDescriptor;
 import me.mrletsplay.mrcore.misc.NullableOptional;
 
 public class DefaultConfigPropertyImpl implements ConfigProperty {
@@ -16,7 +15,7 @@ public class DefaultConfigPropertyImpl implements ConfigProperty {
 	private String name;
 	private ConfigValueType valueType;
 	private Object value;
-	
+
 	public DefaultConfigPropertyImpl(ConfigSection section, String name, ConfigValueType valueType, Object value) {
 		this.section = section;
 		this.name = name;
@@ -28,7 +27,7 @@ public class DefaultConfigPropertyImpl implements ConfigProperty {
 	public ConfigSection getSection() {
 		return section;
 	}
-	
+
 	@Override
 	public String getName() {
 		return name;
@@ -43,15 +42,8 @@ public class DefaultConfigPropertyImpl implements ConfigProperty {
 	public Object getValue() {
 		return value;
 	}
-	
+
 	public static DefaultConfigPropertyImpl create(ConfigSection section, String name, Object value) {
-		if(value instanceof ConfigSectionDescriptor) {
-			ConfigSectionDescriptor d = (ConfigSectionDescriptor) value;
-			ConfigSection s = new DefaultConfigSectionImpl(section.getConfig());
-			s.loadFromMap(d.toPropertyMap());
-			s.loadCommentsFromMap(d.toCommentMap());
-			return new DefaultConfigPropertyImpl(section, name, ConfigValueType.SECTION, s);
-		}
 		if(value instanceof List<?>) {
 			List<?> l = ((List<?>) value).stream().map(o -> create(section, null, o).getValue()).collect(Collectors.toList());
 			return new DefaultConfigPropertyImpl(section, name, ConfigValueType.LIST, l);
@@ -62,7 +54,7 @@ public class DefaultConfigPropertyImpl implements ConfigProperty {
 		ConfigValueType type = ConfigValueType.getRawTypeOf(value);
 		return new DefaultConfigPropertyImpl(section, name, type, value);
 	}
-	
+
 	@Override
 	public String toString() {
 		return "[P: " + value + "]";

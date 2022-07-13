@@ -3,7 +3,7 @@ package me.mrletsplay.mrcore.config.mapper;
 import java.util.function.BiFunction;
 
 import me.mrletsplay.mrcore.config.ConfigSection;
-import me.mrletsplay.mrcore.config.impl.ObjectMapperImpl;
+import me.mrletsplay.mrcore.config.mapper.impl.ObjectMapperImpl;
 import me.mrletsplay.mrcore.misc.CastingFunction;
 import me.mrletsplay.mrcore.misc.Complex;
 

@@ -1,4 +1,4 @@
-package me.mrletsplay.mrcore.config.impl;
+package me.mrletsplay.mrcore.config.mapper.impl;
 
 import java.util.function.BiFunction;
 

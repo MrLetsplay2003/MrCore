@@ -37,6 +37,9 @@ module me.mrletsplay.mrcore {
 	exports me.mrletsplay.mrcore.config.locale;
 	exports me.mrletsplay.mrcore.config.impl;
 	exports me.mrletsplay.mrcore.misc.classfile.pool;
+	exports me.mrletsplay.mrcore.config.mapper.impl;
+	exports me.mrletsplay.mrcore.config.impl.json;
+	exports me.mrletsplay.mrcore.config.impl.yaml;
 
 	requires transitive java.desktop;
 	requires transitive java.net.http;

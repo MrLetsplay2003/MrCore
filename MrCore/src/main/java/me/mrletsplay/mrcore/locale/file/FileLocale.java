@@ -5,22 +5,22 @@ import java.io.OutputStream;
 
 import me.mrletsplay.mrcore.config.ConfigLoader;
 import me.mrletsplay.mrcore.config.CustomConfig;
-import me.mrletsplay.mrcore.config.impl.DefaultFileCustomConfig;
+import me.mrletsplay.mrcore.config.impl.yaml.YAMLCustomConfig;
 import me.mrletsplay.mrcore.locale.Locale;
 import me.mrletsplay.mrcore.locale.LocalizedObject;
 
 public class FileLocale implements Locale {
-	
+
 	private CustomConfig config;
-	
+
 	public FileLocale(File file) {
 		if(file != null) {
 			this.config = ConfigLoader.loadFileConfig(file);
 		}else {
-			this.config = new DefaultFileCustomConfig(null);
+			this.config = new YAMLCustomConfig();
 		}
 	}
-	
+
 	@Override
 	public void applyDefaults(LocalizedObject<?>... objects) {
 		for(LocalizedObject<?> obj : objects) {
