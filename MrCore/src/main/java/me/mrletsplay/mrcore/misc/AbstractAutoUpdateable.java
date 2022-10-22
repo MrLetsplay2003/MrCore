@@ -11,22 +11,22 @@ public abstract class AbstractAutoUpdateable implements AutoUpdateable {
 
 	private boolean changed;
 	private Map<Field, Object> values;
-	
+
 	public AbstractAutoUpdateable() {
 		values = getCurrentValues();
 	}
-	
+
 	@Override
 	public void update() {
 		changed = true;
 	}
-	
+
 	@Override
 	public boolean hasChanged() {
 		Map<Field, Object> vs = getCurrentValues();
 		return changed || !vs.keySet().stream().allMatch(k -> !hasChanged(values.get(k), vs.get(k)));
 	}
-	
+
 	private boolean hasChanged(Object vO, Object vN) {
 		if(vN instanceof Updateable && ((Updateable) vN).hasChanged()) return true;
 		if(vN instanceof Object[] && vO instanceof Object[]) {
@@ -40,7 +40,7 @@ public abstract class AbstractAutoUpdateable implements AutoUpdateable {
 		}
 		return !Objects.deepEquals(vN, vO);
 	}
-	
+
 	@Override
 	public void resetChanged() {
 		values = getCurrentValues();
@@ -49,7 +49,7 @@ public abstract class AbstractAutoUpdateable implements AutoUpdateable {
 				((Updateable) e).resetChanged();
 		changed = false;
 	}
-	
+
 	private Map<Field, Object> getCurrentValues() {
 		Map<Field, Object> fs = new HashMap<>();
 		ClassUtils.getFields(getClass()).forEach(f -> {
@@ -73,5 +73,5 @@ public abstract class AbstractAutoUpdateable implements AutoUpdateable {
 		});
 		return fs;
 	}
-	
+
 }

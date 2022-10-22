@@ -62,7 +62,8 @@ public abstract class AbstractConfigSection implements ConfigSection {
 	public void unset(String key) {
 		ConfigPath path = ConfigPath.of(key);
 		if(path.hasSubpaths()) {
-			ConfigSection section = getOrCreateSubsection(path.getName());
+			ConfigSection section = getSubsection(path.getName());
+			if(section == null) return;
 			section.unset(path.traverseDown().toRawPath());
 		}else {
 			rawProperties.remove(path.getName());
@@ -78,7 +79,8 @@ public abstract class AbstractConfigSection implements ConfigSection {
 	public ConfigProperty getProperty(String key) throws ConfigException{
 		ConfigPath path = ConfigPath.of(key);
 		if(path.hasSubpaths()) {
-			ConfigSection section = getOrCreateSubsection(path.getName());
+			ConfigSection section = getSubsection(path.getName());
+			if(section == null) return null;
 			return section.getProperty(path.traverseDown().toRawPath());
 		}else {
 			ConfigProperty o = rawProperties.get(path.getName());
