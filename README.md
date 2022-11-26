@@ -19,7 +19,7 @@ via the graphite-official repository
 ```xml
 <repository>
 	<id>Graphite-Official</id>
-	<url>http://graphite-official.com/repo/</url>
+	<url>https://maven.graphite-official.com/</url>
 </repository>
 ```
 
