@@ -53,11 +53,11 @@ public class ClassFile {
 	private ClassField[] fields;
 	private ClassMethod[] methods;
 	private Attribute[] attributes;
-	
+
 	public ClassFile(File fromFile) throws IOException {
 		this(new FileInputStream(fromFile));
 	}
-	
+
 	public ClassFile(InputStream fromInputStream) throws IOException {
 		try(DataInputStream in = new DataInputStream(fromInputStream)) {
 			if(in.readInt() != 0xCAFEBABE) throw new IllegalArgumentException("Not a valid .class file");
@@ -106,7 +106,7 @@ public class ClassFile {
 			}
 		}
 	}
-	
+
 	public ClassFile(String name, String superClassName) {
 		this.minorVersion = 0;
 		this.majorVersion = 52; // Java 8
@@ -119,20 +119,20 @@ public class ClassFile {
 		this.methods = new ClassMethod[0];
 		this.attributes = new Attribute[0];
 	}
-	
+
 	public ClassFile(String name, Class<?> superClass) {
 		this(name, className(superClass));
 	}
-	
+
 	public ClassFile(String name) {
 		this(name, Object.class);
 	}
-	
+
 	private static String className(Class<?> clazz) {
 		if(clazz.isInterface() || clazz.isArray() || clazz.isEnum()) throw new IllegalArgumentException("Illegal superclass");
 		return clazz.getCanonicalName().replace('.', '/');
 	}
-	
+
 	private ConstantPoolEntry readConstantPoolEntry(ConstantPool pool, DataInputStream in) throws IOException {
 		int uByte = in.readUnsignedByte();
 		ConstantPoolTag tag = ConstantPoolTag.getByValue(uByte);
@@ -170,12 +170,12 @@ public class ClassFile {
 				throw new FriendlyException("Unhandled constant pool tag");
 		}
 	}
-	
+
 	public Attribute readAttribute(ConstantPool pool, DataInputStream in) throws IOException {
 		int aNameIdx = in.readUnsignedShort();
 		return parseAttribute(new AttributeRaw(this, aNameIdx, in.readNBytes(in.readInt())));
 	}
-	
+
 	private Attribute parseAttribute(AttributeRaw attr) throws IOException {
 		DefaultAttributeType defType = DefaultAttributeType.getByName(attr.getNameString());
 		if(defType == null) return attr;
@@ -223,116 +223,120 @@ public class ClassFile {
 		}
 		return attr;
 	}
-	
+
 	public int getMajorVersion() {
 		return majorVersion;
 	}
-	
+
 	public void setMajorVersion(int majorVersion) {
 		this.majorVersion = majorVersion;
 	}
-	
+
 	public int getMinorVersion() {
 		return minorVersion;
 	}
-	
+
 	public void setMinorVersion(int minorVersion) {
 		this.minorVersion = minorVersion;
 	}
-	
+
 	public ConstantPool getConstantPool() {
 		return constantPool;
 	}
-	
+
 	public EnumFlagCompound<ClassAccessFlag> getAccessFlags() {
 		return accessFlags;
 	}
-	
+
 	public void setThisClass(ConstantPoolClassEntry thisClass) {
 		this.thisClass = thisClass;
 	}
-	
+
 	public void setThisClass(int thisClassIndex) {
 		ConstantPoolEntry en = constantPool.getEntry(thisClassIndex);
 		if(en == null || !en.getTag().equals(ConstantPoolTag.CLASS)) throw new IllegalArgumentException("Not a valid index");
 		setThisClass(en.as(ConstantPoolClassEntry.class));
 	}
-	
+
 	public ConstantPoolClassEntry getThisClass() {
 		return thisClass;
 	}
-	
+
 	public void setSuperClass(ConstantPoolClassEntry superClass) {
 		this.superClass = superClass;
 	}
-	
+
 	public void setSuperClass(int superClassIndex) {
 		if(superClassIndex == 0) {
 			setSuperClass(null);
 			return;
 		}
-		
+
 		ConstantPoolEntry en = constantPool.getEntry(superClassIndex);
 		if(en == null || !en.getTag().equals(ConstantPoolTag.CLASS)) throw new IllegalArgumentException("Not a valid index");
 		setSuperClass(en.as(ConstantPoolClassEntry.class));
 	}
-	
+
 	public ConstantPoolClassEntry getSuperClass() {
 		return superClass;
 	}
-	
+
 	public void setInterfaces(ConstantPoolClassEntry[] interfaces) {
 		this.interfaces = interfaces;
 	}
-	
+
 	public ConstantPoolClassEntry[] getInterfaces() {
 		return interfaces;
 	}
-	
+
 	public void setFields(ClassField[] fields) {
 		this.fields = fields;
 	}
-	
+
 	public ClassField[] getFields() {
 		return fields;
 	}
-	
+
 	public ClassField getField(String name) {
 		return Arrays.stream(fields)
 				.filter(m -> m.getName().getValue().equals(name))
 				.findFirst().orElse(null);
 	}
-	
+
 	public void setMethods(ClassMethod[] methods) {
 		this.methods = methods;
 	}
-	
+
 	public ClassMethod[] getMethods() {
 		return methods;
 	}
-	
+
 	public ClassMethod[] getMethods(String name) {
 		return Arrays.stream(methods)
 				.filter(m -> m.getName().getValue().equals(name))
 				.toArray(ClassMethod[]::new);
 	}
-	
+
+	public void setAttributes(Attribute[] attributes) {
+		this.attributes = attributes;
+	}
+
 	public ClassMethod[] getConstructors() {
 		return getMethods("<init>");
 	}
-	
+
 	public Attribute[] getAttributes() {
 		return attributes;
 	}
-	
+
 	public Attribute getAttribute(String name) {
 		return Arrays.stream(attributes).filter(a -> a.getNameString().equals(name)).findFirst().orElse(null);
 	}
-	
+
 	public Attribute getAttribute(DefaultAttributeType type) {
 		return Arrays.stream(attributes).filter(a -> a.getNameString().equals(type.getName())).findFirst().orElse(null);
 	}
-	
+
 	public void write(OutputStream out) throws IOException {
 		DataOutputStream dOut = new DataOutputStream(out);
 		dOut.writeInt(0xCAFEBABE);
@@ -375,7 +379,7 @@ public class ClassFile {
 			writeAttribute(dOut, constantPool, a);
 		}
 	}
-	
+
 	public void writeConstantPoolEntry(DataOutputStream dOut, ConstantPool pool, ConstantPoolEntry entry) throws IOException {
 		dOut.writeByte(entry.getTag().getValue());
 		switch(entry.getTag()) {
@@ -473,13 +477,13 @@ public class ClassFile {
 				throw new RuntimeException();
 		}
 	}
-	
+
 	public void writeAttribute(DataOutputStream dOut, ConstantPool pool, Attribute attr) throws IOException {
 		dOut.writeShort(pool.indexOf(attr.getName()));
 		dOut.writeInt(attr.getInfo().length);
 		dOut.write(attr.getInfo());
 	}
-	
+
 	@Override
 	public String toString() {
 		StringBuilder res = new StringBuilder();

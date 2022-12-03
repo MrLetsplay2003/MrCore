@@ -31,7 +31,7 @@ public enum Instruction {
 	D2F(0x90, 0),
 	D2I(0x8e, 0),
 	D2L(0x8f, 0),
-	DDAD(0x63, 0),
+	DADD(0x63, 0),
 	DALOAD(0x31, 0),
 	DASTORE(0x52, 0),
 	DCMPG(0x98, 0),
@@ -221,30 +221,30 @@ public enum Instruction {
 	}),
 	WIDE(0xc4, 3),
 	;
-	
+
 	private final int byteValue;
 	private final BiFunction<byte[], Integer, Integer> byteCountFunction;
-	
+
 	private Instruction(int byteValue, int numBytes) {
 		this.byteValue = byteValue;
 		this.byteCountFunction = (a, i) -> numBytes;
 	}
-	
+
 	private Instruction(int byteValue, BiFunction<byte[], Integer, Integer> byteCountFunction) {
 		this.byteValue = byteValue;
 		this.byteCountFunction = byteCountFunction;
 	}
-	
+
 	public int getByteValue() {
 		return byteValue;
 	}
-	
+
 	public BiFunction<byte[], Integer, Integer> getByteCountFunction() {
 		return byteCountFunction;
 	}
-	
+
 	public static Instruction getInstruction(int byteValue) {
 		return Arrays.stream(values()).filter(i -> i.byteValue == byteValue).findFirst().orElse(null);
 	}
-	
+
 }
