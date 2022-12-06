@@ -54,7 +54,7 @@ public class Result<T, E extends Throwable> {
 	}
 
 	public static <T, E extends Throwable> Result<T, E> err(E err) {
-		if(err == null) throw new NullPointerException("err must not be null");
+		if(err == null) throw new IllegalArgumentException("err must not be null");
 		return new Result<>(null, err);
 	}
 
