@@ -33,24 +33,25 @@ import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolFieldRefEntry;
 import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolFloatEntry;
 import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolIntegerEntry;
 import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolInterfaceMethodRefEntry;
+import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolLongEntry;
 import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolMethodRefEntry;
 import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolNameAndTypeEntry;
 import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolStringEntry;
 import me.mrletsplay.mrcore.misc.classfile.pool.entry.ConstantPoolUTF8Entry;
 
 public class ClassFileUtils {
-	
+
 	public static ClassFile createStaticClassCopy(Class<?> ofClass, String canonicalName) {
 		try {
 			ClassFile file = new ClassFile(canonicalName.replace('.', '/'));
 			file.getAccessFlags().addFlag(ClassAccessFlag.PUBLIC);
-			
+
 			List<ClassMethod> methods = new ArrayList<>();
-			
+
 			ClassMethod constr = new ClassMethod(file, new MethodDescriptor("<init>", EnumFlagCompound.of(MethodAccessFlag.PUBLIC), "()V"));
-			
+
 			int mInd = getOrAppendMethodRef(file, getOrAppendClass(file, getOrAppendUTF8(file, "java/lang/Object")), getOrAppendNameAndType(file, getOrAppendUTF8(file, "<init>"), getOrAppendUTF8(file, "()V")));
-			
+
 			AttributeCode code = new AttributeCode(file);
 			code.getCode().replace(ByteCode.of(Arrays.asList(
 				new InstructionInformation(Instruction.ALOAD_0),
@@ -61,7 +62,7 @@ public class ClassFileUtils {
 			code.setMaxStack(1);
 			constr.setAttributes(new Attribute[] {code});
 			methods.add(constr);
-			
+
 			for(Method m : ofClass.getMethods()) {
 				if(!Modifier.isStatic(m.getModifiers())) continue;
 				MethodDescriptor md = getMethodDescriptor(m);
@@ -70,7 +71,7 @@ public class ClassFileUtils {
 				mCode.setMaxLocals(m.getParameterCount() * 2);
 				mth.setAttributes(new Attribute[] {mCode});
 				redirectMethodExecution(file, mth, ofClass.getCanonicalName().replace('.', '/'), md.getName(), md.getRawDescriptor());
-				
+
 //				AttributeLocalVariableTable t = ClassFileUtils.createAttribute(mCode, DefaultAttributeType.LOCAL_VARIABLE_TABLE, () -> new AttributeLocalVariableTable(file)).as(AttributeLocalVariableTable.class);
 //				LocalVariable[] vs = new LocalVariable[m.getParameterCount()];
 //				for(int i = 0; i < vs.length; i++) {
@@ -78,75 +79,75 @@ public class ClassFileUtils {
 //					vs[i] = new LocalVariable(file, 0, mCode.getCode().getBytes().length, "arg" + i, p.getParameterType().getRawDescriptor(), i);
 //				}
 //				t.setEntries(vs);
-				
+
 				methods.add(mth);
 			}
-			
+
 			file.setMethods(methods.toArray(new ClassMethod[methods.size()]));
-			
+
 			return file;
 		}catch(IOException e) {
 			throw new FriendlyException(e);
 		}
 	}
-	
+
 	public static Attribute appendAttribute(ClassMethod method, DefaultAttributeType type, Callable<? extends Attribute> initialValue) {
 		Attribute a = method.getAttribute(type);
 		if(a != null) return a;
-		
+
 		try {
 			a = initialValue.call();
 		} catch (Exception e) {
 			throw new FriendlyException(e);
 		}
-		
+
 		Attribute[] attrs = method.getAttributes();
 		Attribute[] newAttrs = new Attribute[attrs.length + 1];
 		System.arraycopy(attrs, 0, newAttrs, 0, attrs.length);
 		newAttrs[newAttrs.length - 1] = a;
 		method.setAttributes(newAttrs);
-		
+
 		return a;
 	}
-	
+
 	@Deprecated
 	public static Attribute createAttribute(ClassMethod method, DefaultAttributeType type, Callable<? extends Attribute> initialValue) {
 		return appendAttribute(method, type, initialValue);
 	}
-	
+
 	public static Attribute appendAttribute(Attribute attribute, DefaultAttributeType type, Callable<? extends Attribute> initialValue) {
 		Attribute a = attribute.getAttribute(type);
 		if(a != null) return a;
-		
+
 		try {
 			a = initialValue.call();
 		} catch (Exception e) {
 			throw new FriendlyException(e);
 		}
-		
+
 		Attribute[] attrs = attribute.getAttributes();
 		Attribute[] newAttrs = new Attribute[attrs.length + 1];
 		System.arraycopy(attrs, 0, newAttrs, 0, attrs.length);
 		newAttrs[newAttrs.length - 1] = a;
 		attribute.setAttributes(newAttrs);
-		
+
 		return a;
 	}
-	
+
 	@Deprecated
 	public static Attribute createAttribute(Attribute attribute, DefaultAttributeType type, Callable<? extends Attribute> initialValue) {
 		return appendAttribute(attribute, type, initialValue);
 	}
-	
+
 	public static AttributeCode appendCodeAttribute(ClassFile file, ClassMethod method) {
 		return appendAttribute(method, DefaultAttributeType.CODE, () -> new AttributeCode(file)).as(AttributeCode.class);
 	}
-	
+
 	@Deprecated
 	public static AttributeCode createCodeAttribute(ClassFile file, ClassMethod method) {
 		return appendAttribute(method, DefaultAttributeType.CODE, () -> new AttributeCode(file)).as(AttributeCode.class);
 	}
-	
+
 	public static String getInternalClassName(Class<?> clazz) {
 		return clazz.getCanonicalName().replace('.', '/');
 	}
@@ -155,13 +156,13 @@ public class ClassFileUtils {
 	public static String getClassName(Class<?> clazz) {
 		return getInternalClassName(clazz);
 	}
-	
+
 	public static void redirectMethodExecution(ClassFile file, ClassMethod method, String toClass, String toMethodName, String toMethodSignature) {
 		MethodDescriptor mDesc = method.getMethodDescriptor();
-		
+
 		AttributeCode codeAttr = (AttributeCode) method.getAttribute(DefaultAttributeType.CODE);
 		List<InstructionInformation> nInstr = new ArrayList<>();
-		
+
 		int nInd = getOrAppendUTF8(file, toMethodName);
 		int dInd = getOrAppendUTF8(file, toMethodSignature);
 		int ntInd = getOrAppendNameAndType(file, nInd, dInd);
@@ -175,30 +176,30 @@ public class ClassFileUtils {
 			nInstr.add(new InstructionInformation(Instruction.ALOAD_0));
 			i++;
 		}
-		
+
 		for(ParameterDescriptor p : mDesc.getParameterDescriptors()) {
 			PrimitiveType t = p.getParameterType().getPrimitiveType();
 			nInstr.add(getInfo(t, i++));
 			if(t.equals(PrimitiveType.DOUBLE) || t.equals(PrimitiveType.LONG)) i++;
 		}
-		
+
 		nInstr.add(new InstructionInformation(Instruction.INVOKESTATIC, getShortBytes(mrInd)));
-		
+
 		PrimitiveType pt = mDesc.getReturnType().getPrimitiveType();
-		
+
 		nInstr.add(new InstructionInformation(getReturnInstruction(pt)));
 
 		codeAttr.setMaxStack(i + 2); // #params * 2 (longs are 2x) + 2 for possible return value (can be long)
-		
+
 		codeAttr.getCode().replace(ByteCode.of(nInstr));
 	}
-	
+
 	public static void redirectMethodExecutionNamed(ClassFile file, ClassMethod method, String toClass, String toMethodName, String toMethodSignature) {
 		MethodDescriptor mDesc = method.getMethodDescriptor();
-		
+
 		AttributeCode codeAttr = (AttributeCode) method.getAttribute(DefaultAttributeType.CODE);
 		List<InstructionInformation> nInstr = new ArrayList<>();
-		
+
 		int nInd = getOrAppendUTF8(file, toMethodName);
 		int dInd = getOrAppendUTF8(file, toMethodSignature);
 		int ntInd = getOrAppendNameAndType(file, nInd, dInd);
@@ -209,19 +210,19 @@ public class ClassFileUtils {
 		int mDcInd = getOrAppendString(file, file.getConstantPool().indexOf(method.getDescriptor()));
 		int objClNmInd = getOrAppendUTF8(file, "java/lang/Object");
 		int objClInd = file.getConstantPool().appendEntry(new ConstantPoolClassEntry(file.getConstantPool(), objClNmInd));
-		
+
 		boolean isStatic = method.getAccessFlags().hasFlag(MethodAccessFlag.STATIC);
 		if(!isStatic) { // Only add this class instance for instance methods
 			nInstr.add(new InstructionInformation(Instruction.ALOAD_0));
 		}else {
 			nInstr.add(new InstructionInformation(Instruction.ACONST_NULL));
 		}
-		
+
 		nInstr.add(new InstructionInformation(Instruction.LDC_W, getShortBytes(mNmInd)));
 		nInstr.add(new InstructionInformation(Instruction.LDC_W, getShortBytes(mDcInd)));
 		nInstr.add(new InstructionInformation(Instruction.BIPUSH, (byte) method.getMethodDescriptor().getParameterDescriptors().length));
 		nInstr.add(new InstructionInformation(Instruction.ANEWARRAY, getShortBytes(objClInd)));
-		
+
 		byte i = 0;
 		byte idx = 0;
 		for(ParameterDescriptor p : mDesc.getParameterDescriptors()) {
@@ -232,15 +233,15 @@ public class ClassFileUtils {
 			PrimitiveType t = p.getParameterType().getPrimitiveType();
 			if(t.equals(PrimitiveType.DOUBLE) || t.equals(PrimitiveType.LONG)) i++;
 		}
-		
+
 		nInstr.add(new InstructionInformation(Instruction.INVOKESTATIC, getShortBytes(mrInd)));
-		
+
 		PrimitiveType pt = mDesc.getReturnType().getPrimitiveType();
-		
+
 		if(pt == PrimitiveType.VOID) {
 			nInstr.add(new InstructionInformation(Instruction.POP));
 		}
-		
+
 		if(!mDesc.getReturnType().isPrimitive()) {
 			int classInd = getOrAppendClass(file, getOrAppendUTF8(file, mDesc.getReturnType().getClassName().replace('.', '/')));
 			nInstr.add(new InstructionInformation(Instruction.CHECKCAST, getShortBytes(classInd)));
@@ -249,14 +250,14 @@ public class ClassFileUtils {
 			nInstr.add(new InstructionInformation(Instruction.CHECKCAST, getShortBytes(classInd)));
 			nInstr.add(new InstructionInformation(Instruction.INVOKEVIRTUAL, getShortBytes(getOrAppendPrimitiveValueMethod(file, pt))));
 		}
-		
+
 		nInstr.add(new InstructionInformation(getReturnInstruction(pt)));
-		
+
 		codeAttr.setMaxStack(8); // 4 constant args, up to 8 total (longs are 2x) when adding params to array
-		
+
 		codeAttr.getCode().replace(ByteCode.of(nInstr));
 	}
-	
+
 	public static Instruction getReturnInstruction(PrimitiveType primitiveType) {
 		switch(primitiveType) {
 			case DOUBLE:
@@ -279,7 +280,7 @@ public class ClassFileUtils {
 				throw new IllegalArgumentException("Invalid primitive type");
 		}
 	}
-	
+
 	public static int getOrAppendUTF8(ClassFile file, String utf8) {
 		int enInd = Arrays.stream(file.getConstantPool().getEntries())
 				.filter(e -> e instanceof ConstantPoolUTF8Entry && ((ConstantPoolUTF8Entry) e).getValue().equals(utf8))
@@ -290,7 +291,7 @@ public class ClassFileUtils {
 		}
 		return enInd;
 	}
-	
+
 	public static int getOrAppendString(ClassFile file, int stringInd) {
 		int enInd = Arrays.stream(file.getConstantPool().getEntries())
 				.filter(e -> e instanceof ConstantPoolStringEntry && ((ConstantPoolStringEntry) e).getStringIndex() == stringInd)
@@ -301,7 +302,7 @@ public class ClassFileUtils {
 		}
 		return enInd;
 	}
-	
+
 	public static int getOrAppendString(ClassFile file, String string) {
 		int enInd = Arrays.stream(file.getConstantPool().getEntries())
 				.filter(e -> e instanceof ConstantPoolStringEntry && ((ConstantPoolStringEntry) e).getString().getValue().equals(string))
@@ -312,7 +313,7 @@ public class ClassFileUtils {
 		}
 		return enInd;
 	}
-	
+
 	public static int getOrAppendDouble(ClassFile file, double val) {
 		int enInd = Arrays.stream(file.getConstantPool().getEntries())
 				.filter(e -> e instanceof ConstantPoolDoubleEntry && ((ConstantPoolDoubleEntry) e).getValue() == val)
@@ -323,7 +324,7 @@ public class ClassFileUtils {
 		}
 		return enInd;
 	}
-	
+
 	public static int getOrAppendFloat(ClassFile file, float val) {
 		int enInd = Arrays.stream(file.getConstantPool().getEntries())
 				.filter(e -> e instanceof ConstantPoolFloatEntry && ((ConstantPoolFloatEntry) e).getValue() == val)
@@ -334,7 +335,7 @@ public class ClassFileUtils {
 		}
 		return enInd;
 	}
-	
+
 	public static int getOrAppendInteger(ClassFile file, int val) {
 		int enInd = Arrays.stream(file.getConstantPool().getEntries())
 				.filter(e -> e instanceof ConstantPoolIntegerEntry && ((ConstantPoolIntegerEntry) e).getValue() == val)
@@ -345,7 +346,18 @@ public class ClassFileUtils {
 		}
 		return enInd;
 	}
-	
+
+	public static int getOrAppendLong(ClassFile file, long val) {
+		int enInd = Arrays.stream(file.getConstantPool().getEntries())
+				.filter(e -> e instanceof ConstantPoolLongEntry && ((ConstantPoolLongEntry) e).getValue() == val)
+				.map(e -> file.getConstantPool().indexOf(e))
+				.findFirst().orElse(-1);
+		if(enInd == -1) {
+			enInd = file.getConstantPool().appendEntry(new ConstantPoolLongEntry(file.getConstantPool(), val));
+		}
+		return enInd;
+	}
+
 	public static int getOrAppendClass(ClassFile file, int nameIndex) {
 		int enInd = Arrays.stream(file.getConstantPool().getEntries())
 				.filter(e -> e instanceof ConstantPoolClassEntry && ((ConstantPoolClassEntry) e).getNameIndex() == nameIndex)
@@ -356,7 +368,7 @@ public class ClassFileUtils {
 		}
 		return enInd;
 	}
-	
+
 	public static int getOrAppendFieldRef(ClassFile file, int clInd, int ntIndex) {
 		int enInd = Arrays.stream(file.getConstantPool().getEntries())
 				.filter(e -> e instanceof ConstantPoolFieldRefEntry && ((ConstantPoolFieldRefEntry) e).getClassIndex() == clInd && ((ConstantPoolFieldRefEntry) e).getNameAndTypeIndex() == ntIndex)
@@ -367,7 +379,7 @@ public class ClassFileUtils {
 		}
 		return enInd;
 	}
-	
+
 	public static int getOrAppendNameAndType(ClassFile file, int nameIndex, int descIndex) {
 		int enInd = Arrays.stream(file.getConstantPool().getEntries())
 				.filter(e -> e instanceof ConstantPoolNameAndTypeEntry && ((ConstantPoolNameAndTypeEntry) e).getNameIndex() == nameIndex && ((ConstantPoolNameAndTypeEntry) e).getDescriptorIndex() == descIndex)
@@ -378,7 +390,7 @@ public class ClassFileUtils {
 		}
 		return enInd;
 	}
-	
+
 	public static int getOrAppendMethodRef(ClassFile file, int clInd, int ntInd) {
 		int enInd = Arrays.stream(file.getConstantPool().getEntries())
 				.filter(e -> e instanceof ConstantPoolMethodRefEntry && ((ConstantPoolMethodRefEntry) e).getClassIndex() == clInd && ((ConstantPoolMethodRefEntry) e).getNameAndTypeIndex() == ntInd)
@@ -389,7 +401,7 @@ public class ClassFileUtils {
 		}
 		return enInd;
 	}
-	
+
 	public static int getOrAppendInterfaceMethodRef(ClassFile file, int clInd, int ntInd) {
 		int enInd = Arrays.stream(file.getConstantPool().getEntries())
 				.filter(e -> e instanceof ConstantPoolInterfaceMethodRefEntry && ((ConstantPoolInterfaceMethodRefEntry) e).getClassIndex() == clInd && ((ConstantPoolInterfaceMethodRefEntry) e).getNameAndTypeIndex() == ntInd)
@@ -400,7 +412,7 @@ public class ClassFileUtils {
 		}
 		return enInd;
 	}
-	
+
 	public static int getOrAppendValueOfMethod(ClassFile file, String className, String primitiveName) {
 		int intClNmInd = getOrAppendUTF8(file, className);
 		int intClInd = getOrAppendClass(file, intClNmInd);
@@ -409,11 +421,11 @@ public class ClassFileUtils {
 		int intVOntInd = getOrAppendNameAndType(file, intVONmInd, intVOSigInd);
 		return getOrAppendMethodRef(file, intClInd, intVOntInd);
 	}
-	
+
 	public static int getOrAppendValueOfMethod(ClassFile file, PrimitiveType primitiveType) {
 		return getOrAppendValueOfMethod(file, primitiveType.getNonPrimitiveClassName().replace('.', '/'), primitiveType.getSignatureName());
 	}
-	
+
 	public static int getOrAppendPrimitiveValueMethod(ClassFile file, String className, String primitiveName, String methodName) {
 		int intClNmInd = getOrAppendUTF8(file, className);
 		int intClInd = getOrAppendClass(file, intClNmInd);
@@ -422,7 +434,7 @@ public class ClassFileUtils {
 		int intVOntInd = getOrAppendNameAndType(file, intVONmInd, intVOSigInd);
 		return getOrAppendMethodRef(file, intClInd, intVOntInd);
 	}
-	
+
 	public static int getOrAppendPrimitiveValueMethod(ClassFile file, PrimitiveType type) {
 		switch(type) {
 			case DOUBLE:
@@ -445,14 +457,14 @@ public class ClassFileUtils {
 				throw new IllegalArgumentException("Invalid primitive type");
 		}
 	}
-	
+
 	public static void redirectClassMethodsNamed(ClassFile file, Class<?> toClass, Method handlerMethod) {
 		if(handlerMethod.getParameterCount() != 4
 				|| !Arrays.equals(handlerMethod.getParameterTypes(), new Class<?>[] {Object.class, String.class, String.class, Object[].class})
 				|| !Modifier.isPublic(handlerMethod.getModifiers())
 				|| !Modifier.isStatic(handlerMethod.getModifiers()))
 			throw new IllegalArgumentException("Method must be of format: Object method(Object classInstance, String methodName, String methodSignature, Object[] args)");
-		
+
 		for(ClassMethod m : file.getMethods()) {
 			if(m.isConstructor()) continue;
 //			if(m.getMethodDescriptor().getReturnType().isVoid()) continue;
@@ -460,7 +472,7 @@ public class ClassFileUtils {
 			redirectMethodExecutionNamed(file, m, toClass.getName().replace('.', '/'), handlerMethod.getName(), sig);
 		}
 	}
-	
+
 	public static void redirectClassMethods(ClassFile file, Class<?> toClass) {
 		for(ClassMethod m : file.getMethods()) {
 			if(m.isConstructor()) continue;
@@ -479,7 +491,7 @@ public class ClassFileUtils {
 			redirectMethodExecution(file, m, toClass.getName().replace('.', '/'), handlerMethod.getName(), sig);
 		}
 	}
-	
+
 	public static MethodDescriptor getMethodDescriptor(Method m) {
 		return new MethodDescriptor(
 				m.getName(),
@@ -487,25 +499,25 @@ public class ClassFileUtils {
 				TypeDescriptor.of(m.getReturnType()),
 				Arrays.stream(m.getParameterTypes()).map(t -> new ParameterDescriptor(TypeDescriptor.of(t))).toArray(ParameterDescriptor[]::new));
 	}
-	
+
 	public static byte[] getShortBytes(int val) {
 		byte[] bt = new byte[2];
 		bt[0] = (byte) ((val >> 8) & 0xFF);
 		bt[1] = (byte) (val & 0xFF);
 		return bt;
 	}
-	
+
 	public static InstructionInformation getInfo(PrimitiveType type, byte paramIdx) {
 		return new InstructionInformation(getLoadInstruction(type), new byte[] {paramIdx});
 	}
-	
+
 	public static List<InstructionInformation> getLoadInfo(ClassFile file, PrimitiveType type, byte paramIdx) {
 		List<InstructionInformation> inf = new ArrayList<>();
 		inf.add(new InstructionInformation(getLoadInstruction(type), new byte[] {paramIdx}));
 		if(type != PrimitiveType.OBJECT) inf.add(new InstructionInformation(Instruction.INVOKESTATIC, getShortBytes(getOrAppendValueOfMethod(file, type))));
 		return inf;
 	}
-	
+
 	public static Instruction getLoadInstruction(PrimitiveType type) {
 		switch(type) {
 			case BOOLEAN:
@@ -526,15 +538,15 @@ public class ClassFileUtils {
 				throw new IllegalArgumentException("Invalid parameter type");
 		}
 	}
-	
+
 	public static boolean isEntryUsed(ClassFile cf, int poolEntryIndex) {
 		ConstantPool constantPool = cf.getConstantPool();
-		
+
 		if(constantPool.indexOf(cf.getThisClass()) == poolEntryIndex) return true;
 		if(cf.getThisClass().getNameIndex() == poolEntryIndex) return true;
 		if(constantPool.indexOf(cf.getThisClass()) == poolEntryIndex) return true;
 		if(cf.getThisClass().getNameIndex() == poolEntryIndex) return true;
-		
+
 		System.out.println("Entry @ " + poolEntryIndex + " is not used");
 		return false;
 	}
