@@ -22,6 +22,10 @@ public class ConstantPool {
 		return entries[index - 1];
 	}
 
+	public void clear() {
+		entries = new ConstantPoolEntry[0];
+	}
+
 	public ConstantPoolEntry[] getEntries() {
 		return entries;
 	}

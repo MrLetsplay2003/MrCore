@@ -244,6 +244,10 @@ public class ClassFile {
 		return constantPool;
 	}
 
+	public void setAccessFlags(EnumFlagCompound<ClassAccessFlag> accessFlags) {
+		this.accessFlags = accessFlags;
+	}
+
 	public EnumFlagCompound<ClassAccessFlag> getAccessFlags() {
 		return accessFlags;
 	}
