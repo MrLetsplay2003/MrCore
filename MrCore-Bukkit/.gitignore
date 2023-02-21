@@ -3,3 +3,4 @@
 src/_test/
 /TEST/
 dependency-reduced-pom.xml
+.classpath

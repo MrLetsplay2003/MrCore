@@ -2,3 +2,4 @@
 /target/
 src/_test/
 /TEST/
+.classpath
