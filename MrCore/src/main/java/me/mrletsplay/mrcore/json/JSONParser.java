@@ -7,7 +7,7 @@ import me.mrletsplay.mrcore.misc.FriendlyException;
  * @author MrLetsplay2003
  */
 public class JSONParser {
-	
+
 	/**
 	 * Tries to parse the string into a JSON generic value.<br>
 	 * These include:<br>
@@ -28,7 +28,7 @@ public class JSONParser {
 		if(r.nextIgnoreWhitespaces() != '\0') throw new JSONParseException("Didn't reach string end after parsed object", r.currentIndex);
 		return v;
 	}
-	
+
 	private static JSONObject readObject(CharReader reader) {
 		JSONObject obj = new JSONObject();
 		boolean hasComma = false;
@@ -41,6 +41,7 @@ public class JSONParser {
 					hasComma = true;
 					break;
 				case '}':
+					if(hasComma) throw new JSONParseException("Unexpected comma", reader.currentIndex);
 					return obj;
 				case '"':
 					if(!hasComma && !obj.isEmpty()) throw new JSONParseException("Missing comma separator", reader.currentIndex);
@@ -55,7 +56,7 @@ public class JSONParser {
 		}
 		throw new JSONParseException("Missing end of object", reader.currentIndex);
 	}
-	
+
 	private static JSONArray readArray(CharReader reader) {
 		JSONArray arr = new JSONArray();
 		boolean hasComma = false;
@@ -67,6 +68,7 @@ public class JSONParser {
 					hasComma = true;
 					break;
 				case ']':
+					if(hasComma) throw new JSONParseException("Unexpected comma", reader.currentIndex);
 					return arr;
 				default:
 					reader.revert(1);
@@ -79,7 +81,7 @@ public class JSONParser {
 		}
 		throw new JSONParseException("Missing end of array", reader.currentIndex);
 	}
-	
+
 	private static Object readGeneric(CharReader reader) {
 		char c = reader.nextIgnoreWhitespaces();
 		if(Character.isDigit(c)) {
@@ -109,7 +111,7 @@ public class JSONParser {
 				throw new JSONParseException("Invalid generic value: "+c, reader.currentIndex);
 		}
 	}
-	
+
 	private static String readString(CharReader reader) {
 		StringBuilder sb = new StringBuilder();
 		while(reader.hasNext()) {
@@ -128,7 +130,7 @@ public class JSONParser {
 		}
 		throw new JSONParseException("Missing end of string", reader.currentIndex);
 	}
-	
+
 	private static char unescapeSpecial(CharReader reader) {
 		char c = reader.next(); //after the "\"
 		switch(c) {
@@ -157,7 +159,7 @@ public class JSONParser {
 				return c;
 		}
 	}
-	
+
 	private static Number readNumber(CharReader reader) {
 		StringBuilder numberString = new StringBuilder();
 		boolean isDouble = false;
@@ -183,44 +185,44 @@ public class JSONParser {
 		}
 		throw new JSONParseException("Invalid number", reader.currentIndex);
 	}
-	
+
 	private static class CharReader {
-		
+
 		private int currentIndex;
 		private String string;
-		
+
 		public CharReader(String string) {
 			this.string = string;
 			this.currentIndex = 0;
 		}
-		
+
 		public char next() {
 			if(currentIndex == string.length()) return '\0'; //null char on eof
 			return string.charAt(currentIndex++);
 		}
-		
+
 		public String next(int amount) {
 			char[] chs = new char[amount];
 			for(int i = 0; i < amount; i++) chs[i] = next();
 			return new String(chs);
 		}
-		
+
 		public char nextIgnoreWhitespaces() {
 			char c = next();
 			while(Character.isWhitespace(c)) c = next();
 			return c;
 		}
-		
+
 		public CharReader revert(int num) {
 			currentIndex -= num;
 			if(currentIndex < 0) throw new FriendlyException("Illegal reader move");
 			return this;
 		}
-		
+
 		public boolean hasNext() {
 			return currentIndex < string.length();
 		}
-		
+
 	}
-	
+
 }
