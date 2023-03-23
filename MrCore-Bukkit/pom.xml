@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>me.mrletsplay</groupId>
 		<artifactId>MrCore-Parent</artifactId>
-		<version>4.2-SNAPSHOT</version>
+		<version>4.2</version>
 	</parent>
 
 	<artifactId>MrCore-Bukkit</artifactId>
@@ -49,7 +49,7 @@
 		<dependency>
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot-api</artifactId>
-			<version>1.19-R0.1-SNAPSHOT</version>
+			<version>1.19.4-R0.1-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
