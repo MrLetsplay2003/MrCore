@@ -13,7 +13,7 @@ public class JSONConfigParser {
 	public static ConfigSection parseSection(JSONCustomConfig cfg, JSONObject object) {
 		ConfigSection s = new JSONConfigSection(cfg);
 
-		for(String key : object.keySet()) {
+		for(String key : object.keys()) {
 			Object o = object.get(key);
 			JSONType type = JSONType.typeOf(o);
 			switch(type) {
@@ -24,9 +24,8 @@ public class JSONConfigParser {
 					s.set(key, parseSection(cfg, (JSONObject) o));
 					break;
 				case BOOLEAN:
-				case DOUBLE:
+				case DECIMAL:
 				case INTEGER:
-				case LONG:
 				case NULL:
 				case NUMBER:
 				case STRING:
@@ -55,9 +54,8 @@ public class JSONConfigParser {
 					list.add(parseSection(cfg, (JSONObject) o));
 					break;
 				case BOOLEAN:
-				case DOUBLE:
+				case DECIMAL:
 				case INTEGER:
-				case LONG:
 				case NULL:
 				case NUMBER:
 				case STRING:

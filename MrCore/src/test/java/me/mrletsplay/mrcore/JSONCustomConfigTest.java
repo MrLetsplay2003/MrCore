@@ -1,13 +1,13 @@
 package me.mrletsplay.mrcore;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import me.mrletsplay.mrcore.config.ConfigException;
 import me.mrletsplay.mrcore.config.impl.json.JSONCustomConfig;

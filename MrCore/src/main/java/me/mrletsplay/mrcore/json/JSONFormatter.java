@@ -26,21 +26,21 @@ public class JSONFormatter {
 	public static String formatObject(Object object, boolean fancy) {
 		return formatGeneric(object, 0, fancy).toString();
 	}
-	
+
 	protected static CharSequence formatObject(JSONObject object, int indents, boolean fancy) {
 		StringBuilder builder = new StringBuilder("{").append(fancy ? "\n" : "").append(fancy ? space(indents + 1) : "");
-		builder.append(object.entrySet().stream()
-			.map(en -> new StringBuilder()
+		builder.append(object.keys().stream()
+			.map(key -> new StringBuilder()
 					.append("\"")
-					.append(escapeString(en.getKey()))
+					.append(escapeString(key))
 					.append("\"")
 					.append(":")
 					.append(fancy ? " " : "")
-					.append(formatGeneric(en.getValue(), indents + 1, fancy)))
+					.append(formatGeneric(object.get(key), indents + 1, fancy)))
 			.collect(Collectors.joining(new StringBuilder(",").append(fancy ? "\n" : "").append(fancy ? space(indents + 1) : ""))));
 		return builder.append(fancy ? "\n" : "").append(fancy ? space(indents) : "").append("}");
 	}
-	
+
 	protected static CharSequence formatArray(JSONArray array, int indents, boolean fancy) {
 		StringBuilder builder = new StringBuilder("[").append(fancy ? "\n" : "").append(fancy ? space(indents + 1) : "");
 		builder.append(array.stream()
@@ -48,20 +48,20 @@ public class JSONFormatter {
 			.collect(Collectors.joining(new StringBuilder(",").append(fancy ? "\n" + space(indents + 1) : ""))));
 		return builder.append(fancy ? "\n" : "").append(fancy ? space(indents) : "").append("]");
 	}
-	
+
 	private static String space(int len){
 		return String.join("", Collections.nCopies(len * 2, " "));
 	}
-	
+
 	private static CharSequence formatGeneric(Object object, int indents, boolean fancy) {
 		if(object == null) return "null";
 		if(object instanceof Number || object instanceof Boolean) return object.toString();
 		if(object instanceof String) return new StringBuilder("\"").append(escapeString((String)object)).append("\"");
 		if(object instanceof JSONObject) return formatObject((JSONObject) object, indents, fancy);
 		if(object instanceof JSONArray) return formatArray((JSONArray) object, indents, fancy);
-		throw new JSONFormatException("Cannot format object of type "+object.getClass().getName());
+		throw new JSONFormatException("Cannot format object of type " + object.getClass().getName());
 	}
-	
+
 	private static String escapeChar(char c) {
 		switch(c) {
 			case '"':
@@ -85,7 +85,7 @@ public class JSONFormatter {
 				return Character.toString(c);
 		}
 	}
-	
+
 	/**
 	 * Escapes the given string into a JSON-compatible format
 	 * @param string The string to format
@@ -94,7 +94,7 @@ public class JSONFormatter {
 	public static String escapeJSON(String string) {
 		return escapeString(string).toString();
 	}
-	
+
 	private static CharSequence escapeString(String string) {
 		if(string == null) return null;
 		StringBuilder escaped = new StringBuilder();
@@ -104,5 +104,5 @@ public class JSONFormatter {
 			.forEach(escaped::append);
 		return escaped;
 	}
-	
+
 }

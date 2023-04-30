@@ -9,6 +9,33 @@ import me.mrletsplay.mrcore.misc.FriendlyException;
 public class JSONParser {
 
 	/**
+	 * Default maximum depth for a JSONObject or JSONArray before the parser throws a {@link JSONParseException}
+	 * @see #setMaxDepth(int)
+	 * @see #getMaxDepth()
+	 */
+	public static final int DEFAULT_MAX_DEPTH = 256;
+
+	private static int maxDepth = DEFAULT_MAX_DEPTH;
+
+	/**
+	 * Sets the maximum depth for a JSONObject or JSONArray before the parser throws a {@link JSONParseException}.<br>
+	 * Don't set this too high or else you risk getting {@link StackOverflowError}s because of the recursive parser implementation
+	 * @param maxDepth
+	 */
+	public static void setMaxDepth(int maxDepth) {
+		JSONParser.maxDepth = maxDepth;
+	}
+
+	/**
+	 * Returns the maximum depth the parser is allowed to parse. Is set to {@link #DEFAULT_MAX_DEPTH} by default
+	 * @return The maximum allowed depth
+	 * @see #setMaxDepth(int)
+	 */
+	public static int getMaxDepth() {
+		return maxDepth;
+	}
+
+	/**
 	 * Tries to parse the string into a JSON generic value.<br>
 	 * These include:<br>
 	 * - JSON objects<br>
@@ -20,16 +47,31 @@ public class JSONParser {
 	 * @param source The string to parse
 	 * @return An object of any of the types mentioned above
 	 * @throws JSONParseException If a parsing error occurs
+	 * @throws NullPointerException If {@code source} is {@code null}
 	 */
 	public static Object parse(String source) {
-		if(source == null) return null;
+		if(source == null) throw new NullPointerException("source is null");
 		CharReader r = new CharReader(source);
-		Object v = readGeneric(r);
+		Object v = readGeneric(r, 0);
 		if(r.nextIgnoreWhitespaces() != '\0') throw new JSONParseException("Didn't reach string end after parsed object", r.currentIndex);
 		return v;
 	}
 
-	private static JSONObject readObject(CharReader reader) {
+	/**
+	 * Tries to parse the string into a JSON value of the type specified by {@code type}
+	 * @param source The string to parse
+	 * @return An object of the type corresponding to the provided JSON type
+	 * @throws JSONParseException If a parsing error occurs or the type of the parsed JSON is not the specified {@code type}
+	 */
+	public static Object parse(String source, JSONType type) {
+		Object parsed = parse(source);
+		if(!JSONType.isOfType(parsed, type)) throw new JSONParseException("Value is not of the correct type", 0);
+		return parsed;
+	}
+
+	private static JSONObject readObject(CharReader reader, int depth) {
+		if(depth > maxDepth) throw new JSONParseException("Exceeded maximum depth", reader.currentIndex);
+
 		JSONObject obj = new JSONObject();
 		boolean hasComma = false;
 		while(reader.hasNext()) {
@@ -47,17 +89,19 @@ public class JSONParser {
 					if(!hasComma && !obj.isEmpty()) throw new JSONParseException("Missing comma separator", reader.currentIndex);
 					String key = readString(reader);
 					if(reader.nextIgnoreWhitespaces() != ':') throw new JSONParseException("Invalid name/value pair", reader.currentIndex);
-					obj.set(key, readGeneric(reader));
+					obj.set(key, readGeneric(reader, depth));
 					hasComma = false;
 					break;
 				default:
-					throw new JSONParseException("Unexpected char: "+c, reader.currentIndex);
+					throw new JSONParseException("Unexpected char: " + c, reader.currentIndex);
 			}
 		}
 		throw new JSONParseException("Missing end of object", reader.currentIndex);
 	}
 
-	private static JSONArray readArray(CharReader reader) {
+	private static JSONArray readArray(CharReader reader, int depth) {
+		if(depth > maxDepth) throw new JSONParseException("Exceeded maximum depth", reader.currentIndex);
+
 		JSONArray arr = new JSONArray();
 		boolean hasComma = false;
 		while(reader.hasNext()) {
@@ -73,7 +117,7 @@ public class JSONParser {
 				default:
 					reader.revert(1);
 					if(!hasComma && !arr.isEmpty()) throw new JSONParseException("Missing comma separator", reader.currentIndex);
-					Object o = readGeneric(reader);
+					Object o = readGeneric(reader, depth);
 					arr.add(o);
 					hasComma = false;
 					break;
@@ -82,7 +126,7 @@ public class JSONParser {
 		throw new JSONParseException("Missing end of array", reader.currentIndex);
 	}
 
-	private static Object readGeneric(CharReader reader) {
+	private static Object readGeneric(CharReader reader, int depth) {
 		char c = reader.nextIgnoreWhitespaces();
 		if(Character.isDigit(c)) {
 			reader.revert(1);
@@ -104,9 +148,9 @@ public class JSONParser {
 				reader.revert(1);
 				return readNumber(reader);
 			case '{':
-				return readObject(reader);
+				return readObject(reader, depth + 1);
 			case '[':
-				return readArray(reader);
+				return readArray(reader, depth + 1);
 			default:
 				throw new JSONParseException("Invalid generic value: "+c, reader.currentIndex);
 		}

@@ -22,11 +22,11 @@ public class DefaultConfigMappers {
 
 	public static final ObjectMapper<JSONArray, List<Object>> JSON_ARRAY_MAPPER = ObjectMapper.create(Complex.value(JSONArray.class), Complex.list(Object.class),
 			(c, j) -> {
-				return j;
+				return j.toList();
 			}, (c, l) -> {
 				return (JSONArray) ConfigProperty.toJSONCompliant(l);
 			});
-	
+
 	public static final ObjectMapper<Map<String, Object>, ConfigSection> MAP_MAPPER = ObjectMapper.create(Complex.map(String.class, Object.class), Complex.value(ConfigSection.class),
 			(c, m) -> {
 				ConfigSection s = c.getConfig().createEmptySection();
@@ -35,5 +35,5 @@ public class DefaultConfigMappers {
 			}, (c, s) -> {
 				return s.toMap();
 			});
-	
+
 }

@@ -17,7 +17,7 @@ import me.mrletsplay.mrcore.misc.Complex;
 import me.mrletsplay.mrcore.misc.NullableOptional;
 
 public interface ConfigSection {
-	
+
 	// Must be implemented
 
 	/**
@@ -26,7 +26,7 @@ public interface ConfigSection {
 	 * @return The CustomConfig this section belongs to
 	 */
 	public CustomConfig getConfig();
-	
+
 	/**
 	 * Returns a map containing all the properties and subsections of this section.<br>
 	 * The values of this map may contain all {@link ConfigValueType valid value types}, including other ConfigSection instances.<br>
@@ -34,7 +34,7 @@ public interface ConfigSection {
 	 * @return A map containing all the properties and subsections of this section
 	 */
 	public Map<String, ConfigProperty> getAllProperties();
-	
+
 	/**
 	 * Returns a map containing all comments of this section.<br>
 	 * The header comment is represented by the {@code null} key.<br>
@@ -42,7 +42,7 @@ public interface ConfigSection {
 	 * @return A map containing all comments of this section
 	 */
 	public Map<String, String> getComments();
-	
+
 	/**
 	 * Returns an exisiting subsection of this section or creates it, if it doesn't exist.<br>
 	 * The {@code name} parameter does not allow subpaths (e.g. "{@code somepath.somesubpath}")
@@ -51,7 +51,7 @@ public interface ConfigSection {
 	 * @throws ConfigException If the value specified by that key represents a property, not a subsection
 	 */
 	public ConfigSection getOrCreateSubsection(String name) throws ConfigException;
-	
+
 	/**
 	 * Sets a key in this section to a value (represented by a {@link ConfigValueType valid value type}).<br>
 	 * The {@code key} parameter allows for subpaths (e.g. "{@code somepath.somesubpath}")
@@ -59,7 +59,7 @@ public interface ConfigSection {
 	 * @param value The value of the property
 	 */
 	public void set(String key, Object value);
-	
+
 	/**
 	 * Unsets a key in this section.<br>
 	 * The {@code key} parameter allows for subpaths (e.g. "{@code somepath.somesubpath}").<br>
@@ -67,13 +67,13 @@ public interface ConfigSection {
 	 * @param key The key of the property
 	 */
 	public void unset(String key);
-	
+
 	/**
 	 * Clears this section.<br>
 	 * Every property in this section will be unset
 	 */
 	public void clear();
-	
+
 	/**
 	 * Gets a property by a specific key.<br>
 	 * The {@code key} parameter allows for subpaths (e.g. "{@code somepath.somesubpath}")
@@ -81,7 +81,7 @@ public interface ConfigSection {
 	 * @return The property by that name, {@code null} if none
 	 */
 	public ConfigProperty getProperty(String key);
-	
+
 	/**
 	 * Sets a comment in this section.<br>
 	 * The {@code key} parameter allows for subpaths (e.g. "{@code somepath.somesubpath}")
@@ -89,7 +89,7 @@ public interface ConfigSection {
 	 * @param value The value of the property
 	 */
 	public void setComment(String key, String value);
-	
+
 	/**
 	 * Gets a comment by a specific key.<br>
 	 * The {@code key} parameter allows for subpaths (e.g. "{@code somepath.somesubpath}")
@@ -97,9 +97,9 @@ public interface ConfigSection {
 	 * @return The comment by that key, {@code null} if none
 	 */
 	public String getComment(String key);
-	
+
 	// Default methods
-	
+
 	/**
 	 * Gets a subsection by the specified name.<br>
 	 * This implementation uses {@link #getAllProperties()} to retrieve the specified section.<br>
@@ -111,13 +111,13 @@ public interface ConfigSection {
 		ConfigProperty p = getAllProperties().get(name);
 		return p != null && p.isSubsection() ? (ConfigSection) p.getValue() : null;
 	}
-	
-	
+
+
 	/**
 	 * Returns a map containing all the properties (excluding subsections) of this section.<br>
 	 * This implementation uses {@link #getAllProperties()} to retrieve the properties.<br>
 	 * Implementations may return an unmodifiable map
-	 * @return A map containing all the properties (excluding subsections) of this section 
+	 * @return A map containing all the properties (excluding subsections) of this section
 	 */
 	public default Map<String, ConfigProperty> getProperties() {
 		Map<String, ConfigProperty> p = new LinkedHashMap<>();
@@ -127,13 +127,13 @@ public interface ConfigSection {
 		}
 		return p;
 	}
-	
+
 	/**
 	 * Returns a map containing all the raw properties (excluding subsections) of this section.<br>
 	 * Raw properties are - different to {@link ConfigProperty} properties returned by {@link #getProperties()} - the raw values of this section, represented by {@link ConfigValueType valid value types}.<br>
 	 * This implementation uses {@link #getProperties()} to retrieve the properties.<br>
 	 * Implementations may return an unmodifiable map
-	 * @return A map containing all the properties (excluding subsections) of this section 
+	 * @return A map containing all the properties (excluding subsections) of this section
 	 */
 	public default Map<String, Object> getPropertyValues() {
 		Map<String, Object> map = new LinkedHashMap<>();
@@ -142,12 +142,12 @@ public interface ConfigSection {
 		}
 		return map;
 	}
-	
+
 	/**
 	 * Returns a map containing all the subsections of this section.<br>
 	 * This implementation uses {@link #getAllProperties()} to retrieve the subsections.<br>
 	 * Implementations may return an unmodifiable map
-	 * @return A map containing all the properties (excluding subsections) of this section 
+	 * @return A map containing all the properties (excluding subsections) of this section
 	 */
 	public default Map<String, ConfigSection> getSubsections() {
 		Map<String, ConfigSection> s = new LinkedHashMap<>();
@@ -157,7 +157,7 @@ public interface ConfigSection {
 		}
 		return s;
 	}
-	
+
 	/**
 	 * Checks whether a key is set in this section (the key belongs to either a subsection or a property).<br>
 	 * The {@code key} parameter allows for subpaths (e.g. "{@code somepath.somesubpath}").<br>
@@ -167,7 +167,7 @@ public interface ConfigSection {
 	public default boolean isSet(String key) {
 		return !getTypeOf(key).equals(ConfigValueType.UNDEFINED);
 	}
-	
+
 	/**
 	 * Returns a map containing all the (raw) properties of this section as well as subsections (represented by other {@link Map}s).<br>
 	 * The Map returned by this function may be passed to {@link #loadFromMap(Map)}
@@ -192,7 +192,7 @@ public interface ConfigSection {
 		}
 		return map;
 	}
-	
+
 	/**
 	 * Sets all the values and subsections (represented by other {@link Map}s) of the specified map in this subsection.<br>
 	 * Any map created by {@link #toMap()} may be passed to this function
@@ -201,7 +201,7 @@ public interface ConfigSection {
 	public default void loadFromMap(Map<String, Object> map) {
 		map.forEach(this::set);
 	}
-	
+
 	/**
 	 * Returns a map containing all the comments of this section as well as subsections' comments (with their respective subpaths).<br>
 	 * The Map returned by this function may be passed to {@link #loadCommentsFromMap(Map)}
@@ -216,7 +216,7 @@ public interface ConfigSection {
 		}
 		return map;
 	}
-	
+
 	/**
 	 * Sets all the comments in this section and subsections' comments (represented by other {@link Map}s) of the specified map.<br>
 	 * Any map created by {@link #commentsToMap()} may be passed to this function
@@ -227,7 +227,7 @@ public interface ConfigSection {
 			setComment(k, v);
 		});
 	}
-	
+
 	/**
 	 * Checks whether all properties of this section contain no elements (Lists are empty, sub-sections are empty)
 	 * @return Whether this section is empty
@@ -235,7 +235,7 @@ public interface ConfigSection {
 	public default boolean isEmpty() {
 		return getProperties().values().stream().allMatch(ConfigProperty::isEmpty) && getSubsections().values().stream().allMatch(ConfigSection::isEmpty);
 	}
-	
+
 	/**
 	 * Returns a JSONObject containing all the (raw) properties as well as subsections (represented by other {@link JSONObject}s) of this section.<br>
 	 * Lists will be converted to {@link JSONArray}s.<br>
@@ -253,16 +253,16 @@ public interface ConfigSection {
 		}
 		return o;
 	}
-	
+
 	/**
 	 * Sets all the values and subsections (represented by other {@link JSONObject}s) of the specified JSONObject in this subsection.<br>
 	 * Any JSONObject created by {@link #toJSON()} may be passed to this function
 	 * @param json A JSONObject containing all the values and subsections
 	 */
 	public default void loadFromJSON(JSONObject json) {
-		json.forEach(this::set);
+		json.keys().forEach(key -> set(key, json.get(key)));
 	}
-	
+
 	/**
 	 * This is the default method for casting raw configuration objects to their (possibly complex) final types
 	 * @param <T> The type to cast to
@@ -313,7 +313,7 @@ public interface ConfigSection {
 					.sorted(Comparator.<Map.Entry<ObjectMapper<?, ?>, Integer>>comparingInt(Map.Entry::getValue).reversed())
 					.map(Map.Entry::getKey)
 					.collect(Collectors.toList());
-			
+
 			for(ObjectMapper<?, ?> om : llms) {
 				try {
 					Object c = om.constructRawObject(section, o, section::castType);
@@ -323,18 +323,18 @@ public interface ConfigSection {
 							return t; // cc -> llm -> ct
 						}
 					}
-					
+
 					NullableOptional<T> tto = constructTopLevelType(section, c, typeClass, exactType); // First try cc -> llm -> tlm -> ct
 					if(tto.isPresent()) return tto;
 				}catch(ObjectMappingException e) {
 					throw e;
 				}
 			}
-			
+
 			return constructTopLevelType(section, o, typeClass, exactType); // Then just return cc -> tlm -> ct
 		}
 	}
-	
+
 	/**
 	 * Internal method
 	 * @param <T>
@@ -351,7 +351,7 @@ public interface ConfigSection {
 				.sorted(Comparator.comparingInt(Map.Entry::getValue))
 				.map(Map.Entry::getKey)
 				.findFirst().orElse(null);
-		
+
 		if(tlm == null) return NullableOptional.empty();
 		try {
 			Object c2 = tlm.constructRawObject(section, o, section::castType);
@@ -366,7 +366,7 @@ public interface ConfigSection {
 		}
 		return NullableOptional.empty();
 	}
-	
+
 	/**
 	 * Equivalent to calling {@link #defaultCast(ConfigSection, Object, Class, Complex, boolean)} for this section with <code>allowComplex</code> set to <code>true</code>
 	 * @param <T> The type to cast to
@@ -378,7 +378,7 @@ public interface ConfigSection {
 	public default <T> NullableOptional<T> castType(Object o, Class<T> typeClass, Complex<?> exactType) {
 		return defaultCast(this, o, typeClass, exactType, true);
 	}
-	
+
 	/**
 	 * Equivalent to calling {@link #defaultCast(ConfigSection, Object, Class, Complex, boolean)} for this section with <code>allowComplex</code> set to <code>false</code>
 	 * @param <T> The type to cast to
@@ -402,7 +402,7 @@ public interface ConfigSection {
 		if(p == null || p.isUndefined()) return ConfigValueType.UNDEFINED;
 		return p.getValueType();
 	}
-	
+
 	/**
 	 * Gets a value from this section and attempts to cast it to the specified type
 	 * The {@code key} parameter allows for subpaths (e.g. "{@code somepath.somesubpath}").<br>
@@ -427,7 +427,7 @@ public interface ConfigSection {
 			return value.get();
 		}
 	}
-	
+
 	public default <T> T getGeneric(String key, Class<T> clazz, T defaultValue, boolean applyDefault) {
 		return getComplex(key, Complex.value(clazz), defaultValue, applyDefault);
 	}
@@ -439,159 +439,159 @@ public interface ConfigSection {
 	public default <T> Map<String, T> getGenericMap(Class<T> valueClass, String key, Map<String, T> defaultValue, boolean applyDefault) {
 		return getComplex(key, Complex.map(String.class, valueClass), defaultValue, applyDefault);
 	}
-	
+
 	public default String getString(String key, String defaultValue, boolean applyDefault) {
 		return getGeneric(key, String.class, defaultValue, applyDefault);
 	}
-	
+
 	public default boolean getBoolean(String key, boolean defaultValue, boolean applyDefault) {
 		return getGeneric(key, Boolean.class, defaultValue, applyDefault);
 	}
-	
+
 	public default byte getByte(String key, byte defaultValue, boolean applyDefault) {
 		return getGeneric(key, Byte.class, defaultValue, applyDefault);
 	}
-	
+
 	public default short getShort(String key, short defaultValue, boolean applyDefault) {
 		return getGeneric(key, Short.class, defaultValue, applyDefault);
 	}
-	
+
 	public default int getInt(String key, int defaultValue, boolean applyDefault) {
 		return getGeneric(key, Integer.class, defaultValue, applyDefault);
 	}
-	
+
 	public default long getLong(String key, long defaultValue, boolean applyDefault) {
 		return getGeneric(key, Long.class, defaultValue, applyDefault);
 	}
-	
+
 	public default float getFloat(String key, float defaultValue, boolean applyDefault) {
 		return getGeneric(key, Float.class, defaultValue, applyDefault);
 	}
-	
+
 	public default double getDouble(String key, double defaultValue, boolean applyDefault) {
 		return getGeneric(key, Double.class, defaultValue, applyDefault);
 	}
-	
+
 	public default List<?> getList(String key, List<?> defaultValue, boolean applyDefault) {
 		return getGeneric(key, List.class, defaultValue, applyDefault);
 	}
-	
+
 	public default Map<?, ?> getMap(String key, Map<?, ?> defaultValue, boolean applyDefault) {
 		return getGeneric(key, Map.class, defaultValue, applyDefault);
 	}
-	
+
 	public default List<String> getStringList(String key, List<String> defaultValue, boolean applyDefault) {
 		return getGenericList(key, String.class, defaultValue, applyDefault);
 	}
-	
+
 	public default List<Boolean> getBooleanList(String key, List<Boolean> defaultValue, boolean applyDefault) {
 		return getGenericList(key, Boolean.class, defaultValue, applyDefault);
 	}
-	
+
 	public default List<Byte> getByteList(String key, List<Byte> defaultValue, boolean applyDefault) {
 		return getGenericList(key, Byte.class, defaultValue, applyDefault);
 	}
-	
+
 	public default List<Short> getShortList(String key, List<Short> defaultValue, boolean applyDefault) {
 		return getGenericList(key, Short.class, defaultValue, applyDefault);
 	}
-	
+
 	public default List<Integer> getIntegerList(String key, List<Integer> defaultValue, boolean applyDefault) {
 		return getGenericList(key, Integer.class, defaultValue, applyDefault);
 	}
-	
+
 	public default List<Long> getLongList(String key, List<Long> defaultValue, boolean applyDefault) {
 		return getGenericList(key, Long.class, defaultValue, applyDefault);
 	}
-	
+
 	public default List<Float> getFloatList(String key, List<Float> defaultValue, boolean applyDefault) {
 		return getGenericList(key, Float.class, defaultValue, applyDefault);
 	}
-	
+
 	public default List<Double> getDoubleList(String key, List<Double> defaultValue, boolean applyDefault) {
 		return getGenericList(key, Double.class, defaultValue, applyDefault);
 	}
-	
+
 	public default <T> T getGeneric(String key, Class<T> clazz) {
 		return getGeneric(key, clazz, null, false);
 	}
-	
+
 	public default <T> T getComplex(String key, Complex<T> complex) {
 		return getComplex(key, complex, null, false);
 	}
-	
+
 	public default String getString(String key) {
 		return getString(key, null, false);
 	}
-	
+
 	public default boolean getBoolean(String key) {
 		return getBoolean(key, false, false);
 	}
-	
+
 	public default byte getByte(String key) {
 		return getByte(key, (byte) 0, false);
 	}
-	
+
 	public default short getShort(String key) {
 		return getShort(key, (short) 0, false);
 	}
-	
+
 	public default int getInt(String key) {
 		return getInt(key, 0, false);
 	}
-	
+
 	public default long getLong(String key) {
 		return getLong(key, 0l, false);
 	}
-	
+
 	public default float getFloat(String key) {
 		return getFloat(key, 0f, false);
 	}
-	
+
 	public default double getDouble(String key) {
 		return getDouble(key, 0d, false);
 	}
-	
+
 	public default List<?> getList(String key) {
 		return getList(key, new ArrayList<>(), false);
 	}
-	
+
 	public default Map<?, ?> getMap(String key) {
 		return getMap(key, new LinkedHashMap<>(), false);
 	}
-	
+
 	public default List<String> getStringList(String key) {
 		return getGenericList(key, String.class, new ArrayList<>(), false);
 	}
-	
+
 	public default List<Boolean> getBooleanList(String key) {
 		return getGenericList(key, Boolean.class, new ArrayList<>(), false);
 	}
-	
+
 	public default List<Byte> getByteList(String key) {
 		return getGenericList(key, Byte.class, new ArrayList<>(), false);
 	}
-	
+
 	public default List<Short> getShortList(String key) {
 		return getGenericList(key, Short.class, new ArrayList<>(), false);
 	}
-	
+
 	public default List<Integer> getIntegerList(String key) {
 		return getGenericList(key, Integer.class, new ArrayList<>(), false);
 	}
-	
+
 	public default List<Long> getLongList(String key) {
 		return getGenericList(key, Long.class, new ArrayList<>(), false);
 	}
-	
+
 	public default List<Float> getFloatList(String key) {
 		return getGenericList(key, Float.class, new ArrayList<>(), false);
 	}
-	
+
 	public default List<Double> getDoubleList(String key) {
 		return getGenericList(key, Double.class, new ArrayList<>(), false);
 	}
-	
+
 	public default List<String> getKeys(String key, boolean deep, boolean fullKeys) {
 		ConfigPath path = new ConfigPath(key, 0);
 		if(path.hasSubpaths()) {
@@ -601,11 +601,11 @@ public interface ConfigSection {
 		if(ss == null) return new ArrayList<>();
 		return ss.getKeys(deep, fullKeys);
 	}
-	
+
 	public default List<String> getKeys(String key) {
 		return getKeys(key, false, true);
 	}
-	
+
 	public default List<String> getKeys(boolean deep, boolean fullKeys) {
 		List<String> keys = new ArrayList<>();
 		getAllProperties().forEach((k, v) -> keys.add(k));
@@ -618,11 +618,11 @@ public interface ConfigSection {
 		}
 		return keys;
 	}
-	
+
 	public default List<String> getKeys() {
 		List<String> keys = new ArrayList<>();
 		getAllProperties().forEach((k, v) -> keys.add(k));
 		return keys;
 	}
-	
+
 }
