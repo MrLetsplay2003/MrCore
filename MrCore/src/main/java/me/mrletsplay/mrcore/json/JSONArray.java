@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
@@ -65,84 +66,140 @@ public class JSONArray implements Iterable<Object> {
 	}
 
 	/**
+	 * Checks whether a value exists within this JSON array
+	 * @param index The index of the value
+	 * @return true if the a value exists at the given index, false otherwise
+	 */
+	public boolean has(int index) {
+		return index >= 0 && index < values.size();
+	}
+
+	/**
 	 * Gets an element from this JSON array
 	 * @param index The index of the element
 	 * @return The value of the property
 	 * @throws JSONException If the given index is out of range
 	 */
 	public Object get(int index) {
-		if(index < 0 || index > values.size()) throw new JSONException("Index out of range");
+		if(!has(index)) throw new JSONException("Index out of range");
 		return values.get(index);
 	}
 
 	@SuppressWarnings("unchecked")
 	private <T> T get(int index, JSONType type) {
 		Object value = get(index);
-		if(!JSONType.isOfType(value, type)) throw new JSONException("Value cannot be converted to expected type");
+		if(value != null && JSONType.typeOf(value) != type) {
+			throw new JSONException(String.format("Value of type %s cannot be converted to expected type %s", value.getClass(), type));
+		}
 		return (T) value;
 	}
 
 	/**
 	 * @param index The index to get
-	 * See {@link #get(int)}
-	 * @throws JSONException If
+	 * @return The value at that index
+	 * @throws JSONException If the value doesn't exist or the type cannot be converted to a string
 	 */
 	public String getString(int index) {
 		return get(index, JSONType.STRING);
 	}
 
 	/**
-	 * See {@link #get(int)}
+	 * @param index The index to get
+	 * @return The value at that index
+	 * @throws JSONException If the value doesn't exist or the type cannot be converted to a boolean
 	 */
 	public Boolean getBoolean(int index) {
 		return get(index, JSONType.BOOLEAN);
 	}
 
 	/**
-	 * See {@link #get(int)}
+	 * @param index The index to get
+	 * @return The value at that index
+	 * @throws JSONException If the value doesn't exist or the type cannot be converted to a number
 	 */
 	public Number getNumber(int index) {
 		return get(index, JSONType.NUMBER);
 	}
 
 	/**
-	 * See {@link #get(int)}
+	 * @param index The index to get
+	 * @return The value at that index
+	 * @throws JSONException If the value doesn't exist or the type cannot be converted to an integer
+	 * @apiNote This method will not check for integer over-/underflows, use {@link #getLong(int)} to manually check for that
 	 */
-	public int getInt(int index) {
-		return this.<Number>get(index, JSONType.INTEGER).intValue();
+	public Integer getInt(int index) {
+		Number n = get(index, JSONType.INTEGER);
+		return n == null ? null : n.intValue();
 	}
 
 	/**
-	 * See {@link #get(int)}
+	 * @param index The index to get
+	 * @return The value at that index
+	 * @throws JSONException If the value doesn't exist or the type cannot be converted to a long
 	 */
-	public long getLong(int index) {
-		return this.<Number>get(index, JSONType.INTEGER).longValue();
+	public Long getLong(int index) {
+		Number n = get(index, JSONType.INTEGER);
+		return n == null ? null : n.longValue();
 	}
 
 	/**
-	 * See {@link #get(int)}
+	 * @param index The index to get
+	 * @return The value at that index
+	 * @throws JSONException If the value doesn't exist or the type cannot be converted to a float
+	 * @apiNote This method may result in precision loss. Use {@link #getDouble(int)} for maximum precision
 	 */
-	public double getDouble(int index) {
-		return this.<Number>get(index, JSONType.DECIMAL).doubleValue();
+	public Float getFloat(int index) {
+		Number n = get(index, JSONType.DECIMAL);
+		return n == null ? null : n.floatValue();
 	}
 
 	/**
-	 * See {@link #get(int)}
+	 * @param index The index to get
+	 * @return The value at that index
+	 * @throws JSONException If the value doesn't exist or the type cannot be converted to a double
+	 */
+	public Double getDouble(int index) {
+		Number n = get(index, JSONType.DECIMAL);
+		return n == null ? null : n.doubleValue();
+	}
+
+	/**
+	 * @param index The index to get
+	 * @return The value at that index
+	 * @throws JSONException If the value doesn't exist or the type cannot be converted to a JSON object
 	 */
 	public JSONObject getJSONObject(int index) {
 		return get(index, JSONType.OBJECT);
 	}
 
 	/**
-	 * See {@link #get(int)}
+	 * @param index The index to get
+	 * @return The value at that index
+	 * @throws JSONException If the value doesn't exist or the type cannot be converted to a JSON array
 	 */
 	public JSONArray getJSONArray(int index) {
 		return get(index, JSONType.ARRAY);
 	}
 
-	public boolean isOfType(int index, JSONType type) {
+	/**
+	 * @param index The index to check
+	 * @return The type of the value at that index
+	 * @throws JSONException If the value doesn't exist
+	 */
+	public JSONType typeOf(int index) {
 		Object value = get(index);
-		return JSONType.isOfType(value, type);
+		return JSONType.typeOf(value);
+	}
+
+	/**
+	 * Checks whether a value is of the given type
+	 * @param index The index of the value
+	 * @param type The type to check for
+	 * @return true if the value exists and is of the given type, false otherwise
+	 */
+	public boolean isOfType(int index, JSONType type) {
+		if(!has(index)) return false;
+		return typeOf(index) == type;
 	}
 
 	public List<Object> toList() {
@@ -187,6 +244,23 @@ public class JSONArray implements Iterable<Object> {
 	 */
 	public String toFancyString() {
 		return JSONFormatter.formatArray(this, 0, true).toString();
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(values);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		JSONArray other = (JSONArray) obj;
+		return Objects.equals(values, other.values);
 	}
 
 }

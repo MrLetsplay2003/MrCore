@@ -65,7 +65,9 @@ public class JSONParser {
 	 */
 	public static Object parse(String source, JSONType type) {
 		Object parsed = parse(source);
-		if(!JSONType.isOfType(parsed, type)) throw new JSONParseException("Value is not of the correct type", 0);
+		if(JSONType.typeOf(parsed) != type) {
+			throw new JSONParseException(String.format("Value is not of the correct type (%s, but should be %s)", parsed.getClass(), type), 0);
+		}
 		return parsed;
 	}
 

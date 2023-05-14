@@ -197,15 +197,27 @@ public class JSONConverter {
 
 	private static <T extends JSONPrimitiveConvertible> T decodePrimitive0(Class<T> clazz, Object value) {
 		try {
+			if(JSONPrimitiveStringConvertible.class.isAssignableFrom(clazz)) {
+				if(!(value instanceof String)) throw new JSONDecodeException("Primitive value is not a string");
+
+				Method voM = clazz.getMethod("decodePrimitive", String.class);
+				voM.setAccessible(true);
+				try {
+					return clazz.cast(voM.invoke(null, (String) value));
+				} catch (ClassCastException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+					throw new JSONDecodeException("Failed to invoke decodePrimitive method", e);
+				}
+			}
+
 			Method voM = clazz.getMethod("decodePrimitive", Object.class);
 			voM.setAccessible(true);
 			try {
 				return clazz.cast(voM.invoke(null, value));
-			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			} catch (ClassCastException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 				throw new JSONDecodeException("Failed to invoke decodePrimitive method", e);
 			}
 		} catch (NoSuchMethodException | SecurityException e) {
-			throw new JSONDecodeException("Class " + clazz.getName() + " doesn't have the static method decodePrimitive(Object)", e);
+			throw new JSONDecodeException("Class " + clazz.getName() + " doesn't have the static method decodePrimitive(Object) (or decodePrimitive(String) for JSONPrimitiveStringConvertible)", e);
 		}
 	}
 
@@ -279,7 +291,7 @@ public class JSONConverter {
 		}else if(Enum.class.isAssignableFrom(clazz)) {
 			return decodeEnumValue(clazz, (String) value);
 		}else {
-			NullableOptional<Object> v = MiscUtils.callSafely(() -> JSONType.castJSONValueTo(value, clazz, false));
+			NullableOptional<Object> v = MiscUtils.callSafely(() -> JSONType.castJSONValueTo(value, clazz));
 			if(!v.isPresent()) throw new JSONDecodeException("Invalid JSON value type: " + clazz);
 			return v.get();
 		}

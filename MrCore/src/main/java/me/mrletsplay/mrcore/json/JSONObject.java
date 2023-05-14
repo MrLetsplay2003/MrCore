@@ -3,6 +3,7 @@ package me.mrletsplay.mrcore.json;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import me.mrletsplay.mrcore.misc.NullableOptional;
@@ -113,7 +114,9 @@ public class JSONObject {
 	@SuppressWarnings("unchecked")
 	private <T> T get(String key, JSONType type) {
 		Object value = get(key);
-		if(!JSONType.isOfType(value, type)) throw new JSONException("Value cannot be converted to expected type");
+		if(value != null && JSONType.typeOf(value) != type) {
+			throw new JSONException(String.format("Value of type %s cannot be converted to expected type %s", value.getClass(), type));
+		}
 		return (T) value;
 	}
 
@@ -150,8 +153,9 @@ public class JSONObject {
 	 * @throws JSONException If the key doesn't exist or the type cannot be converted to an integer
 	 * @apiNote This method will not check for integer over-/underflows, use {@link #getLong(String)} to manually check for that
 	 */
-	public int getInt(String key) {
-		return this.<Number>get(key, JSONType.INTEGER).intValue();
+	public Integer getInt(String key) {
+		Number n = get(key, JSONType.INTEGER);
+		return n == null ? null : n.intValue();
 	}
 
 	/**
@@ -159,8 +163,20 @@ public class JSONObject {
 	 * @return The value of the property
 	 * @throws JSONException If the key doesn't exist or the type cannot be converted to a long
 	 */
-	public long getLong(String key) {
-		return this.<Number>get(key, JSONType.INTEGER).longValue();
+	public Long getLong(String key) {
+		Number n = get(key, JSONType.INTEGER);
+		return n == null ? null : n.longValue();
+	}
+
+	/**
+	 * @param key The key to get
+	 * @return The value of the property
+	 * @throws JSONException If the key doesn't exist or the type cannot be converted to a float
+	 * @apiNote This method may result in precision loss. Use {@link #getDouble(String)} for maximum precision
+	 */
+	public Float getFloat(String key) {
+		Number n = get(key, JSONType.DECIMAL);
+		return n == null ? null : n.floatValue();
 	}
 
 	/**
@@ -168,8 +184,9 @@ public class JSONObject {
 	 * @return The value of the property
 	 * @throws JSONException If the key doesn't exist or the type cannot be converted to a double
 	 */
-	public double getDouble(String key) {
-		return this.<Number>get(key, JSONType.DECIMAL).doubleValue();
+	public Double getDouble(String key) {
+		Number n = get(key, JSONType.DECIMAL);
+		return n == null ? null : n.doubleValue();
 	}
 
 	/**
@@ -237,9 +254,10 @@ public class JSONObject {
 	 * @param key The key to get
 	 * @return The value of the property wrapped inside a {@link NullableOptional}
 	 * @throws JSONException If the type cannot be converted to an integer
+	 * @apiNote This method will not check for integer over-/underflows, use {@link #optLong(String)} to manually check for that
 	 */
 	public NullableOptional<Integer> optInt(String key) {
-		return this.<Number>opt(key, JSONType.INTEGER).map(n -> n.intValue());
+		return this.<Number>opt(key, JSONType.INTEGER).map(n -> n == null ? null : n.intValue());
 	}
 
 	/**
@@ -248,7 +266,17 @@ public class JSONObject {
 	 * @throws JSONException If the type cannot be converted to a long
 	 */
 	public NullableOptional<Long> optLong(String key) {
-		return this.<Number>opt(key, JSONType.INTEGER).map(n -> n.longValue());
+		return this.<Number>opt(key, JSONType.INTEGER).map(n -> n == null ? null : n.longValue());
+	}
+
+	/**
+	 * @param key The key to get
+	 * @return The value of the property wrapped inside a {@link NullableOptional}
+	 * @throws JSONException If the type cannot be converted to a float
+	 * @apiNote This method may result in precision loss. Use {@link #optDouble(String)} for maximum precision
+	 */
+	public NullableOptional<Float> optFloat(String key) {
+		return this.<Number>opt(key, JSONType.DECIMAL).map(n -> n == null ? null : n.floatValue());
 	}
 
 	/**
@@ -257,7 +285,7 @@ public class JSONObject {
 	 * @throws JSONException If the type cannot be converted to a double
 	 */
 	public NullableOptional<Double> optDouble(String key) {
-		return this.<Number>opt(key, JSONType.DECIMAL).map(n -> n.doubleValue());
+		return this.<Number>opt(key, JSONType.DECIMAL).map(n -> n == null ? null : n.doubleValue());
 	}
 
 	/**
@@ -278,10 +306,25 @@ public class JSONObject {
 		return this.opt(key, JSONType.ARRAY);
 	}
 
+	/**
+	 * @param key The key of the property
+	 * @return The type of the property with the given key
+	 * @throws JSONException If the property doesn't exist
+	 */
+	public JSONType typeOf(String key) {
+		Object value = get(key);
+		return JSONType.typeOf(value);
+	}
+
+	/**
+	 * Checks whether a property is of the given type
+	 * @param key The key of the property
+	 * @param type The type to check for
+	 * @return true if the property exists and is of the given type, false otherwise
+	 */
 	public boolean isOfType(String key, JSONType type) {
 		if(!has(key)) return false;
-		Object value = get(key);
-		return JSONType.isOfType(value, type);
+		return typeOf(key) == type;
 	}
 
 	public Map<String, Object> toMap() {
@@ -319,4 +362,20 @@ public class JSONObject {
 		return JSONFormatter.formatObject(this, true).toString();
 	}
 
+	@Override
+	public int hashCode() {
+		return Objects.hash(values);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		JSONObject other = (JSONObject) obj;
+		return Objects.equals(values, other.values);
+	}
 }

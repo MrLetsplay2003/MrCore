@@ -75,38 +75,15 @@ public enum JSONType {
 		return null;
 	}
 
-	public static boolean isOfType(Object value, JSONType type) {
-		switch (type) {
-			case OBJECT:
-				return value instanceof JSONObject;
-			case ARRAY:
-				return value instanceof JSONArray;
-			case STRING:
-				return value instanceof String;
-			case BOOLEAN:
-				return value instanceof Boolean;
-			case DECIMAL:
-			case DOUBLE:
-				return value instanceof Double;
-			case INTEGER:
-			case LONG:
-				return value instanceof Long || value instanceof Integer;
-			case NUMBER:
-				return value instanceof Number;
-			case NULL:
-				return value == null;
-		}
-
-		return false;
-	}
-
 	public static Object castObjectToJSONType(Object value, JSONType type) {
+		// TODO: check casts
 		switch(type) {
 			case ARRAY:
 				return value;
 			case BOOLEAN:
 				return value;
 			case DOUBLE:
+			case DECIMAL:
 				return ((Number) value).doubleValue();
 			case INTEGER:
 				return ((Number) value).intValue();
@@ -125,29 +102,21 @@ public enum JSONType {
 		}
 	}
 
-	public static Object castJSONValueTo(Object value, Class<?> clazz) {
-		return castJSONValueTo(value, clazz, true);
-	}
+	@SuppressWarnings("unchecked")
+	public static <T> T castJSONValueTo(Object value, Class<T> clazz) {
+		// TODO: generic type
+		if(clazz.isInstance(value)) return (T) value;
 
-	public static Object castJSONValueTo(Object value, Class<?> clazz, boolean strict) {
-		if(!strict && clazz.equals(Object.class)) return value;
-		if(clazz.equals(JSONArray.class)) {
-			return value;
-		}else if(clazz.equals(Boolean.class) || clazz.equals(boolean.class)) {
-			return value;
-		}else if(clazz.equals(Number.class)) {
-			return value;
+		if(clazz.equals(Float.class) || clazz.equals(float.class)) {
+			return (T) (Float) ((Number) value).floatValue();
 		}else if(clazz.equals(Double.class) || clazz.equals(double.class)) {
-			return ((Number) value).doubleValue();
+			return (T) (Double) ((Number) value).doubleValue();
 		}else if(clazz.equals(Integer.class) || clazz.equals(int.class)) {
-			return ((Number) value).intValue();
+			return (T) (Integer) ((Number) value).intValue();
 		}else if(clazz.equals(Long.class) || clazz.equals(long.class)) {
-			return ((Number) value).longValue();
-		}else if(clazz.equals(JSONObject.class)) {
-			return value;
-		}else if(clazz.equals(String.class)) {
-			return strict ? (String) value : value.toString();
+			return (T) (Long) ((Number) value).longValue();
 		}
+
 		throw new IllegalArgumentException("Invalid class provided");
 	}
 
