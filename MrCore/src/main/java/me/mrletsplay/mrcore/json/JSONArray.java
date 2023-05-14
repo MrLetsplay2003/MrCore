@@ -199,6 +199,7 @@ public class JSONArray implements Iterable<Object> {
 	 */
 	public boolean isOfType(int index, JSONType type) {
 		if(!has(index)) return false;
+		if(type == JSONType.NUMBER) return isOfType(index, JSONType.INTEGER) || isOfType(index, JSONType.DECIMAL);
 		return typeOf(index) == type;
 	}
 

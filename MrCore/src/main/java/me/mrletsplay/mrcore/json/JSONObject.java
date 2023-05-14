@@ -324,6 +324,7 @@ public class JSONObject {
 	 */
 	public boolean isOfType(String key, JSONType type) {
 		if(!has(key)) return false;
+		if(type == JSONType.NUMBER) return isOfType(key, JSONType.INTEGER) || isOfType(key, JSONType.DECIMAL);
 		return typeOf(key) == type;
 	}
 
