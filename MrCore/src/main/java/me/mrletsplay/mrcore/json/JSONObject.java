@@ -84,6 +84,7 @@ public class JSONObject {
 	 * Functionally equivalent to {@link #set(String, Object)}
 	 * @param key
 	 * @param value
+	 * @throws JSONException If the value is not a valid JSON type
 	 * @see #set(String, Object)
 	 */
 	public void put(String key, Object value) {
@@ -326,6 +327,20 @@ public class JSONObject {
 		if(!has(key)) return false;
 		if(type == JSONType.NUMBER) return isOfType(key, JSONType.INTEGER) || isOfType(key, JSONType.DECIMAL);
 		return typeOf(key) == type;
+	}
+
+	/**
+	 * @return A deep copy of this JSONObject
+	 */
+	public JSONObject copy() {
+		JSONObject copy = new JSONObject();
+		for(var e : values.entrySet()) {
+			Object o = e.getValue();
+			if(o instanceof JSONArray) o = ((JSONArray) o).copy();
+			if(o instanceof JSONObject) o = ((JSONObject) o).copy();
+			copy.values.put(e.getKey(), o);
+		}
+		return copy;
 	}
 
 	public Map<String, Object> toMap() {

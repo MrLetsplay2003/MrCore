@@ -59,10 +59,12 @@ public class JSONArray implements Iterable<Object> {
 
 	/**
 	 * Adds an element to this JSON array
-	 * @param o The value to add
+	 * @param value The value to add
+	 * @throws JSONException If the value is not a valid JSON type
 	 */
-	public void add(Object o) {
-		this.values.add(o);
+	public void add(Object value) {
+		if(JSONType.typeOf(value) == null) throw new JSONException("Invalid value type");
+		this.values.add(value);
 	}
 
 	/**
@@ -201,6 +203,19 @@ public class JSONArray implements Iterable<Object> {
 		if(!has(index)) return false;
 		if(type == JSONType.NUMBER) return isOfType(index, JSONType.INTEGER) || isOfType(index, JSONType.DECIMAL);
 		return typeOf(index) == type;
+	}
+
+	/**
+	 * @return A deep copy of this JSONArray
+	 */
+	public JSONArray copy() {
+		JSONArray copy = new JSONArray();
+		for(Object o : values) {
+			if(o instanceof JSONArray) o = ((JSONArray) o).copy();
+			if(o instanceof JSONObject) o = ((JSONObject) o).copy();
+			copy.values.add(o);
+		}
+		return copy;
 	}
 
 	public List<Object> toList() {
