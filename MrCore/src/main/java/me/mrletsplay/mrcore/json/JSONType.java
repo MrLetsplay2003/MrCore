@@ -107,7 +107,9 @@ public enum JSONType {
 		// TODO: generic type
 		if(clazz.isInstance(value)) return (T) value;
 
-		if(clazz.equals(Float.class) || clazz.equals(float.class)) {
+		if(clazz.equals(Boolean.class) || clazz.equals(boolean.class)) {
+			return (T) (Boolean) value;
+		}else if(clazz.equals(Float.class) || clazz.equals(float.class)) {
 			return (T) (Float) ((Number) value).floatValue();
 		}else if(clazz.equals(Double.class) || clazz.equals(double.class)) {
 			return (T) (Double) ((Number) value).doubleValue();
