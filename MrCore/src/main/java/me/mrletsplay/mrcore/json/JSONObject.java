@@ -115,9 +115,7 @@ public class JSONObject {
 	@SuppressWarnings("unchecked")
 	private <T> T get(String key, JSONType type) {
 		Object value = get(key);
-		if(value != null && JSONType.typeOf(value) != type) {
-			throw new JSONException(String.format("Value of type %s cannot be converted to expected type %s", value.getClass(), type));
-		}
+		if(!JSONType.isOfType(value, type)) throw new JSONException(String.format("Value of type %s cannot be converted to expected type %s", value.getClass(), type));
 		return (T) value;
 	}
 
@@ -149,10 +147,10 @@ public class JSONObject {
 	}
 
 	/**
+	 * Note: This method will not check for integer over-/underflows, use {@link #getLong(String)} to manually check for that
 	 * @param key The key to get
 	 * @return The value of the property
 	 * @throws JSONException If the key doesn't exist or the type cannot be converted to an integer
-	 * @apiNote This method will not check for integer over-/underflows, use {@link #getLong(String)} to manually check for that
 	 */
 	public Integer getInt(String key) {
 		Number n = get(key, JSONType.INTEGER);
@@ -170,10 +168,10 @@ public class JSONObject {
 	}
 
 	/**
+	 * Note: This method may result in precision loss. Use {@link #getDouble(String)} for maximum precision
 	 * @param key The key to get
 	 * @return The value of the property
 	 * @throws JSONException If the key doesn't exist or the type cannot be converted to a float
-	 * @apiNote This method may result in precision loss. Use {@link #getDouble(String)} for maximum precision
 	 */
 	public Float getFloat(String key) {
 		Number n = get(key, JSONType.DECIMAL);
@@ -252,10 +250,10 @@ public class JSONObject {
 	}
 
 	/**
+	 * Note: This method will not check for integer over-/underflows, use {@link #optLong(String)} to manually check for that
 	 * @param key The key to get
 	 * @return The value of the property wrapped inside a {@link NullableOptional}
 	 * @throws JSONException If the type cannot be converted to an integer
-	 * @apiNote This method will not check for integer over-/underflows, use {@link #optLong(String)} to manually check for that
 	 */
 	public NullableOptional<Integer> optInt(String key) {
 		return this.<Number>opt(key, JSONType.INTEGER).map(n -> n == null ? null : n.intValue());
@@ -271,10 +269,10 @@ public class JSONObject {
 	}
 
 	/**
+	 * Note: This method may result in precision loss. Use {@link #optDouble(String)} for maximum precision
 	 * @param key The key to get
 	 * @return The value of the property wrapped inside a {@link NullableOptional}
 	 * @throws JSONException If the type cannot be converted to a float
-	 * @apiNote This method may result in precision loss. Use {@link #optDouble(String)} for maximum precision
 	 */
 	public NullableOptional<Float> optFloat(String key) {
 		return this.<Number>opt(key, JSONType.DECIMAL).map(n -> n == null ? null : n.floatValue());
@@ -325,8 +323,7 @@ public class JSONObject {
 	 */
 	public boolean isOfType(String key, JSONType type) {
 		if(!has(key)) return false;
-		if(type == JSONType.NUMBER) return isOfType(key, JSONType.INTEGER) || isOfType(key, JSONType.DECIMAL);
-		return typeOf(key) == type;
+		return JSONType.isOfType(get(key), type);
 	}
 
 	/**

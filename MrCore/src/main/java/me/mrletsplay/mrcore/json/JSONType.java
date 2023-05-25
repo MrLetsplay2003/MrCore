@@ -75,6 +75,12 @@ public enum JSONType {
 		return null;
 	}
 
+	public static boolean isOfType(Object value, JSONType type) {
+		if(value == null) return true;
+		if(type == JSONType.NUMBER) return isOfType(value, JSONType.INTEGER) || isOfType(value, JSONType.DECIMAL);
+		return typeOf(value) == type;
+	}
+
 	public static Object castObjectToJSONType(Object value, JSONType type) {
 		// TODO: check casts
 		switch(type) {

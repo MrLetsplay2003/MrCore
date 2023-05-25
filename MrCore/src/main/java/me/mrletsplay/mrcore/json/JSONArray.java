@@ -90,9 +90,7 @@ public class JSONArray implements Iterable<Object> {
 	@SuppressWarnings("unchecked")
 	private <T> T get(int index, JSONType type) {
 		Object value = get(index);
-		if(value != null && JSONType.typeOf(value) != type) {
-			throw new JSONException(String.format("Value of type %s cannot be converted to expected type %s", value.getClass(), type));
-		}
+		if(!JSONType.isOfType(value, type)) throw new JSONException(String.format("Value of type %s cannot be converted to expected type %s", value.getClass(), type));
 		return (T) value;
 	}
 
@@ -124,10 +122,10 @@ public class JSONArray implements Iterable<Object> {
 	}
 
 	/**
+	 * Note: This method will not check for integer over-/underflows, use {@link #getLong(int)} to manually check for that
 	 * @param index The index to get
 	 * @return The value at that index
 	 * @throws JSONException If the value doesn't exist or the type cannot be converted to an integer
-	 * @apiNote This method will not check for integer over-/underflows, use {@link #getLong(int)} to manually check for that
 	 */
 	public Integer getInt(int index) {
 		Number n = get(index, JSONType.INTEGER);
@@ -145,10 +143,10 @@ public class JSONArray implements Iterable<Object> {
 	}
 
 	/**
+	 * Note: This method may result in precision loss. Use {@link #getDouble(int)} for maximum precision
 	 * @param index The index to get
 	 * @return The value at that index
 	 * @throws JSONException If the value doesn't exist or the type cannot be converted to a float
-	 * @apiNote This method may result in precision loss. Use {@link #getDouble(int)} for maximum precision
 	 */
 	public Float getFloat(int index) {
 		Number n = get(index, JSONType.DECIMAL);
@@ -201,8 +199,7 @@ public class JSONArray implements Iterable<Object> {
 	 */
 	public boolean isOfType(int index, JSONType type) {
 		if(!has(index)) return false;
-		if(type == JSONType.NUMBER) return isOfType(index, JSONType.INTEGER) || isOfType(index, JSONType.DECIMAL);
-		return typeOf(index) == type;
+		return JSONType.isOfType(get(index), type);
 	}
 
 	/**
