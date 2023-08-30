@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>me.mrletsplay</groupId>
 	<artifactId>MrCore-Parent</artifactId>
-	<version>4.3-SNAPSHOT</version>
+	<version>4.3</version>
 	<packaging>pom</packaging>
 	<name>MrCore-Parent</name>
 
