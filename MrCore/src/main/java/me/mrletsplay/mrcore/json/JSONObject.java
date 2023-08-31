@@ -92,6 +92,22 @@ public class JSONObject {
 	}
 
 	/**
+	 * Unsets the given key, removing the associated value, if any<br>
+	 * @param key The key to unset
+	 */
+	public void unset(String key) {
+		values.remove(key);
+	}
+
+	/**
+	 * Functionally equivalent to {@link #unset(String)}
+	 * @param key The key to unset
+	 */
+	public void remove(String key) {
+		unset(key);
+	}
+
+	/**
 	 * Checks whether a specific property exists within this JSON object
 	 * @param key The key of the property
 	 * @return true if the given property exists, false otherwise
@@ -356,6 +372,16 @@ public class JSONObject {
 
 	public Set<String> keys() {
 		return values.keySet();
+	}
+
+	/**
+	 * Returns the underlying map of this JSON array.<br>
+	 * Modifications to the map will be reflected in this JSON object and vice-versa.<br>
+	 * There are no type safety checks when modifying the underlying map!
+	 * @return The underlying map
+	 */
+	public Map<String, Object> getRaw() {
+		return values;
 	}
 
 	/**

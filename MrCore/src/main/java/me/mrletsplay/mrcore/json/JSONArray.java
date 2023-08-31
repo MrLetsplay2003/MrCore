@@ -68,6 +68,15 @@ public class JSONArray implements Iterable<Object> {
 	}
 
 	/**
+	 * Removes an element from this JSON array
+	 * @param index The index of the element to remove
+	 * @throws IndexOutOfBoundsException If the {@code index} is not in the range 0 to {@link #size()} - 1
+	 */
+	public void remove(int index) {
+		this.values.remove(index);
+	}
+
+	/**
 	 * Checks whether a value exists within this JSON array
 	 * @param index The index of the value
 	 * @return true if the a value exists at the given index, false otherwise
@@ -240,6 +249,16 @@ public class JSONArray implements Iterable<Object> {
 
 	public Stream<Object> stream() {
 		return values.stream();
+	}
+
+	/**
+	 * Returns the underlying list of this JSON array.<br>
+	 * Modifications to the list will be reflected in this JSON array and vice-versa.<br>
+	 * There are no type safety checks when modifying the underlying list!
+	 * @return The underlying list
+	 */
+	public List<Object> getRaw() {
+		return values;
 	}
 
 	/**
