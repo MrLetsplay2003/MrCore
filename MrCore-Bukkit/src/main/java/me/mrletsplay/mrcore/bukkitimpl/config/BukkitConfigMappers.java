@@ -147,7 +147,8 @@ public class BukkitConfigMappers {
 				}
 				if(j.has("patterns")) {
 					JSONArray ps = j.getJSONArray("patterns");
-					for(JSONObject pK : Complex.castList(ps.toList(), JSONObject.class).get()) {
+					for(Object o : ps) {
+						JSONObject pK = (JSONObject) o;
 						m.addPattern(new Pattern(DyeColor.valueOf(pK.getString("color").toUpperCase()), PatternType.valueOf(pK.getString("pattern").toUpperCase())));
 					}
 				}
@@ -241,7 +242,8 @@ public class BukkitConfigMappers {
 				if(j.has("power")) m.setPower(j.getInt("power"));
 				if(j.has("effects")) {
 					JSONArray efs = j.getJSONArray("effects");
-					for(JSONObject e : Complex.castList(efs.toList(), JSONObject.class).get()) {
+					for(Object o : efs) {
+						JSONObject e = (JSONObject) o;
 						FireworkEffect.Builder b = FireworkEffect.builder();
 						if(e.has("colors")) b.withColor(e.getJSONArray("colors").stream().map(c -> Color.fromRGB(Integer.parseInt((String) c, 16))).collect(Collectors.toList()));
 						if(e.has("fade-colors")) b.withFade(e.getJSONArray("fade-colors").stream().map(c -> Color.fromRGB(Integer.parseInt((String) c, 16))).collect(Collectors.toList()));
@@ -328,7 +330,8 @@ public class BukkitConfigMappers {
 				m.setBasePotionData(d);
 				if(j.has("custom-effects")) {
 					JSONArray efs = j.getJSONArray("custom-effects");
-					for(JSONObject e : Complex.castList(efs.toList(), JSONObject.class).get()) {
+					for(Object o : efs) {
+						JSONObject e = (JSONObject) o;
 						PotionEffectType type = PotionEffectType.getByName(e.getString("type"));
 						int duration = j.getInt("duration");
 						int amplifier = j.getInt("amplifier");
@@ -406,7 +409,7 @@ public class BukkitConfigMappers {
 				VersionedCrossbowMeta m = new VersionedCrossbowMeta(i.getItemMeta());
 				if(j.has("charged-projectiles")) {
 					JSONArray ps = j.getJSONArray("charged-projectiles");
-					m.setChargedProjectiles(Complex.castList(ps.toList(), JSONObject.class).get().stream().map(p -> s.castType(p, ItemStack.class, Complex.value(ItemStack.class)).get()).collect(Collectors.toList()));
+					m.setChargedProjectiles(ps.stream().map(p -> s.castType(p, ItemStack.class, Complex.value(ItemStack.class)).get()).collect(Collectors.toList()));
 				}
 				i.setItemMeta(m.getBukkit());
 			})
