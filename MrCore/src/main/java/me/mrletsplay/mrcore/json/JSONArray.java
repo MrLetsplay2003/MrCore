@@ -21,7 +21,16 @@ public class JSONArray implements Iterable<Object> {
 	 * Creates an empty JSON array
 	 */
 	public JSONArray() {
-		super();
+
+	}
+
+	/**
+	 * Creates a JSON array which has identical elements to the JSONArray parameter<br>
+	 * Giving null as a parameter will result in an empty JSONArray, no exception will be thrown
+	 * @param fromArray The JSONArray to copy
+	 */
+	public JSONArray(JSONArray fromArray) {
+		this.values = new ArrayList<>(fromArray != null ? fromArray.values : new ArrayList<>());
 	}
 
 	/**

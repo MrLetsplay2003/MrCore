@@ -45,7 +45,7 @@ public class JSONObject {
 	 * @param fromObject The JSONObject to copy
 	 */
 	public JSONObject(JSONObject fromObject) {
-//		this.values = new LinkedHashMap<>(fromObject != null ? fromObject : new LinkedHashMap<>());
+		this.values = new LinkedHashMap<>(fromObject != null ? fromObject.values : new LinkedHashMap<>());
 	}
 
 	/**
